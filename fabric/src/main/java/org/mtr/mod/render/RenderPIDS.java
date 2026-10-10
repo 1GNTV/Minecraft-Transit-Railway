@@ -6,6 +6,7 @@ import org.mtr.core.data.Station;
 import org.mtr.core.operation.ArrivalResponse;
 import org.mtr.core.tool.Utilities;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
+import java.util.WeakHashMap;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongCollection;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.mapping.holder.BlockPos;
@@ -23,6 +24,57 @@ import org.mtr.mod.data.IGui;
 import org.mtr.mod.generated.lang.TranslationProvider;
 
 public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEntityRenderer<T> implements IGui, Utilities {
+
+
+	/**
+	 * Most vanilla PIDS resolve the same nearby platforms on every frame.
+	 * Reuse the result for up to 40 game ticks; weak keys avoid keeping
+	 * unloaded block entities alive. Explicitly configured PIDS bypass this.
+	 */
+	private static final WeakHashMap<BlockPIDSBase.BlockEntityBase, AutoPlatformIds> AUTO_PLATFORMS = new WeakHashMap<>();
+	private static final boolean CACHE_AUTO_PLATFORM_IDS = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.pidsCache", "true"));
+	private static final long AUTO_PLATFORM_TTL_TICKS = 40;
+	private static final class AutoPlatformIds {
+		final long tick;
+		final int x, y, z;
+		final MinecraftClientData data;
+		final long networkRevision;
+		final LongArrayList ids;
+
+		AutoPlatformIds(long tick, int x, int y, int z, MinecraftClientData data, LongArrayList ids) {
+			this.tick = tick;
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.data = data;
+			this.networkRevision = data.networkRevision;
+			this.ids = ids;
+		}
+	}
+
+	private static LongArrayList getAutoPlatformIds(BlockPIDSBase.BlockEntityBase entity, BlockPos blockPos) {
+		final long tick = (long) Math.floor(InitClient.getGameTick());
+		final int x = blockPos.getX(), y = blockPos.getY(), z = blockPos.getZ();
+		final MinecraftClientData data = MinecraftClientData.getInstance();
+		final AutoPlatformIds entry = CACHE_AUTO_PLATFORM_IDS ? AUTO_PLATFORMS.get(entity) : null;
+		if (entry != null && entry.data == data && entry.networkRevision == data.networkRevision && entry.x == x && entry.y == y && entry.z == z && tick >= entry.tick && tick - entry.tick < AUTO_PLATFORM_TTL_TICKS) {
+			return entry.ids;
+		}
+
+		final LongArrayList result = new LongArrayList();
+		if (entity instanceof BlockArrivalProjectorBase.BlockEntityArrivalProjectorBase) {
+			final Station station = InitClient.findStation(blockPos);
+			if (station != null) {
+				station.savedRails.forEach(platform -> result.add(platform.getId()));
+			}
+		} else {
+			InitClient.findClosePlatform(blockPos.down(4), 5, platform -> result.add(platform.getId()));
+		}
+		if (CACHE_AUTO_PLATFORM_IDS) {
+			AUTO_PLATFORMS.put(entity, new AutoPlatformIds(tick, x, y, z, data, result));
+		}
+		return result;
+	}
 
 	private final float startX;
 	private final float startY;
@@ -62,16 +114,7 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 		final Direction facing = IBlock.getStatePropertySafe(world, blockPos, DirectionHelper.FACING);
 
 		if (entity.getPlatformIds().isEmpty()) {
-			final LongArrayList platformIds = new LongArrayList();
-			if (entity instanceof BlockArrivalProjectorBase.BlockEntityArrivalProjectorBase) {
-				final Station station = InitClient.findStation(blockPos);
-				if (station != null) {
-					station.savedRails.forEach(platform -> platformIds.add(platform.getId()));
-				}
-			} else {
-				InitClient.findClosePlatform(entity.getPos2().down(4), 5, platform -> platformIds.add(platform.getId()));
-			}
-			getArrivalsAndRender(entity, blockPos, facing, platformIds);
+			getArrivalsAndRender(entity, blockPos, facing, getAutoPlatformIds(entity, blockPos));
 		} else {
 			getArrivalsAndRender(entity, blockPos, facing, entity.getPlatformIds());
 		}
@@ -108,8 +151,8 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 		final int arrivalsPerPage = isSingleArrival ? 1 : entity.alternateLines() ? entity.maxArrivals / 2 : entity.maxArrivals;
 		int arrivalIndex = entity.getDisplayPage() * arrivalsPerPage;
 
+		final int languageTicks = (int) Math.floor(InitClient.getGameTick()) / SWITCH_LANGUAGE_TICKS;
 		for (int i = 0; i < entity.maxArrivals; i++) {
-			final int languageTicks = (int) Math.floor(InitClient.getGameTick()) / SWITCH_LANGUAGE_TICKS;
 			final ArrivalResponse arrivalResponse;
 			final String customMessage = entity.getMessage(i);
 			final String[] destinationSplit;
@@ -144,7 +187,7 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 						int numberIndex = 0;
 						final ObjectArrayList<String> newDestinations = new ObjectArrayList<>();
 						while (true) {
-							final String newDestination = String.format("%s %s", tempNumberSplit[numberIndex % tempNumberSplit.length], tempDestinationSplit[destinationIndex % tempDestinationSplit.length]);
+							final String newDestination = tempNumberSplit[numberIndex % tempNumberSplit.length] + " " + tempDestinationSplit[destinationIndex % tempDestinationSplit.length];
 							if (newDestinations.contains(newDestination)) {
 								break;
 							} else {
