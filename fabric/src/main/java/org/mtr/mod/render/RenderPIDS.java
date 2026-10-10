@@ -35,21 +35,23 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 	private static final long AUTO_PLATFORM_TTL_TICKS = 40;
 	private static final class AutoPlatformIds {
 		final long tick;
-		final long position;
+		final int x, y, z;
 		final LongArrayList ids;
 
-		AutoPlatformIds(long tick, long position, LongArrayList ids) {
+		AutoPlatformIds(long tick, int x, int y, int z, LongArrayList ids) {
 			this.tick = tick;
-			this.position = position;
+			this.x = x;
+			this.y = y;
+			this.z = z;
 			this.ids = ids;
 		}
 	}
 
 	private static LongArrayList getAutoPlatformIds(BlockPIDSBase.BlockEntityBase entity, BlockPos blockPos) {
 		final long tick = (long) Math.floor(InitClient.getGameTick());
-		final long position = blockPos.asLong();
+		final int x = blockPos.getX(), y = blockPos.getY(), z = blockPos.getZ();
 		final AutoPlatformIds entry = AUTO_PLATFORMS.get(entity);
-		if (entry != null && entry.position == position && tick >= entry.tick && tick - entry.tick < AUTO_PLATFORM_TTL_TICKS) {
+		if (entry != null && entry.x == x && entry.y == y && entry.z == z && tick >= entry.tick && tick - entry.tick < AUTO_PLATFORM_TTL_TICKS) {
 			return entry.ids;
 		}
 
@@ -62,7 +64,7 @@ public class RenderPIDS<T extends BlockPIDSBase.BlockEntityBase> extends BlockEn
 		} else {
 			InitClient.findClosePlatform(blockPos.down(4), 5, platform -> result.add(platform.getId()));
 		}
-		AUTO_PLATFORMS.put(entity, new AutoPlatformIds(tick, position, result));
+		AUTO_PLATFORMS.put(entity, new AutoPlatformIds(tick, x, y, z, result));
 		return result;
 	}
 
