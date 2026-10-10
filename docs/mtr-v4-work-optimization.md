@@ -19,6 +19,7 @@ Both supplied profiles contain 60,000 ms of render-thread samples, execution mod
 | MainRenderer.render (recursive frames counted once) | 46.253% | 53.220% |
 | BatchManager.drawAll | 27.967% | 34.827% |
 | VertexAttributeState.apply | 22.013% | 29.460% |
+| RenderRails.render (submission only) | 3.507% | 2.147% |
 | MTR VertexArray.draw → glDrawElements | 4.427% | 3.433% |
 | Iris ExtendedShader.apply (all callers) | absent | 28.220% |
 
@@ -28,13 +29,15 @@ The first profile spends 15.893% self samples in GL20C.glVertexAttrib4f and 5.34
 
 Spark samples native-driver calls but cannot separate CPU submission from driver/GPU stalls or supply draw counts or frame-time percentiles. No FPS gain is inferred from these percentages. Use `tools/analyze_spark.py` for a local-only reproducible decode using the [Spark sampler schema](https://github.com/lucko/spark/blob/master/spark-common/src/main/proto/spark/spark_sampler.proto).
 
+The installed Oculus 1.8.0 ExtendedShader bytecode was also inspected. Its `apply` override recalculates model-view inverse and inverse-transpose normal matrices, uploads derived uniforms, pushes custom uniforms and binds textures/framebuffers. Updating MODEL_VIEW_MATRIX alone can leave derived state stale. This is why the work branch retains the complete Oculus apply and aims to reduce the number of model mesh draws that require it, rather than bypassing shader hooks.
+
 ## Changes
 
 1. Restore V2's allocation-free hash calculations and reusable 64-byte matrix staging buffer without changing attribute values or shader behavior.
 2. Restore generic-attribute deduplication **only for the shaderless/custom MTR shader path**, with independent kill switch. Scope it to a protected pass and invalidate before/after each material shader setup/cleanup. After each draw, invalidate locations sourced from enabled vertex/instance arrays: their current values can become undefined per OpenGL. Nested and failed passes disable/clear the cache. Keep every VAO bind and every full ShaderInstance/Oculus apply. See [OpenGL generic attribute semantics](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glVertexAttrib.xhtml).
 3. Clear undrawn translucent queues so hide-translucent mode cannot accumulate old geometry/train transforms.
 4. Combine equal **solid** OBJ material meshes at model upload, before GPU submission. This uses existing RawMesh append/upload semantics, preserving source-local normal generation and face index offsets. Translucent, glowing cutout and non-depth-writing meshes remain separate and ordered. No merge across separate cars, animation/door conditions, model submissions, or light values. One-part uploads keep the original path. This reduces actual draws only when multiple parts of a single OBJ submission share solid materials; it cannot help already-consolidated single-material Blockbench rails. No instancing, shader patching or per-frame GPU mesh upload is introduced.
-5. Opt-in per-pass CPU durations and exact MTR draw/material counters, separated by shaderless/main/shadow paths, plus OBJ source/uploaded mesh counts. Metrics do not claim GPU timings or FPS.
+5. Opt-in per-pass wall durations on the render thread and exact MTR draw/material counters, separated by shaderless/main/shadow paths, plus OBJ source/uploaded mesh counts. The timer includes native-driver waits and is not CPU-only execution time, a GPU timer or FPS.
 6. Register these mixins only on Forge 1.20.1 and verify classes/config registration in the final shaded JAR. The V3 uniform-only shader bypass and VAO-bind suppression are excluded.
 
 ## A/B switches
@@ -45,7 +48,7 @@ Restart after changing JVM options; reload already-created models after choosing
 | --- | --- | --- |
 | `-Dmtr.v4.attributeCache=false` | true | Disable shaderless generic attribute deduplication |
 | `-Dmtr.v4.mergeOpaqueObj=false` | true | Keep individual OBJ uploads |
-| `-Dmtr.v4.metrics=true` | false | Log pass CPU time, MTR draws/materials and OBJ consolidation |
+| `-Dmtr.v4.metrics=true` | false | Log render-thread pass duration, MTR draws/materials and OBJ consolidation |
 | `-Dmtr.v4.railIndex=false` | true | Original pre-V4 global rail selection |
 | `-Dmtr.v4.frustumBasis=false` | true | Original per-segment camera rotations |
 | `-Dmtr.v4.pidsCache=false` | true | Original auto-PIDS lookup |
@@ -58,6 +61,10 @@ CI exercises actual merged mesh geometry (material boundaries, face offsets, unc
 
 Compilation and these tests are not a live Mixin-application test or an Oculus/MTR France Addon rendering validation. Keep the full shader application and public MTR/mapping APIs, but verify in game: fixed station camera and identical settings, idle/train arrival/train interior, shaders on/off, doors, bogies, PIDS, transparency/glow, F3+T, resource packs, rail edits and world/dimension changes. Capture 60-second FPS median/1% low/frame-time traces and Spark plus the logged draw counts. Warm up the same world before each run and record exact JAR hash/options. No in-game FPS improvement is claimed.
 
+Read-only inspection of the locally installed MTR France Addon `2.0.0+1.20.1` found its mixins target rail schemas/types, init accessors, creative inventory and GraphicsHolder access. It does not bundle the BatchManager/OptimizedModel classes targeted here or list a mixin targeting them. This avoids a direct known target collision; it is a static compatibility check, not a rendering test.
+
 ## Build evidence
 
-Pending first branch build. Follow the GitHub Actions run for this branch and its `MTR-v4-work-forge-1.20.1` shaded client JAR artifact. Record the run ID, commit SHA, tests and JAR SHA-256 after completion.
+First build passed: commit `40a46abdfedacfc9036b8f18faece18daa3215ea`, [run 38092417343](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38092417343). Forge compilation, geometry tests, cache boundary tests and shaded-JAR registration/integrity checks succeeded. Shaded JAR: 84,303,835 bytes. Artifact archive SHA-256: `76f907ec8b4a43e8f944a5637447f15217a096de71915f00c8c4601bba900623` (ZIP hash, not JAR hash).
+
+Follow-up verification adds the cache kill-switch test, static field/method/invocation checks against the shipped mapping bytecode and explicit JAR SHA-256 output. It also clarifies that pass duration is wall time on the render thread. Final build evidence is recorded in MODLOG.md and the PR.

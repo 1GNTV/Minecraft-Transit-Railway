@@ -7,4 +7,5 @@
 - Route: Forge 1.20.1 client-only mixins on MTR mapping classes, allocation restoration, safer shaderless attribute caching and equal-solid-material OBJ upload consolidation. Keep complete shader apply, VAO binds, queues, train/door transforms.
 - No game profile/save/JAR changes performed. Original V2/V4 branches remain unchanged.
 - Detailed source/profile findings, switches and verification limits: `docs/mtr-v4-work-optimization.md`.
-- CI build pending; next: inspect compiler/test logs, repair issues, retrieve and verify shaded artifact, record evidence. In-game shader/addon A/B acceptance remains pending.
+- First CI passed: `40a46abdfedacfc9036b8f18faece18daa3215ea`, run `38092417343`. Forge compilation, geometry tests and JAR verification succeeded. Artifact `11684159118` retrieved through the connector; no compile errors. Two inherited Javadoc warnings about method-level `@author` remain non-blocking.
+- Follow-up: cache kill-switch test, exact bytecode target checks and JAR SHA-256 output; clarify render-thread wall duration. In-game shader/addon A/B acceptance remains pending.

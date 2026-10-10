@@ -3,7 +3,7 @@ package org.mtr.mod.render;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mod.Init;
 
-/** Opt-in sampled CPU durations and exact MTR draw counts; never GPU timings. */
+/** Opt-in wall durations on the render thread and exact MTR draw counts. */
 public final class RenderPipelineMetrics {
 
 	private static final boolean ENABLED = Boolean.getBoolean("mtr.v4.metrics");
@@ -32,7 +32,7 @@ public final class RenderPipelineMetrics {
 		lastReport = now;
 		for (int i = 0; i < passes.length; i++) {
 			if (passes[i] != 0) {
-				Init.LOGGER.info("MTR V4 pipeline: shaderless={}, shadows={}, passes={}, draws/pass={}, materials/pass={}, CPU-us/pass={}", i < 2, i % 2 == 1, passes[i], draws[i] / (double) passes[i], materials[i] / (double) passes[i], nanos[i] / 1000.0 / passes[i]);
+				Init.LOGGER.info("MTR V4 pipeline: shaderless={}, shadows={}, passes={}, draws/pass={}, materials/pass={}, render-thread-us/pass={}", i < 2, i % 2 == 1, passes[i], draws[i] / (double) passes[i], materials[i] / (double) passes[i], nanos[i] / 1000.0 / passes[i]);
 			}
 			passes[i] = draws[i] = materials[i] = nanos[i] = 0;
 		}

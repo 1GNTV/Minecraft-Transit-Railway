@@ -21,6 +21,11 @@ public final class CacheTest {
   if(GL33.calls!=count) throw new AssertionError("expected "+count+", got "+GL33.calls);
  }
  public static void main(String[] args) {
+  if(args.length>0) {
+   GlVertexAttributeCache.begin(true); write(); write(); expect(2);
+   GlVertexAttributeCache.end();
+   System.out.println("PASS: attribute-cache kill switch"); return;
+  }
   write(); write(); expect(2); // Never cache external renderers.
   GlVertexAttributeCache.begin(true);
   write(); write(); expect(3);
@@ -57,3 +62,4 @@ with tempfile.TemporaryDirectory(prefix='mtr-cache-test-') as temp:
         raise SystemExit('Java JDK required')
     subprocess.run([javac, '-d', str(work), str(stub), str(source), str(main)], check=True)
     subprocess.run([java, '-cp', str(work), 'CacheTest'], check=True)
+    subprocess.run([java, '-Dmtr.v4.attributeCache=false', '-cp', str(work), 'CacheTest', 'disabled'], check=True)
