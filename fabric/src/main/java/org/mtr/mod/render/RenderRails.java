@@ -51,6 +51,8 @@ public class RenderRails implements IGui {
 	private static final Identifier ONE_WAY_RAIL_ARROW_TEXTURE = new Identifier(Init.MOD_ID, "textures/block/one_way_rail_arrow.png");
 	private static final int INVALID_NODE_CHECK_RADIUS = 16;
 	private static final boolean USE_RAIL_SPATIAL_INDEX = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.railIndex", "true"));
+	private static final boolean LOG_RAIL_METRICS = Boolean.getBoolean("mtr.v4.metrics");
+	private static long lastRailMetricsMillis;
 	private static final double LIGHT_REFERENCE_OFFSET = 0.1;
 	private static final ModelSmallCube MODEL_SMALL_CUBE = new ModelSmallCube(new Identifier(Init.MOD_ID, "textures/block/white.png"));
 
@@ -76,15 +78,31 @@ public class RenderRails implements IGui {
 		final Iterable<MinecraftClientData.RailWrapper> railCandidates = USE_RAIL_SPATIAL_INDEX
 				? data.railSpatialIndex.query(cameraPosition.getXMapped(), cameraPosition.getZMapped(), MinecraftClientHelper.getRenderDistance() * 16 + 32)
 				: data.railWrapperList.values();
-		railCandidates.forEach(railWrapper -> {
+		final long railScanStartNanos = LOG_RAIL_METRICS ? System.nanoTime() : 0;
+		int railCandidateCount = 0;
+		int visibleRailCount = 0;
+		for (final MinecraftClientData.RailWrapper railWrapper : railCandidates) {
+			if (LOG_RAIL_METRICS) {
+				railCandidateCount++;
+			}
 			cullingTasks.add(occlusionCullingInstance -> {
 				final boolean shouldRender = occlusionCullingInstance.isAABBVisible(railWrapper.startVector, railWrapper.endVector, camera);
 				return () -> railWrapper.shouldRender = shouldRender;
 			});
 			if (railWrapper.shouldRender) {
 				railsToRender.add(railWrapper.getRail());
+				if (LOG_RAIL_METRICS) {
+					visibleRailCount++;
+				}
 			}
-		});
+		}
+		if (LOG_RAIL_METRICS && !OptimizedRenderer.renderingShadows()) {
+			final long now = System.currentTimeMillis();
+			if (now - lastRailMetricsMillis >= 10000) {
+				lastRailMetricsMillis = now;
+				Init.LOGGER.info("MTR V4 rail prefilter: total={}, candidates={}, previously-visible={}, selection-us={}, index={}", data.railWrapperList.size(), railCandidateCount, visibleRailCount, (System.nanoTime() - railScanStartNanos) / 1000, USE_RAIL_SPATIAL_INDEX);
+			}
+		}
 
 		// Ghost rails (when holding brush)
 		final ObjectArraySet<Rail> hoverRails = new ObjectArraySet<>();
