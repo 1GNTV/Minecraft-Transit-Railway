@@ -1,5 +1,9 @@
 # gradle
 
+# Local render/profile investigation inputs and downloaded build artifacts
+analysis/
+artifacts/
+
 .gradle/
 build/
 out/

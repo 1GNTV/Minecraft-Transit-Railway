@@ -27,6 +27,9 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${minecraftVersion}-${buildTools.getForgeVersion()}"
 	annotationProcessor "org.spongepowered:mixin:+:processor"
 	shadowImplementation "org.mtr:Minecraft-Mappings-forge-${minecraftVersion}:0.0.1-dev"
+	if (minecraftVersion == "1.20.1") {
+		testImplementation "junit:junit:4.13.2"
+	}
 
 	if (buildTools.hasJadeSupport()) {
 		compileOnly fg.deobf("maven.modrinth:jade:${buildTools.getJadeVersion()}")
@@ -40,6 +43,9 @@ dependencies {
 mixin {
 	add sourceSets.main, "mtr.refmap.json"
 	config "mtr.mixins.json"
+	if (minecraftVersion == "1.20.1") {
+		config "mtr.performance.mixins.json"
+	}
 	debug.verbose = true
 	debug.export = true
 }

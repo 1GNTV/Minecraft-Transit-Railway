@@ -1,7 +1,7 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization" ]
   workflow_dispatch:
 
 permissions:
@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: '20'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Check generic attribute cache boundaries
+        run: python3 tools/test_attribute_cache.py
       - name: Build web resources
         run: |
           chmod +x gradlew
@@ -33,11 +35,19 @@ jobs:
           ./gradlew forge:setupFiles -PminecraftVersion=1.20.1
       - name: Compile optimized MTR Forge
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
+      - name: Verify final shaded Forge artifact
+        run: python3 tools/verify_work_jar.py
+      - name: Upload geometry test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTR-v4-geometry-test-reports
+          path: forge/build/reports/tests/test/
+          if-no-files-found: ignore
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-optimized-forge-1.20.1
+          name: MTR-v4-work-forge-1.20.1
           path: |
-            forge/build/libs/*.jar
-            !forge/build/libs/*-sources.jar
+            forge/build/libs/*-all.jar
           if-no-files-found: error

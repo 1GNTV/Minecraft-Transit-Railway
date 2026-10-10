@@ -1,0 +1,32 @@
+package org.mtr.mod.mixin;
+
+import org.mtr.mapping.render.vertex.VertexAttributeMapping;
+import org.mtr.mapping.render.vertex.VertexAttributeSource;
+import org.mtr.mod.render.GlVertexAttributeCache;
+import org.mtr.mod.render.RenderPipelineMetrics;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Pseudo
+@Mixin(targets = "org.mtr.mapping.render.object.VertexArray", remap = false)
+public abstract class VertexArrayAttributeBoundaryMixin {
+
+	@Shadow @Final public VertexAttributeMapping mapping;
+
+	@Inject(method = "draw", at = @At("RETURN"))
+	private void mtr$afterDraw(CallbackInfo ci) {
+		if (GlVertexAttributeCache.isActive()) {
+			mapping.sources.forEach((type, source) -> {
+				if (source == VertexAttributeSource.VERTEX_BUFFER || source == VertexAttributeSource.INSTANCE_BUFFER) {
+					GlVertexAttributeCache.invalidate(type.location, type.span);
+				}
+			});
+		}
+		RenderPipelineMetrics.draw();
+	}
+}
