@@ -85,4 +85,4 @@ Experimental immutable *default-rail* geometry chunk batches, then possibly inst
 - MTR France Addon interaction (Copycat block entities, station signs, invisible platforms), including past crash diagnosis and compatibility.
 - Obtain/reopen actual Spark profile binaries before claiming any bottleneck percentage.
 
-**Status:** documentation/plan only, no V4 FPS optimization or benchmark claimed yet.
+**Status (experimental):** the conservative rail spatial index is implemented in `client/RailSpatialIndex.java` and used by `RenderRails.java`, synchronized from `MinecraftClientData.sync()`. The index is on by default; `-Dmtr.v4.railIndex=false` restores the V2 global iteration for A/B comparison. Forge compilation and in-game shader/resource-pack benchmarking have **not** yet been verified. No FPS improvement is claimed.
