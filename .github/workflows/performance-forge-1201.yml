@@ -1,7 +1,7 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4" ]
   workflow_dispatch:
 
 permissions:
