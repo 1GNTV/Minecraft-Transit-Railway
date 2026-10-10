@@ -37,6 +37,7 @@ public final class MinecraftClientData extends ClientData {
 	private final LongAVLTreeSet routeIdsWithDisabledAnnouncements = new LongAVLTreeSet();
 	public final ClientSpatialIndex spatialIndex = new ClientSpatialIndex(this);
 	public final RailGeometryCache railGeometryCache = new RailGeometryCache();
+	public final RailSpatialIndex railSpatialIndex = new RailSpatialIndex();
 
 	private static MinecraftClientData instance = new MinecraftClientData();
 	private static MinecraftClientData dashboardInstance = new MinecraftClientData();
@@ -70,6 +71,7 @@ public final class MinecraftClientData extends ClientData {
 		simplifiedRoutes.forEach(simplifiedRoute -> simplifiedRouteIdMap.put(simplifiedRoute.getId(), simplifiedRoute));
 		spatialIndex.rebuild();
 		railGeometryCache.retainRails(rails);
+		railSpatialIndex.rebuild(railWrapperList.values());
 	}
 
 	// Vehicle snapshots do not change stations, routes, or rail adjacency.
