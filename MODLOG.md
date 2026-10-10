@@ -9,3 +9,6 @@
 - Detailed source/profile findings, switches and verification limits: `docs/mtr-v4-work-optimization.md`.
 - First CI passed: `40a46abdfedacfc9036b8f18faece18daa3215ea`, run `38092417343`. Forge compilation, geometry tests and JAR verification succeeded. Artifact `11684159118` retrieved through the connector; no compile errors. Two inherited Javadoc warnings about method-level `@author` remain non-blocking.
 - Follow-up: cache kill-switch test, exact bytecode target checks and JAR SHA-256 output; clarify render-thread wall duration. In-game shader/addon A/B acceptance remains pending.
+- Final CI passed: code `b0c19aae7b36b0c5912ce6ce37947edc24c22270`, run `38093048769`. Three geometry tests, cache lifecycle/kill-switch, eight-mixin registration, shipped bytecode targets and JAR integrity passed; full logs inspected, no compiler errors.
+- Final artifact `11684754231` downloaded and extracted locally: 84,303,838 bytes; JAR SHA-256 `6f00080c74353a45ccac77416ed373b472073a9b66ff29dbe4872ca9a8d7bda9`. Local archive/JAR hashes match GitHub and CI. Final test report retrieved: 3 tests, 0 failures, 0 ignored.
+- Draft PR: https://github.com/1GNTV/Minecraft-Transit-Railway/pull/1. FPS gains and live Oculus/France Addon compatibility remain unmeasured; no game installation changes made.
