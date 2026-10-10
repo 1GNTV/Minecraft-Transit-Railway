@@ -62,7 +62,15 @@ public class DynamicTextureCache implements IGui {
 		generatingResources.clear();
 	}
 
+	private long lastExpirySweepMillis;
+
 	public void tick() {
+		// Expiration is a housekeeping task, not a per-frame rendering task.
+		final long now = System.currentTimeMillis();
+		if (now - lastExpirySweepMillis < 1000) {
+			return;
+		}
+		lastExpirySweepMillis = now;
 		final ObjectArrayList<String> keysToRemove = new ObjectArrayList<>();
 		final long currentTimeMillis = System.currentTimeMillis();
 		dynamicResources.forEach((checkKey, checkDynamicResource) -> {
