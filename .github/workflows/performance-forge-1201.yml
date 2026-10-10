@@ -1,7 +1,7 @@
-name: Forge 1.20.1 performance build
+name: Forge 1.20.1 graphics pipeline build
 on:
   push:
-    branches: [ "perf/forge-1201" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-render-pipeline" ]
   workflow_dispatch:
 
 permissions:
@@ -33,10 +33,25 @@ jobs:
           ./gradlew forge:setupFiles -PminecraftVersion=1.20.1
       - name: Compile optimized MTR Forge
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
+      - name: Verify optimized Forge render pipeline in final JAR
+        run: |
+          python3 - <<'PY'
+          import glob, zipfile, json, sys
+          jars = glob.glob("forge/build/libs/*-all.jar")
+          if not jars: sys.exit("No shaded Forge JAR")
+          required = ["mtr.performance.mixins.json", "org/mtr/mod/mixin/VertexAttributeStateMixin.class", "org/mtr/mod/mixin/OptimizedBatchManagerMixin.class", "org/mtr/mod/render/GlVertexAttributeCache.class", "org/mtr/mod/render/MatrixUploadBuffer.class", "org/mtr/mapping/render/batch/BatchManager.class", "org/mtr/mapping/render/vertex/VertexAttributeState.class"]
+          for path in jars:
+              with zipfile.ZipFile(path) as jar:
+                  missing = set(required) - set(jar.namelist())
+                  if missing: sys.exit(f"Missing files in {path}: {missing}")
+                  if "mtr.performance.mixins.json" not in jar.read("META-INF/MANIFEST.MF").decode("utf-8", "replace"):
+                      sys.exit(f"Performance mixins not registered for Forge in {path}")
+                  print("VERIFIED", path)
+          PY
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-optimized-forge-1.20.1
+          name: MTR-render-pipeline-forge-1.20.1
           path: |
             forge/build/libs/*.jar
             !forge/build/libs/*-sources.jar

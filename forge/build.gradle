@@ -40,6 +40,7 @@ dependencies {
 mixin {
 	add sourceSets.main, "mtr.refmap.json"
 	config "mtr.mixins.json"
+	config "mtr.performance.mixins.json"
 	debug.verbose = true
 	debug.export = true
 }
