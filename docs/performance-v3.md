@@ -2,6 +2,14 @@
 
 This branch is based on the measured V2 render pipeline and targets repeated shader activation and OpenGL state calls.
 
+## PIDS auto-platform lookup
+
+Vanilla PIDS with no explicitly configured platforms used to rediscover
+the station/nearby platforms on every render frame. V3 reuses each block
+entity's resolved platform IDs for up to 40 game ticks, refreshing on
+position change and naturally reclaiming unloaded block entities.
+Explicit platform selections are never cached by this new path.
+
 ## New rendering fast paths
 
 - Per-material-batch validation of the currently bound OpenGL shader program.
