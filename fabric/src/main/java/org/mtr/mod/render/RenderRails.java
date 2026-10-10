@@ -50,6 +50,7 @@ public class RenderRails implements IGui {
 	private static final Identifier WOOL_TEXTURE = new Identifier("textures/block/white_wool.png");
 	private static final Identifier ONE_WAY_RAIL_ARROW_TEXTURE = new Identifier(Init.MOD_ID, "textures/block/one_way_rail_arrow.png");
 	private static final int INVALID_NODE_CHECK_RADIUS = 16;
+	private static final boolean USE_RAIL_SPATIAL_INDEX = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.railIndex", "true"));
 	private static final double LIGHT_REFERENCE_OFFSET = 0.1;
 	private static final ModelSmallCube MODEL_SMALL_CUBE = new ModelSmallCube(new Identifier(Init.MOD_ID, "textures/block/white.png"));
 
@@ -69,7 +70,13 @@ public class RenderRails implements IGui {
 
 		// Finding visible rails
 		final ObjectArrayList<Rail> railsToRender = new ObjectArrayList<>();
-		MinecraftClientData.getInstance().railWrapperList.values().forEach(railWrapper -> {
+		final MinecraftClientData data = MinecraftClientData.getInstance();
+		// Never replace the existing detailed occlusion and per-segment visibility checks.
+		// This only keeps distant rails out of the per-frame global traversal.
+		final Iterable<MinecraftClientData.RailWrapper> railCandidates = USE_RAIL_SPATIAL_INDEX
+				? data.railSpatialIndex.query(cameraPosition.getXMapped(), cameraPosition.getZMapped(), MinecraftClientHelper.getRenderDistance() * 16 + 32)
+				: data.railWrapperList.values();
+		railCandidates.forEach(railWrapper -> {
 			cullingTasks.add(occlusionCullingInstance -> {
 				final boolean shouldRender = occlusionCullingInstance.isAABBVisible(railWrapper.startVector, railWrapper.endVector, camera);
 				return () -> railWrapper.shouldRender = shouldRender;
