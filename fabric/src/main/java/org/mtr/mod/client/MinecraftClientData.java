@@ -38,6 +38,8 @@ public final class MinecraftClientData extends ClientData {
 	public final ClientSpatialIndex spatialIndex = new ClientSpatialIndex(this);
 	public final RailGeometryCache railGeometryCache = new RailGeometryCache();
 	public final RailSpatialIndex railSpatialIndex = new RailSpatialIndex();
+	/** Bumped only when synchronized static network content changes. */
+	public long networkRevision;
 
 	private static MinecraftClientData instance = new MinecraftClientData();
 	private static MinecraftClientData dashboardInstance = new MinecraftClientData();
@@ -72,6 +74,7 @@ public final class MinecraftClientData extends ClientData {
 		spatialIndex.rebuild();
 		railGeometryCache.retainRails(rails);
 		railSpatialIndex.rebuild(railWrapperList.values());
+		networkRevision++;
 	}
 
 	// Vehicle snapshots do not change stations, routes, or rail adjacency.
