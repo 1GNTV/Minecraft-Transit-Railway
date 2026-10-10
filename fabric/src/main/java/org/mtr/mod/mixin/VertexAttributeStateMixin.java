@@ -9,6 +9,8 @@ import org.lwjgl.opengl.GL33;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -26,6 +28,17 @@ public abstract class VertexAttributeStateMixin {
 	@Shadow @Final public Vector3f normal;
 	@Shadow @Final public Matrix4f matrix4f;
 	@Unique private static final VertexAttributeType[] mtr$attributeTypes = VertexAttributeType.values();
+
+
+    @Inject(method = "apply", at = @At("HEAD"))
+    private void mtr$v3EnterAttributeApply(CallbackInfo ci) {
+        GlVertexAttributeCache.enterAttributeApply();
+    }
+
+    @Inject(method = "apply", at = @At("RETURN"))
+    private void mtr$v3ExitAttributeApply(CallbackInfo ci) {
+        GlVertexAttributeCache.exitAttributeApply();
+    }
 
 	@Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lorg/mtr/mapping/render/vertex/VertexAttributeType;values()[Lorg/mtr/mapping/render/vertex/VertexAttributeType;"))
 	private VertexAttributeType[] mtr$reuseAttributeTypes() {

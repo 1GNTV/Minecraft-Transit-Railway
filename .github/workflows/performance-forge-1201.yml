@@ -1,7 +1,7 @@
-name: Forge 1.20.1 graphics pipeline build
+name: Forge 1.20.1 V3 graphics pipeline build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-render-pipeline" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-render-pipeline", "perf/forge-1201-v3" ]
   workflow_dispatch:
 
 permissions:
@@ -39,11 +39,16 @@ jobs:
           import glob, zipfile, json, sys
           jars = glob.glob("forge/build/libs/*-all.jar")
           if not jars: sys.exit("No shaded Forge JAR")
-          required = ["mtr.performance.mixins.json", "org/mtr/mod/mixin/VertexAttributeStateMixin.class", "org/mtr/mod/mixin/MaterialPropertiesMixin.class", "org/mtr/mod/mixin/OptimizedBatchManagerMixin.class", "org/mtr/mod/render/GlVertexAttributeCache.class", "org/mtr/mod/render/MatrixUploadBuffer.class", "org/mtr/mapping/render/batch/BatchManager.class", "org/mtr/mapping/render/vertex/VertexAttributeState.class"]
+          required = ["mtr.performance.mixins.json", "org/mtr/mod/mixin/VertexAttributeStateMixin.class", "org/mtr/mod/mixin/MaterialPropertiesMixin.class", "org/mtr/mod/mixin/VertexArrayMixin.class", "org/mtr/mod/mixin/ShaderManagerMixin.class", "org/mtr/mod/mixin/ShaderInstanceMixin.class", "org/mtr/mod/mixin/OptimizedBatchManagerMixin.class", "org/mtr/mod/render/GlVertexAttributeCache.class", "org/mtr/mod/render/MatrixUploadBuffer.class", "org/mtr/mapping/render/batch/BatchManager.class", "org/mtr/mapping/render/vertex/VertexAttributeState.class"]
           for path in jars:
               with zipfile.ZipFile(path) as jar:
                   missing = set(required) - set(jar.namelist())
                   if missing: sys.exit(f"Missing files in {path}: {missing}")
+                  cfg = json.loads(jar.read("mtr.performance.mixins.json"))
+                  if cfg.get("refmap") != "mtr.refmap.json" or "mtr.refmap.json" not in jar.namelist():
+                      sys.exit(f"Forge refmap missing: {path}")
+                  if any(m not in cfg["client"] for m in ("ShaderInstanceMixin","ShaderManagerMixin","VertexArrayMixin")):
+                      sys.exit(f"V3 shaders/VAO mixins not active: {path}")
                   if "mtr.performance.mixins.json" not in jar.read("META-INF/MANIFEST.MF").decode("utf-8", "replace"):
                       sys.exit(f"Performance mixins not registered for Forge in {path}")
                   print("VERIFIED", path)
@@ -51,7 +56,7 @@ jobs:
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-render-pipeline-forge-1.20.1
+          name: MTR-V3-render-pipeline-forge-1.20.1
           path: |
             forge/build/libs/*.jar
             !forge/build/libs/*-sources.jar

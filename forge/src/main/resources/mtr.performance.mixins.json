@@ -6,9 +6,13 @@
   "client": [
     "OptimizedBatchManagerMixin",
     "VertexAttributeStateMixin",
-    "MaterialPropertiesMixin"
+    "MaterialPropertiesMixin",
+    "ShaderManagerMixin",
+    "VertexArrayMixin",
+    "ShaderInstanceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "refmap": "mtr.refmap.json"
 }
