@@ -54,6 +54,10 @@ public class RenderRails implements IGui {
 	private static final boolean LOG_RAIL_METRICS = Boolean.getBoolean("mtr.v4.metrics");
 	private static final boolean USE_RAIL_FRUSTUM_BASIS = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.frustumBasis", "true"));
 	private static long lastRailMetricsMillis;
+	// Only touched on Minecraft's render thread; shared by all rail traversals.
+	private static float projectionYaw = Float.NaN;
+	private static float projectionPitch = Float.NaN;
+	private static double projectionZFromX, projectionZFromY, projectionZFromZ;
 	private static final double LIGHT_REFERENCE_OFFSET = 0.1;
 	private static final ModelSmallCube MODEL_SMALL_CUBE = new ModelSmallCube(new Identifier(Init.MOD_ID, "textures/block/white.png"));
 
@@ -346,13 +350,17 @@ public class RenderRails implements IGui {
 		final int renderDistance = MinecraftClientHelper.getRenderDistance() * 16;
 
 		// Camera rotation is a linear transform. Rotate its three basis vectors
-		// once per rail traversal instead of constructing/rotating a vector for
-		// every distant rail sample. Retain the original path as an A/B fallback.
+		// only when camera orientation changes, then reuse the projection for
+		// all distant rail samples. Retain the original path as an A/B fallback.
 		final float yaw = (float) Math.toRadians(camera.getYaw());
 		final float pitch = (float) Math.toRadians(camera.getPitch());
-		final Vector3d axisX = USE_RAIL_FRUSTUM_BASIS ? new Vector3d(1, 0, 0).rotateY(yaw).rotateX(pitch) : null;
-		final Vector3d axisY = USE_RAIL_FRUSTUM_BASIS ? new Vector3d(0, 1, 0).rotateY(yaw).rotateX(pitch) : null;
-		final Vector3d axisZ = USE_RAIL_FRUSTUM_BASIS ? new Vector3d(0, 0, 1).rotateY(yaw).rotateX(pitch) : null;
+		if (USE_RAIL_FRUSTUM_BASIS && (projectionYaw != yaw || projectionPitch != pitch)) {
+			projectionYaw = yaw;
+			projectionPitch = pitch;
+			projectionZFromX = new Vector3d(1, 0, 0).rotateY(yaw).rotateX(pitch).getZMapped();
+			projectionZFromY = new Vector3d(0, 1, 0).rotateY(yaw).rotateX(pitch).getZMapped();
+			projectionZFromZ = new Vector3d(0, 0, 1).rotateY(yaw).rotateX(pitch).getZMapped();
+		}
 
 		MinecraftClientData.getInstance().railGeometryCache.render(rail.railMath, (x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 			final double dx = x1 - cameraPosition.getXMapped();
@@ -364,7 +372,7 @@ public class RenderRails implements IGui {
 				} else {
 					final boolean inFront;
 					if (USE_RAIL_FRUSTUM_BASIS) {
-						final double projectedZ = dx * axisX.getZMapped() + (y1 - cameraPosition.getYMapped()) * axisY.getZMapped() + dz * axisZ.getZMapped();
+						final double projectedZ = dx * projectionZFromX + (y1 - cameraPosition.getYMapped()) * projectionZFromY + dz * projectionZFromZ;
 						// Inclusive epsilon avoids precision-induced missing rail segments at the camera plane.
 						inFront = projectedZ > -0.00001;
 					} else {
