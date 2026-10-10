@@ -39,7 +39,7 @@ jobs:
           import glob, zipfile, json, sys
           jars = glob.glob("forge/build/libs/*-all.jar")
           if not jars: sys.exit("No shaded Forge JAR")
-          required = ["mtr.performance.mixins.json", "org/mtr/mod/mixin/VertexAttributeStateMixin.class", "org/mtr/mod/mixin/OptimizedBatchManagerMixin.class", "org/mtr/mod/render/GlVertexAttributeCache.class", "org/mtr/mod/render/MatrixUploadBuffer.class", "org/mtr/mapping/render/batch/BatchManager.class", "org/mtr/mapping/render/vertex/VertexAttributeState.class"]
+          required = ["mtr.performance.mixins.json", "org/mtr/mod/mixin/VertexAttributeStateMixin.class", "org/mtr/mod/mixin/MaterialPropertiesMixin.class", "org/mtr/mod/mixin/OptimizedBatchManagerMixin.class", "org/mtr/mod/render/GlVertexAttributeCache.class", "org/mtr/mod/render/MatrixUploadBuffer.class", "org/mtr/mapping/render/batch/BatchManager.class", "org/mtr/mapping/render/vertex/VertexAttributeState.class"]
           for path in jars:
               with zipfile.ZipFile(path) as jar:
                   missing = set(required) - set(jar.namelist())
