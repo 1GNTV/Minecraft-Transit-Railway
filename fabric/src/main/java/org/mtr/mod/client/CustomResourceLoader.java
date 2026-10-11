@@ -71,6 +71,7 @@ public class CustomResourceLoader {
 
 	public static void reload() {
 		org.mtr.mod.render.RailSectorBatcher.reload();
+		org.mtr.mod.render.InstancedModelRenderer.clear();
 		MINECRAFT_MODEL_RESOURCES.clear();
 		MINECRAFT_TEXTURE_RESOURCES.clear();
 		RESOURCE_CACHE.clear();

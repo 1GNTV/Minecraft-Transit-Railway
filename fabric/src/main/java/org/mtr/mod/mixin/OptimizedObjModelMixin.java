@@ -7,6 +7,9 @@ import org.mtr.mapping.render.object.VertexArray;
 import org.mtr.mapping.render.vertex.VertexAttributeMapping;
 import org.mtr.mod.Init;
 import org.mtr.mod.render.OpaqueMeshCombiner;
+import org.mtr.mod.render.OpaqueMeshOptimizer;
+import org.mtr.mod.render.GpuMeshOwnership;
+import org.mtr.mapping.render.model.Mesh;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -40,17 +43,22 @@ public abstract class OptimizedObjModelMixin {
 			rawModel.iterateRawMeshList(combiner::append);
 		}
 		final List<VertexArray> uploaded = new ArrayList<>();
+		final List<Mesh> meshes = new ArrayList<>();
 		try {
 			for (RawMesh mesh : combiner.meshes()) {
-				uploaded.add(new VertexArray(mesh.upload(DEFAULT_MAPPING), DEFAULT_MAPPING));
+				final Mesh buffer = OpaqueMeshOptimizer.optimize(mesh).upload(DEFAULT_MAPPING);
+				meshes.add(buffer);
+				uploaded.add(new VertexArray(buffer, DEFAULT_MAPPING));
 			}
 		} catch (RuntimeException | Error error) {
 			uploaded.forEach(VertexArray::close);
+			meshes.forEach(Mesh::close);
 			throw error;
 		}
 		if (mtr$metrics) {
 			Init.LOGGER.info("MTR V4 OBJ upload: objects={}, source-draws={}, uploaded-draws={}", models.size(), combiner.sourceDraws(), uploaded.size());
 		}
+		for (int i = 0; i < uploaded.size(); i++) GpuMeshOwnership.attach(uploaded.get(i), meshes.get(i));
 		cir.setReturnValue(new OptimizedModel(uploaded));
 	}
 }

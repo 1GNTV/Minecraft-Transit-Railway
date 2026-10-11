@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil, subprocess, tempfile
 ROOT = Path(__file__).resolve().parents[1]
 STUBS = {
+"org/mtr/mod/render/InstancedModelRenderer.java": "package org.mtr.mod.render; public class InstancedModelRenderer {public static void report(){}}",
 "org/lwjgl/opengl/GL.java": """package org.lwjgl.opengl;
 public class GL {
  public static int capabilityCalls;

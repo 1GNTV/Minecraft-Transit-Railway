@@ -14,7 +14,8 @@
     "OptimizedObjModelMixin",
     "OptimizedMaterialGroupAccessor",
     "OptimizedModelLayoutAccessor",
-    "RenderCallMetricsMixin"
+    "RenderCallMetricsMixin",
+    "BatchInstancingMixin"
   ],
   "injectors": { "defaultRequire": 1 }
 }

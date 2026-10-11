@@ -393,6 +393,7 @@ public final class InitClient {
 
 		REGISTRY_CLIENT.eventRegistryClient.registerClientDisconnect(() -> {
 			org.mtr.mod.render.RailSectorBatcher.clear();
+			org.mtr.mod.render.InstancedModelRenderer.clear();
 			if (webserver != null) {
 				webserver.stop();
 				webserver = null;

@@ -31,6 +31,8 @@ jobs:
         run: python3 tools/test_resource_lifecycle.py
       - name: Check frame-time analysis
         run: python3 tools/test_frame_times.py
+      - name: Check next renderer instances and frame lifetimes
+        run: python3 tools/test_next_renderer.py
       - name: Build web resources
         run: |
           chmod +x gradlew

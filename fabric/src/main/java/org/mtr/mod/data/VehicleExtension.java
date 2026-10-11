@@ -33,6 +33,8 @@ import org.mtr.mod.resource.VehicleResource;
 import javax.annotation.Nullable;
 
 public class VehicleExtension extends Vehicle implements Utilities {
+	private long renderRevision;
+	public long getRenderRevision() { return renderRevision; }
 
 	private double oldSpeed;
 	private int speedLimitKilometersPerHour;
@@ -54,6 +56,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 	}
 
 	public void updateData(@Nullable JsonObject jsonObject) {
+		renderRevision++;
 		if (jsonObject != null) {
 			updateData(new JsonReader(jsonObject.getAsJsonObject("vehicle")));
 			vehicleExtraData.updateData(new JsonReader(jsonObject.getAsJsonObject("data")));
@@ -61,6 +64,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 	}
 
 	public void simulate(long millisElapsed) {
+		renderRevision++;
 		final double oldRailProgress = railProgress;
 		oldSpeed = speed;
 		simulate(millisElapsed, null, null);
@@ -297,9 +301,8 @@ public class VehicleExtension extends Vehicle implements Utilities {
 	public ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> getSmoothedVehicleCarsAndPositions(long millisElapsed) {
 		final double oldRailProgress = railProgress;
 		railProgress = persistentVehicleData.getSmoothedRailProgress(railProgress, persistentVehicleData.getDoorValue() > 0 ? 0 : millisElapsed * (speed == 0 ? Integer.MAX_VALUE : speed / 10));
-		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> vehicleCarsAndPositions = getVehicleCarsAndPositions();
-		railProgress = oldRailProgress;
-		return vehicleCarsAndPositions;
+		try { return getVehicleCarsAndPositions(); }
+		finally { railProgress = oldRailProgress; }
 	}
 
 	public void playMotorSound(VehicleResource vehicleResource, int carNumber, Vector bogiePosition) {

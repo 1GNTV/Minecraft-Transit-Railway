@@ -19,3 +19,7 @@ Regroupement shaderless optionnel des rails opaques statiques : sélection origi
 ### Work : images dynamiques et propriété des buffers
 
 Résultats de textures invalidés par génération, file de complétions et publications bornées, recadrage CPU sur worker avec libération des images remplacées. Propriété explicite des buffers créés par le compilateur Work, fermeture unique des aliases et nettoyage des buffers à la collecte. Tests locaux de capacité, races et libération réussis. Correction du nom de matériau glow dans le test CI du prototype de rails.
+
+### Next : premiers composants d'architecture
+
+Instanciation shaderless GL 3.3 par séries compatibles, trois pages bornées et fences non bloquantes ; VAO sources inchangés. Cache de poses par vraie image Forge/révision de véhicule. Réordonnancement des triangles opaques et sommets à l'upload. Les six groupes de tests locaux passent. Cible du redirect vérifiée dans le JAR : `BatchManager.lambda$drawBatch$2`, et non `drawBatch` dont le corps appelle une lambda. Les autres grands chantiers restent suivis explicitement dans `docs/mtr-next-version-fr.md`.

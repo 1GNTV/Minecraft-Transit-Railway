@@ -58,7 +58,7 @@ public final class ModelMeshCompiler {
         final List<Mesh> meshes = new ArrayList<>();
         try {
             for (RawMesh raw : combiner.meshes()) {
-                final Mesh mesh = raw.upload(mapping);
+                final Mesh mesh = OpaqueMeshOptimizer.optimize(raw).upload(mapping);
                 meshes.add(mesh);
                 arrays.add(new VertexArray(mesh, mapping));
             }

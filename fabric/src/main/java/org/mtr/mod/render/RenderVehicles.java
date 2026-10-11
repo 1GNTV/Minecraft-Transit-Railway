@@ -17,6 +17,7 @@ import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mod.Init;
 import org.mtr.mod.client.*;
 import org.mtr.mod.config.Config;
+import org.mtr.mod.data.VehicleExtension;
 import org.mtr.mod.data.IGui;
 import org.mtr.mod.item.ItemDriverKey;
 import org.mtr.mod.resource.Interpolation;
@@ -30,6 +31,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RenderVehicles implements IGui {
+	private static final boolean CACHE_POSES = !"false".equalsIgnoreCase(System.getProperty("mtr.next.poseCache", "true"));
+	private static final FrameMemoizer<VehicleExtension, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>>> POSES = new FrameMemoizer<>(1024);
+	public static void beginFrame() { POSES.beginFrame(); }
+	public static void endFrame() { POSES.endFrame(); }
+	private static ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> preparePose(VehicleExtension vehicle, long elapsed) {
+		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> result = new ObjectArrayList<>();
+		for (var car : vehicle.getSmoothedVehicleCarsAndPositions(elapsed)) {
+			final ObjectArrayList<PositionAndRotation> bogies = new ObjectArrayList<>();
+			for (var bogie : car.right()) bogies.add(new PositionAndRotation(bogie.left(), bogie.right(), true));
+			result.add(new ObjectObjectImmutablePair<>(car.left(), new ObjectObjectImmutablePair<>(bogies, new PositionAndRotation(bogies, car.left(), vehicle.getTransportMode().hasPitchAscending || vehicle.getTransportMode().hasPitchDescending))));
+		}
+		return result;
+	}
 
 	public static final ObjectArrayList<RidingPlayerInterpolation> RIDING_PLAYER_INTERPOLATIONS = new ObjectArrayList<>();
 
@@ -58,16 +72,7 @@ public class RenderVehicles implements IGui {
 			final PreviousGangwayMovementPositions previousGangwayMovementPositions = new PreviousGangwayMovementPositions();
 
 			// Calculating vehicle transformations in advance
-			final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> vehiclePropertiesList = vehicle.getSmoothedVehicleCarsAndPositions(millisElapsed)
-					.stream()
-					.map(vehicleCarAndPosition -> {
-						final ObjectArrayList<PositionAndRotation> bogiePositions = vehicleCarAndPosition.right()
-								.stream()
-								.map(bogiePositionPair -> new PositionAndRotation(bogiePositionPair.left(), bogiePositionPair.right(), true))
-								.collect(Collectors.toCollection(ObjectArrayList::new));
-						return new ObjectObjectImmutablePair<>(vehicleCarAndPosition.left(), new ObjectObjectImmutablePair<>(bogiePositions, new PositionAndRotation(bogiePositions, vehicleCarAndPosition.left(), vehicle.getTransportMode().hasPitchAscending || vehicle.getTransportMode().hasPitchDescending)));
-					})
-					.collect(Collectors.toCollection(ObjectArrayList::new));
+			final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> vehiclePropertiesList = CACHE_POSES ? POSES.get(vehicle, vehicle.getRenderRevision(), () -> preparePose(vehicle, millisElapsed)) : preparePose(vehicle, millisElapsed);
 
 			// Riding offset
 			final IntObjectImmutablePair<ObjectObjectImmutablePair<Vector3d, Double>> ridingVehicleCarNumberAndOffset = VehicleRidingMovement.getRidingVehicleCarNumberAndOffset(vehicle.getId());

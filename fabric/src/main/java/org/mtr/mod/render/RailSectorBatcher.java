@@ -104,7 +104,7 @@ public final class RailSectorBatcher {
         GlStateTracker.capture();
         try {
             for (RawMesh raw : combiner.meshes()) {
-                final Mesh mesh = raw.upload(mapping);
+                final Mesh mesh = OpaqueMeshOptimizer.optimize(raw).upload(mapping);
                 result.meshes.add(mesh);
                 result.arrays.add(new VertexArray(mesh, mapping));
             }

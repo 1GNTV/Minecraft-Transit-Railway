@@ -53,6 +53,13 @@ public final class RenderPipelineMetrics {
             value.triangles[drawingFamily.ordinal()] += indexCount / 3;
         }
     }
+    public static void instancedDraw(int indexCount, int instances) {
+        if (ENABLED && !stack.isEmpty()) {
+            final Stats value = stats[stack.peek().category];
+            value.draws[drawingFamily.ordinal()]++;
+            value.triangles[drawingFamily.ordinal()] += (long) (indexCount / 3) * instances;
+        }
+    }
     public static void material() { if (ENABLED && !stack.isEmpty()) stats[stack.peek().category].materials++; }
     public static void matrixShaderPath() { if (ENABLED && !stack.isEmpty()) stats[stack.peek().category].matrixShaderPaths++; }
     static void gpu(int category, long nanos) { stats[category].gpuNanos += nanos; stats[category].gpuSamples++; }
@@ -66,6 +73,7 @@ public final class RenderPipelineMetrics {
         final long now = System.nanoTime();
         if (now - lastReport < 10_000_000_000L) return;
         lastReport = now;
+        InstancedModelRenderer.report();
         for (int i = 0; i < stats.length; i++) {
             final Stats value = stats[i];
             if (value.passes != 0 || value.gpuSamples != 0) {

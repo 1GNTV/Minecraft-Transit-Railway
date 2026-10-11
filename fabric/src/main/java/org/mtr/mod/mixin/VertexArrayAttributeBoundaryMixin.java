@@ -8,6 +8,7 @@ import org.mtr.mapping.render.batch.MaterialProperties;
 import org.mtr.mod.render.GpuMeshOwnership;
 import org.mtr.mod.render.GlVertexAttributeCache;
 import org.mtr.mod.render.RenderPipelineMetrics;
+import org.mtr.mod.render.VertexArrayIdentity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -18,7 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Pseudo
 @Mixin(targets = "org.mtr.mapping.render.object.VertexArray", remap = false)
-public abstract class VertexArrayAttributeBoundaryMixin {
+public abstract class VertexArrayAttributeBoundaryMixin implements VertexArrayIdentity {
+    @Shadow private int id;
+    @Override public int mtr$vaoId() { return id; }
 
 	@Shadow @Final public VertexAttributeMapping mapping;
 	@Shadow @Final public IndexBuffer indexBuffer;
