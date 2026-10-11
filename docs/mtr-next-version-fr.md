@@ -5,6 +5,7 @@ Chantier demandé le 11 octobre 2026 : intégrer les grandes architectures étud
 ## Premier lot
 
 - Instanciation GL 3.3 sur les séries consécutives d'au moins quatre dessins du même VAO opaque, avec couleur, lumière et overlay identiques. Shaderless seulement, pas d'instanciation sous Oculus. Ordre des dessins conservé. Matrices par instance et géométrie source partagée.
+- Vues de matrices préallouées et tableaux CPU des pages réutilisés après croissance : pas de nouveau tableau de matrices pour chaque groupe à chaque image.
 - Trois pages de transfert par géométrie, fences interrogées avec timeout zéro, retour aux dessins ordinaires si toutes les pages sont occupées. Les données identiques sont réutilisées sans upload. Pas de persistent mapping ni de compute culling.
 - Au maximum 64 géométries résidentes, 1024 instances par dessin, trois pages de 64 Kio par géométrie ; plafond des nouveaux buffers d'instances : 12 Mio. Les VAO sources restent intacts, les VAO et buffers ajoutés sont libérés sur éviction/reload/changement de monde.
 - Cache des positions, rotations et lumières de voitures/bogies limité à une image Forge. Identité du véhicule et révision de simulation/données sont vérifiées. Une passe d'ombres antérieure à la simulation principale ne fournit pas une pose périmée à celle-ci. Ne pas confondre cache de pose avec arrêt de simulation.

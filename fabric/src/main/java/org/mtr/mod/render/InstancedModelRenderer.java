@@ -16,7 +16,6 @@ import org.mtr.mod.Init;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +30,8 @@ public final class InstancedModelRenderer {
     private static final Map<VertexArray, Slot> SLOTS = new LinkedHashMap<>(64, 0.75F, true);
     private static final ByteBuffer SCRATCH = ByteBuffer.allocateDirect(MAX_INSTANCES * MATRIX_BYTES).order(ByteOrder.nativeOrder());
     private static final FloatBuffer FLOATS = SCRATCH.asFloatBuffer();
+    private static final FloatBuffer[] MATRIX_VIEWS = new FloatBuffer[MAX_INSTANCES];
+    static { for (int i = 0; i < MAX_INSTANCES; i++) MATRIX_VIEWS[i] = FLOATS.slice(i << 4, 16); }
     private static final float[] VALUES = new float[MAX_INSTANCES * 16];
     private static final VertexAttributeType[] TYPES = VertexAttributeType.values();
     private static boolean failed;
@@ -114,7 +115,8 @@ public final class InstancedModelRenderer {
         FLOATS.clear();
         for (int i = start; i < end; i++) {
             // Utilities.store uses absolute writes; use a 16-float slice for each matrix.
-            FloatBuffer matrix = FLOATS.slice(i - start << 4, 16);
+            FloatBuffer matrix = MATRIX_VIEWS[i - start];
+            matrix.clear();
             Matrix4f value = ((RenderCallData) calls.get(i)).mtr$attributes().matrix4f;
             Utilities.store(value, matrix);
         }
@@ -142,7 +144,8 @@ public final class InstancedModelRenderer {
             }
             SCRATCH.position(0).limit(bytes);
             GL33.glBufferSubData(GL33.GL_ARRAY_BUFFER, 0, SCRATCH);
-            page.values = Arrays.copyOf(VALUES, count * 16); page.count = count; uploads++;
+            if (page.values == null || page.values.length < count * 16) page.values = new float[page.capacity / Float.BYTES];
+            System.arraycopy(VALUES, 0, page.values, 0, count * 16); page.count = count; uploads++;
         }
         GL33.glBindVertexArray(page.vao);
         first.mtr$attributes().apply();

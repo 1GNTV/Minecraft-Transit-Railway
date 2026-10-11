@@ -13,7 +13,7 @@ import java.nio.*; import java.util.*;
 public class GL33 {
  public static final int GL_ALREADY_SIGNALED=1,GL_CONDITION_SATISFIED=2,GL_ARRAY_BUFFER=3,GL_STREAM_DRAW=4,GL_TRIANGLES=5,GL_SYNC_GPU_COMMANDS_COMPLETE=6,GL_ELEMENT_ARRAY_BUFFER_BINDING=7,GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING=8,GL_ELEMENT_ARRAY_BUFFER=9;
  public static int id=100, draws, uploads, deletes, polls, capacity, vao; public static boolean ready;
- public static long fence=1000; public static float[] lastUpload; public static Set<Integer> live=new HashSet<>();
+ public static int allocations; public static long fence=1000; public static float[] lastUpload; public static Set<Integer> live=new HashSet<>();
  public static int glClientWaitSync(long s,int flags,long timeout){if(flags!=0||timeout!=0)throw new AssertionError("blocking poll"); polls++;return ready?GL_ALREADY_SIGNALED:0;}
  public static void glDeleteSync(long s){} public static long glFenceSync(int x,int y){return ++fence;}
  public static int glGenBuffers(){live.add(++id);return id;} public static int glGenVertexArrays(){live.add(++id);return id;}
@@ -21,7 +21,7 @@ public class GL33 {
  public static void glDeleteVertexArrays(int x){if(!live.remove(x))throw new AssertionError("source VAO deleted");deletes++;}
  public static void glBindBuffer(int a,int b){} public static void glBindVertexArray(int a){vao=a;}
  public static int glGetInteger(int a){return 42;} public static int glGetVertexAttribi(int a,int b){return 43;}
- public static void glBufferData(int target,long size,int usage){if(size>65536)throw new AssertionError("unbounded GPU buffer");capacity=(int)size;}
+ public static void glBufferData(int target,long size,int usage){if(size>65536)throw new AssertionError("unbounded GPU buffer");capacity=(int)size; allocations++;}
  public static void glBufferSubData(int target,long offset,ByteBuffer b){uploads++;lastUpload=new float[b.remaining()/4];b.asFloatBuffer().get(lastUpload);}
  public static void glVertexAttribDivisor(int l,int d){} public static void glDrawElementsInstanced(int mode,int indices,int type,long offset,int count){if(count<4||count>1024)throw new AssertionError();draws++;}
 }""",
@@ -66,6 +66,7 @@ public class NextTest {
   draw(calls(vao,4,20));draw(calls(vao,4,30));check(GL33.uploads==3&&GL33.live.size()==6);
   draw(calls(vao,4,40));check(ordinary==4&&GL33.draws==4&&GL33.polls>0); // no wait, all three pages busy
   GL33.ready=true;draw(calls(vao,4,40));check(GL33.draws==5&&GL33.uploads==4);
+  int allocations=GL33.allocations;for(int i=0;i<100;i++)draw(calls(vao,4,100+i));check(GL33.allocations==allocations);check(GL33.draws==105);
   Utilities.custom=false;draw(c);Utilities.custom=true;check(ordinary==8); // preserve Oculus path
   vao.materialProperties.translucent=true;draw(c);vao.materialProperties.translucent=false;check(ordinary==12);
   c.get(2).state.lightmapUV=99;draw(c);check(ordinary==16); // no grouping across a changed light

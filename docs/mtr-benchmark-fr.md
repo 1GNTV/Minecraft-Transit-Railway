@@ -1,4 +1,6 @@
-# Comparer V2 et Work localement
+# Comparer V2 et Next localement
+
+Pour le prochain essai, utiliser le JAR Next identifié par son hash. Le JAR Work précédent reste une référence ; il n’est pas nécessaire de le tester avant Next.
 
 La scène de référence est la grande gare centrale de l'ancienne survie à deux lignes de métro. Aucun nom de serveur, adresse ou coordonnées n'est nécessaire pour conserver les résultats localement. Aucune mesure en jeu n'a encore été réalisée par ce chantier.
 
@@ -26,6 +28,10 @@ Le hash du JAR et les options suffisent pour identifier chaque version. V2 reste
 | Fusion de sources mixtes OBJ/Blockbench | `-Dmtr.v4.mergeMixedModels=false` |
 | Budget de publication des textures | `-Dmtr.v4.textureUploadBudget=false` |
 | Prototype de secteurs de rails (désactivé par défaut) | `-Dmtr.v4.railBatches=true` |
+| Instanciation Next sans shader pack | `-Dmtr.next.instances=false` |
+| Cache de pose Next entre passes | `-Dmtr.next.poseCache=false` |
+| Ordre des maillages opaques Next | `-Dmtr.next.meshOrder=false` |
+| Compilation de shaders une fois par génération | `-Dmtr.next.shaderReloadCache=false` |
 | Compteurs de passe/famille | `-Dmtr.v4.metrics=true` |
 | Timestamps GPU sans attente | `-Dmtr.v4.gpuMetrics=true` |
 
