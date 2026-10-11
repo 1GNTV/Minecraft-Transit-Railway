@@ -114,7 +114,9 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 		final Vector3d cameraShakeOffset = clientPlayerEntity.getPos().subtract(offset);
 		RenderVehicles.render(millisElapsed, cameraShakeOffset);
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
+		RailSectorBatcher.beginFrame();
 		RenderRails.render();
+		RailSectorBatcher.flush();
 
 		prepareRenderQueues();
 

@@ -22,12 +22,20 @@ public final class ModelMeshCompiler {
 
     public static boolean available(Collection<OptimizedModel.MaterialGroup> groups, Collection<OptimizedModel.ObjModel> objects) {
         if (!ENABLED || groups.isEmpty() || objects.isEmpty()) return false;
+        return accessorsAvailable(groups, objects);
+    }
+
+    public static boolean accessorsAvailable(Collection<OptimizedModel.MaterialGroup> groups, Collection<OptimizedModel.ObjModel> objects) {
         for (Object group : groups) if (!(group instanceof OptimizedMaterialGroupAccessor)) return false;
         for (Object object : objects) if (!(object instanceof OptimizedObjModelAccessor)) return false;
         return true;
     }
 
     public static OptimizedModel compile(Collection<OptimizedModel.MaterialGroup> groups, Collection<OptimizedModel.ObjModel> objects) {
+        return compile(groups, objects, false);
+    }
+
+    public static OptimizedModel compile(Collection<OptimizedModel.MaterialGroup> groups, Collection<OptimizedModel.ObjModel> objects, boolean retainRailGeometry) {
         final CapturingVertexConsumer capture = new CapturingVertexConsumer();
         for (Object group : groups) {
             final OptimizedMaterialGroupAccessor accessor = (OptimizedMaterialGroupAccessor) group;
@@ -62,6 +70,8 @@ public final class ModelMeshCompiler {
         if (Boolean.getBoolean("mtr.v4.metrics")) {
             Init.LOGGER.info("MTR Work mixed upload: blockbench-groups={}, obj-parts={}, source-draws={}, uploaded-draws={}", groups.size(), objects.size(), combiner.sourceDraws(), arrays.size());
         }
-        return new OptimizedModel(arrays);
+        final OptimizedModel model = new OptimizedModel(arrays);
+        if (retainRailGeometry) RailGeometrySnapshots.retain(model, combiner.meshes());
+        return model;
     }
 }

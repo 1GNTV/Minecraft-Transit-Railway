@@ -296,7 +296,9 @@ public class RenderRails implements IGui {
 						graphicsHolder.rotateXRadians((float) (Math.PI - pitch * (flip ? -1 : 1)));
 						graphicsHolder.rotateZDegrees((float) ((x1 * z1) % 10) / 100);
 					});
-					railResource.render(storedMatrixTransformations, light);
+					if (!RailSectorBatcher.queue(railResource, storedMatrixTransformations, (x1 + x3) / 2, (y1 + y2) / 2 + railResource.getModelYOffset(), (z1 + z3) / 2, (float) (Math.PI / 2 - yaw + (flip ? Math.PI : 0)), (float) (Math.PI - pitch * (flip ? -1 : 1)), (float) ((x1 * z1) % 10) / 100, light)) {
+						railResource.render(storedMatrixTransformations, light);
+					}
 					renderType[1] = true;
 				}, railResource.getRepeatInterval(), 0, 0));
 			}

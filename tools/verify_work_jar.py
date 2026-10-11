@@ -16,7 +16,7 @@ for path in jars:
         for name in config['client']:
             entry = config['package'].replace('.', '/') + '/' + name + '.class'
             assert entry in jar.namelist(), f'Missing {entry}'
-        for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer']:
+        for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer', 'RailBatchGeometry', 'RailGeometrySnapshots', 'RailSectorCache', 'RailSectorBatcher']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
         for name in ['batch/BatchManager', 'vertex/VertexAttributeState', 'object/VertexArray']:
             assert f'org/mtr/mapping/render/{name}.class' in jar.namelist(), name
@@ -32,6 +32,9 @@ for path in jars:
         'org.mtr.mapping.mapper.OptimizedModel$MaterialGroup': ['MaterialProperties materialProperties;', 'modelPartConsumers;'],
         'org.mtr.mapping.render.vertex.CapturingVertexConsumer': ['RawModel rawModel;', 'beginStage('],
         'org.mtr.mapping.render.model.RawModel': ['triangulate()', 'distinct()', 'iterateRawMeshList('],
+        'org.mtr.mapping.render.model.RawMesh': ['Vertex> vertices;', 'Face> faces;', 'applyMatrix(', 'Mesh upload('],
+        'org.mtr.mapping.render.vertex.VertexAttributeMapping$Builder': ['set(', 'build()'],
+        'org.mtr.mapping.render.tool.Utilities': ['exchangeLightmapUVBits(', 'canUseCustomShader()'],
         'org.mtr.mapping.render.batch.BatchManager$RenderCall': ['VertexArray vertexArray;', 'VertexAttributeState vertexAttributeState;', 'draw()'],
         'org.mtr.mapping.render.batch.BatchManager': ['translucentBatches;', 'drawAll('],
         'org.mtr.mapping.render.shader.ShaderManager': ['setupShaderBatchState(', 'cleanupShaderBatchState()'],
