@@ -35,6 +35,11 @@ public final class OculusInstanceRenderer {
     public static boolean draw(List<?> calls,int start,int end){
         if(failed || end-start>8)return false;
         RenderCallData first=(RenderCallData)calls.get(start);
+        int program=GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM);
+        if(program==0)return false;
+        Locations locations=PROGRAMS.computeIfAbsent(program,p->new Locations(GL33.glGetUniformLocation(p,"mtr_Instanced"),GL33.glGetUniformLocation(p,"mtr_ModelViews[0]"),GL33.glGetUniformLocation(p,"mtr_ModelViewInverses[0]"),GL33.glGetUniformLocation(p,"mtr_NormalMatrices[0]")));
+        if(locations.mode<0 || locations.model<0)return false;
+
         MODELS.clear();INVERSES.clear();NORMALS.clear();
         for(int i=start;i<end;i++){
             ONE.clear();Utilities.store(((RenderCallData)calls.get(i)).mtr$attributes().matrix4f,ONE);
@@ -45,9 +50,7 @@ public final class OculusInstanceRenderer {
             NORMAL.set(MATRIX).transpose().get((i-start)*9,NORMALS);
         }
         first.mtr$array().bind();first.mtr$attributes().apply();first.mtr$array().materialProperties.vertexAttributeState.apply();
-        int program=GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM);
-        Locations locations=PROGRAMS.computeIfAbsent(program,p->new Locations(GL33.glGetUniformLocation(p,"mtr_Instanced"),GL33.glGetUniformLocation(p,"mtr_ModelViews[0]"),GL33.glGetUniformLocation(p,"mtr_ModelViewInverses[0]"),GL33.glGetUniformLocation(p,"mtr_NormalMatrices[0]")));
-        if(locations.mode<0 || locations.model<0)return false;
+        if(GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM)!=program)return false;
         int count=end-start;boolean submitted=false;
         try{
             MODELS.limit(count*16);INVERSES.limit(count*16);NORMALS.limit(count*9);

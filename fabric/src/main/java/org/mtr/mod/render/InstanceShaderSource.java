@@ -26,7 +26,7 @@ public final class InstanceShaderSource {
     }
     private static String rewrite(String source,boolean vertex){
         String masked=mask(source);Matcher main=MAIN.matcher(masked);if(!main.find())return null;
-        int declarationAt=main.start(),bodyAt=main.end();
+
         List<int[]> declarations=new ArrayList<>();
         Matcher uniform=Pattern.compile("\\buniform\\b[^;{}]*;").matcher(masked);
         while(uniform.find())declarations.add(new int[]{uniform.start(),uniform.end()});
@@ -44,7 +44,20 @@ public final class InstanceShaderSource {
         String rewritten=result.toString();main=MAIN.matcher(mask(rewritten));if(!main.find())return null;
         String declarationsText="\nuniform bool mtr_Instanced;\nuniform mat4 mtr_ModelViews[8];\nuniform mat4 mtr_ModelViewInverses[8];\nuniform mat3 mtr_NormalMatrices[8];\nflat "+(vertex?"out":"in")+" int mtr_InstanceId;\n";
         String body=vertex?"\n mtr_InstanceId = mtr_Instanced ? gl_InstanceID : 0;\n":"";
-        return rewritten.substring(0,main.start())+declarationsText+rewritten.substring(main.start(),main.end())+body+rewritten.substring(main.end());
+        int declarationsAt=firstCode(mask(rewritten));
+        if(declarationsAt<0)return null;
+        return rewritten.substring(0,declarationsAt)+declarationsText+rewritten.substring(declarationsAt,main.end())+body+rewritten.substring(main.end());
+    }
+    private static int firstCode(String masked) {
+        int start=0;boolean continuation=false;
+        while(start<masked.length()) {
+            int end=masked.indexOf('\n',start);if(end<0)end=masked.length();
+            String line=masked.substring(start,end);String clean=line.stripLeading();
+            boolean directive=continuation || clean.startsWith("#");
+            continuation=directive && line.stripTrailing().endsWith("\\");
+            if(!directive && !clean.isEmpty())return start+line.length()-clean.length();
+            start=end+1;
+        }return -1;
     }
     private static String mask(String source){
         char[] chars=source.toCharArray();boolean block=false,line=false;
