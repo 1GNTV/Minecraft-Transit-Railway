@@ -37,3 +37,5 @@ Next final vérifié : code 8574d7fb788b17e4dd19f0189948475ee260135d, CI 3814621
 Oculus 1.8 shader source integration with unchanged full apply and preflight/fallback; early train/car visibility and deferred light; immutable rail/eye-candy regions with selected multi-draw spans; shared-vertex detail index LODs; bounded predictive CPU model preparation. V2 remains unchanged. See docs/mtr-next-architecture-fr.md for scope, switches and outstanding runtime validation.
 
 Next architecture final : code db74325bcdb362322c4df000057a58b38ae98fcf, CI 38153720748 réussie ; sept groupes CPU, quinze tests de géométrie, comparaison GL logiciel et intégrité/contrats statiques du JAR réussis. Artefact récupéré, SHA256 74816821665f136f46f803aca7659b9740f95521831f7ae54826b96b61ed4786. Validation Minecraft/Oculus/France Addon et FPS restant à effectuer.
+
+Profile-driven follow-up verified: 62db10751f9098daa5d3595ac7ade21b06e4445f, CI 38157947923 passed, eight CPU groups, fifteen geometry tests, real software GL pixels and static JAR contracts. Retrieved JAR SHA256 c4d999713fa5b0e981d51d3a6194484cb7f66824c73dd6566b27a48a6fc05265. No in-game measurement for this binary.

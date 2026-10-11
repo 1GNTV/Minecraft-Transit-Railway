@@ -81,3 +81,14 @@ Le job OpenGL passe sur Mesa llvmpipe : pixels identiques entre dessins ordinair
 [Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748/artifacts/11708115777) récupéré et vérifié : 84 421 820 octets, SHA256 `74816821665f136f46f803aca7659b9740f95521831f7ae54826b96b61ed4786`. ZIP SHA256 `497137e7214ee400e7e2e9f80ef66a4464fee70d6671f9ed4a8a8784f2debd1c`. Rapports récupérés : quinze tests réussis ; ZIP SHA256 `dc6647b2d6bf39d487cacfb8fa8db67a3b15152cd57ca8f5e65412c953af92e8`. Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-architecture-db74325.jar`. Version interne 4.0.5 conservée. Les commits documentaires suivants ne changent pas ce JAR.
 
 Les références V2/V3/V4 ont été revérifiées inchangées le 11 octobre 2026. Aucun gain FPS ni résultat visuel avec MTR France Addon n'est revendiqué.
+
+
+## Suite après le profil shaders m156dT84Yo
+
+Détection directe Oculus et échéances faibles ordonnées au lieu des deux surcoûts identifiés ; filtres rapides des LOD. [Audit des prochains chantiers](mtr-next-profile-followup-fr.md).
+
+Code compilé : `62db10751f9098daa5d3595ac7ade21b06e4445f`. [GitHub Actions 38157947923](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38157947923) réussi : huit groupes de checks CPU, quinze tests de géométrie (zéro échec/ignoré), comparaison de pixels OpenGL logiciel, contrats statiques des mappings et vérification du JAR. Les logs complets des deux jobs ont été inspectés. Aucun échec ; deux avertissements Javadoc hérités, un avertissement de dépréciation ThreadDeath dans le harness Java 21 et dépréciations des outils CI restent présents.
+
+[Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38157947923/artifacts/11709577605) récupéré : 84 426 877 octets ; SHA256 `c4d999713fa5b0e981d51d3a6194484cb7f66824c73dd6566b27a48a6fc05265`. ZIP SHA256 `c6f6be66569c12d138609fba2f8b96ad2621a64f0f8783d83aeceb6109e799dd`. Rapports récupérés : quinze tests réussis ; ZIP SHA256 `db2c4caf8573cfd7449eeb5e238a36ea9c1f688b0b10baf730bfebaf6de01021`. Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-hotspots-62db107.jar`. Dix-neuf mixins clients enregistrés et présents. Les commits de documentation suivants ne changent pas ce binaire.
+
+L'injection du nouveau lecteur d'ombres reste à valider dans Minecraft/Oculus. Aucun FPS, résultat visuel ni gain en jeu n'est attribué à ce JAR avant essai. Version interne 4.0.5 conservée ; la candidate db74325 déjà testée reste disponible. Références V2/V3/V4 revérifiées inchangées.
