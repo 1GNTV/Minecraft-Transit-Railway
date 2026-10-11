@@ -63,7 +63,7 @@ public class RenderVehicles implements IGui {
 		// When riding a moving vehicle, the client movement is always out of sync with the vehicle rendering. This produces annoying shaking effects.
 		// Offsets are used to render the vehicle with respect to the player position rather than the absolute world position, eliminating shaking.
 
-		final boolean canRide = !clientPlayerEntity.isSpectator();
+		final boolean canRide = updateVisibility && !clientPlayerEntity.isSpectator();
 
 		// Iterate all vehicles that the client knows about
 		MinecraftClientData.getInstance().vehicles.forEach(vehicle -> {
@@ -113,18 +113,20 @@ public class RenderVehicles implements IGui {
 					return () -> vehicle.persistentVehicleData.rayTracing[carNumber] = shouldRender;
 				});
 
-				if ((vehicle.persistentVehicleData.rayTracing[carNumber] && TrainVisibility.carVisible(vehicle, carNumber, vehicleCarDetails.right().right(), cameraPosition)) || VehicleRidingMovement.isRiding(vehicle.getId())) {
+				final boolean visualCar = (vehicle.persistentVehicleData.rayTracing[carNumber] && TrainVisibility.carVisible(vehicle, carNumber, vehicleCarDetails.right().right(), cameraPosition)) || VehicleRidingMovement.isRiding(vehicle.getId());
+                final boolean interactionCar = updateVisibility && TrainVisibility.interactionReach(vehicle,carNumber,vehicleCarDetails.right().right(),cameraPosition);
+                if (visualCar || interactionCar) {
 					CustomResourceLoader.getVehicleById(vehicle.getTransportMode(), vehicleCarDetails.left().getVehicleId(), vehicleResourceDetails -> {
 						final VehicleResource vehicleResource = vehicleResourceDetails.left();
 						final boolean fromResourcePackCreator = vehicleResourceDetails.rightBoolean() && !vehicle.getIsOnRoute();
 						final int[] scrollingDisplayIndexTracker = {0};
 
 						// Riding offset
-						final PositionAndRotation absoluteVehicleCarPositionAndRotation = vehicleCarDetails.right().right().withLight();
+						final PositionAndRotation absoluteVehicleCarPositionAndRotation = visualCar ? vehicleCarDetails.right().right().withLight() : vehicleCarDetails.right().right();
 						final PositionAndRotation vehicleCarRenderingPositionAndRotation = getRenderPositionAndRotation(offsetVector, offsetRotation, ridingCarPositionAndRotation, absoluteVehicleCarPositionAndRotation, cameraShakeOffset);
 
 						// Render each bogie of the car
-						iterateWithIndex(vehicleCarDetails.right().left(), (bogieIndex, absoluteBogiePositionAndRotation) -> {
+						if (visualCar) iterateWithIndex(vehicleCarDetails.right().left(), (bogieIndex, absoluteBogiePositionAndRotation) -> {
 							final PositionAndRotation bogieRenderingPositionAndRotation = getRenderPositionAndRotation(offsetVector, offsetRotation, ridingCarPositionAndRotation, absoluteBogiePositionAndRotation, cameraShakeOffset);
 							final StoredMatrixTransformations storedMatrixTransformations = getStoredMatrixTransformations(offsetVector == null, bogieRenderingPositionAndRotation, 0);
 							if (OptimizedRenderer.hasOptimizedRendering()) {
@@ -224,12 +226,16 @@ public class RenderVehicles implements IGui {
 
 						// Each car can have more than one model defined
 						final StoredMatrixTransformations storedMatrixTransformations = getStoredMatrixTransformations(offsetVector == null, vehicleCarRenderingPositionAndRotation, oscillationAmount);
-						if (OptimizedRenderer.hasOptimizedRendering()) {
+						if (visualCar && OptimizedRenderer.hasOptimizedRendering()) {
 							vehicleResource.queue(storedMatrixTransformations, vehicle, carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), absoluteVehicleCarPositionAndRotation.light, openDoorways.isEmpty());
 						}
 
 						vehicleResource.iterateModels(carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), (modelIndex, model) -> {
-							model.render(storedMatrixTransformations, vehicle, carNumber, scrollingDisplayIndexTracker, absoluteVehicleCarPositionAndRotation.light, openDoorways, fromResourcePackCreator);
+                            if (visualCar) {
+                                double previousDistance=ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
+                                try { model.render(storedMatrixTransformations, vehicle, carNumber, scrollingDisplayIndexTracker, absoluteVehicleCarPositionAndRotation.light, openDoorways, fromResourcePackCreator); }
+                                finally { ModelDetailCache.restoreDistance(previousDistance); }
+                            }
 
 							while (modelIndex >= previousGangwayPositionsList.size()) {
 								previousGangwayPositionsList.add(new PreviousConnectionPositions());
@@ -259,7 +265,7 @@ public class RenderVehicles implements IGui {
 									model.modelProperties.getGangwayYOffset(),
 									model.modelProperties.getGangwayZOffset(),
 									oscillationAmount,
-									vehicle.getIsOnRoute()
+									vehicle.getIsOnRoute(), visualCar
 							);
 
 							// Render barrier
@@ -282,7 +288,7 @@ public class RenderVehicles implements IGui {
 									model.modelProperties.getBarrierYOffset(),
 									model.modelProperties.getBarrierZOffset(),
 									oscillationAmount,
-									vehicle.getIsOnRoute()
+									vehicle.getIsOnRoute(), visualCar
 							);
 						});
 
@@ -299,12 +305,12 @@ public class RenderVehicles implements IGui {
 						}
 
 						// Render the current riding player
-						if (ridingCarNumber == carNumber && offsetVector != null && minecraftClient.getGameRendererMapped().getCamera().isThirdPerson()) {
+						if (visualCar && ridingCarNumber == carNumber && offsetVector != null && minecraftClient.getGameRendererMapped().getCamera().isThirdPerson()) {
 							renderPlayer(new Entity(clientPlayerEntity.data), -1, 0, 0, offsetVector, offsetVector, offsetRotation, absoluteVehicleCarPositionAndRotation, absoluteVehicleCarPositionAndRotation, cameraShakeOffset);
 						}
 
 						// Render other players on this vehicle
-						vehicle.vehicleExtraData.iterateRidingEntities(vehicleRidingEntity -> {
+						if (visualCar) vehicle.vehicleExtraData.iterateRidingEntities(vehicleRidingEntity -> {
 							final boolean isOnBackGangway = vehicleRidingEntity.getIsOnGangway() && vehicleRidingEntity.getZ() < 0.5;
 
 							if (vehicleRidingEntity.getRidingCar() - (isOnBackGangway ? 1 : 0) == carNumber && !vehicleRidingEntity.uuid.equals(clientPlayerEntity.getUuid())) {
@@ -512,7 +518,7 @@ public class RenderVehicles implements IGui {
 			@Nullable Identifier outerTopTexture,
 			@Nullable Identifier outerBottomTexture,
 			PositionAndRotation positionAndRotation, boolean useOffset,
-			double vehicleLength, double width, double height, double yOffset, double zOffset, double oscillationAmount, boolean isOnRoute
+			double vehicleLength, double width, double height, double yOffset, double zOffset, double oscillationAmount, boolean isOnRoute, boolean emitVisual
 	) {
 		final ClientWorld clientWorld = MinecraftClient.getInstance().getWorldMapped();
 		if (clientWorld == null) {
@@ -522,7 +528,7 @@ public class RenderVehicles implements IGui {
 		final double halfLength = vehicleLength / 2;
 		final double newOscillationAmount = -Math.toRadians(oscillationAmount);
 
-		if (shouldRender1 && previousConnectionPositions.isValid()) {
+		if (emitVisual && shouldRender1 && previousConnectionPositions.isValid()) {
 			final Vector position1 = positionAndRotation.transformForwards(new Vector(-width / 2, yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);
 			final Vector position2 = positionAndRotation.transformForwards(new Vector(-width / 2, height + yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);
 			final Vector position3 = positionAndRotation.transformForwards(new Vector(width / 2, height + yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);

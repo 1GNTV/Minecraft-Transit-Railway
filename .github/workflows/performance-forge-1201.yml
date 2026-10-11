@@ -53,6 +53,7 @@ jobs:
         run: python3 tools/test_next_architecture.py
       - name: Check live shadow state and deadline resource expiry
         run: python3 tools/test_profile_hotspots.py
+          python3 tools/test_fps_fixes.py
       - name: Build web resources
         run: |
           chmod +x gradlew

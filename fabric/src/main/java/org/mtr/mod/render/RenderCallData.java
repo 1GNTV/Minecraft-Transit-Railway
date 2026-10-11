@@ -8,4 +8,6 @@ public interface RenderCallData {
     VertexArray mtr$array();
     VertexAttributeState mtr$attributes();
     RenderPipelineMetrics.Family mtr$family();
+    default boolean mtr$visible(){return ModelPartVisibility.visible(mtr$array(),mtr$attributes());}
+    default BoundedDrawGrouping.Rect mtr$screenBounds(){return ModelPartVisibility.screenBounds(mtr$array(),mtr$attributes());}
 }

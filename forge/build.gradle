@@ -45,6 +45,7 @@ mixin {
 	config "mtr.mixins.json"
 	if (minecraftVersion == "1.20.1") {
 		config "mtr.performance.mixins.json"
+		config "mtr.text.performance.mixins.json"
 	}
 	debug.verbose = true
 	debug.export = true

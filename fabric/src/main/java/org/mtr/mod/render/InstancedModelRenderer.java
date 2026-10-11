@@ -26,13 +26,13 @@ import java.util.function.Consumer;
 /** Shaderless GL 3.3 instances. Original VAOs and shader setup remain untouched. */
 public final class InstancedModelRenderer {
     private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.instances", "true"));
-    private static final int MAX_INSTANCES = 1024, MAX_SLOTS = 64, PAGES = 3, MATRIX_BYTES = 64;
+    private static final int MAX_INSTANCES = 1024, MAX_SLOTS = 64, PAGES = 3, MATRIX_BYTES = 76, WORDS = 19;
     private static final Map<VertexArray, Slot> SLOTS = new LinkedHashMap<>(64, 0.75F, true);
     private static final ByteBuffer SCRATCH = ByteBuffer.allocateDirect(MAX_INSTANCES * MATRIX_BYTES).order(ByteOrder.nativeOrder());
     private static final FloatBuffer FLOATS = SCRATCH.asFloatBuffer();
     private static final FloatBuffer[] MATRIX_VIEWS = new FloatBuffer[MAX_INSTANCES];
-    static { for (int i = 0; i < MAX_INSTANCES; i++) MATRIX_VIEWS[i] = FLOATS.slice(i << 4, 16); }
-    private static final float[] VALUES = new float[MAX_INSTANCES * 16];
+    static { for (int i = 0; i < MAX_INSTANCES; i++) MATRIX_VIEWS[i] = FLOATS.slice(i * WORDS, 16); }
+    private static final int[] VALUES = new int[MAX_INSTANCES * WORDS];
     private static final VertexAttributeType[] TYPES = VertexAttributeType.values();
     private static boolean failed;
     private static long submittedGroups, submittedInstances, uploads, reused, busy;
@@ -40,7 +40,7 @@ public final class InstancedModelRenderer {
     private static final class Page {
         int vao, buffer, capacity, count;
         long fence;
-        float[] values;
+        int[] values;
         boolean available() {
             if (fence == 0) return true;
             int status = GL33.glClientWaitSync(fence, 0, 0L);
@@ -50,7 +50,7 @@ public final class InstancedModelRenderer {
         }
         boolean same(int count) {
             if (this.count != count || values == null) return false;
-            for (int i = 0; i < count * 16; i++) if (Float.floatToRawIntBits(values[i]) != Float.floatToRawIntBits(VALUES[i])) return false;
+            for (int i = 0; i < count * WORDS; i++) if (values[i] != VALUES[i]) return false;
             return true;
         }
         void close() {
@@ -73,23 +73,24 @@ public final class InstancedModelRenderer {
             calls.forEach(ordinary); return;
         }
         if (!GL.getCapabilities().OpenGL33) { calls.forEach(ordinary); return; }
-        ConsecutiveRuns.visit(calls, Utilities.canUseCustomShader() ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
+        List<?> ordered=Utilities.canUseCustomShader() && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true")) ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,call->call instanceof RenderCallData data?data.mtr$screenBounds():null,24) : calls;
+        ConsecutiveRuns.visit(ordered, Utilities.canUseCustomShader() ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
             boolean drawn = false;
-            if (end - start >= 4 && calls.get(start) instanceof RenderCallData) {
-                try { drawn = Utilities.canUseCustomShader() ? drawRun(calls, start, end) : OculusInstanceRenderer.draw(calls, start, end); }
+            if (end - start >= 4 && ordered.get(start) instanceof RenderCallData) {
+                try { drawn = Utilities.canUseCustomShader() ? drawRun(ordered, start, end) : OculusInstanceRenderer.draw(ordered, start, end); }
                 catch (RuntimeException error) {
                     failed = true;
                     Init.LOGGER.error("MTR Next instances disabled for this resource generation; ordinary draws restored", error);
                 } finally { GlVertexAttributeCache.invalidate(); }
             }
-            if (!drawn) for (int i = start; i < end; i++) ordinary.accept(calls.get(i));
+            if (!drawn) for (int i = start; i < end; i++) ordinary.accept(ordered.get(i));
         });
     }
 
     private static boolean eligible(RenderCallData call) {
         VertexArray array = call.mtr$array();
         VertexAttributeState state = call.mtr$attributes();
-        if (RegionVertexRanges.contains(array) || !ModelPartVisibility.visible(array,state)) return false;
+        if (RegionVertexRanges.contains(array) || !call.mtr$visible()) return false;
         if (!((Object) array instanceof VertexArrayIdentity) || ((VertexArrayIdentity) (Object) array).mtr$vaoId() == 0 || state.matrix4f == null) return false;
         if (array.materialProperties.translucent || array.materialProperties.cutoutHack || !array.materialProperties.writeDepthBuf) return false;
         if (state.position != null || state.normal != null || state.textureU != null || state.textureV != null) return false;
@@ -98,14 +99,15 @@ public final class InstancedModelRenderer {
             if (type == VertexAttributeType.MATRIX_MODEL && source != VertexAttributeSource.GLOBAL) return false;
             if (source != VertexAttributeSource.GLOBAL && source != VertexAttributeSource.VERTEX_BUFFER) return false;
         }
+        for (VertexAttributeType type : new VertexAttributeType[]{VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY})
+            if(InstanceValues.varying(array,type) && InstanceValues.value(call,type)==null)return false;
         return array.materialProperties.vertexAttributeState.matrix4f == null;
     }
     private static boolean compatible(Object left, Object right) {
         if (!(left instanceof RenderCallData) || !(right instanceof RenderCallData)) return false;
         RenderCallData a = (RenderCallData) left, b = (RenderCallData) right;
         if (a.mtr$array() != b.mtr$array() || a.mtr$family() != b.mtr$family() || !eligible(a) || !eligible(b)) return false;
-        VertexAttributeState x = a.mtr$attributes(), y = b.mtr$attributes();
-        return Objects.equals(x.color, y.color) && Objects.equals(x.lightmapUV, y.lightmapUV) && Objects.equals(x.overlayUV, y.overlayUV);
+        return true; // Different global colors/light/overlay are encoded for each instance.
     }
 
     private static boolean drawRun(List<?> calls, int start, int end) {
@@ -113,15 +115,23 @@ public final class InstancedModelRenderer {
         if (!eligible(first)) return false;
         VertexArray source = first.mtr$array();
         int count = end - start;
-        FLOATS.clear();
+        SCRATCH.clear();FLOATS.clear();
         for (int i = start; i < end; i++) {
             // Utilities.store uses absolute writes; use a 16-float slice for each matrix.
             FloatBuffer matrix = MATRIX_VIEWS[i - start];
             matrix.clear();
             Matrix4f value = ((RenderCallData) calls.get(i)).mtr$attributes().matrix4f;
             Utilities.store(value, matrix);
+            RenderCallData call=(RenderCallData)calls.get(i);
+            int base=(i-start)*MATRIX_BYTES;
+            Integer color=InstanceValues.value(call,VertexAttributeType.COLOR);
+            int rgba=color==null?-1:color;
+            SCRATCH.put(base+64,(byte)(rgba>>>24));SCRATCH.put(base+65,(byte)(rgba>>>16));SCRATCH.put(base+66,(byte)(rgba>>>8));SCRATCH.put(base+67,(byte)rgba);
+            Integer light=InstanceValues.value(call,VertexAttributeType.UV_LIGHTMAP),overlay=InstanceValues.value(call,VertexAttributeType.UV_OVERLAY);
+            SCRATCH.putShort(base+68,(short)(light==null?0:light>>>16));SCRATCH.putShort(base+70,(short)(light==null?0:(int)light));
+            SCRATCH.putShort(base+72,(short)(overlay==null?0:overlay>>>16));SCRATCH.putShort(base+74,(short)(overlay==null?0:(int)overlay));
         }
-        FLOATS.get(0, VALUES, 0, count * 16);
+        SCRATCH.asIntBuffer().get(0, VALUES, 0, count * WORDS);
         Slot slot = SLOTS.get(source);
         if (slot == null) {
             if (SLOTS.size() == MAX_SLOTS) {
@@ -145,8 +155,8 @@ public final class InstancedModelRenderer {
             }
             SCRATCH.position(0).limit(bytes);
             GL33.glBufferSubData(GL33.GL_ARRAY_BUFFER, 0, SCRATCH);
-            if (page.values == null || page.values.length < count * 16) page.values = new float[page.capacity / Float.BYTES];
-            System.arraycopy(VALUES, 0, page.values, 0, count * 16); page.count = count; uploads++;
+            if (page.values == null || page.values.length < count * WORDS) page.values = new int[page.capacity / Integer.BYTES];
+            System.arraycopy(VALUES, 0, page.values, 0, count * WORDS); page.count = count; uploads++;
         }
         GL33.glBindVertexArray(page.vao);
         first.mtr$attributes().apply();
@@ -191,6 +201,9 @@ public final class InstancedModelRenderer {
             VertexAttributeType.MATRIX_MODEL.toggleAttributeArray(true);
             VertexAttributeType.MATRIX_MODEL.setupAttributePointer(MATRIX_BYTES, 0);
             for (int n = 0; n < 4; n++) GL33.glVertexAttribDivisor(VertexAttributeType.MATRIX_MODEL.location + n, 1);
+            VertexAttributeType[] attributes={VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY};
+            int[] offsets={64,68,72};
+            for(int i=0;i<attributes.length;i++)if(InstanceValues.varying(source,attributes[i])){attributes[i].toggleAttributeArray(true);attributes[i].setupAttributePointer(MATRIX_BYTES,offsets[i]);GL33.glVertexAttribDivisor(attributes[i].location,1);}
             return page;
         } catch (RuntimeException | Error error) { page.close(); throw error; }
     }

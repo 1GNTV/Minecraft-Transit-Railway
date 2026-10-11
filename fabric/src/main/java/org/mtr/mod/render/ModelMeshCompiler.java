@@ -72,7 +72,7 @@ public final class ModelMeshCompiler {
         }
         final OptimizedModel model = new OptimizedModel(arrays);
         for (int i = 0; i < arrays.size(); i++) GpuMeshOwnership.attach(arrays.get(i), meshes.get(i));
-        if (retainRailGeometry) RailGeometrySnapshots.retain(model, combiner.meshes());
+        if (retainRailGeometry) RailGeometrySnapshots.retain(model, combiner.meshes(), arrays);
         return model;
     }
 }

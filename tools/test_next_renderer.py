@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STUBS = {
 "org/mtr/mod/render/OculusInstanceRenderer.java": "package org.mtr.mod.render; import java.util.*; public class OculusInstanceRenderer {public static boolean draw(List<?> x,int a,int b){return false;}public static void clear(){}}",
 "org/mtr/mod/render/RegionVertexRanges.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray; public class RegionVertexRanges {public static boolean contains(VertexArray a){return false;}}",
-"org/mtr/mod/render/ModelPartVisibility.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray;import org.mtr.mapping.render.vertex.VertexAttributeState; public class ModelPartVisibility {public static boolean visible(VertexArray a,VertexAttributeState s){return true;}}",
+"org/mtr/mod/render/ModelPartVisibility.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray;import org.mtr.mapping.render.vertex.VertexAttributeState; public class ModelPartVisibility {public static boolean visible(VertexArray a,VertexAttributeState s){return true;}public static org.mtr.mod.render.BoundedDrawGrouping.Rect screenBounds(VertexArray a,VertexAttributeState s){return null;}}",
 "com/mojang/blaze3d/systems/RenderSystem.java": "package com.mojang.blaze3d.systems; public class RenderSystem {public static boolean isOnRenderThread(){return true;} public static void recordRenderCall(Runnable r){r.run();}}",
 "org/lwjgl/opengl/GL.java": "package org.lwjgl.opengl; public class GL { public static C getCapabilities(){return new C();} public static class C {public boolean OpenGL33=!Boolean.getBoolean(\"test.unsupported\");}}",
 "org/lwjgl/opengl/GL33.java": """package org.lwjgl.opengl;
@@ -24,7 +24,7 @@ public class GL33 {
  public static void glDeleteVertexArrays(int x){if(!live.remove(x))throw new AssertionError("source VAO deleted");deletes++;}
  public static void glBindBuffer(int a,int b){} public static void glBindVertexArray(int a){vao=a;}
  public static int glGetInteger(int a){return 42;} public static int glGetVertexAttribi(int a,int b){return 43;}
- public static void glBufferData(int target,long size,int usage){if(size>65536)throw new AssertionError("unbounded GPU buffer");capacity=(int)size; allocations++;}
+ public static void glBufferData(int target,long size,int usage){if(size>131072)throw new AssertionError("unbounded GPU buffer");capacity=(int)size; allocations++;}
  public static void glBufferSubData(int target,long offset,ByteBuffer b){uploads++;lastUpload=new float[b.remaining()/4];b.asFloatBuffer().get(lastUpload);}
  public static void glVertexAttribDivisor(int l,int d){} public static void glDrawElementsInstanced(int mode,int indices,int type,long offset,int count){if(count<4||count>1024)throw new AssertionError();draws++;}
 }""",
@@ -64,7 +64,7 @@ public class NextTest {
   var vao=new VertexArray();var c=calls(vao,4,1);
   if(args.length>0){draw(c);check(ordinary==4&&GL33.draws==0&&GL33.live.isEmpty());System.out.println("PASS: "+args[0]);return;}
   draw(c);check(GL33.draws==1&&ordinary==0&&GL33.uploads==1&&vao.id==1);
-  for(int i=0;i<4;i++)for(int j=0;j<16;j++)check(GL33.lastUpload[i*16+j]==c.get(i).state.matrix4f.data[j]);
+  for(int i=0;i<4;i++)for(int j=0;j<16;j++)check(GL33.lastUpload[i*19+j]==c.get(i).state.matrix4f.data[j]);
   draw(c);check(GL33.draws==2&&GL33.uploads==1); // same data can be reused even with a pending fence
   draw(calls(vao,4,20));draw(calls(vao,4,30));check(GL33.uploads==3&&GL33.live.size()==6);
   draw(calls(vao,4,40));check(ordinary==4&&GL33.draws==4&&GL33.polls>0); // no wait, all three pages busy
@@ -72,9 +72,12 @@ public class NextTest {
   int allocations=GL33.allocations;for(int i=0;i<100;i++)draw(calls(vao,4,100+i));check(GL33.allocations==allocations);check(GL33.draws==105);
   Utilities.custom=false;draw(c);Utilities.custom=true;check(ordinary==8); // preserve Oculus path
   vao.materialProperties.translucent=true;draw(c);vao.materialProperties.translucent=false;check(ordinary==12);
-  c.get(2).state.lightmapUV=99;draw(c);check(ordinary==16); // no grouping across a changed light
-  vao.id=0;draw(c);check(ordinary==20);vao.id=1;
-  draw(calls(new VertexArray(),1025,1));check(ordinary==21&&GL33.lastUpload.length==1024*16);
+  vao.materialProperties.vertexAttributeState.color=null;vao.materialProperties.vertexAttributeState.lightmapUV=null;vao.materialProperties.vertexAttributeState.overlayUV=null;
+  c.get(2).state.lightmapUV=99;c.get(1).state.color=0x11223344;draw(c);check(ordinary==12); // per-instance attributes no longer split groups
+  check(Float.floatToRawIntBits(GL33.lastUpload[2*19+17])==99*65536); // native-endian short pair
+  check(Float.floatToRawIntBits(GL33.lastUpload[1*19+16])==0x44332211);
+  vao.id=0;draw(c);check(ordinary==16);vao.id=1;
+  draw(calls(new VertexArray(),1025,1));check(ordinary==17&&GL33.lastUpload.length==1024*19);
   for(int i=0;i<70;i++)draw(calls(new VertexArray(),4,i));check(GL33.live.size()<=64*3*2);
   InstancedModelRenderer.clear();check(GL33.live.isEmpty()&&vao.id==1);InstancedModelRenderer.clear();
   var ranges=new ArrayList<String>();ConsecutiveRuns.visit(List.of(1,1,2,1,1),2,Integer::equals,(s,e)->ranges.add(s+":"+e));check(ranges.equals(List.of("0:2","2:3","3:5")));
@@ -88,7 +91,7 @@ with tempfile.TemporaryDirectory(prefix="mtr-next-") as tmp:
         path = base / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder", "ShaderReloadPolicy", "InstanceShaderSource"]:
+    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder", "ShaderReloadPolicy", "InstanceShaderSource", "InstanceValues", "BoundedDrawGrouping"]:
         shutil.copy(ROOT / "fabric/src/main/java/org/mtr/mod/render" / (name + ".java"), base / "org/mtr/mod/render")
     subprocess.run(["javac", "-d", tmp] + [str(p) for p in base.rglob("*.java")], check=True)
     for args in [["NextTest"], ["-Dmtr.next.instances=false", "NextTest", "disabled"], ["-Dtest.unsupported=true", "NextTest", "unsupported"], ["-Dmtr.next.shaderReloadCache=false", "-Dtest.shaderCacheDisabled=true", "NextTest"]]:

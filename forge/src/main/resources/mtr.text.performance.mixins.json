@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "org.mtr.init.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": ["GraphicsHolderTextMixin"],
+  "injectors": {"defaultRequire": 1}
+}

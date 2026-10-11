@@ -12,13 +12,17 @@ for path in jars:
     with zipfile.ZipFile(path) as jar:
         manifest = jar.read('META-INF/MANIFEST.MF').decode()
         assert 'mtr.performance.mixins.json' in manifest, 'Unregistered Forge performance mixins'
+        assert 'mtr.text.performance.mixins.json' in manifest, 'Unregistered world text mixin'
+        text_config=json.loads(jar.read('mtr.text.performance.mixins.json'))
+        for name in text_config['client']:assert text_config['package'].replace('.','/')+'/'+name+'.class' in jar.namelist()
+        assert 'org/mtr/init/ForgeWorldTextBatch.class' in jar.namelist()
         config = json.loads(jar.read('mtr.performance.mixins.json'))
         for name in config['client']:
             entry = config['package'].replace('.', '/') + '/' + name + '.class'
             assert entry in jar.namelist(), f'Missing {entry}'
         for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer', 'RailBatchGeometry', 'RailGeometrySnapshots', 'RailSectorCache', 'RailSectorBatcher', 'GpuMeshOwnership', 'GenerationUploadQueue', 'NativeImageCropper']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
-        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy', 'OculusInstanceRenderer', 'InstanceShaderSource', 'TrainVisibility', 'PredictiveVehiclePreloader', 'StaticRegionRenderer', 'StaticDecorationRegions', 'PersistentRegionCache', 'RegionVertexRanges', 'ModelDetailGeometry', 'ModelDetailCache', 'ModelPartVisibility', 'ShadowPassState']:
+        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy', 'OculusInstanceRenderer', 'InstanceShaderSource', 'TrainVisibility', 'PredictiveVehiclePreloader', 'StaticRegionRenderer', 'StaticDecorationRegions', 'PersistentRegionCache', 'RegionVertexRanges', 'ModelDetailGeometry', 'ModelDetailCache', 'ModelPartVisibility', 'ShadowPassState', 'WorldTextBatch', 'InstanceValues', 'RegionPageLayout', 'BoundedDrawGrouping', 'BoundedMeshSimplifier', 'ScreenErrorBudget']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
         assert 'org/mtr/mod/resource/WeakExpiryQueue.class' in jar.namelist()
         assert 'org/mtr/init/PerformanceFrameHooks.class' in jar.namelist(), 'Missing Forge render frame hooks'
@@ -30,6 +34,7 @@ for path in jars:
     print('VERIFIED', Path(path).name, Path(path).stat().st_size)
     # Validate stable third-party targets against the dependency actually shipped.
     targets = {
+        'org.mtr.mapping.mapper.GraphicsHolder':['matrixStack;', 'drawContext;', 'drawText(org.mtr.mapping.holder.MutableText', 'drawText(org.mtr.mapping.holder.OrderedText', 'drawText(java.lang.String', 'createVertexConsumer(', 'drawTextureInWorld(', 'drawLineInWorld(', 'renderEntity('],
         'org.mtr.mapping.render.shader.ModShaderHandler': ['renderingShadows()', 'java/lang/Thread.getStackTrace:'],
         'org.mtr.mapping.mapper.OptimizedRenderer': ['render(boolean)', 'BatchManager.drawAll:'],
         'org.mtr.mapping.mapper.OptimizedModel': ['fromObjModels(', 'DEFAULT_MAPPING;'],

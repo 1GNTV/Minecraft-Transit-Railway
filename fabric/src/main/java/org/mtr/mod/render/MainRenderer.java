@@ -158,11 +158,16 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 					if (renderLayer != null) {
 						graphicsHolder.createVertexConsumer(renderLayer);
 					}
-					value.forEach(renderer -> renderer.accept(graphicsHolder, offset));
+					value.forEach(renderer -> {
+                        WorldTextBatch.begin();
+                        try { renderer.accept(graphicsHolder, offset); }
+                        finally { WorldTextBatch.end(); }
+                    });
 				});
 			}
 		}
 
+		ModelDetailCache.beginPass();
 		CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.render(!Config.getClient().getHideTranslucentParts());
 	}
 

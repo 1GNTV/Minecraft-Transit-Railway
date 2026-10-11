@@ -27,9 +27,12 @@ public final class TrainVisibility {
         if (!usable()) return true;
         double r = radius(vehicle, index), x = pose.position.x, y = pose.position.y, z = pose.position.z;
         if (!Double.isFinite(r) || !Double.isFinite(x + y + z) || r <= 0) return true;
-        // Nearby interaction and spatial audio must continue outside the camera view.
-        if (Math.abs(x-camera.getXMapped()) <= r+48 && Math.abs(y-camera.getYMapped()) <= r+48 && Math.abs(z-camera.getZMapped()) <= r+48) return true;
         return frustum.isVisible(new Box(x-r, y-r, z-r, x+r, y+r, z+r));
+    }
+    public static boolean interactionReach(VehicleExtension vehicle,int index,PositionAndRotation pose,Vector3d camera) {
+        double radius=radius(vehicle,index)+48;
+        if(!Double.isFinite(radius))return true;
+        return Math.abs(pose.position.x-camera.getXMapped())<=radius && Math.abs(pose.position.y-camera.getYMapped())<=radius && Math.abs(pose.position.z-camera.getZMapped())<=radius;
     }
     public static boolean trainVisible(VehicleExtension vehicle, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> cars, Vector3d camera) {
         if (!usable() || cars.isEmpty()) return true;

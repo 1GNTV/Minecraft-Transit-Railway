@@ -21,7 +21,13 @@ public abstract class RenderCallMetricsMixin implements RenderCallData {
     @Shadow @Final public VertexAttributeState vertexAttributeState;
     @Unique private RenderPipelineMetrics.Family mtr$family;
     @Unique private double mtr$distance;
-    @Override public VertexArray mtr$array() { return ModelDetailCache.select(vertexArray,mtr$family,mtr$distance); }
+    @Unique private VertexArray mtr$resolved;
+    @Unique private Boolean mtr$visible;
+    @Unique private boolean mtr$boundsResolved;
+    @Unique private org.mtr.mod.render.BoundedDrawGrouping.Rect mtr$bounds;
+    @Override public boolean mtr$visible(){if(mtr$visible==null)mtr$visible=ModelPartVisibility.visible(mtr$array(),vertexAttributeState);return mtr$visible;}
+    @Override public org.mtr.mod.render.BoundedDrawGrouping.Rect mtr$screenBounds(){if(!mtr$boundsResolved){mtr$bounds=ModelPartVisibility.screenBounds(mtr$array(),vertexAttributeState);mtr$boundsResolved=true;}return mtr$bounds;}
+    @Override public VertexArray mtr$array() { if (mtr$resolved == null) mtr$resolved = ModelDetailCache.select(vertexArray,mtr$family,mtr$distance); return mtr$resolved; }
     @Override public VertexAttributeState mtr$attributes() { return vertexAttributeState; }
     @Override public RenderPipelineMetrics.Family mtr$family() { return mtr$family; }
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -33,6 +39,6 @@ public abstract class RenderCallMetricsMixin implements RenderCallData {
     @Redirect(method="draw",at=@At(value="FIELD",target="Lorg/mtr/mapping/render/batch/BatchManager$RenderCall;vertexArray:Lorg/mtr/mapping/render/object/VertexArray;"))
     private VertexArray mtr$detailArray(@org.spongepowered.asm.mixin.injection.Coerce Object ignored){return mtr$array();}
     @Inject(method = "draw", at = @At("HEAD"),cancellable=true)
-    private void mtr$drawing(CallbackInfo ci) { if (!ModelPartVisibility.visible(vertexArray,vertexAttributeState)) { ci.cancel(); return; } RenderPipelineMetrics.drawing(mtr$family); }
+    private void mtr$drawing(CallbackInfo ci) { if (!mtr$visible()) { ci.cancel(); return; } RenderPipelineMetrics.drawing(mtr$family); }
 }
 
