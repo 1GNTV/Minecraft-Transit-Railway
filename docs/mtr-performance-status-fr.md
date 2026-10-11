@@ -1,8 +1,8 @@
 # État des quarante pistes
 
-La prochaine version est décrite dans [son suivi](mtr-next-version-fr.md). Code Next : `91c09ff5a4fa970f33316c906f9ed2af574867ef`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
+La prochaine version est décrite dans [son suivi](mtr-next-version-fr.md). Code Next : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
 
-Code compilé : `500334ef0e70f67d6f57617cdd0b1e01a495cbac`. [CI 38140845544](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544) réussie. Ces statuts décrivent le code, **pas** des gains FPS mesurés. Aucune piste n'est déclarée entièrement validée en jeu.
+Référence précédente compilée : `500334ef0e70f67d6f57617cdd0b1e01a495cbac`. [CI 38140845544](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544) réussie. Ces statuts décrivent le code, **pas** des gains FPS mesurés. Aucune piste n'est déclarée entièrement validée en jeu.
 
 | Piste | Réalisation actuelle |
 | --- | --- |
@@ -52,3 +52,9 @@ S2/S3 : compteurs familles/passes et timestamps GPU optionnels, compilés et tes
 La [cartographie détaillée](mtr-performance-map-fr.md) donne le mécanisme et le test d'adoption de chaque piste. Le [suivi](work-progress.md) décrit les limites des prototypes ; le [protocole de comparaison](mtr-benchmark-fr.md) conserve les résultats localement.
 
 Next ajoute aussi la compilation des trois shaders internes une seule fois par génération valide de ressources. Ce cache ne remplace ni ShaderInstance.apply ni les uniformes Oculus. Aucun gain FPS n’est déduit de la réussite des tests.
+
+Code compilé : `8574d7fb788b17e4dd19f0189948475ee260135d`. [GitHub Actions 38146219733](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38146219733) réussi : six groupes de checks Python, compilation Forge, onze tests de géométrie (zéro échec/ignoré), contrats statiques de mappings et intégrité du JAR. Logs complets inspectés : aucune erreur, deux warnings Javadoc hérités.
+
+[Artefact Next Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38146219733/artifacts/11704284132), téléchargé et vérifié : 84 365 415 octets, SHA256 `746ea60c7a66df2b5ad6698121035413185e5b59c8a25cf460ca5f5c8e2d1b65`. ZIP SHA256 `bb4a9029531a7040d76bf2a0decacaf98652c6e656853ad680522e2525b4eb38`. Rapports : onze tests, zéro échec/ignoré ; ZIP SHA256 `35da5be9540efe27d0ef2b87a1b946bd370eff0208205f94d7dc294d59755da0`.
+
+Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-8574d7f.jar`. Le nom distingue cet essai ; version interne 4.0.5 conservée. Le précédent JAR Work et la V2 restent intacts. Les commits documentaires ultérieurs ne changent pas ce JAR. Aucune installation ni mesure en jeu n'a été effectuée.
