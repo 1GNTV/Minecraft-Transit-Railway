@@ -10,7 +10,7 @@ jars = glob.glob('forge/build/libs/*-all.jar')
 assert jars, 'Missing shaded Forge JAR'
 for path in jars:
     with zipfile.ZipFile(path) as jar:
-        manifest = jar.read('META-INF/MANIFEST.MF').decode()
+        manifest = jar.read('META-INF/MANIFEST.MF').decode().replace('\r\n ', '').replace('\n ', '')
         assert 'mtr.performance.mixins.json' in manifest, 'Unregistered Forge performance mixins'
         assert 'mtr.text.performance.mixins.json' in manifest, 'Unregistered world text mixin'
         text_config=json.loads(jar.read('mtr.text.performance.mixins.json'))

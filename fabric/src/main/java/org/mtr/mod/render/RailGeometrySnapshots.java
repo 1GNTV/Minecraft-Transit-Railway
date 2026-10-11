@@ -32,9 +32,10 @@ public final class RailGeometrySnapshots {
         if(chunks.isEmpty())return;
         SNAPSHOTS.put(model,new Snapshot(List.copyOf(chunks),count,residual.isEmpty()?null:OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(residual))));
     }
-    private static List<Chunk> split(RawMesh mesh) {
+    static List<Chunk> split(RawMesh mesh) {
         List<Chunk> result=new ArrayList<>(); RawMesh page=new RawMesh(mesh.materialProperties);Map<Integer,Integer> remap=new HashMap<>();
         for(Face face:mesh.faces) {
+            if(face.vertices.length!=3)return null;
             int added=0;for(int index:face.vertices){if(index<0 || index>=mesh.vertices.size())return null;if(!remap.containsKey(index))added++;}
             if(page.vertices.size()+added>PAGE_VERTICES) { result.add(new Chunk(List.of(page),page.vertices.size()));page=new RawMesh(mesh.materialProperties);remap.clear(); }
             int[] indices=new int[3];

@@ -15,7 +15,7 @@ public final class InstanceShaderSource {
         if(vertex==null || fragment==null)return null;
         String v=mask(vertex),f=mask(fragment);
         // Storage/image writes or pack-defined draw IDs can depend on the original draw boundaries.
-        for(String source:List.of(v,f))if(Pattern.compile("\\b(?:[iu]?image[123]D|[iu]?image[123]DArray|atomic_uint|buffer|gl_InstanceID|gl_BaseInstance|gl_DrawID)\\b").matcher(source).find())return null;
+        for(String source:List.of(v,f))if(Pattern.compile("\\b(?:[iu]?image[A-Za-z0-9_]*|atomic_uint|buffer|gl_InstanceID|gl_BaseInstance|gl_DrawID)\\b").matcher(source).find())return null;
         if(v.contains("mtr_Instanced") || f.contains("mtr_Instanced") || !v.contains("uniform mat4 iris_ModelViewMat") || v.contains("gl_ModelViewMatrix") || f.contains("gl_ModelViewMatrix"))return null;
         if(!MAIN.matcher(v).find() || !MAIN.matcher(f).find())return null;
         // Legacy GLSL and macros with model matrices need a different transformation.

@@ -12,7 +12,6 @@ import java.util.*;
 /** Two index-only LODs sharing the original immutable vertex buffer. */
 public final class ModelDetailCache {
     private static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.next.lod","true"));
-    private static final double MAIN_DISTANCE=positive("mtr.next.lodDistance",160),SHADOW_DISTANCE=positive("mtr.next.shadowLodDistance",64);
     private static final Map<Mesh,RawMesh> PENDING=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<VertexArray,Owner> LEVELS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Cleaner CLEANER=Cleaner.create();
@@ -33,7 +32,6 @@ public final class ModelDetailCache {
         @Override public synchronized void run(){if(closed)return;closed=true;if(main!=null)main.close();if(shadow!=null)shadow.close();if(mainIndices!=null)mainIndices.close();if(shadowIndices!=null)shadowIndices.close();BYTES.addAndGet(-bytes);}
     }
     private ModelDetailCache(){}
-    private static double positive(String name,double fallback){try{double n=Double.parseDouble(System.getProperty(name,""));return Double.isFinite(n)&&n>=32?n:fallback;}catch(Exception ignored){return fallback;}}
     public static double pushDistance(double value){double previous=queuedDistance;queuedDistance=value;return previous;}
     public static void restoreDistance(double value){queuedDistance=value;}
     public static double captureDistance(){return queuedDistance;}
