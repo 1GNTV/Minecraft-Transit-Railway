@@ -17,7 +17,13 @@ import java.util.*;
 /** Incremental immutable pages for solid rails/decorations; selected spans retain fine visibility. */
 public final class StaticRegionRenderer {
     private record Sector(int x,int y,int z){}
-    private record Selection(OptimizedModelWrapper model,String location,List<Float> matrix,int light){}
+    private static final class MatrixKey {
+        final float[] values;final int hash;
+        MatrixKey(org.joml.Matrix4f matrix){values=new float[16];matrix.get(values);hash=Arrays.hashCode(values);}
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){return other instanceof MatrixKey key && Arrays.equals(values,key.values);}
+    }
+    private record Selection(OptimizedModelWrapper model,Object location,MatrixKey matrix,int light){}
     private record Instance(Selection selection,RailGeometrySnapshots.Snapshot snapshot,StoredModelResourceBase resource,StoredMatrixTransformations fallback){}
     private record MaterialSpan(MaterialProperties material,RegionVertexRanges.Span span){}
     private static final class Page implements AutoCloseable{
@@ -25,20 +31,19 @@ public final class StaticRegionRenderer {
         final Map<Selection,List<MaterialSpan>> spans=new HashMap<>();OptimizedModelWrapper model;
         @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);}
     }
-    private final PersistentRegionCache<Sector,Selection,String,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
-    private final Map<Sector,LinkedHashMap<String,Instance>> groups=new LinkedHashMap<>();
+    private final PersistentRegionCache<Sector,Selection,Object,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
+    private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
     private final RenderPipelineMetrics.Family family;
     private Object world;
     public StaticRegionRenderer(RenderPipelineMetrics.Family family){this.family=family;}
-    public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,String location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
+    public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
         if(!RailGeometrySnapshots.ENABLED || !OptimizedRenderer.hasOptimizedRendering() || GlStateTracker.isGl4ES())return false;
         Object current=MinecraftClient.getInstance().getWorldMapped().data;if(current!=world){clear();world=current;}
         OptimizedModelWrapper model=resource.getOptimizedModel();if(model==null || model.getModel()==null)return false;
         var snapshot=RailGeometrySnapshots.get(model.getModel());if(snapshot==null)return false;
         var sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
         org.joml.Matrix4f local=new org.joml.Matrix4f(matrix);local.m30((float)(x-sector.x*16D));local.m31((float)(y-sector.y*16D));local.m32((float)(z-sector.z*16D));
-        float[] values=new float[16];local.get(values);List<Float> signature=new ArrayList<>(16);for(float value:values)signature.add(value);
-        Selection selection=new Selection(model,location,List.copyOf(signature),light);
+        Selection selection=new Selection(model,location,new MatrixKey(local),light);
         groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(selection,snapshot,resource,fallback));return true;
     }
     public void flush(){
@@ -58,7 +63,7 @@ public final class StaticRegionRenderer {
     private Page build(List<Selection> content){
         Page page=new Page();Map<MaterialProperties,RawMesh> combined=new LinkedHashMap<>();
         for(Selection s:content){
-            float[] values=new float[16];for(int i=0;i<16;i++)values[i]=s.matrix.get(i);Matrix4f transform=new Matrix4f(new org.joml.Matrix4f().set(values));
+            Matrix4f transform=new Matrix4f(new org.joml.Matrix4f().set(s.matrix.values));
             var snapshot=RailGeometrySnapshots.get(s.model.getModel());if(snapshot==null)return null;
             List<MaterialSpan> spans=new ArrayList<>();
             for(RawMesh source:snapshot.meshes()){

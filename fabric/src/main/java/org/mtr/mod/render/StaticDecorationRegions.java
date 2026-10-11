@@ -6,7 +6,7 @@ import org.mtr.mod.resource.ObjectResource;
 public final class StaticDecorationRegions {
     private static final StaticRegionRenderer MAIN=new StaticRegionRenderer(RenderPipelineMetrics.Family.DECORATION),SHADOW=new StaticRegionRenderer(RenderPipelineMetrics.Family.DECORATION);
     private StaticDecorationRegions(){}
-    public static boolean queue(ObjectResource resource,StoredMatrixTransformations fallback,String location,double x,double y,double z,float facing,float rx,float ry,float rz,int light){
+    public static boolean queue(ObjectResource resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,float facing,float rx,float ry,float rz,int light){
         var matrix=new org.joml.Matrix4f().rotateY((float)Math.toRadians(facing)).rotateX(rx+(float)Math.PI).rotateY(ry).rotateZ(rz);
         return (OptimizedRenderer.renderingShadows()?SHADOW:MAIN).queue(resource,fallback,location,x,y,z,matrix,light);
     }
