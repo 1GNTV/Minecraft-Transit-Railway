@@ -29,7 +29,13 @@ Les caches de ressources utilisent désormais des références faibles pour ne p
 
 ## Validation
 
-Compilation GitHub Actions et récupération du nouveau JAR en cours. Les checks locaux du renderer et du cache passent ; le nouveau test couvre réellement la transformation de tokens GLSL, le maintien des uniformes/commentaires, les macros rejetées, les sélections partielles de région et la libération des ressources. Une comparaison de pixels sur un vrai contexte OpenGL logiciel est ajoutée en CI pour comparer les huit transformations, inverses et normales, les uniformes personnalisés, un sampler et le retour au mode ordinaire. Elle ne remplace pas une session Minecraft/Oculus. Les tests de géométrie en CI doivent contrôler le retrait de petites composantes et la conservation du reste.
+Code compilé : `db74325bcdb362322c4df000057a58b38ae98fcf`. [GitHub Actions 38153720748](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748) réussi : compilation Forge 1.20.1, sept groupes de checks Python, quinze tests de géométrie (zéro échec, zéro ignoré), vérification des classes et contrats statiques du JAR. Les logs complets ont été inspectés ; aucune erreur de compilation, deux avertissements Javadoc hérités et avertissements de dépréciation des outils CI.
+
+Le job OpenGL passe sur Mesa llvmpipe : pixels identiques entre dessins ordinaires et huit instances (matrices, inverses, normales, uniformes personnalisés et sampler), retour au mode ordinaire, refus de shaders incompatibles, régions complètes et sélection partielle de plages. Ces tests utilisent le vrai contexte GL et les helpers du mod avec des substituts Minecraft ; ils ne prouvent pas l'application des mixins dans une session Oculus.
+
+[Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748/artifacts/11708115777) récupéré et vérifié : 84 421 820 octets, SHA256 `74816821665f136f46f803aca7659b9740f95521831f7ae54826b96b61ed4786`. ZIP SHA256 `497137e7214ee400e7e2e9f80ef66a4464fee70d6671f9ed4a8a8784f2debd1c`. Rapports récupérés : quinze tests réussis ; ZIP SHA256 `dc6647b2d6bf39d487cacfb8fa8db67a3b15152cd57ca8f5e65412c953af92e8`. Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-architecture-db74325.jar`. Version interne 4.0.5 conservée. Les commits documentaires suivants ne changent pas ce JAR.
+
+Les références V2/V3/V4 ont été revérifiées inchangées le 11 octobre 2026. Aucun gain FPS ni résultat visuel avec MTR France Addon n'est revendiqué.
 
 Le point d'injection Oculus a été vérifié contre le JAR public `oculus-mc1.20.1-1.8.0.jar`, et non seulement contre une branche GitHub. Il faut encore vérifier l'application des mixins et le résultat visuel dans Minecraft avec le pack de shaders et MTR France Addon utilisés. Aucune installation du profil ou lecture du monde privé n'est effectuée ici.
 

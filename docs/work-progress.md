@@ -4,7 +4,7 @@ Demande du 11 octobre 2026 : implémenter la cartographie. Référence donnée p
 
 Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucune ligne ne vaut une annonce de gain FPS. Le [tableau des quarante statuts](mtr-performance-status-fr.md) explicite chaque réalisation et chaque reste à faire.
 
-## Prochaine version — artefact vérifié
+## Version précédente — artefact conservé
 
 Code compilé : `8574d7fb788b17e4dd19f0189948475ee260135d`. [GitHub Actions 38146219733](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38146219733) réussi : six groupes de checks Python, compilation Forge, onze tests de géométrie (zéro échec/ignoré), contrats statiques de mappings et intégrité du JAR. Logs complets inspectés : aucune erreur, deux warnings Javadoc hérités.
 
@@ -51,7 +51,7 @@ Les modifications documentaires suivant ce code ne changent pas le JAR. Les réf
 - Tests locaux sur les vrais helpers : libération unique avec aliases et Cleaner, image inchangée/transférée, recadrage, erreurs d'allocation/copie, capacité et budget de queue, invalidation concurrente de génération. Aucune annonce de correction d'un pic FPS mesuré.
 - La CI du lot 2 a compilé les sources du mod, puis échoué sur un nom erroné du matériau glow **dans un test** (`CUTOUT_GLOW` au lieu de `CUTOUT_GLOWING`). Le nom est corrigé dans ce lot ; les sept tests de géométrie et le JAR final ont ensuite passé la CI.
 
-## État consolidé
+## État historique avant Next architecture
 
 01, 03, 04, 19, 24, 27, 28, 33 et S2–S5/S7 ont une réalisation partielle ou un prototype. Aucune des 40 pistes n'est déclarée entièrement validée. S1 est outillé par [le protocole local et l'analyse de frame times](mtr-benchmark-fr.md) ; S8 reste une validation réelle. Les autres pistes restent étudiées ou à développer selon les nouvelles mesures.
 
@@ -71,4 +71,13 @@ L'ordre est celui de [la cartographie](mtr-performance-map-fr.md). Les pistes co
 
 ## Cinq chantiers demandés : Next architecture
 
-Instancing Oculus deux stages avec preflight, visibilité anticipée train/voiture, pages persistantes avec sélection d’indices pour rails et Eye Candy solides, LOD d’indices distant/ombres, préparation CPU anticipée sur deux workers implémentés. [Mécanismes et limites](mtr-next-architecture-fr.md). Sept groupes de checks locaux passent. Compilation de cette candidate en cours ; aucune mesure FPS ou validation visuelle revendiquée.
+Instancing Oculus deux stages avec preflight, visibilité anticipée train/voiture, pages persistantes avec sélection d’indices pour rails et Eye Candy solides, LOD d’indices distant/ombres, préparation CPU anticipée sur deux workers implémentés. [Mécanismes et limites](mtr-next-architecture-fr.md). Sept groupes de checks locaux passent. Compilation de cette candidate réussie ; aucune mesure FPS ou validation visuelle revendiquée.
+
+
+Code compilé : `db74325bcdb362322c4df000057a58b38ae98fcf`. [GitHub Actions 38153720748](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748) réussi : compilation Forge 1.20.1, sept groupes de checks Python, quinze tests de géométrie (zéro échec, zéro ignoré), vérification des classes et contrats statiques du JAR. Les logs complets ont été inspectés ; aucune erreur de compilation, deux avertissements Javadoc hérités et avertissements de dépréciation des outils CI.
+
+Le job OpenGL passe sur Mesa llvmpipe : pixels identiques entre dessins ordinaires et huit instances (matrices, inverses, normales, uniformes personnalisés et sampler), retour au mode ordinaire, refus de shaders incompatibles, régions complètes et sélection partielle de plages. Ces tests utilisent le vrai contexte GL et les helpers du mod avec des substituts Minecraft ; ils ne prouvent pas l'application des mixins dans une session Oculus.
+
+[Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748/artifacts/11708115777) récupéré et vérifié : 84 421 820 octets, SHA256 `74816821665f136f46f803aca7659b9740f95521831f7ae54826b96b61ed4786`. ZIP SHA256 `497137e7214ee400e7e2e9f80ef66a4464fee70d6671f9ed4a8a8784f2debd1c`. Rapports récupérés : quinze tests réussis ; ZIP SHA256 `dc6647b2d6bf39d487cacfb8fa8db67a3b15152cd57ca8f5e65412c953af92e8`. Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-architecture-db74325.jar`. Version interne 4.0.5 conservée. Les commits documentaires suivants ne changent pas ce JAR.
+
+Les références V2/V3/V4 ont été revérifiées inchangées le 11 octobre 2026. Aucun gain FPS ni résultat visuel avec MTR France Addon n'est revendiqué.

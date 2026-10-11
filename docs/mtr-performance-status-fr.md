@@ -1,6 +1,8 @@
 # État des quarante pistes
 
-Les nouveaux cinq chantiers sont détaillés dans [Next architecture](mtr-next-architecture-fr.md), avec compilation en cours et validation en jeu à faire. La précédente version est décrite dans [son suivi](mtr-next-version-fr.md). Code Next : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
+Les nouveaux cinq chantiers sont détaillés dans [Next architecture](mtr-next-architecture-fr.md), avec compilation et tests CI réussis, validation en jeu à faire. La précédente version est décrite dans [son suivi](mtr-next-version-fr.md). Code précédent : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
+
+Code Next architecture : `db74325bcdb362322c4df000057a58b38ae98fcf` ; [CI réussie](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38153720748), quinze tests de géométrie et comparaisons OpenGL logiciel. Artefact et sommes de contrôle : [validation](mtr-next-architecture-fr.md#validation).
 
 Référence précédente compilée : `500334ef0e70f67d6f57617cdd0b1e01a495cbac`. [CI 38140845544](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544) réussie. Ces statuts décrivent le code, **pas** des gains FPS mesurés. Aucune piste n'est déclarée entièrement validée en jeu.
 
