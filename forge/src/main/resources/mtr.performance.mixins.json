@@ -15,7 +15,11 @@
     "OptimizedMaterialGroupAccessor",
     "OptimizedModelLayoutAccessor",
     "RenderCallMetricsMixin",
-    "BatchInstancingMixin"
+    "BatchInstancingMixin",
+    "ShaderReloadGenerationMixin",
+    "RawModelUploadMixin"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

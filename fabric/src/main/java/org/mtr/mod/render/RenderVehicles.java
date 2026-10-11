@@ -55,7 +55,8 @@ public class RenderVehicles implements IGui {
 			return;
 		}
 
-		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = new ObjectArrayList<>();
+		final boolean updateVisibility = !OptimizedRenderer.renderingShadows();
+		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = updateVisibility ? new ObjectArrayList<>() : null;
 		final Vector3d cameraPosition = minecraftClient.getGameRendererMapped().getCamera().getPos();
 		final Vec3d camera = new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
 
@@ -95,7 +96,7 @@ public class RenderVehicles implements IGui {
 
 			// Iterate all cars of a vehicle
 			iterateWithIndex(vehiclePropertiesList, (carNumber, vehicleCarDetails) -> {
-				cullingTasks.add(occlusionCullingInstance -> {
+				if (updateVisibility) cullingTasks.add(occlusionCullingInstance -> {
 					final double longestDimension = vehicle.persistentVehicleData.longestDimensions[carNumber];
 					final boolean shouldRender = occlusionCullingInstance.isAABBVisible(new Vec3d(
 							vehicleCarDetails.right().right().position.x - longestDimension,
@@ -350,7 +351,7 @@ public class RenderVehicles implements IGui {
 			});
 		});
 
-		if (!OptimizedRenderer.renderingShadows()) {
+		if (updateVisibility) {
 			MainRenderer.WORKER_THREAD.scheduleVehicles(occlusionCullingInstance -> {
 				final ObjectArrayList<Runnable> tasks = new ObjectArrayList<>();
 				cullingTasks.forEach(occlusionCullingInstanceRunnableFunction -> tasks.add(occlusionCullingInstanceRunnableFunction.apply(occlusionCullingInstance)));

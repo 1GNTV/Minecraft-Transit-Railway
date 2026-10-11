@@ -534,6 +534,7 @@ public final class VehicleResource extends VehicleResourceSchema {
 	) {
 		return new CachedResource<>(() -> {
 			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.beginReload();
+			try {
 			final Object2ObjectOpenHashMap<PartCondition, OptimizedModelWrapper> optimizedModels = new Object2ObjectOpenHashMap<>();
 
 			for (final PartCondition partCondition : PartCondition.values()) {
@@ -542,8 +543,8 @@ public final class VehicleResource extends VehicleResourceSchema {
 				optimizedModels.put(partCondition, OptimizedModelWrapper.fromCompatibleSources(materialGroups, objModels));
 			}
 
-			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload();
 			return optimizedModels;
+			} finally { CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload(); }
 		}, modelLifespan);
 	}
 

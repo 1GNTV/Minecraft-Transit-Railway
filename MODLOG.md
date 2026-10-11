@@ -23,3 +23,7 @@ Résultats de textures invalidés par génération, file de complétions et publ
 ### Next : premiers composants d'architecture
 
 Instanciation shaderless GL 3.3 par séries compatibles, trois pages bornées et fences non bloquantes ; VAO sources inchangés. Cache de poses par vraie image Forge/révision de véhicule. Réordonnancement des triangles opaques et sommets à l'upload. Les six groupes de tests locaux passent. Cible du redirect vérifiée dans le JAR : `BatchManager.lambda$drawBatch$2`, et non `drawBatch` dont le corps appelle une lambda. Les autres grands chantiers restent suivis explicitement dans `docs/mtr-next-version-fr.md`.
+
+### Next — compilation de shaders et couverture des modèles
+
+Suppression des recompilations des trois shaders internes lors de chaque upload, avec invalidation par génération de ressources et contrôle du succès complet. Aucun changement à ShaderInstance.apply / setupShaderBatchState / uniformes Oculus. Tests de succès, échec partiel, gestionnaire distinct, invalidation et option de désactivation. Réordonnancement opaque étendu aux chemins originaux Blockbench et OBJ isolé ; propriété des buffers attachée aux VAO. Suppression des allocations de tâches d’occlusion non utilisées pendant les ombres. Recherche des candidats triangles par présence en cache en O(1), pour limiter le coût de préparation. Cibles synthétiques contrôlées dans la dépendance distribuée ; validation Mixin en jeu encore requise.

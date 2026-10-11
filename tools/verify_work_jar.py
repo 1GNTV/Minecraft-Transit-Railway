@@ -18,7 +18,7 @@ for path in jars:
             assert entry in jar.namelist(), f'Missing {entry}'
         for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer', 'RailBatchGeometry', 'RailGeometrySnapshots', 'RailSectorCache', 'RailSectorBatcher', 'GpuMeshOwnership', 'GenerationUploadQueue', 'NativeImageCropper']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
-        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity']:
+        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
         assert 'org/mtr/init/PerformanceFrameHooks.class' in jar.namelist(), 'Missing Forge render frame hooks'
         for name in ['batch/BatchManager', 'vertex/VertexAttributeState', 'object/VertexArray']:
@@ -34,13 +34,13 @@ for path in jars:
         'org.mtr.mapping.mapper.OptimizedModel$ObjModel': ['RawModel rawModel;'],
         'org.mtr.mapping.mapper.OptimizedModel$MaterialGroup': ['MaterialProperties materialProperties;', 'modelPartConsumers;'],
         'org.mtr.mapping.render.vertex.CapturingVertexConsumer': ['RawModel rawModel;', 'beginStage('],
-        'org.mtr.mapping.render.model.RawModel': ['triangulate()', 'distinct()', 'iterateRawMeshList('],
+        'org.mtr.mapping.render.model.RawModel': ['triangulate()', 'distinct()', 'iterateRawMeshList(', 'lambda$upload$0(', 'RawMesh.upload:', 'VertexArray."<init>":'],
         'org.mtr.mapping.render.model.RawMesh': ['Vertex> vertices;', 'Face> faces;', 'applyMatrix(', 'Mesh upload('],
         'org.mtr.mapping.render.vertex.VertexAttributeMapping$Builder': ['set(', 'build()'],
         'org.mtr.mapping.render.tool.Utilities': ['exchangeLightmapUVBits(', 'canUseCustomShader()'],
         'org.mtr.mapping.render.batch.BatchManager$RenderCall': ['VertexArray vertexArray;', 'VertexAttributeState vertexAttributeState;', 'draw()'],
         'org.mtr.mapping.render.batch.BatchManager': ['translucentBatches;', 'drawAll(', 'lambda$drawBatch$2(', 'java/util/List.forEach:'],
-        'org.mtr.mapping.render.shader.ShaderManager': ['setupShaderBatchState(', 'cleanupShaderBatchState()'],
+        'org.mtr.mapping.render.shader.ShaderManager': ['setupShaderBatchState(', 'cleanupShaderBatchState()', 'reloadShaders()', 'shaders;', 'rendertype_entity_cutout', 'rendertype_entity_translucent_cull', 'rendertype_beacon_beam'],
         'org.mtr.mapping.render.object.VertexArray': ['private int id;', 'VertexAttributeMapping mapping;', 'draw()', 'close()', 'VertexArray(org.mtr.mapping.render.object.VertexArray, org.mtr.mapping.render.batch.MaterialProperties)'],
         'org.mtr.mapping.render.vertex.VertexAttributeState': ['VertexAttributeType.values:', 'java/nio/ByteBuffer.allocate:', 'org/lwjgl/opengl/GL33.glVertexAttrib4f:', 'Utilities.canUseCustomShader:'],
     }

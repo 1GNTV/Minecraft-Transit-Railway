@@ -48,6 +48,10 @@ public class NextTest {
  static void draw(List<Call> c){InstancedModelRenderer.draw(c,x->ordinary++);}
  public static void main(String[] args){
   var memo=new FrameMemoizer<Object,String>(1);Object a=new Object(),b=new Object();int[] computes={0};
+  long generation=ShaderReloadPolicy.generation();check(!ShaderReloadPolicy.canSkip(a,true));ShaderReloadPolicy.completed(a,generation,true);
+  check(ShaderReloadPolicy.canSkip(a,true)==!Boolean.getBoolean("test.shaderCacheDisabled"));check(!ShaderReloadPolicy.canSkip(a,false));check(!ShaderReloadPolicy.canSkip(b,true));
+  ShaderReloadPolicy.invalidate();check(!ShaderReloadPolicy.canSkip(a,true));ShaderReloadPolicy.completed(a,generation,true);check(!ShaderReloadPolicy.canSkip(a,true));
+  ShaderReloadPolicy.completed(a,ShaderReloadPolicy.generation(),true);check(ShaderReloadPolicy.canSkip(a,true)==!Boolean.getBoolean("test.shaderCacheDisabled"));ShaderReloadPolicy.completed(a,ShaderReloadPolicy.generation(),false);check(!ShaderReloadPolicy.canSkip(a,true));
   int[] triangles=new int[600];for(int f=0;f<200;f++){int v=(f%20)*100+f/20;for(int n=0;n<3;n++)triangles[f*3+n]=v+n;}
   int[] ordered=TriangleOrder.optimize(triangles,2048);check(TriangleOrder.misses(ordered)<TriangleOrder.misses(triangles));
   check(memo.get(a,0,()->"off"+(++computes[0])).equals("off1"));memo.beginFrame();
@@ -80,8 +84,8 @@ with tempfile.TemporaryDirectory(prefix="mtr-next-") as tmp:
         path = base / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder"]:
+    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder", "ShaderReloadPolicy"]:
         shutil.copy(ROOT / "fabric/src/main/java/org/mtr/mod/render" / (name + ".java"), base / "org/mtr/mod/render")
     subprocess.run(["javac", "-d", tmp] + [str(p) for p in base.rglob("*.java")], check=True)
-    for args in [["NextTest"], ["-Dmtr.next.instances=false", "NextTest", "disabled"], ["-Dtest.unsupported=true", "NextTest", "unsupported"]]:
+    for args in [["NextTest"], ["-Dmtr.next.instances=false", "NextTest", "disabled"], ["-Dtest.unsupported=true", "NextTest", "unsupported"], ["-Dmtr.next.shaderReloadCache=false", "-Dtest.shaderCacheDisabled=true", "NextTest"]]:
         subprocess.run(["java", "-cp", tmp] + args, check=True)

@@ -16,6 +16,7 @@ public final class TriangleOrder {
         cursor = offsets.clone();
         boolean[] emitted = new boolean[indices.length / 3];
         int[] cache = new int[CACHE], result = new int[indices.length]; Arrays.fill(cache, -1);
+        boolean[] cached = new boolean[vertices];
         int sequential = 0;
         for (int out = 0; out < emitted.length; out++) {
             int best = -1, score = -1;
@@ -26,7 +27,7 @@ public final class TriangleOrder {
                 for (int p = cursor[vertex]; p < offsets[vertex + 1] && scans < 4; p++, scans++) {
                     int face = adjacency[p]; if (emitted[face]) continue;
                     int hits = 0;
-                    for (int n = 0; n < 3; n++) if (contains(cache, indices[face * 3 + n])) hits++;
+                    for (int n = 0; n < 3; n++) if (cached[indices[face * 3 + n]]) hits++;
                     if (hits > score) { score = hits; best = face; }
                 }
             }
@@ -35,7 +36,11 @@ public final class TriangleOrder {
                 best = sequential;
             }
             emitted[best] = true;
-            for (int n = 0; n < 3; n++) { int index = indices[best * 3 + n]; result[out * 3 + n] = index; touch(cache, index); }
+            for (int n = 0; n < 3; n++) {
+                int index = indices[best * 3 + n]; result[out * 3 + n] = index;
+                if (!cached[index] && cache[CACHE - 1] >= 0) cached[cache[CACHE - 1]] = false;
+                touch(cache, index); cached[index] = true;
+            }
         }
         // An estimate, not a GPU measurement: reject a reorder that worsens this cache model.
         return misses(result) <= misses(indices) ? result : indices.clone();
