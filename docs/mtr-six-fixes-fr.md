@@ -36,3 +36,12 @@ Les buffers d’instances ont maintenant 76 octets par instance : matrice 64, RG
 [Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448/artifacts/11711696725) téléchargé et vérifié : **84 466 558 octets**, JAR SHA256 `346f5b33dc3e6d7aa756a375edf2295f9fde4c2739ff8f45bee059d872abd52a`. ZIP SHA256 `43010ad7f86750d62ecb3a07c668e541e5969eba5f3ca3b01c5c10aa7c466f84`. Nom local : `artifacts/MTR-forge-4.0.5+1.20.1-next-six-fixes-f137172.jar`. Le JAR contient bien le module de texte enregistré, les helpers et les vingt mixins clients.
 
 [Rapports des vingt tests](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448/artifacts/11711442345) récupérés : zéro échec et zéro ignoré, ZIP SHA256 `316146ef818169694828933dd754908a70dcbdb9caa9d3974c93f8165b452b7e`. Les résultats structurés et références intactes figurent dans [validation JSON](mtr-six-fixes-validation.json). V2/V3/V4 ont été revérifiées inchangées. La correction du vérificateur de manifeste concernait ses lignes repliées ; le module était présent. Les JAR précédents sont conservés. Aucun essai Minecraft/Oculus/France Addon ni gain FPS n’est revendiqué pour ce candidat.
+
+
+## Correctif du crash TJMetro du 11 octobre
+
+Le JAR f137172 plante avec Tianjin Metro 1.1.0 : sa fonction beforeRenderConnection attend la signature MTR originale, mais une optimisation avait ajoute un booleen emitVisual a renderConnection. La compilation seule ne pouvait pas detecter cette injection externe. La mention Connector en tete du rapport ne prouve pas qu il soit responsable.
+
+Le correctif supprime ce parametre et transmet la visibilite via shouldRender1. shouldRender2 continue d actualiser les points de raccordement, y compris pour un wagon hors champ. Aucun addon n est retire, aucune optimisation des autres chantiers n est annulee.
+
+Le controle du JAR compare desormais 30 membres de RenderVehicles et de ses classes exposees au binaire db74325 teste par l utilisateur. Il exige une seule cible renderConnection avec le descripteur exact attendu par TJMetro. Ce controle accepte db74325 et rejette f137172, reproduisant la regression signalee. C est une verification de bytecode : le lancement reel avec tous les addons reste a tester.

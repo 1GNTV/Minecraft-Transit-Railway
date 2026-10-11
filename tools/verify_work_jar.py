@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import zipfile
+from verify_addon_contract import verify as verify_addon_contract
 
 jars = glob.glob('forge/build/libs/*-all.jar')
 assert jars, 'Missing shaded Forge JAR'
@@ -31,6 +32,7 @@ for path in jars:
         forbidden = ['ShaderInstanceMixin', 'VertexArrayMixin', 'ShaderManagerMixin']
         assert not any(name in config['client'] for name in forbidden), 'V3 bypass included'
         assert jar.testzip() is None, 'Corrupt JAR'
+    verify_addon_contract(path)
     print('VERIFIED', Path(path).name, Path(path).stat().st_size)
     # Validate stable third-party targets against the dependency actually shipped.
     targets = {

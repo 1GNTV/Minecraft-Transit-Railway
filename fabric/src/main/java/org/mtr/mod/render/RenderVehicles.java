@@ -247,7 +247,7 @@ public class RenderVehicles implements IGui {
 
 							// Render gangway
 							renderConnection(
-									vehicleResource.hasGangway1(),
+									vehicleResource.hasGangway1() && visualCar,
 									vehicleResource.hasGangway2(),
 									true,
 									previousGangwayPositionsList.get(modelIndex),
@@ -265,12 +265,12 @@ public class RenderVehicles implements IGui {
 									model.modelProperties.getGangwayYOffset(),
 									model.modelProperties.getGangwayZOffset(),
 									oscillationAmount,
-									vehicle.getIsOnRoute(), visualCar
+									vehicle.getIsOnRoute()
 							);
 
 							// Render barrier
 							renderConnection(
-									vehicleResource.hasBarrier1(),
+									vehicleResource.hasBarrier1() && visualCar,
 									vehicleResource.hasBarrier2(),
 									false,
 									previousBarrierPositionsList.get(modelIndex),
@@ -288,7 +288,7 @@ public class RenderVehicles implements IGui {
 									model.modelProperties.getBarrierYOffset(),
 									model.modelProperties.getBarrierZOffset(),
 									oscillationAmount,
-									vehicle.getIsOnRoute(), visualCar
+									vehicle.getIsOnRoute()
 							);
 						});
 
@@ -509,6 +509,8 @@ public class RenderVehicles implements IGui {
 		});
 	}
 
+	// Addons inject into this exact descriptor, including private methods.
+	// Pass visual visibility through shouldRender1; shouldRender2 still updates endpoints.
 	private static void renderConnection(
 			boolean shouldRender1, boolean shouldRender2, boolean canHaveLight, PreviousConnectionPositions previousConnectionPositions,
 			@Nullable Identifier innerSideTexture,
@@ -518,7 +520,7 @@ public class RenderVehicles implements IGui {
 			@Nullable Identifier outerTopTexture,
 			@Nullable Identifier outerBottomTexture,
 			PositionAndRotation positionAndRotation, boolean useOffset,
-			double vehicleLength, double width, double height, double yOffset, double zOffset, double oscillationAmount, boolean isOnRoute, boolean emitVisual
+			double vehicleLength, double width, double height, double yOffset, double zOffset, double oscillationAmount, boolean isOnRoute
 	) {
 		final ClientWorld clientWorld = MinecraftClient.getInstance().getWorldMapped();
 		if (clientWorld == null) {
@@ -528,7 +530,7 @@ public class RenderVehicles implements IGui {
 		final double halfLength = vehicleLength / 2;
 		final double newOscillationAmount = -Math.toRadians(oscillationAmount);
 
-		if (emitVisual && shouldRender1 && previousConnectionPositions.isValid()) {
+		if (shouldRender1 && previousConnectionPositions.isValid()) {
 			final Vector position1 = positionAndRotation.transformForwards(new Vector(-width / 2, yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);
 			final Vector position2 = positionAndRotation.transformForwards(new Vector(-width / 2, height + yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);
 			final Vector position3 = positionAndRotation.transformForwards(new Vector(width / 2, height + yOffset + SMALL_OFFSET, zOffset - halfLength).rotateZ(newOscillationAmount), Vector::rotateX, Vector::rotateY, Vector::add);
