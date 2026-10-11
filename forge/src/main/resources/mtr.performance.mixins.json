@@ -17,7 +17,11 @@
     "RenderCallMetricsMixin",
     "BatchInstancingMixin",
     "ShaderReloadGenerationMixin",
-    "RawModelUploadMixin"
+    "RawModelUploadMixin",
+    "PreparedObjModelAccessor",
+    "ModelAtlasAccessor",
+    "OculusInstanceShaderMixin",
+    "ModelDetailUploadMixin"
   ],
   "injectors": {
     "defaultRequire": 1

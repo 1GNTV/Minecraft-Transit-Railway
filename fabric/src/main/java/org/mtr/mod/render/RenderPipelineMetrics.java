@@ -29,11 +29,11 @@ public final class RenderPipelineMetrics {
     private RenderPipelineMetrics() {}
     public static Family pushQueueFamily(Family family) {
         final Family previous = queuedFamily;
-        if (ENABLED) queuedFamily = family;
+        queuedFamily = family;
         return previous;
     }
-    public static void restoreQueueFamily(Family previous) { if (ENABLED) queuedFamily = previous; }
-    public static Family captureFamily() { return ENABLED ? queuedFamily : Family.OTHER; }
+    public static void restoreQueueFamily(Family previous) { queuedFamily = previous; }
+    public static Family captureFamily() { return queuedFamily; }
     private static int category(boolean shaderless) { return (shaderless ? 0 : 2) + (OptimizedRenderer.renderingShadows() ? 1 : 0); }
     public static void queued(Family family) {
         if (ENABLED) stats[category(Utilities.canUseCustomShader())].queued[family.ordinal()]++;

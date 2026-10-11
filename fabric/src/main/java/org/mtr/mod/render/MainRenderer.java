@@ -67,6 +67,7 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 
 	@Override
 	public boolean shouldRender2(EntityRendering entity, Frustum frustum, double x, double y, double z) {
+		TrainVisibility.capture(frustum);
 		return true;
 	}
 

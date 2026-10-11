@@ -8,7 +8,7 @@ import java.util.WeakHashMap;
 
 /** Optional, bounded CPU copies of solid rail resources, indexed by model identity. */
 public final class RailGeometrySnapshots {
-    public static final boolean ENABLED = Boolean.getBoolean("mtr.v4.railBatches");
+    public static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.regions", "true"));
     private static final int MAX_SOURCE_VERTICES = 16_000;
     private static final int MAX_RETAINED_VERTICES = 200_000;
     private static final WeakHashMap<OptimizedModel, Snapshot> SNAPSHOTS = new WeakHashMap<>();

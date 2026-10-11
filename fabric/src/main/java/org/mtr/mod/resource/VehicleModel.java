@@ -111,20 +111,24 @@ public final class VehicleModel extends VehicleModelSchema {
 		return modelProperties.toVehicleModelWrapper(modelResource, textureResource, modelPropertiesResource, positionDefinitionsResource, flipTextureV, parts);
 	}
 
+	public void prepareAsync() { ModelPreparation.request(this, modelResource, CustomResourceTools.formatIdentifierWithDefault(textureResource, "png"), resourceProvider); }
+
 	private DynamicVehicleModel createModel(ModelProperties modelProperties, PositionDefinitions positionDefinitions, String id) {
 		final Identifier textureId = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
+		final ModelPreparation.Prepared prepared = ModelPreparation.take(this);
 		CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.beginReload();
+		org.mtr.mod.render.ModelDetailCache.beginVehicleUpload();
 		try {
 			if (modelResource.endsWith(".bbmodel")) {
 				return new DynamicVehicleModel(
-						new BlockbenchModel(new JsonReader(Utilities.parseJson(resourceProvider.get(CustomResourceTools.formatIdentifierWithDefault(modelResource, "bbmodel"))))),
+						prepared != null && prepared.blockbench() != null ? prepared.blockbench() : new BlockbenchModel(new JsonReader(Utilities.parseJson(resourceProvider.get(CustomResourceTools.formatIdentifierWithDefault(modelResource, "bbmodel"))))),
 						textureId,
 						modelProperties,
 						positionDefinitions,
 						id
 				);
 			} else if (ModelResourceLoader.isSupportedModelResource(modelResource)) {
-				return new DynamicVehicleModel(ModelResourceLoader.loadModel(modelResource, textureId, flipTextureV, resourceProvider), textureId, modelProperties, positionDefinitions, id);
+				return new DynamicVehicleModel(prepared != null && prepared.meshes() != null ? ModelPreparation.finish(prepared, flipTextureV) : ModelResourceLoader.loadModel(modelResource, textureId, flipTextureV, resourceProvider), textureId, modelProperties, positionDefinitions, id);
 			} else {
 				Init.LOGGER.error("[{}] Invalid model!", modelResource);
 				return new DynamicVehicleModel(
@@ -145,6 +149,7 @@ public final class VehicleModel extends VehicleModelSchema {
 					id
 			);
 		} finally {
+			org.mtr.mod.render.ModelDetailCache.endVehicleUpload();
 			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload();
 		}
 	}

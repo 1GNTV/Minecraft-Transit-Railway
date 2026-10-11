@@ -68,3 +68,7 @@ L'ordre est celui de [la cartographie](mtr-performance-map-fr.md). Les pistes co
 - RawMesh.append partage les objets Vertex et copie les indices de faces avec offset. Pour toute future transformation/baking, copier les sommets avant modification ; ne pas supposer un deep copy.
 - L'API des buffer queries est optionnelle. Aucune requête bloquante ajoutée au rendu normal.
 
+
+## Cinq chantiers demandés : Next architecture
+
+Instancing Oculus deux stages avec preflight, visibilité anticipée train/voiture, pages persistantes avec sélection d’indices pour rails et Eye Candy solides, LOD d’indices distant/ombres, préparation CPU anticipée sur deux workers implémentés. [Mécanismes et limites](mtr-next-architecture-fr.md). Sept groupes de checks locaux passent. Compilation de cette candidate en cours ; aucune mesure FPS ou validation visuelle revendiquée.

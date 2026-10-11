@@ -15,6 +15,7 @@ public final class RailBatchGeometry {
         if (meshes.isEmpty()) return false;
         for (RawMesh mesh : meshes) {
             if (mesh.materialProperties.translucent || mesh.materialProperties.cutoutHack || !mesh.materialProperties.writeDepthBuf || mesh.materialProperties.vertexAttributeState.lightmapUV != null) return false;
+            for (Face face : mesh.faces) if (face.vertices.length != 3) return false;
             for (Vertex vertex : mesh.vertices) if (vertex.position == null || vertex.normal == null) return false;
         }
         return true;

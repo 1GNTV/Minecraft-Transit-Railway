@@ -1,38 +1,38 @@
 # État des quarante pistes
 
-La prochaine version est décrite dans [son suivi](mtr-next-version-fr.md). Code Next : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
+Les nouveaux cinq chantiers sont détaillés dans [Next architecture](mtr-next-architecture-fr.md), avec compilation en cours et validation en jeu à faire. La précédente version est décrite dans [son suivi](mtr-next-version-fr.md). Code Next : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.
 
 Référence précédente compilée : `500334ef0e70f67d6f57617cdd0b1e01a495cbac`. [CI 38140845544](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544) réussie. Ces statuts décrivent le code, **pas** des gains FPS mesurés. Aucune piste n'est déclarée entièrement validée en jeu.
 
 | Piste | Réalisation actuelle |
 | --- | --- |
-| 01 — Rails persistants par secteur | Prototype compilé, opt-in shaderless ; sélection visible conservée. |
-| 02 — Décors fixes regroupés par secteur | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
+| 01 — Rails persistants par secteur | Régions de contenu persistantes : sélection de plages d’indices sans recompiler les sommets sur rotation de caméra ; validation en jeu à faire. |
+| 02 — Décors fixes regroupés par secteur | Régions persistantes pour les Eye Candy solides compatibles, collections main/shadow séparées ; repli individuel. |
 | 03 — Fusion complète des groupes de train compatibles | Partielle : groupes OBJ/Blockbench opaques égaux d'un même modèle/condition. |
 | 04 — Batches réels de soumission | Partielle : maillages opaques communs et secteurs de rails ; pas de renderer général de lots. |
-| 05 — Instanciation des éléments répétés | Implémentée Next : séries consécutives de VAO opaques compatibles, quatre occurrences minimum, shaderless hors ombres, GL 3.3 ; validation en jeu à faire. |
+| 05 — Instanciation des éléments répétés | GL 3.3 shaderless conservé ; intégration Oculus 1.8.0 ajoutée pour les programmes deux stages et groupes de 4–8 dessins opaques compatibles. |
 | 06 — Arènes de buffers GPU partagées | Pas implémentée ; propriété, budget et fragmentation à mesurer. |
-| 07 — Multi-draw des lots compatibles | Dépend des arènes, formats et états compatibles ; pas implémenté. |
+| 07 — Multi-draw des lots compatibles | Multi-draw des plages de régions solides ; pas de multi-draw indirect général. |
 | 08 — Sélection et commandes pilotées par GPU | Expérimental, pas implémenté. |
 | 09 — Streaming GPU sans attendre les buffers en cours | Partielle Next : trois pages d’instances, réutilisation des données identiques, fences sans attente et repli si saturation ; pas de mapping persistant. |
 | 10 — Regroupement des textures et matériaux | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
 | 11 — Une pose de train partagée entre passes | Implémentée Next : cache limité à une image Forge et révision de simulation/données ; restauration du rail progress par finally. Validation main/shadow en jeu à faire. |
-| 12 — Application Oculus complète au niveau du lot | Fusion des dessins en amont seulement ; intégration dédiée pas implémentée. |
+| 12 — Application Oculus complète au niveau du lot | Application complète du shader Oculus conservée par groupe compatible, matrices modèle/inverse/normales par instance ; preflight et repli. |
 | 13 — Uniformes dérivés recalculés seulement si modifiés | Pas de cache ajouté ; application complète préservée. |
 | 14 — Visibilité dédiée aux objets qui projettent des ombres | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
-| 15 — Maillages simplifiés pour les ombres | Compromis visuel optionnel, pas implémenté. |
-| 16 — Hiérarchie de visibilité par région/train/voiture | Pas implémentée ; l'index spatial V4 existant reste distinct. |
-| 17 — Élimination grossière avant les calculs coûteux | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
+| 15 — Maillages simplifiés pour les ombres | LOD d’indices des petites composantes isolées pour les ombres lointaines ; géométrie restante exacte. |
+| 16 — Hiérarchie de visibilité par région/train/voiture | Union train puis voitures sur le frustum de passe, avant ressources/lumière ; proximité et train monté préservés. Pièces shaderless au clip conservateur. |
+| 17 — Élimination grossière avant les calculs coûteux | Préparation géométrique sans lumière puis sélection train/voiture avant ressources, éclairage et préparation visuelle. |
 | 18 — Snapshots d'opacité par section | Pas ajoutés ; le cache d'opacité existant n'est pas un snapshot immuable. |
 | 19 — Culling incrémental avec budget et fraîcheur | Fondations de stabilité et budget de construction de secteurs ; culling incrémental complet pas ajouté. |
 | 20 — Occlusion GPU avec profondeur hiérarchique | Expérimental, pas implémenté. |
 | 21 — Visibilité par salles et ouvertures | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
-| 22 — Niveaux de détail selon la taille à l'écran | Compromis visuel optionnel, pas implémenté. |
+| 22 — Niveaux de détail selon la taille à l'écran | LOD distant à seuils de distance réglables, suppression de petites composantes ; pas de LOD continu universel selon pixels. |
 | 23 — Optimisation des maillages sans réduire le détail | Implémentée Next : triangles opaques et ordre de sommets réorganisés, attributs et winding conservés ; estimation de cache distincte du coût GPU. |
 | 24 — Compilation des transformations et animations | Partielle : transformations de rails baked dans le secteur ; animations générales intactes. |
 | 25 — Cache disque des modèles compilés | Conditionnelle, à implémenter et valider selon les nouvelles mesures. |
-| 26 — Préchargement prédictif des trains approchants | Pas ajouté ; préchargement configurable existant conservé. |
-| 27 — Préparation CPU parallèle des modèles | Recadrage d'images sur worker existant ; compilation parallèle des modèles pas ajoutée. |
+| 26 — Préchargement prédictif des trains approchants | Préparation de modèles et cache progressif des trains proches/approchants, fenêtres et files bornées. |
+| 27 — Préparation CPU parallèle des modèles | Workers pour Blockbench et géométrie OBJ/MQO depuis snapshots, atlas/finalisation/GL sur le render thread. |
 | 28 — Caches résidents pilotés par budget | Partielle : secteurs bornés en sommets/entrées, 64 slots d’instances et 12 Mio maximum pour leurs buffers ; pas de gestionnaire VRAM global. |
 | 29 — Géométrie partagée entre variantes | Propriété des aliases suivie ; partage géométrique entre variantes pas ajouté. |
 | 30 — Atlas de glyphes et textes mis en cache | Pas ajouté ; le renderer de texte Minecraft existant reste distinct. |

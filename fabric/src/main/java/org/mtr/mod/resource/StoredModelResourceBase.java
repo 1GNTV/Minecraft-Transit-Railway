@@ -36,7 +36,7 @@ public interface StoredModelResourceBase {
 						""
 				);
 				tempDynamicVehicleModel.writeFloorsAndDoorways(new ObjectArrayList<>(), new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>(), materialGroups, new Object2ObjectOpenHashMap<>(), new Object2ObjectOpenHashMap<>());
-				models = new ObjectObjectImmutablePair<>(this instanceof RailResource ? OptimizedModelWrapper.fromRailSources(materialGroups.get(PartCondition.NORMAL), null) : OptimizedModelWrapper.fromMaterialGroups(materialGroups.get(PartCondition.NORMAL)), tempDynamicVehicleModel);
+				models = new ObjectObjectImmutablePair<>(OptimizedModelWrapper.fromRailSources(materialGroups.get(PartCondition.NORMAL), null), tempDynamicVehicleModel);
 			} else if (isSupportedModelResource) {
 				try {
 					final Object2ObjectOpenHashMap<PartCondition, ObjectArrayList<OptimizedModelWrapper.ObjModelWrapper>> objModels = new Object2ObjectOpenHashMap<>();
@@ -50,7 +50,7 @@ public interface StoredModelResourceBase {
 							""
 					);
 					dynamicVehicleModel.writeFloorsAndDoorways(new ObjectArrayList<>(), new ObjectArrayList<>(), new Object2ObjectOpenHashMap<>(), new Object2ObjectOpenHashMap<>(), new Object2ObjectOpenHashMap<>(), objModels);
-					models = new ObjectObjectImmutablePair<>(this instanceof RailResource ? OptimizedModelWrapper.fromRailSources(null, objModels.get(PartCondition.NORMAL)) : OptimizedModelWrapper.fromObjModels(objModels.get(PartCondition.NORMAL)), dynamicVehicleModel);
+					models = new ObjectObjectImmutablePair<>(OptimizedModelWrapper.fromRailSources(null, objModels.get(PartCondition.NORMAL)), dynamicVehicleModel);
 				} catch (Exception e) {
 					Init.LOGGER.error("[{}] Invalid model!", modelResource, e);
 					models = new ObjectObjectImmutablePair<>(null, null);

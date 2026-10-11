@@ -71,6 +71,8 @@ public class CustomResourceLoader {
 
 	public static void reload() {
 		org.mtr.mod.render.ShaderReloadPolicy.invalidate();
+		org.mtr.mod.resource.ModelPreparation.clear();
+		org.mtr.mod.render.PredictiveVehiclePreloader.clear();
 		org.mtr.mod.render.RailSectorBatcher.reload();
 		org.mtr.mod.render.InstancedModelRenderer.clear();
 		MINECRAFT_MODEL_RESOURCES.clear();

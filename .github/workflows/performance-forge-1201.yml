@@ -33,6 +33,8 @@ jobs:
         run: python3 tools/test_frame_times.py
       - name: Check next renderer instances and frame lifetimes
         run: python3 tools/test_next_renderer.py
+      - name: Check shader integration and persistent region content
+        run: python3 tools/test_next_architecture.py
       - name: Build web resources
         run: |
           chmod +x gradlew

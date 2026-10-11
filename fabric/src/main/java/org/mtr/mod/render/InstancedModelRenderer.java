@@ -69,14 +69,14 @@ public final class InstancedModelRenderer {
     private InstancedModelRenderer() {}
 
     public static void draw(List<?> calls, Consumer<Object> ordinary) {
-        if (!ENABLED || failed || !Utilities.canUseCustomShader() || OptimizedRenderer.renderingShadows() || GlStateTracker.isGl4ES()) {
+        if (!ENABLED || failed || (Utilities.canUseCustomShader() && OptimizedRenderer.renderingShadows()) || GlStateTracker.isGl4ES()) {
             calls.forEach(ordinary); return;
         }
         if (!GL.getCapabilities().OpenGL33) { calls.forEach(ordinary); return; }
-        ConsecutiveRuns.visit(calls, MAX_INSTANCES, InstancedModelRenderer::compatible, (start, end) -> {
+        ConsecutiveRuns.visit(calls, Utilities.canUseCustomShader() ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
             boolean drawn = false;
             if (end - start >= 4 && calls.get(start) instanceof RenderCallData) {
-                try { drawn = drawRun(calls, start, end); }
+                try { drawn = Utilities.canUseCustomShader() ? drawRun(calls, start, end) : OculusInstanceRenderer.draw(calls, start, end); }
                 catch (RuntimeException error) {
                     failed = true;
                     Init.LOGGER.error("MTR Next instances disabled for this resource generation; ordinary draws restored", error);
@@ -89,6 +89,7 @@ public final class InstancedModelRenderer {
     private static boolean eligible(RenderCallData call) {
         VertexArray array = call.mtr$array();
         VertexAttributeState state = call.mtr$attributes();
+        if (RegionVertexRanges.contains(array) || !ModelPartVisibility.visible(array,state)) return false;
         if (!((Object) array instanceof VertexArrayIdentity) || ((VertexArrayIdentity) (Object) array).mtr$vaoId() == 0 || state.matrix4f == null) return false;
         if (array.materialProperties.translucent || array.materialProperties.cutoutHack || !array.materialProperties.writeDepthBuf) return false;
         if (state.position != null || state.normal != null || state.textureU != null || state.textureV != null) return false;
@@ -193,7 +194,7 @@ public final class InstancedModelRenderer {
 
     public static void clear() {
         if (!RenderSystem.isOnRenderThread()) { RenderSystem.recordRenderCall(InstancedModelRenderer::clear); return; }
-        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false;
+        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false; OculusInstanceRenderer.clear();
         submittedGroups = submittedInstances = uploads = reused = busy = 0;
     }
     public static void report() {

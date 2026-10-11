@@ -15,7 +15,7 @@ public final class CachedResource<T> {
 	private final long lifespan;
 
 	private static boolean canFetchCache;
-	private static final ObjectArrayList<CachedResource<?>> CACHED_RESOURCES = new ObjectArrayList<>();
+	private static final java.util.Set<CachedResource<?>> CACHED_RESOURCES = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
 	public CachedResource(final Supplier<T> dataSupplier, final long lifespan) {
 		this.dataSupplier = dataSupplier;
@@ -35,6 +35,8 @@ public final class CachedResource<T> {
 		}
 		return data;
 	}
+
+	public boolean hasData() { return data != null && System.currentTimeMillis() <= expiry; }
 
 	public static void tick() {
 		canFetchCache = true;

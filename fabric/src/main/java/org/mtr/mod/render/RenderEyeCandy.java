@@ -57,7 +57,7 @@ public class RenderEyeCandy extends BlockEntityRenderer<BlockEyeCandy.BlockEntit
 					graphicsHolderNew.rotateYRadians(blockEntity.getRotateY());
 					graphicsHolderNew.rotateZRadians(blockEntity.getRotateZ());
 				});
-				objectResource.render(storedMatrixTransformationsNew, newLight);
+				if (!StaticDecorationRegions.queue(objectResource, storedMatrixTransformationsNew, blockPos.getX()+":"+blockPos.getY()+":"+blockPos.getZ()+":"+modelId, blockPos.getX()+0.5+blockEntity.getTranslateX(), blockPos.getY()+blockEntity.getTranslateY(), blockPos.getZ()+0.5+blockEntity.getTranslateZ(), 180-facing.asRotation(), blockEntity.getRotateX(), blockEntity.getRotateY(), blockEntity.getRotateZ(), newLight)) objectResource.render(storedMatrixTransformationsNew, newLight);
 			});
 		}
 	}

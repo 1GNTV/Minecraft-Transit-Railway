@@ -18,7 +18,7 @@ for path in jars:
             assert entry in jar.namelist(), f'Missing {entry}'
         for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer', 'RailBatchGeometry', 'RailGeometrySnapshots', 'RailSectorCache', 'RailSectorBatcher', 'GpuMeshOwnership', 'GenerationUploadQueue', 'NativeImageCropper']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
-        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy']:
+        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy', 'OculusInstanceRenderer', 'InstanceShaderSource', 'TrainVisibility', 'PredictiveVehiclePreloader', 'StaticRegionRenderer', 'StaticDecorationRegions', 'PersistentRegionCache', 'RegionVertexRanges', 'ModelDetailGeometry', 'ModelDetailCache', 'ModelPartVisibility']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
         assert 'org/mtr/init/PerformanceFrameHooks.class' in jar.namelist(), 'Missing Forge render frame hooks'
         for name in ['batch/BatchManager', 'vertex/VertexAttributeState', 'object/VertexArray']:
@@ -31,7 +31,7 @@ for path in jars:
     targets = {
         'org.mtr.mapping.mapper.OptimizedRenderer': ['render(boolean)', 'BatchManager.drawAll:'],
         'org.mtr.mapping.mapper.OptimizedModel': ['fromObjModels(', 'DEFAULT_MAPPING;'],
-        'org.mtr.mapping.mapper.OptimizedModel$ObjModel': ['RawModel rawModel;'],
+        'org.mtr.mapping.mapper.OptimizedModel$ObjModel': ['RawModel rawModel;', 'ObjModel(java.util.List<org.mtr.mapping.render.model.RawMesh>, boolean, float, float, float, float, float, float)'],
         'org.mtr.mapping.mapper.OptimizedModel$MaterialGroup': ['MaterialProperties materialProperties;', 'modelPartConsumers;'],
         'org.mtr.mapping.render.vertex.CapturingVertexConsumer': ['RawModel rawModel;', 'beginStage('],
         'org.mtr.mapping.render.model.RawModel': ['triangulate()', 'distinct()', 'iterateRawMeshList(', 'lambda$upload$0(', 'RawMesh.upload:', 'VertexArray."<init>":'],

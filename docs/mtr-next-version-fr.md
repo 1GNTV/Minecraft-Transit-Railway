@@ -1,3 +1,5 @@
+> Mise à jour : les cinq chantiers supplémentaires sont décrits dans [Next architecture](mtr-next-architecture-fr.md). Le présent document conserve les détails et preuves du JAR précédent `8574d7f`. Ses mentions « non implémenté » sont historiques.
+
 # Prochaine version : renderer MTR
 
 Chantier demandé le 11 octobre 2026 : intégrer les grandes architectures étudiées, puis essayer la prochaine version directement. La V2 et le précédent JAR Work restent des références intactes. Ce document suit le code réel ; il ne présente pas les quatorze architectures comme achevées.

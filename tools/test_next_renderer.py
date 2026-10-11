@@ -6,6 +6,9 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 STUBS = {
+"org/mtr/mod/render/OculusInstanceRenderer.java": "package org.mtr.mod.render; import java.util.*; public class OculusInstanceRenderer {public static boolean draw(List<?> x,int a,int b){return false;}public static void clear(){}}",
+"org/mtr/mod/render/RegionVertexRanges.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray; public class RegionVertexRanges {public static boolean contains(VertexArray a){return false;}}",
+"org/mtr/mod/render/ModelPartVisibility.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray;import org.mtr.mapping.render.vertex.VertexAttributeState; public class ModelPartVisibility {public static boolean visible(VertexArray a,VertexAttributeState s){return true;}}",
 "com/mojang/blaze3d/systems/RenderSystem.java": "package com.mojang.blaze3d.systems; public class RenderSystem {public static boolean isOnRenderThread(){return true;} public static void recordRenderCall(Runnable r){r.run();}}",
 "org/lwjgl/opengl/GL.java": "package org.lwjgl.opengl; public class GL { public static C getCapabilities(){return new C();} public static class C {public boolean OpenGL33=!Boolean.getBoolean(\"test.unsupported\");}}",
 "org/lwjgl/opengl/GL33.java": """package org.lwjgl.opengl;
@@ -85,7 +88,7 @@ with tempfile.TemporaryDirectory(prefix="mtr-next-") as tmp:
         path = base / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder", "ShaderReloadPolicy"]:
+    for name in ["InstancedModelRenderer", "RenderCallData", "VertexArrayIdentity", "ConsecutiveRuns", "FrameMemoizer", "TriangleOrder", "ShaderReloadPolicy", "InstanceShaderSource"]:
         shutil.copy(ROOT / "fabric/src/main/java/org/mtr/mod/render" / (name + ".java"), base / "org/mtr/mod/render")
     subprocess.run(["javac", "-d", tmp] + [str(p) for p in base.rglob("*.java")], check=True)
     for args in [["NextTest"], ["-Dmtr.next.instances=false", "NextTest", "disabled"], ["-Dtest.unsupported=true", "NextTest", "unsupported"], ["-Dmtr.next.shaderReloadCache=false", "-Dtest.shaderCacheDisabled=true", "NextTest"]]:

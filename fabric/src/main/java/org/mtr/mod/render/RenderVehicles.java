@@ -33,14 +33,14 @@ import java.util.stream.Collectors;
 public class RenderVehicles implements IGui {
 	private static final boolean CACHE_POSES = !"false".equalsIgnoreCase(System.getProperty("mtr.next.poseCache", "true"));
 	private static final FrameMemoizer<VehicleExtension, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>>> POSES = new FrameMemoizer<>(1024);
-	public static void beginFrame() { POSES.beginFrame(); }
+	public static void beginFrame() { POSES.beginFrame(); TrainVisibility.beginFrame(); org.mtr.mod.resource.ModelPreparation.beginFrame(); }
 	public static void endFrame() { POSES.endFrame(); }
 	private static ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> preparePose(VehicleExtension vehicle, long elapsed) {
 		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> result = new ObjectArrayList<>();
 		for (var car : vehicle.getSmoothedVehicleCarsAndPositions(elapsed)) {
 			final ObjectArrayList<PositionAndRotation> bogies = new ObjectArrayList<>();
-			for (var bogie : car.right()) bogies.add(new PositionAndRotation(bogie.left(), bogie.right(), true));
-			result.add(new ObjectObjectImmutablePair<>(car.left(), new ObjectObjectImmutablePair<>(bogies, new PositionAndRotation(bogies, car.left(), vehicle.getTransportMode().hasPitchAscending || vehicle.getTransportMode().hasPitchDescending))));
+			for (var bogie : car.right()) bogies.add(PositionAndRotation.geometry(bogie.left(), bogie.right(), true));
+			result.add(new ObjectObjectImmutablePair<>(car.left(), new ObjectObjectImmutablePair<>(bogies, new PositionAndRotation(bogies, car.left(), vehicle.getTransportMode().hasPitchAscending || vehicle.getTransportMode().hasPitchDescending, false))));
 		}
 		return result;
 	}
@@ -74,6 +74,9 @@ public class RenderVehicles implements IGui {
 
 			// Calculating vehicle transformations in advance
 			final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> vehiclePropertiesList = CACHE_POSES ? POSES.get(vehicle, vehicle.getRenderRevision(), () -> preparePose(vehicle, millisElapsed)) : preparePose(vehicle, millisElapsed);
+
+			PredictiveVehiclePreloader.consider(vehicle, vehiclePropertiesList, cameraPosition);
+			if (!VehicleRidingMovement.isRiding(vehicle.getId()) && !TrainVisibility.trainVisible(vehicle, vehiclePropertiesList, cameraPosition)) return;
 
 			// Riding offset
 			final IntObjectImmutablePair<ObjectObjectImmutablePair<Vector3d, Double>> ridingVehicleCarNumberAndOffset = VehicleRidingMovement.getRidingVehicleCarNumberAndOffset(vehicle.getId());
@@ -110,14 +113,14 @@ public class RenderVehicles implements IGui {
 					return () -> vehicle.persistentVehicleData.rayTracing[carNumber] = shouldRender;
 				});
 
-				if (vehicle.persistentVehicleData.rayTracing[carNumber] || VehicleRidingMovement.isRiding(vehicle.getId())) {
+				if ((vehicle.persistentVehicleData.rayTracing[carNumber] && TrainVisibility.carVisible(vehicle, carNumber, vehicleCarDetails.right().right(), cameraPosition)) || VehicleRidingMovement.isRiding(vehicle.getId())) {
 					CustomResourceLoader.getVehicleById(vehicle.getTransportMode(), vehicleCarDetails.left().getVehicleId(), vehicleResourceDetails -> {
 						final VehicleResource vehicleResource = vehicleResourceDetails.left();
 						final boolean fromResourcePackCreator = vehicleResourceDetails.rightBoolean() && !vehicle.getIsOnRoute();
 						final int[] scrollingDisplayIndexTracker = {0};
 
 						// Riding offset
-						final PositionAndRotation absoluteVehicleCarPositionAndRotation = vehicleCarDetails.right().right();
+						final PositionAndRotation absoluteVehicleCarPositionAndRotation = vehicleCarDetails.right().right().withLight();
 						final PositionAndRotation vehicleCarRenderingPositionAndRotation = getRenderPositionAndRotation(offsetVector, offsetRotation, ridingCarPositionAndRotation, absoluteVehicleCarPositionAndRotation, cameraShakeOffset);
 
 						// Render each bogie of the car

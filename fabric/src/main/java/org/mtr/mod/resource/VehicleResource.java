@@ -218,6 +218,12 @@ public final class VehicleResource extends VehicleResourceSchema {
 		return null;
 	}
 
+	public void prepareModels(int carNumber, int totalCars) {
+		getAllModels(carNumber,totalCars).forEach(VehicleModel::prepareAsync);
+		bogie1Models.forEach(VehicleModel::prepareAsync);
+		bogie2Models.forEach(VehicleModel::prepareAsync);
+	}
+
 	public void queue(StoredMatrixTransformations storedMatrixTransformations, VehicleExtension vehicle, int carNumber, int totalCars, int light, boolean noOpenDoorways) {
 		final VehicleResourceCache vehicleResourceCache = getCachedVehicleResource(carNumber, totalCars, false);
 		if (vehicleResourceCache != null) {
@@ -520,8 +526,8 @@ public final class VehicleResource extends VehicleResourceSchema {
 			if (matchesCondition(vehicle, partCondition, noOpenDoorways)) {
 				MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 					storedMatrixTransformations.transform(graphicsHolder, offset);
-					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light, org.mtr.mod.render.RenderPipelineMetrics.Family.TRAIN);
-					graphicsHolder.pop();
+					double previousDistance=org.mtr.mod.render.ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
+					try { CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light, org.mtr.mod.render.RenderPipelineMetrics.Family.TRAIN); } finally { org.mtr.mod.render.ModelDetailCache.restoreDistance(previousDistance); graphicsHolder.pop(); }
 				});
 			}
 		});
@@ -534,6 +540,7 @@ public final class VehicleResource extends VehicleResourceSchema {
 	) {
 		return new CachedResource<>(() -> {
 			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.beginReload();
+			org.mtr.mod.render.ModelDetailCache.beginVehicleUpload();
 			try {
 			final Object2ObjectOpenHashMap<PartCondition, OptimizedModelWrapper> optimizedModels = new Object2ObjectOpenHashMap<>();
 
@@ -544,7 +551,7 @@ public final class VehicleResource extends VehicleResourceSchema {
 			}
 
 			return optimizedModels;
-			} finally { CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload(); }
+			} finally { org.mtr.mod.render.ModelDetailCache.endVehicleUpload(); CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload(); }
 		}, modelLifespan);
 	}
 
