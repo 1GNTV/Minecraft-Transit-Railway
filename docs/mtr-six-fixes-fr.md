@@ -1,5 +1,7 @@
 # Candidat six chantiers FPS â€” Forge 1.20.1
 
+**Mise a jour : f137172 provoque un crash avec TJMetro 1.1.0. Utiliser le correctif 6c8d581 ci-dessous.**
+
 La branche `work/mtr-v4-optimization` poursuit le candidat `62db107`. V2, V3 et V4 restent intactes. La version interne 4.0.5 reste identique pour les addons. Aucun gain FPS n'est mesurÃ© ici.
 
 ## Changements effectifs
@@ -45,3 +47,11 @@ Le JAR f137172 plante avec Tianjin Metro 1.1.0 : sa fonction beforeRenderConnect
 Le correctif supprime ce parametre et transmet la visibilite via shouldRender1. shouldRender2 continue d actualiser les points de raccordement, y compris pour un wagon hors champ. Aucun addon n est retire, aucune optimisation des autres chantiers n est annulee.
 
 Le controle du JAR compare desormais 30 membres de RenderVehicles et de ses classes exposees au binaire db74325 teste par l utilisateur. Il exige une seule cible renderConnection avec le descripteur exact attendu par TJMetro. Ce controle accepte db74325 et rejette f137172, reproduisant la regression signalee. C est une verification de bytecode : le lancement reel avec tous les addons reste a tester.
+
+## Binaire corrige et controles
+
+Compilation [38167129694](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38167129694) reussie au commit 6c8d581. Les dix groupes CPU, les comparaisons OpenGL Mesa, les 20 tests de geometrie (aucun echec/ignore), les cibles de mixins et les 30 contrats de membres des classes de trains passent. Logs complets inspectes : aucune erreur de compilation ; avertissements historiques de documentation/deprecation seulement. Le test local de la methode de raccordement extraite des sources verifie les premiers/derniers wagons, les surfaces visibles et la mise a jour des points hors champ.
+
+[Artefact corrige](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38167129694/artifacts/11712633436) recupere : 84 466 541 octets, SHA256 b8092f65e3649ff22f34036c844df83633f154f3cc565c2774462234e8db0d6b. Nom local : artifacts/MTR-forge-4.0.5+1.20.1-next-tjmetro-fix-6c8d581.jar. Rapports des vingt tests recuperes, archive et JAR verifiees. [Validation structuree](mtr-tjmetro-fix-validation.json).
+
+Remplacer le precedent JAR MTR par celui-ci, sans les cumuler. Aucun addon ni monde n a ete modifie. V2 reste intacte. Le lancement dans le modpack complet et les FPS restent a confirmer en jeu.

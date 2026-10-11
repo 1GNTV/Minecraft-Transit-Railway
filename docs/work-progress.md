@@ -102,3 +102,7 @@ L'injection du nouveau lecteur d'ombres reste à valider dans Minecraft/Oculus. 
 Code `f137172ec58646af9361c898e887463be6762aff` : [CI réussie](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448), dix groupes CPU, vingt tests de géométrie, comparaison de pixels sous Mesa et NVIDIA, vingt mixins clients/contrats statiques. Texte scoped, instances avec lumière/couleur propres, régions partielles multi-pages, poses de rails persistantes, interactions/visuels séparés et géométrie simplifiée sur workers avec choix par erreur en pixels. [Couverture et limites actuelles](mtr-six-fixes-fr.md).
 
 JAR téléchargé et vérifié : `artifacts/MTR-forge-4.0.5+1.20.1-next-six-fixes-f137172.jar`, 84 466 558 octets, SHA256 `346f5b33dc3e6d7aa756a375edf2295f9fde4c2739ff8f45bee059d872abd52a`. Rapports : vingt réussites, aucun échec ni ignoré. [Métadonnées de validation](mtr-six-fixes-validation.json). Les documents précédents restent historiques. V2/V3/V4 intactes ; anciens JAR conservés ; validation en jeu et FPS encore à mesurer.
+
+## Crash TJMetro corrige
+
+6c8d581 restaure le descripteur original de renderConnection sans supprimer la selection visuelle/interactions. CI 38167129694 reussie : dix groupes CPU, vingt tests geometrie, GL et trente contrats addons. JAR telecharge/verifie, details docs/mtr-tjmetro-fix-validation.json. Demarrage reel du modpack non teste.

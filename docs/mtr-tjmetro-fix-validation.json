@@ -1,0 +1,23 @@
+{
+  "commit": "6c8d5819a3be447d0d666a1bab66b3fa070def7d",
+  "run_id": 38167129694,
+  "conclusion": "success",
+  "jar_artifact": 11712633436,
+  "jar_file": "artifacts/MTR-forge-4.0.5+1.20.1-next-tjmetro-fix-6c8d581.jar",
+  "jar_bytes": 84466541,
+  "jar_sha256": "b8092f65e3649ff22f34036c844df83633f154f3cc565c2774462234e8db0d6b",
+  "zip_sha256": "eb538b2a0965cd257d99c463f011fa7fb7ac08df2f9d729731923da7e930cbdf",
+  "report_artifact": 11712424159,
+  "report_zip_sha256": "8a100792824e2010457d260ea2b431e531c261b1abd1006911261cf6963d4c66",
+  "geometry_tests": 20,
+  "failed": 0,
+  "ignored": 0,
+  "addon_members_checked": 30,
+  "known_bad_f137172_rejected": true,
+  "previous_db74325_accepted": true,
+  "original_v4_members_preserved": true,
+  "local_production_method_test": "First car endpoints, hidden car endpoints without light or draw, six visible surfaces and fresh light, last car endpoints cleared; stubbed world/render interfaces",
+  "live_modpack_tested": false,
+  "fps_measured": false,
+  "v2_unchanged": "dadf9c9a3e3fcdfbe6b0074ab75acda368c8d6e5"
+}
