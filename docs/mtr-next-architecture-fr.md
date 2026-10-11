@@ -12,6 +12,8 @@ Branche `work/mtr-v4-optimization`, basée sur V4. La V2 `dadf9c9` reste intacte
 
 Les caches de ressources utilisent désormais des références faibles pour ne pas retenir toutes les générations anciennes. Les budgets bornent les nouveaux chemins ; ils ne représentent pas un gestionnaire de toute la VRAM du jeu.
 
+Suite après le premier test en jeu : [surcoûts corrigés et priorités](mtr-next-profile-followup-fr.md).
+
 ## Réglages d'essai
 
 | Paramètre JVM | Défaut | Fonction |

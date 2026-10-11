@@ -1,5 +1,7 @@
 # MTR Forge 1.20.1 optimization work
 
+- Profile-driven follow-up: use Oculus's live shadow state instead of repeated stack reconstruction, skip LOD checks without candidate geometry, and expire loaded resources by weak ordered deadlines instead of global registry scans. Scope and remaining opportunities: docs/mtr-next-profile-followup-fr.md. No FPS claim for this candidate.
+
 - 2026-10-11: Created `work/mtr-v4-optimization` remotely and locally from `perf/forge-1201-v4` / `2b048396`.
 - Profiles reopened from prior conversation attachments, decoded locally as Spark protobuf. Both are 60-second V4 render-thread captures, not V2 baselines.
 - Found V4 based on older `perf/forge-1201` / `0242e7b`, missing V2 render-pipeline improvements at `dadf9c9`.

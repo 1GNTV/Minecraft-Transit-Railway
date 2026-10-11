@@ -21,7 +21,8 @@
     "PreparedObjModelAccessor",
     "ModelAtlasAccessor",
     "OculusInstanceShaderMixin",
-    "ModelDetailUploadMixin"
+    "ModelDetailUploadMixin",
+    "ModShaderShadowStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

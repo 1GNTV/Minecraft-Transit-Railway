@@ -51,6 +51,8 @@ jobs:
         run: python3 tools/test_next_renderer.py
       - name: Check shader integration and persistent region content
         run: python3 tools/test_next_architecture.py
+      - name: Check live shadow state and deadline resource expiry
+        run: python3 tools/test_profile_hotspots.py
       - name: Build web resources
         run: |
           chmod +x gradlew

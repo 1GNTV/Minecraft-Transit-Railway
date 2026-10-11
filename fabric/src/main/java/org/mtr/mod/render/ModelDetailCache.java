@@ -48,10 +48,12 @@ public final class ModelDetailCache {
     }
     private static IndexBuffer upload(int[] indices){IndexBuffer index=new IndexBuffer(indices.length/3,GL33.GL_UNSIGNED_INT);ByteBuffer data=ByteBuffer.allocateDirect(indices.length*4).order(ByteOrder.nativeOrder());data.asIntBuffer().put(indices);try{index.upload(data,VertexBuffer.USAGE_STATIC_DRAW);return index;}catch(RuntimeException|Error error){index.close();throw error;}}
     public static VertexArray select(VertexArray original,RenderPipelineMetrics.Family family,double distanceSquared){
-        if(family!=RenderPipelineMetrics.Family.TRAIN || !Double.isFinite(distanceSquared))return original;
-        double cutoff=OptimizedRenderer.renderingShadows()?SHADOW_DISTANCE:MAIN_DISTANCE;if(distanceSquared<cutoff*cutoff)return original;
+        double nearestCutoff=Math.min(MAIN_DISTANCE,SHADOW_DISTANCE);
+        if(!ENABLED || family!=RenderPipelineMetrics.Family.TRAIN || !Double.isFinite(distanceSquared) || distanceSquared<nearestCutoff*nearestCutoff)return original;
         Owner owner=LEVELS.get(original);if(owner==null || owner.closed)return original;
-        VertexArray level=OptimizedRenderer.renderingShadows()?owner.shadow:owner.main;return level==null?original:level;
+        boolean shadows=OptimizedRenderer.renderingShadows();
+        double cutoff=shadows?SHADOW_DISTANCE:MAIN_DISTANCE;if(distanceSquared<cutoff*cutoff)return original;
+        VertexArray level=shadows?owner.shadow:owner.main;return level==null?original:level;
     }
     public static void close(VertexArray original){Owner owner=LEVELS.remove(original);if(owner!=null)owner.cleanup.clean();ModelPartVisibility.remove(original);}
 }

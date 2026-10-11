@@ -18,8 +18,9 @@ for path in jars:
             assert entry in jar.namelist(), f'Missing {entry}'
         for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer', 'RailBatchGeometry', 'RailGeometrySnapshots', 'RailSectorCache', 'RailSectorBatcher', 'GpuMeshOwnership', 'GenerationUploadQueue', 'NativeImageCropper']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
-        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy', 'OculusInstanceRenderer', 'InstanceShaderSource', 'TrainVisibility', 'PredictiveVehiclePreloader', 'StaticRegionRenderer', 'StaticDecorationRegions', 'PersistentRegionCache', 'RegionVertexRanges', 'ModelDetailGeometry', 'ModelDetailCache', 'ModelPartVisibility']:
+        for name in ['InstancedModelRenderer', 'ConsecutiveRuns', 'FrameMemoizer', 'TriangleOrder', 'OpaqueMeshOptimizer', 'RenderCallData', 'VertexArrayIdentity', 'ShaderReloadPolicy', 'OculusInstanceRenderer', 'InstanceShaderSource', 'TrainVisibility', 'PredictiveVehiclePreloader', 'StaticRegionRenderer', 'StaticDecorationRegions', 'PersistentRegionCache', 'RegionVertexRanges', 'ModelDetailGeometry', 'ModelDetailCache', 'ModelPartVisibility', 'ShadowPassState']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
+        assert 'org/mtr/mod/resource/WeakExpiryQueue.class' in jar.namelist()
         assert 'org/mtr/init/PerformanceFrameHooks.class' in jar.namelist(), 'Missing Forge render frame hooks'
         for name in ['batch/BatchManager', 'vertex/VertexAttributeState', 'object/VertexArray']:
             assert f'org/mtr/mapping/render/{name}.class' in jar.namelist(), name
@@ -29,6 +30,7 @@ for path in jars:
     print('VERIFIED', Path(path).name, Path(path).stat().st_size)
     # Validate stable third-party targets against the dependency actually shipped.
     targets = {
+        'org.mtr.mapping.render.shader.ModShaderHandler': ['renderingShadows()', 'java/lang/Thread.getStackTrace:'],
         'org.mtr.mapping.mapper.OptimizedRenderer': ['render(boolean)', 'BatchManager.drawAll:'],
         'org.mtr.mapping.mapper.OptimizedModel': ['fromObjModels(', 'DEFAULT_MAPPING;'],
         'org.mtr.mapping.mapper.OptimizedModel$ObjModel': ['RawModel rawModel;', 'ObjModel(java.util.List<org.mtr.mapping.render.model.RawMesh>, boolean, float, float, float, float, float, float)'],
