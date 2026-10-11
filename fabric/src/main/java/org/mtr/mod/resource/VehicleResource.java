@@ -520,7 +520,7 @@ public final class VehicleResource extends VehicleResourceSchema {
 			if (matchesCondition(vehicle, partCondition, noOpenDoorways)) {
 				MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 					storedMatrixTransformations.transform(graphicsHolder, offset);
-					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light);
+					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light, org.mtr.mod.render.RenderPipelineMetrics.Family.TRAIN);
 					graphicsHolder.pop();
 				});
 			}
@@ -537,14 +537,9 @@ public final class VehicleResource extends VehicleResourceSchema {
 			final Object2ObjectOpenHashMap<PartCondition, OptimizedModelWrapper> optimizedModels = new Object2ObjectOpenHashMap<>();
 
 			for (final PartCondition partCondition : PartCondition.values()) {
-				final OptimizedModelWrapper optimizedModel1;
 				final ObjectArrayList<OptimizedModelWrapper.MaterialGroupWrapper> materialGroups = materialGroupsModel.get(partCondition);
-				optimizedModel1 = materialGroups == null ? null : OptimizedModelWrapper.fromMaterialGroups(materialGroups);
-
-				final OptimizedModelWrapper optimizedModel2;
 				final ObjectArrayList<OptimizedModelWrapper.ObjModelWrapper> objModels = objModelsModel.get(partCondition);
-				optimizedModel2 = objModels == null ? null : OptimizedModelWrapper.fromObjModels(objModels);
-				optimizedModels.put(partCondition, new OptimizedModelWrapper(optimizedModel1, optimizedModel2));
+				optimizedModels.put(partCondition, OptimizedModelWrapper.fromCompatibleSources(materialGroups, objModels));
 			}
 
 			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload();

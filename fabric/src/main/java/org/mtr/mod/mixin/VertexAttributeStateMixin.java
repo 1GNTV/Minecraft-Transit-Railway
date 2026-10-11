@@ -5,6 +5,8 @@ import org.mtr.mapping.holder.Vector3f;
 import org.mtr.mapping.render.vertex.VertexAttributeType;
 import org.mtr.mod.render.MatrixUploadBuffer;
 import org.mtr.mod.render.GlVertexAttributeCache;
+import org.mtr.mod.render.RenderPipelineMetrics;
+import org.mtr.mapping.render.tool.Utilities;
 import org.lwjgl.opengl.GL33;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,6 +28,13 @@ public abstract class VertexAttributeStateMixin {
 	@Shadow @Final public Vector3f normal;
 	@Shadow @Final public Matrix4f matrix4f;
 	@Unique private static final VertexAttributeType[] mtr$attributeTypes = VertexAttributeType.values();
+
+	@Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lorg/mtr/mapping/render/tool/Utilities;canUseCustomShader()Z"))
+	private boolean mtr$countMatrixShaderPath() {
+		final boolean custom = Utilities.canUseCustomShader();
+		if (!custom) RenderPipelineMetrics.matrixShaderPath();
+		return custom;
+	}
 
 	@Redirect(method = "apply", at = @At(value = "INVOKE", target = "Lorg/mtr/mapping/render/vertex/VertexAttributeType;values()[Lorg/mtr/mapping/render/vertex/VertexAttributeType;"))
 	private VertexAttributeType[] mtr$reuseAttributeTypes() {

@@ -23,6 +23,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Check generic attribute cache boundaries
         run: python3 tools/test_attribute_cache.py
+      - name: Check asynchronous render diagnostics
+        run: python3 tools/test_render_diagnostics.py
       - name: Build web resources
         run: |
           chmod +x gradlew

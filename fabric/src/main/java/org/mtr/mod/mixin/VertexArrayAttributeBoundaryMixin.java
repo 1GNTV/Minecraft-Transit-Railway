@@ -2,6 +2,7 @@ package org.mtr.mod.mixin;
 
 import org.mtr.mapping.render.vertex.VertexAttributeMapping;
 import org.mtr.mapping.render.vertex.VertexAttributeSource;
+import org.mtr.mapping.render.object.IndexBuffer;
 import org.mtr.mod.render.GlVertexAttributeCache;
 import org.mtr.mod.render.RenderPipelineMetrics;
 import org.spongepowered.asm.mixin.Final;
@@ -17,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class VertexArrayAttributeBoundaryMixin {
 
 	@Shadow @Final public VertexAttributeMapping mapping;
+	@Shadow @Final public IndexBuffer indexBuffer;
 
 	@Inject(method = "draw", at = @At("RETURN"))
 	private void mtr$afterDraw(CallbackInfo ci) {
@@ -27,6 +29,6 @@ public abstract class VertexArrayAttributeBoundaryMixin {
 				}
 			});
 		}
-		RenderPipelineMetrics.draw();
+		RenderPipelineMetrics.draw(indexBuffer.getVertexCount());
 	}
 }

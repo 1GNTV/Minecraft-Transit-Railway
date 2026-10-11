@@ -11,7 +11,10 @@
     "VertexArrayAttributeBoundaryMixin",
     "HiddenTranslucentQueueMixin",
     "OptimizedObjModelAccessor",
-    "OptimizedObjModelMixin"
+    "OptimizedObjModelMixin",
+    "OptimizedMaterialGroupAccessor",
+    "OptimizedModelLayoutAccessor",
+    "RenderCallMetricsMixin"
   ],
   "injectors": { "defaultRequire": 1 }
 }

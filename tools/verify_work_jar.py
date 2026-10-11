@@ -16,7 +16,7 @@ for path in jars:
         for name in config['client']:
             entry = config['package'].replace('.', '/') + '/' + name + '.class'
             assert entry in jar.namelist(), f'Missing {entry}'
-        for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics']:
+        for name in ['OpaqueMeshCombiner', 'GlVertexAttributeCache', 'MatrixUploadBuffer', 'RenderPipelineMetrics', 'ModelMeshCompiler', 'GpuPassTimer']:
             assert f'org/mtr/mod/render/{name}.class' in jar.namelist(), name
         for name in ['batch/BatchManager', 'vertex/VertexAttributeState', 'object/VertexArray']:
             assert f'org/mtr/mapping/render/{name}.class' in jar.namelist(), name
@@ -29,10 +29,14 @@ for path in jars:
         'org.mtr.mapping.mapper.OptimizedRenderer': ['render(boolean)', 'BatchManager.drawAll:'],
         'org.mtr.mapping.mapper.OptimizedModel': ['fromObjModels(', 'DEFAULT_MAPPING;'],
         'org.mtr.mapping.mapper.OptimizedModel$ObjModel': ['RawModel rawModel;'],
+        'org.mtr.mapping.mapper.OptimizedModel$MaterialGroup': ['MaterialProperties materialProperties;', 'modelPartConsumers;'],
+        'org.mtr.mapping.render.vertex.CapturingVertexConsumer': ['RawModel rawModel;', 'beginStage('],
+        'org.mtr.mapping.render.model.RawModel': ['triangulate()', 'distinct()', 'iterateRawMeshList('],
+        'org.mtr.mapping.render.batch.BatchManager$RenderCall': ['VertexArray vertexArray;', 'VertexAttributeState vertexAttributeState;', 'draw()'],
         'org.mtr.mapping.render.batch.BatchManager': ['translucentBatches;', 'drawAll('],
         'org.mtr.mapping.render.shader.ShaderManager': ['setupShaderBatchState(', 'cleanupShaderBatchState()'],
         'org.mtr.mapping.render.object.VertexArray': ['VertexAttributeMapping mapping;', 'draw()'],
-        'org.mtr.mapping.render.vertex.VertexAttributeState': ['VertexAttributeType.values:', 'java/nio/ByteBuffer.allocate:', 'org/lwjgl/opengl/GL33.glVertexAttrib4f:'],
+        'org.mtr.mapping.render.vertex.VertexAttributeState': ['VertexAttributeType.values:', 'java/nio/ByteBuffer.allocate:', 'org/lwjgl/opengl/GL33.glVertexAttrib4f:', 'Utilities.canUseCustomShader:'],
     }
     for target, expected in targets.items():
         result = subprocess.run(['javap', '-p', '-c', '-classpath', path, target], capture_output=True, text=True, check=True)

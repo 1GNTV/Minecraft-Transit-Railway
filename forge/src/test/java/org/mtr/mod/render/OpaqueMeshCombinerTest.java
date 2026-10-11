@@ -78,4 +78,25 @@ public class OpaqueMeshCombinerTest {
 		door.append(triangle);
 		assertNotSame(body.meshes().get(0), door.meshes().get(0));
 	}
+
+	@Test
+	public void mergingKeepsDistinctVertexLightColorNormalsAndUv() {
+		final MaterialProperties material = material(OptimizedModel.ShaderType.CUTOUT, "a");
+		final RawMesh first = triangle(material, 0), second = triangle(material, 10);
+		second.vertices.get(0).color = 0xFF123456;
+		second.vertices.get(0).light = 0x00A000B0;
+		second.vertices.get(0).u = 0.25F;
+		second.vertices.get(0).v = 0.75F;
+		second.vertices.get(0).normal = new Vector3f(1, 0, 0);
+		final OpaqueMeshCombiner combiner = new OpaqueMeshCombiner();
+		combiner.append(first);
+		combiner.append(second);
+		final Vertex merged = combiner.meshes().get(0).vertices.get(3);
+		assertEquals(0xFF123456, merged.color);
+		assertEquals(0x00A000B0, merged.light);
+		assertEquals(0.25F, merged.u, 0);
+		assertEquals(0.75F, merged.v, 0);
+		assertEquals(new Vector3f(1, 0, 0), merged.normal);
+		assertEquals(0.25F, second.vertices.get(0).u, 0);
+	}
 }

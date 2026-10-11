@@ -70,7 +70,7 @@ public interface StoredModelResourceBase {
 			if (optimizedModel != null) {
 				MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 					storedMatrixTransformations.transform(graphicsHolder, offset);
-					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light);
+					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light, this instanceof RailResource ? org.mtr.mod.render.RenderPipelineMetrics.Family.RAIL : org.mtr.mod.render.RenderPipelineMetrics.Family.DECORATION);
 					graphicsHolder.pop();
 				});
 			}

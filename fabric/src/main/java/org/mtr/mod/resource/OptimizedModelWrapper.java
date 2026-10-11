@@ -7,6 +7,7 @@ import org.mtr.mapping.mapper.ModelPartExtension;
 import org.mtr.mapping.mapper.OptimizedModel;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mod.Init;
+import org.mtr.mod.render.ModelMeshCompiler;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -31,6 +32,19 @@ public final class OptimizedModelWrapper {
 
 	private OptimizedModelWrapper(@Nullable OptimizedModel optimizedModel) {
 		this.optimizedModel = optimizedModel;
+	}
+
+	public static OptimizedModelWrapper fromCompatibleSources(@Nullable ObjectArrayList<MaterialGroupWrapper> groups, @Nullable ObjectArrayList<ObjModelWrapper> objects) {
+		if (OptimizedRenderer.hasOptimizedRendering() && groups != null && objects != null) {
+			final java.util.List<OptimizedModel.MaterialGroup> rawGroups = new java.util.ArrayList<>();
+			final java.util.List<OptimizedModel.ObjModel> rawObjects = new java.util.ArrayList<>();
+			groups.forEach(group -> { if (group.materialGroup != null) rawGroups.add(group.materialGroup); });
+			objects.forEach(object -> { if (object.objModel != null) rawObjects.add(object.objModel); });
+			if (ModelMeshCompiler.available(rawGroups, rawObjects)) {
+				return new OptimizedModelWrapper(ModelMeshCompiler.compile(rawGroups, rawObjects));
+			}
+		}
+		return new OptimizedModelWrapper(groups == null ? null : fromMaterialGroups(groups), objects == null ? null : fromObjModels(objects));
 	}
 
 	public OptimizedModelWrapper(@Nullable OptimizedModelWrapper optimizedModel1, @Nullable OptimizedModelWrapper optimizedModel2) {
