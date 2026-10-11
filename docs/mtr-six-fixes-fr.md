@@ -28,3 +28,5 @@ Les mesures utilisateur disponibles concernent le prÃ©cÃ©dent JAR db74325 : 
 `-Dmtr.next.textBatch=false`, `-Dmtr.next.instances=false`, `-Dmtr.next.oculusInstances=false`, `-Dmtr.next.grouping=false`, `-Dmtr.next.regions=false`, `-Dmtr.next.visibility=false`, `-Dmtr.next.lod=false`. Ils permettent d'isoler la cause d'un dÃ©faut ou d'une rÃ©gression. Les appels complets du shader/Framebuffer de V3 ne sont pas supprimÃ©s.
 
 Source primaire du contrat d'attributs Oculus : [VanillaTransformer Ã  la rÃ©vision inspectÃ©e](https://github.com/Asek3/Oculus/blob/b3b278134f719afe32ba8b6b5d3a93f052175afc/src/main/java/net/irisshaders/iris/pipeline/transform/transformer/VanillaTransformer.java). Les cibles MTR/Minecraft-Mappings sont vÃ©rifiÃ©es contre le bytecode embarquÃ©, pas seulement contre l'upstream actuel.
+
+Les buffers d’instances ont maintenant 76 octets par instance : matrice 64, RGBA 4, lightmap 4, overlay 4. Avec allocation par puissance de deux, 64 slots × 3 pages × 128 Kio donnent un plafond de 24 Mio GPU ; copies de comparaison CPU également bornées. Les anciens chiffres de 64 Kio/12 Mio des documents historiques ne décrivent plus ce candidat.

@@ -26,7 +26,7 @@ public final class BoundedMeshSimplifier {
         List<Edge> candidates=new ArrayList<>();edgeCounts.forEach((key,uses)->{int a=(int)(key>>>32),b=(int)(long)key;double distance=distance(raw.vertices.get(a),raw.vertices.get(b));if(uses==2 && distance<=error)candidates.add(new Edge(a,b,distance));});
         candidates.sort(Comparator.comparingDouble(Edge::distance).thenComparingInt(Edge::a).thenComparingInt(Edge::b));
         int[] parent=new int[count];double[] radius=new double[count];for(int i=0;i<count;i++)parent[i]=i;
-        for(Edge candidate:candidates){int a=root(parent,candidate.a),b=root(parent,candidate.b);if(a==b || locked[a] || locked[b])continue;
+        for(Edge candidate:candidates){if(Thread.currentThread().isInterrupted())return null;int a=root(parent,candidate.a),b=root(parent,candidate.b);if(a==b || locked[a] || locked[b])continue;
             double distance=distance(raw.vertices.get(a),raw.vertices.get(b));
             int from=radius[a]<=radius[b]?a:b,to=from==a?b:a;
             if(radius[from]+distance>error)continue;

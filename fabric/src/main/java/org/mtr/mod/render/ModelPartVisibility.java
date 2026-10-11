@@ -41,5 +41,6 @@ public final class ModelPartVisibility {
         // Margin exceeds raster precision and retains coplanar/adjacent coverage ordering.
         return new BoundedDrawGrouping.Rect(x0-.002,y0-.002,x1+.002,y1+.002);
     }
+    public static void copy(VertexArray source,VertexArray target){Bounds bounds=BOUNDS.get(source);if(bounds!=null)BOUNDS.put(target,bounds);}
     public static void remove(VertexArray array){BOUNDS.remove(array);}
 }

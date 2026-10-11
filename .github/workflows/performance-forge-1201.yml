@@ -55,6 +55,7 @@ jobs:
         run: |
           python3 tools/test_profile_hotspots.py
           python3 tools/test_fps_fixes.py
+          python3 tools/test_detail_async.py
       - name: Build web resources
         run: |
           chmod +x gradlew

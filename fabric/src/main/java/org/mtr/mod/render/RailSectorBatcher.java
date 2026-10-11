@@ -33,5 +33,5 @@ public final class RailSectorBatcher {
     }
     public static void flush(){REGIONS.flush();StaticDecorationRegions.flush();}
     public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();}
-    public static void reload(){clear();RailGeometrySnapshots.clear();}
+    public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }
