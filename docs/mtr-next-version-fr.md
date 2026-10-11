@@ -1,3 +1,5 @@
+> Suite implémentée : [six chantiers FPS, code et limites actuels](mtr-six-fixes-fr.md). Les restrictions décrites ci-dessous sont celles du code audité ou des versions historiques ; elles ne remplacent pas le suivi du nouveau candidat.
+
 > Mise à jour : les cinq chantiers supplémentaires sont décrits dans [Next architecture](mtr-next-architecture-fr.md). Le présent document conserve les détails et preuves du JAR précédent `8574d7f`. Ses mentions « non implémenté » sont historiques.
 
 # Prochaine version : renderer MTR

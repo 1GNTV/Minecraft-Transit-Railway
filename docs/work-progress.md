@@ -1,6 +1,8 @@
 # Suivi du chantier des 40 pistes
 
-Audit approfondi du code actuel et du dernier profil client : [constats, restrictions des optimisations existantes et priorites FPS](mtr-fps-deep-audit-fr.md). La carte initiale reste une reference historique ; ses descriptions ne remplacent pas cet audit.
+Six chantiers issus de cet audit implémentés : [code, contrôles et limites du nouveau candidat](mtr-six-fixes-fr.md).
+
+Audit approfondi du code antérieur et du dernier profil client : [constats, restrictions des optimisations existantes et priorites FPS](mtr-fps-deep-audit-fr.md). La carte initiale reste une reference historique ; ses descriptions ne remplacent pas cet audit.
 
 Demande du 11 octobre 2026 : implémenter la cartographie. Référence donnée par l'utilisateur : ancienne survie avec deux lignes de métro, grande gare centrale avec correspondances. L'utilisateur souhaite garder les détails de son monde privés ; la suite du chantier utilise les profils fournis et les sources. Aucune mesure en jeu n'est revendiquée.
 
@@ -94,3 +96,9 @@ Code compilé : `62db10751f9098daa5d3595ac7ade21b06e4445f`. [GitHub Actions 3815
 [Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38157947923/artifacts/11709577605) récupéré : 84 426 877 octets ; SHA256 `c4d999713fa5b0e981d51d3a6194484cb7f66824c73dd6566b27a48a6fc05265`. ZIP SHA256 `c6f6be66569c12d138609fba2f8b96ad2621a64f0f8783d83aeceb6109e799dd`. Rapports récupérés : quinze tests réussis ; ZIP SHA256 `db2c4caf8573cfd7449eeb5e238a36ea9c1f688b0b10baf730bfebaf6de01021`. Copie locale : `artifacts/MTR-forge-4.0.5+1.20.1-next-hotspots-62db107.jar`. Dix-neuf mixins clients enregistrés et présents. Les commits de documentation suivants ne changent pas ce binaire.
 
 L'injection du nouveau lecteur d'ombres reste à valider dans Minecraft/Oculus. Aucun FPS, résultat visuel ni gain en jeu n'est attribué à ce JAR avant essai. Version interne 4.0.5 conservée ; la candidate db74325 déjà testée reste disponible. Références V2/V3/V4 revérifiées inchangées.
+
+## Six correctifs du dernier audit — candidat livré
+
+Code `f137172ec58646af9361c898e887463be6762aff` : [CI réussie](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448), dix groupes CPU, vingt tests de géométrie, comparaison de pixels sous Mesa et NVIDIA, vingt mixins clients/contrats statiques. Texte scoped, instances avec lumière/couleur propres, régions partielles multi-pages, poses de rails persistantes, interactions/visuels séparés et géométrie simplifiée sur workers avec choix par erreur en pixels. [Couverture et limites actuelles](mtr-six-fixes-fr.md).
+
+JAR téléchargé et vérifié : `artifacts/MTR-forge-4.0.5+1.20.1-next-six-fixes-f137172.jar`, 84 466 558 octets, SHA256 `346f5b33dc3e6d7aa756a375edf2295f9fde4c2739ff8f45bee059d872abd52a`. Rapports : vingt réussites, aucun échec ni ignoré. [Métadonnées de validation](mtr-six-fixes-validation.json). Les documents précédents restent historiques. V2/V3/V4 intactes ; anciens JAR conservés ; validation en jeu et FPS encore à mesurer.

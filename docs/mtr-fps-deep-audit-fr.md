@@ -1,3 +1,5 @@
+> Suite implémentée : [six chantiers FPS, code et limites actuels](mtr-six-fixes-fr.md). Les restrictions décrites ci-dessous sont celles du code audité ou des versions historiques ; elles ne remplacent pas le suivi du nouveau candidat.
+
 # Audit FPS du dépôt : ce qui bloque encore réellement
 
 Audit du 11 octobre 2026, sources `d6ae448394a6e36ab31204b059521cbe6a55d463`.

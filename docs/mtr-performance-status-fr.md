@@ -1,3 +1,5 @@
+> Suite implémentée : [six chantiers FPS, code et limites actuels](mtr-six-fixes-fr.md). Les restrictions décrites ci-dessous sont celles du code audité ou des versions historiques ; elles ne remplacent pas le suivi du nouveau candidat.
+
 # État des quarante pistes
 
 Audit approfondi du code actuel et du dernier profil client : [constats, restrictions des optimisations existantes et priorites FPS](mtr-fps-deep-audit-fr.md). La carte initiale reste une reference historique ; ses descriptions ne remplacent pas cet audit.

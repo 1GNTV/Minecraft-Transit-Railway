@@ -30,3 +30,9 @@ Les mesures utilisateur disponibles concernent le prÃ©cÃ©dent JAR db74325 : 
 Source primaire du contrat d'attributs Oculus : [VanillaTransformer Ã  la rÃ©vision inspectÃ©e](https://github.com/Asek3/Oculus/blob/b3b278134f719afe32ba8b6b5d3a93f052175afc/src/main/java/net/irisshaders/iris/pipeline/transform/transformer/VanillaTransformer.java). Les cibles MTR/Minecraft-Mappings sont vÃ©rifiÃ©es contre le bytecode embarquÃ©, pas seulement contre l'upstream actuel.
 
 Les buffers d’instances ont maintenant 76 octets par instance : matrice 64, RGBA 4, lightmap 4, overlay 4. Avec allocation par puissance de deux, 64 slots × 3 pages × 128 Kio donnent un plafond de 24 Mio GPU ; copies de comparaison CPU également bornées. Les anciens chiffres de 64 Kio/12 Mio des documents historiques ne décrivent plus ce candidat.
+
+## Binaire livré
+
+[Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448/artifacts/11711696725) téléchargé et vérifié : **84 466 558 octets**, JAR SHA256 `346f5b33dc3e6d7aa756a375edf2295f9fde4c2739ff8f45bee059d872abd52a`. ZIP SHA256 `43010ad7f86750d62ecb3a07c668e541e5969eba5f3ca3b01c5c10aa7c466f84`. Nom local : `artifacts/MTR-forge-4.0.5+1.20.1-next-six-fixes-f137172.jar`. Le JAR contient bien le module de texte enregistré, les helpers et les vingt mixins clients.
+
+[Rapports des vingt tests](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448/artifacts/11711442345) récupérés : zéro échec et zéro ignoré, ZIP SHA256 `316146ef818169694828933dd754908a70dcbdb9caa9d3974c93f8165b452b7e`. Les résultats structurés et références intactes figurent dans [validation JSON](mtr-six-fixes-validation.json). V2/V3/V4 ont été revérifiées inchangées. La correction du vérificateur de manifeste concernait ses lignes repliées ; le module était présent. Les JAR précédents sont conservés. Aucun essai Minecraft/Oculus/France Addon ni gain FPS n’est revendiqué pour ce candidat.

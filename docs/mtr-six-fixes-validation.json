@@ -1,0 +1,32 @@
+{
+  "code_commit": "f137172ec58646af9361c898e887463be6762aff",
+  "branch": "work/mtr-v4-optimization",
+  "run_id": 38163655448,
+  "run_url": "https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38163655448",
+  "conclusion": "success",
+  "cpu_check_groups": 10,
+  "geometry_tests": 20,
+  "failed_geometry_tests": 0,
+  "ignored_geometry_tests": 0,
+  "client_mixins": 20,
+  "artifact_id": 11711696725,
+  "jar_file": "artifacts/MTR-forge-4.0.5+1.20.1-next-six-fixes-f137172.jar",
+  "jar_bytes": 84466558,
+  "jar_sha256": "346f5b33dc3e6d7aa756a375edf2295f9fde4c2739ff8f45bee059d872abd52a",
+  "artifact_zip_sha256": "43010ad7f86750d62ecb3a07c668e541e5969eba5f3ca3b01c5c10aa7c466f84",
+  "report_artifact_id": 11711442345,
+  "report_zip_sha256": "316146ef818169694828933dd754908a70dcbdb9caa9d3974c93f8165b452b7e",
+  "graphics_validation": [
+    "Mesa llvmpipe ordinary/instanced identical pixels",
+    "NVIDIA native ordinary/instanced identical pixels",
+    "material override priority",
+    "original source VAO retained",
+    "ordinary mode restored",
+    "unsupported shader side effects rejected"
+  ],
+  "live_game_validation": "pending",
+  "fps_gain": null,
+  "v2_reference": "dadf9c9a3e3fcdfbe6b0074ab75acda368c8d6e5",
+  "v3_reference": "a10f1c932d314ed527b07d19bc8b83173a117fcf",
+  "v4_reference": "2b0483968a1f75facf8e63a7f7b4e6d4e2eb1c4d"
+}
