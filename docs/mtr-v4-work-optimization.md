@@ -42,12 +42,18 @@ The installed Oculus 1.8.0 ExtendedShader bytecode was also inspected. Its `appl
 
 ## A/B switches
 
+This document's original build evidence is historical. The expanded implementation, latest CI status and limitations are maintained in [work-progress.md](work-progress.md); the complete candidate map is [mtr-performance-map-fr.md](mtr-performance-map-fr.md). The newer mixed-source compiler, GPU/family diagnostics, opt-in rail batches and texture/resource lifetime changes extend the original changes listed above. Use the [local benchmark protocol](mtr-benchmark-fr.md) for comparison; no in-game improvement is claimed.
+
 Restart after changing JVM options; reload already-created models after choosing merge behavior.
 
 | Option | Default | Purpose |
 | --- | --- | --- |
 | `-Dmtr.v4.attributeCache=false` | true | Disable shaderless generic attribute deduplication |
 | `-Dmtr.v4.mergeOpaqueObj=false` | true | Keep individual OBJ uploads |
+| `-Dmtr.v4.mergeMixedModels=false` | true | Keep separate compatible OBJ/Blockbench source uploads |
+| `-Dmtr.v4.railBatches=true` | false | Experimental stable solid rail sectors, shaderless only |
+| `-Dmtr.v4.textureUploadBudget=false` | true | Disable the two-completion publication window |
+| `-Dmtr.v4.gpuMetrics=true` | false | Bounded delayed GPU timestamps; also enables diagnostics |
 | `-Dmtr.v4.metrics=true` | false | Log render-thread pass duration, MTR draws/materials and OBJ consolidation |
 | `-Dmtr.v4.railIndex=false` | true | Original pre-V4 global rail selection |
 | `-Dmtr.v4.frustumBasis=false` | true | Original per-segment camera rotations |

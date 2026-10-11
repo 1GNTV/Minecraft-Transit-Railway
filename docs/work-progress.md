@@ -1,6 +1,6 @@
 # Suivi du chantier des 40 pistes
 
-Demande du 11 octobre 2026 : implémenter la cartographie. Référence en jeu donnée par l'utilisateur : ancienne survie avec deux lignes de métro, grande gare centrale avec correspondances. Le serveur/monde exact, la caméra et le scénario reproductible ne sont pas encore identifiés.
+Demande du 11 octobre 2026 : implémenter la cartographie. Référence donnée par l'utilisateur : ancienne survie avec deux lignes de métro, grande gare centrale avec correspondances. L'utilisateur souhaite garder les détails de son monde privés ; la suite du chantier utilise les profils fournis et les sources. Aucune mesure en jeu n'est revendiquée.
 
 Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucune ligne ne vaut une annonce de gain FPS.
 
@@ -37,7 +37,11 @@ Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucun
 
 ## État consolidé
 
-01, 03, 04, 19, 24, 28, 33 et S2–S5/S7 ont une réalisation partielle ou un prototype. Aucune des 40 pistes n'est déclarée entièrement validée. S1 et S8 exigent le scénario réel et des captures comparables. Les autres pistes restent étudiées ou à développer selon les nouvelles mesures.
+01, 03, 04, 19, 24, 27, 28, 33 et S2–S5/S7 ont une réalisation partielle ou un prototype. Aucune des 40 pistes n'est déclarée entièrement validée. S1 est outillé par [le protocole local et l'analyse de frame times](mtr-benchmark-fr.md) ; S8 reste une validation réelle. Les autres pistes restent étudiées ou à développer selon les nouvelles mesures.
+
+Les changements architecturaux 05–10/12–23/25–26/29–32/34–40 ne sont pas annoncés comme implémentés. Plusieurs sont des alternatives ou dépendent d'un renderer/format de données nouveau ; les changements de shader, visibilité et simulation ne peuvent pas être certifiés par une compilation. La cartographie ne doit pas être confondue avec 40 gains acquis.
+
+Dernière revue de sécurité de rendu : fermeture du scope GL de chargement de ressource et restitution de la pile de matrices via `finally`, même si un modèle/callback échoue. La CI suivante inclut également les tests du lecteur de frame times (traces synthétiques, aucun benchmark en jeu).
 
 L'ordre est celui de [la cartographie](mtr-performance-map-fr.md). Les pistes conditionnelles nécessitent leurs compteurs/profils pour choisir une architecture et vérifier le gain net ; le code compilé ne suffit pas.
 
