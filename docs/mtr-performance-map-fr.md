@@ -1,5 +1,7 @@
 # Cartographie des optimisations majeures — MTR Forge 1.20.1
 
+Cette carte décrit les candidates et leurs conditions d'adoption. Le [statut actuel des quarante pistes](mtr-performance-status-fr.md) et le [suivi des builds](work-progress.md) distinguent les prototypes compilés des refontes encore à réaliser.
+
 Date : 11 octobre 2026 (Europe/Paris). Sources de travail : `work/mtr-v4-optimization`, tête inspectée `0530db54ed3c81b96a61555afdff15057007ad77`, code compilé `b0c19aae`. V2 de référence : `dadf9c9` ; V4 initiale : `2b048396`. Ce document est une carte de travail, pas une annonce de gains ni une implémentation des 40 pistes.
 
 ## Ce que la carte couvre

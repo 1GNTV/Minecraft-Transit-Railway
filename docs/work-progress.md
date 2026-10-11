@@ -2,7 +2,15 @@
 
 Demande du 11 octobre 2026 : implémenter la cartographie. Référence donnée par l'utilisateur : ancienne survie avec deux lignes de métro, grande gare centrale avec correspondances. L'utilisateur souhaite garder les détails de son monde privés ; la suite du chantier utilise les profils fournis et les sources. Aucune mesure en jeu n'est revendiquée.
 
-Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucune ligne ne vaut une annonce de gain FPS.
+Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucune ligne ne vaut une annonce de gain FPS. Le [tableau des quarante statuts](mtr-performance-status-fr.md) explicite chaque réalisation et chaque reste à faire.
+
+## Dernier artefact vérifié
+
+Code `500334ef0e70f67d6f57617cdd0b1e01a495cbac`, [CI 38140845544](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544) : compilation, cinq groupes de checks Python, sept tests de géométrie (zéro échec/ignoré), intégrité et contrats statiques du JAR réussis. Logs complets inspectés : aucune erreur, deux warnings Javadoc hérités. L'erreur de nom de matériau du lot 2 est corrigée.
+
+[Artefact Forge](https://github.com/1GNTV/Minecraft-Transit-Railway/actions/runs/38140845544/artifacts/11702746873), téléchargé et vérifié localement : JAR 84 342 424 octets, SHA256 `086654b36ddc33fe4af5a76022af48b695c2fb72fd409199af51db000c25dd94`. ZIP SHA256 `34ed354fa691f83c58515c469cc997f62de961d0168e02833b9f9db9e3cf01ff`. La copie locale est `artifacts/MTR-forge-4.0.5+1.20.1-work-v4.jar` ; les fichiers compilés privés restent hors Git.
+
+Les modifications documentaires suivant ce code ne changent pas le JAR. Les références V2/V3/V4 ont été vérifiées inchangées. Pas de déploiement dans le profil installé ni de mesure FPS/validation Oculus/France Addon en jeu. Le prototype de rails reste désactivé par défaut.
 
 ## Lot 1 — CI réussie, en jeu non validé
 
@@ -24,8 +32,6 @@ Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucun
 - Tests locaux du vrai cache : stabilité, invalidation, ressources épinglées, plafond de construction/résidence, absence de tempête de retries après erreur et libération exacte. Tests de géométrie dans CI : copie indépendante, rotation/translation/normale, packing de lumière, UV/couleur et matériaux exclus.
 - Limites : allocation/préparation des callbacks et lecture de lumière par segment restent présentes ; pas d'instancing, multi-draw, visibilité Hi-Z ou arène globale. La géométrie dupliquée peut augmenter la mémoire. Le coût de construction/transfert doit être comparé aux dessins supprimés dans la gare avant activation par défaut.
 
-## État de l'inventaire
-
 ## Lot 3 — durée de vie des images et buffers
 
 - 27 / 33 / S4 / S7 partiels : les textures terminées sont marquées par génération de rechargement. Une ancienne génération ferme son image plutôt que publier un résultat périmé. File de complétions limitée à 16 images ; au maximum deux complétions traitées par fenêtre de 16,67 ms (interrupteur `-Dmtr.v4.textureUploadBudget=false`). Cela borne le nombre de publications, **pas** le temps d'une grande publication ou la mémoire totale des images. La queue des tâches de génération CPU reste à borner selon les mesures.
@@ -33,7 +39,7 @@ Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucun
 - Chargement des polices sans boucle infinie ; une génération périmée ne réinstalle pas ses anciennes polices. Une police indisponible n'est pas remplacée silencieusement par un autre rendu.
 - Les buffers créés par le compilateur Work ont désormais une propriété explicite : fermeture avec leur VAO, aliases suivis et nettoyage des buffers à la collecte du dernier propriétaire. Ceci ne prétend pas réparer l'ensemble de la durée de vie des ressources historiques des mappings. Le Cleaner des buffers n'efface pas les VAO historiques abandonnés sans close.
 - Tests locaux sur les vrais helpers : libération unique avec aliases et Cleaner, image inchangée/transférée, recadrage, erreurs d'allocation/copie, capacité et budget de queue, invalidation concurrente de génération. Aucune annonce de correction d'un pic FPS mesuré.
-- La CI du lot 2 a compilé les sources du mod, puis échoué sur un nom erroné du matériau glow **dans un test** (`CUTOUT_GLOW` au lieu de `CUTOUT_GLOWING`). Le nom est corrigé dans ce lot ; validation de géométrie et artefact final attendue dans la CI suivante.
+- La CI du lot 2 a compilé les sources du mod, puis échoué sur un nom erroné du matériau glow **dans un test** (`CUTOUT_GLOW` au lieu de `CUTOUT_GLOWING`). Le nom est corrigé dans ce lot ; les sept tests de géométrie et le JAR final ont ensuite passé la CI.
 
 ## État consolidé
 
