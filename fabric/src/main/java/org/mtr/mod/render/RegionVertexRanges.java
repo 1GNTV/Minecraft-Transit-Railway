@@ -9,7 +9,7 @@ import java.util.*;
 /** CPU selection of index spans; camera motion never rewrites persistent vertex/index geometry. */
 public final class RegionVertexRanges {
     public record Span(int first,int count) {}
-    private static final Map<VertexArray,Ranges> ACTIVE=new WeakHashMap<>();
+    private static final Map<VertexArray,Ranges> ACTIVE=Collections.synchronizedMap(new WeakHashMap<>());
     private static final class Ranges {
         IntBuffer counts;PointerBuffer offsets;int indices;
         Ranges(int capacity){counts=BufferUtils.createIntBuffer(capacity);offsets=BufferUtils.createPointerBuffer(capacity);}

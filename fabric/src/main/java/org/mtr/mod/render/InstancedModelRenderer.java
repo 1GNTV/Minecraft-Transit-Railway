@@ -153,10 +153,13 @@ public final class InstancedModelRenderer {
         source.materialProperties.vertexAttributeState.apply();
         RenderPipelineMetrics.drawing(first.mtr$family());
         GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES, source.indexBuffer.getVertexCount(), source.indexBuffer.indexType, 0L, count);
-        RenderPipelineMetrics.instancedDraw(source.indexBuffer.getVertexCount(), count);
-        if (page.fence != 0) GL33.glDeleteSync(page.fence);
-        page.fence = GL33.glFenceSync(GL33.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        submittedGroups++; submittedInstances += count;
+        // A submitted draw must never be replayed if diagnostics/fence bookkeeping fails.
+        try {
+            RenderPipelineMetrics.instancedDraw(source.indexBuffer.getVertexCount(), count);
+            if (page.fence != 0) GL33.glDeleteSync(page.fence);
+            page.fence = GL33.glFenceSync(GL33.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+            submittedGroups++; submittedInstances += count;
+        } catch (RuntimeException error) { failed=true; Init.LOGGER.error("MTR instances retained submitted draw and disabled later groups",error); }
         return true;
     }
 

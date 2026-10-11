@@ -4,7 +4,7 @@ import java.util.function.*;
 
 /** Content membership survives visibility changes; immutable queued resources are pinned for a pass. */
 public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implements AutoCloseable {
-    private static final class Entry<V,L,R>{Map<L,V> content=new LinkedHashMap<>();Set<V> compiled=Set.of();R resource;long seen;int vertices;}
+    private static final class Entry<V,L,R>{Map<L,V> content=new LinkedHashMap<>();Set<V> compiled=Set.of(),failed=Set.of();R resource;long seen;int vertices;}
     private final Map<K,Entry<V,L,R>> entries=new LinkedHashMap<>(64,.75f,true);
     private final int maxEntries,maxVertices,maxBuildVertices;
     private int vertices,builds;
@@ -22,8 +22,10 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         List<V> content=List.copyOf(entry.content.values());int count=content.stream().mapToInt(size).sum();
         if(count<=0 || count>maxBuildVertices || count>maxVertices)return null;
         if(!room(entry,0,count-entry.vertices))return null;
+        Set<V> signature=Set.copyOf(content);if(entry.failed.equals(signature))return null;
         builds--;
-        R replacement=builder.apply(content);if(replacement==null)return null;
+        R replacement;try{replacement=builder.apply(content);}catch(RuntimeException error){entry.failed=signature;throw error;}if(replacement==null){entry.failed=signature;return null;}
+        entry.failed=Set.of();
         release(entry);entry.resource=replacement;entry.compiled=Set.copyOf(content);entry.vertices=count;vertices+=count;entry.seen=frame;return replacement;
     }
     private boolean room(Entry<V,L,R> keep,int additional,int vertexDelta){

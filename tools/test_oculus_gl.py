@@ -1,0 +1,61 @@
+"""Actual software OpenGL pixel comparison of ordinary and instanced two-stage shader paths.
+
+Minecraft/Oculus apply is represented by an explicit complete-uniform test state here;
+this checks the real bridge's math/GL/state restoration, not live mod compatibility.
+"""
+from pathlib import Path
+import hashlib, os, shutil, subprocess, tempfile, urllib.request
+
+ROOT=Path(__file__).resolve().parents[1]
+STUBS={
+ 'com/mojang/blaze3d/systems/RenderSystem.java':'package com.mojang.blaze3d.systems; public class RenderSystem {public static boolean isOnRenderThread(){return true;}}',
+ 'org/mtr/mapping/holder/Matrix4f.java':'package org.mtr.mapping.holder;public class Matrix4f {public final org.joml.Matrix4f data;public Matrix4f(org.joml.Matrix4f m){data=m;}}',
+ 'org/mtr/mapping/render/tool/Utilities.java':'package org.mtr.mapping.render.tool;import java.nio.*;import org.mtr.mapping.holder.Matrix4f;public class Utilities {public static void store(Matrix4f m,FloatBuffer b){m.data.get(b);}}',
+ 'org/mtr/mapping/render/object/VertexArray.java':'''package org.mtr.mapping.render.object;import org.mtr.mapping.render.vertex.VertexAttributeState;import org.lwjgl.opengl.GL33;
+ public class VertexArray {public int vao;public Index indexBuffer=new Index();public Material materialProperties=new Material();public void bind(){GL33.glBindVertexArray(vao);}public static class Index {public int indexType=GL33.GL_UNSIGNED_INT;public int getVertexCount(){return 6;}}public static class Material {public VertexAttributeState vertexAttributeState=new VertexAttributeState();}}''',
+ 'org/mtr/mapping/render/vertex/VertexAttributeState.java':'''package org.mtr.mapping.render.vertex;import org.mtr.mapping.holder.Matrix4f;import org.lwjgl.opengl.GL33;import java.nio.*;import org.lwjgl.BufferUtils;
+ public class VertexAttributeState {public Matrix4f matrix4f;public static int applies;private static final FloatBuffer four=BufferUtils.createFloatBuffer(16),three=BufferUtils.createFloatBuffer(9);public void apply(){applies++;if(matrix4f==null)return;int p=GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM);var m=matrix4f.data;four.clear();m.get(four);GL33.glUniformMatrix4fv(GL33.glGetUniformLocation(p,"iris_ModelViewMat"),false,four);four.clear();new org.joml.Matrix4f(m).invert().get(four);GL33.glUniformMatrix4fv(GL33.glGetUniformLocation(p,"iris_ModelViewMatInverse"),false,four);three.clear();new org.joml.Matrix3f(m).invert().transpose().get(three);GL33.glUniformMatrix3fv(GL33.glGetUniformLocation(p,"iris_NormalMat"),false,three);GL33.glUniform1f(GL33.glGetUniformLocation(p,"customColor"),.7f);GL33.glUniform1i(GL33.glGetUniformLocation(p,"Sampler0"),0);}}''',
+ 'org/mtr/mod/render/RenderPipelineMetrics.java':'package org.mtr.mod.render;public class RenderPipelineMetrics {public enum Family{TRAIN}public static void drawing(Family f){}public static void instancedDraw(int n,int count){}}',
+ 'org/mtr/mod/Init.java':'package org.mtr.mod;public class Init {public static final Log LOGGER=new Log();public static class Log{public void debug(String s,Object... v){throw new AssertionError(s);}public void error(String s,Object...v){throw new AssertionError(s);}}}',
+}
+TEST=r'''import org.lwjgl.*;import org.lwjgl.glfw.GLFW;import org.lwjgl.opengl.*;import org.mtr.mod.render.*;import org.mtr.mapping.render.vertex.*;import org.mtr.mapping.render.object.VertexArray;import org.mtr.mapping.holder.Matrix4f;import java.nio.*;import java.util.*;
+public class OculusGlTest {
+ static final String V="#version 150\nin vec3 Position;\nuniform mat4 iris_ModelViewMat;\nuniform mat4 iris_ModelViewMatInverse;\nuniform mat3 iris_NormalMat;\nout vec3 transformedNormal;\nvoid main(){ gl_Position=iris_ModelViewMat*vec4(Position,1);transformedNormal=iris_NormalMat*vec3(0,1,0);}";
+ static final String F="#version 150\nuniform mat4 iris_ModelViewMatInverse;\nuniform float customColor;\nuniform sampler2D Sampler0;\nin vec3 transformedNormal;\nout vec4 fragColor;\nvoid main(){vec4 p=iris_ModelViewMatInverse*vec4(0,0,0,1);fragColor=vec4(p.x*.4+.5,customColor,transformedNormal.y*.5,1)*texture(Sampler0,vec2(.25));}";
+ static void check(boolean b,String why){if(!b)throw new AssertionError(why);}
+ static int shader(int type,String source){int id=GL33.glCreateShader(type);GL33.glShaderSource(id,source);GL33.glCompileShader(id);check(GL33.glGetShaderi(id,GL33.GL_COMPILE_STATUS)!=0,GL33.glGetShaderInfoLog(id));return id;}
+ static int program(String v,String f){int vs=shader(GL33.GL_VERTEX_SHADER,v),fs=shader(GL33.GL_FRAGMENT_SHADER,f),p=GL33.glCreateProgram();GL33.glAttachShader(p,vs);GL33.glAttachShader(p,fs);GL33.glBindAttribLocation(p,0,"Position");GL33.glBindFragDataLocation(p,0,"fragColor");GL33.glLinkProgram(p);check(GL33.glGetProgrami(p,GL33.GL_LINK_STATUS)!=0,GL33.glGetProgramInfoLog(p));GL33.glDeleteShader(vs);GL33.glDeleteShader(fs);return p;}
+ static class Call implements RenderCallData {final VertexArray array;final VertexAttributeState state=new VertexAttributeState();Call(VertexArray a,float x,float y,float angle){array=a;state.matrix4f=new Matrix4f(new org.joml.Matrix4f().translation(x,y,0).rotateZ(angle));}public VertexArray mtr$array(){return array;}public VertexAttributeState mtr$attributes(){return state;}public RenderPipelineMetrics.Family mtr$family(){return RenderPipelineMetrics.Family.TRAIN;}}
+ static byte[] pixels(){ByteBuffer b=BufferUtils.createByteBuffer(64*64*4);GL33.glReadPixels(0,0,64,64,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,b);byte[] result=new byte[b.capacity()];b.get(result);return result;}
+ public static void main(String[] args){
+  check(GLFW.glfwInit(),"GLFW init");GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE,GLFW.GLFW_FALSE);GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR,3);GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR,3);GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE,GLFW.GLFW_OPENGL_CORE_PROFILE);long window=GLFW.glfwCreateWindow(64,64,"MTR bridge test",0,0);check(window!=0,"software GL context");GLFW.glfwMakeContextCurrent(window);GL.createCapabilities();
+  System.out.println("GL renderer: "+GL33.glGetString(GL33.GL_RENDERER));GL33.glViewport(0,0,64,64);GL33.glDisable(GL33.GL_DITHER);GL33.glDisable(GL33.GL_MULTISAMPLE);
+  var patched=OculusInstanceRenderer.prepare(V,F);check(patched!=null,"preflight rejected valid program");check(InstanceShaderSource.patch(V+"\n#define MV iris_ModelViewMat\n",F)==null,"macro must fail open");check(OculusInstanceRenderer.prepare(V,F.replace("fragColor=","bad syntax fragColor="))==null,"invalid candidate must fail open");
+  int original=program(V,F),instanced=program(patched.vertex(),patched.fragment());
+  int vao=GL33.glGenVertexArrays(),vb=GL33.glGenBuffers(),ib=GL33.glGenBuffers();GL33.glBindVertexArray(vao);GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER,vb);GL33.glBufferData(GL33.GL_ARRAY_BUFFER,new float[]{-.09f,-.08f,0,.09f,-.08f,0,.09f,.08f,0,-.09f,.08f,0},GL33.GL_STATIC_DRAW);GL33.glVertexAttribPointer(0,3,GL33.GL_FLOAT,false,12,0L);GL33.glEnableVertexAttribArray(0);GL33.glBindBuffer(GL33.GL_ELEMENT_ARRAY_BUFFER,ib);GL33.glBufferData(GL33.GL_ELEMENT_ARRAY_BUFFER,new int[]{0,1,2,0,2,3},GL33.GL_STATIC_DRAW);
+  int texture=GL33.glGenTextures();GL33.glActiveTexture(GL33.GL_TEXTURE0);GL33.glBindTexture(GL33.GL_TEXTURE_2D,texture);ByteBuffer texel=BufferUtils.createByteBuffer(4);texel.put(new byte[]{(byte)255,(byte)255,(byte)255,(byte)255}).flip();GL33.glTexImage2D(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA8,1,1,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,texel);GL33.glTexParameteri(GL33.GL_TEXTURE_2D,GL33.GL_TEXTURE_MIN_FILTER,GL33.GL_NEAREST);GL33.glTexParameteri(GL33.GL_TEXTURE_2D,GL33.GL_TEXTURE_MAG_FILTER,GL33.GL_NEAREST);
+  var array=new VertexArray();array.vao=vao;var calls=new ArrayList<Call>();for(int i=0;i<8;i++)calls.add(new Call(array,-.85f+i*.24f,i%2==0?-.2f:.2f,(i-3)*.05f));
+  GL33.glClearColor(0,0,0,1);GL33.glUseProgram(original);GL33.glClear(GL33.GL_COLOR_BUFFER_BIT);for(var call:calls){array.bind();call.state.apply();array.materialProperties.vertexAttributeState.apply();GL33.glDrawElements(GL33.GL_TRIANGLES,6,GL33.GL_UNSIGNED_INT,0L);}byte[] expected=pixels();check(Arrays.stream(new int[]{expected[3]&255}).sum()>0,"readback");
+  GL33.glUseProgram(instanced);GL33.glClear(GL33.GL_COLOR_BUFFER_BIT);VertexAttributeState.applies=0;check(OculusInstanceRenderer.draw(calls,0,8),"instanced bridge rejected group");check(VertexAttributeState.applies==2,"full call/material apply must run once per group");check(GL33.glGetUniformi(instanced,GL33.glGetUniformLocation(instanced,"mtr_Instanced"))==0,"ordinary mode restored");byte[] actual=pixels();int differences=0;for(int i=0;i<actual.length;i++)if(actual[i]!=expected[i])differences++;check(differences==0,"ordinary/instance pixels differ: "+differences);
+  // A later ordinary draw using this same patched program must keep its own matrix and custom uniforms.
+  GL33.glClear(GL33.GL_COLOR_BUFFER_BIT);for(var call:calls){array.bind();call.state.apply();array.materialProperties.vertexAttributeState.apply();GL33.glDrawElements(GL33.GL_TRIANGLES,6,GL33.GL_UNSIGNED_INT,0L);}check(Arrays.equals(expected,pixels()),"subsequent ordinary draw changed");
+  check(GL33.glGetError()==GL33.GL_NO_ERROR,"OpenGL error");OculusInstanceRenderer.clear();GL33.glDeleteTextures(texture);GL33.glDeleteBuffers(vb);GL33.glDeleteBuffers(ib);GL33.glDeleteVertexArrays(vao);GL33.glDeleteProgram(original);GL33.glDeleteProgram(instanced);GLFW.glfwDestroyWindow(window);GLFW.glfwTerminate();
+  System.out.println("PASS: real GL preflight/fallback, eight matrices/inverses/normals, complete apply/custom uniforms/sampler, identical pixels, ordinary mode restored");
+ }
+}'''
+with tempfile.TemporaryDirectory(prefix='mtr-oculus-gl-') as tmp:
+ base=Path(tmp); jars=[]
+ for module in ['lwjgl','lwjgl-glfw','lwjgl-opengl']:
+  for suffix in ['', '-natives-linux']:
+   url=f'https://repo.maven.apache.org/maven2/org/lwjgl/{module}/3.3.1/{module}-3.3.1{suffix}.jar'
+   data=urllib.request.urlopen(url).read();expected=urllib.request.urlopen(url+'.sha1').read().decode().strip()
+   assert hashlib.sha1(data).hexdigest()==expected
+   jar=base/url.rsplit('/',1)[1];jar.write_bytes(data);jars.append(jar)
+ url='https://repo.maven.apache.org/maven2/org/joml/joml/1.10.5/joml-1.10.5.jar';data=urllib.request.urlopen(url).read();assert hashlib.sha1(data).hexdigest()==urllib.request.urlopen(url+'.sha1').read().decode().strip();jar=base/'joml.jar';jar.write_bytes(data);jars.append(jar)
+ for name,content in STUBS.items():
+  p=base/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(content)
+ for name in ['OculusInstanceRenderer','InstanceShaderSource','RenderCallData']:
+  shutil.copy(ROOT/'fabric/src/main/java/org/mtr/mod/render'/f'{name}.java',base/'org/mtr/mod/render')
+ (base/'OculusGlTest.java').write_text(TEST)
+ cp=os.pathsep.join(map(str,jars));subprocess.run(['javac','-cp',cp,'-d',tmp,*map(str,base.rglob('*.java'))],check=True)
+ subprocess.run(['java','-cp',tmp+os.pathsep+cp,'OculusGlTest'],check=True)

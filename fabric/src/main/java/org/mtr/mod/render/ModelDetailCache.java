@@ -13,8 +13,8 @@ import java.util.*;
 public final class ModelDetailCache {
     private static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.next.lod","true"));
     private static final double MAIN_DISTANCE=positive("mtr.next.lodDistance",160),SHADOW_DISTANCE=positive("mtr.next.shadowLodDistance",64);
-    private static final Map<Mesh,RawMesh> PENDING=new WeakHashMap<>();
-    private static final Map<VertexArray,Owner> LEVELS=new WeakHashMap<>();
+    private static final Map<Mesh,RawMesh> PENDING=Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<VertexArray,Owner> LEVELS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Cleaner CLEANER=Cleaner.create();
     private static final java.util.concurrent.atomic.AtomicInteger BYTES=new java.util.concurrent.atomic.AtomicInteger();
     private static final int MAX_BYTES=8*1024*1024;

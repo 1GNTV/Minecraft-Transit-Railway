@@ -9,7 +9,7 @@ import java.util.*;
 /** Conservative per-mesh clip test before applying attributes; unknown/custom shader geometry fails open. */
 public final class ModelPartVisibility {
     private record Bounds(float x0,float y0,float z0,float x1,float y1,float z1){}
-    private static final Map<VertexArray,Bounds> BOUNDS=new WeakHashMap<>();
+    private static final Map<VertexArray,Bounds> BOUNDS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final org.joml.Matrix4f CLIP=new org.joml.Matrix4f();
     private static final org.joml.Vector4f CORNER=new org.joml.Vector4f();
     private ModelPartVisibility(){}

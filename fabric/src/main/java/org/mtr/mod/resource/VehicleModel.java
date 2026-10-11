@@ -111,7 +111,10 @@ public final class VehicleModel extends VehicleModelSchema {
 		return modelProperties.toVehicleModelWrapper(modelResource, textureResource, modelPropertiesResource, positionDefinitionsResource, flipTextureV, parts);
 	}
 
-	public void prepareAsync() { ModelPreparation.request(this, modelResource, CustomResourceTools.formatIdentifierWithDefault(textureResource, "png"), resourceProvider); }
+	public void prepareAsync() {
+		try { if (modelResource.endsWith(".bbmodel") || ModelResourceLoader.isSupportedModelResource(modelResource)) ModelPreparation.request(this, modelResource, CustomResourceTools.formatIdentifierWithDefault(textureResource, "png"), resourceProvider); }
+		catch (RuntimeException ignored) { /* A speculative source failure must leave ordinary loading available. */ }
+	}
 
 	private DynamicVehicleModel createModel(ModelProperties modelProperties, PositionDefinitions positionDefinitions, String id) {
 		final Identifier textureId = CustomResourceTools.formatIdentifierWithDefault(textureResource, "png");
