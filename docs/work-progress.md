@@ -26,6 +26,17 @@ Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucun
 
 ## État de l'inventaire
 
+## Lot 3 — durée de vie des images et buffers
+
+- 27 / 33 / S4 / S7 partiels : les textures terminées sont marquées par génération de rechargement. Une ancienne génération ferme son image plutôt que publier un résultat périmé. File de complétions limitée à 16 images ; au maximum deux complétions traitées par fenêtre de 16,67 ms (interrupteur `-Dmtr.v4.textureUploadBudget=false`). Cela borne le nombre de publications, **pas** le temps d'une grande publication ou la mémoire totale des images. La queue des tâches de génération CPU reste à borner selon les mesures.
+- Le recadrage est déplacé du rendu vers le worker existant et ferme l'image source remplacée, y compris sur exception. Les erreurs de création/enregistrement ferment l'image ou la texture dont la propriété n'a pas été transférée. Les images nouvellement publiées reçoivent immédiatement leur TTL, avant la prochaine collecte.
+- Chargement des polices sans boucle infinie ; une génération périmée ne réinstalle pas ses anciennes polices. Une police indisponible n'est pas remplacée silencieusement par un autre rendu.
+- Les buffers créés par le compilateur Work ont désormais une propriété explicite : fermeture avec leur VAO, aliases suivis et nettoyage des buffers à la collecte du dernier propriétaire. Ceci ne prétend pas réparer l'ensemble de la durée de vie des ressources historiques des mappings. Le Cleaner des buffers n'efface pas les VAO historiques abandonnés sans close.
+- Tests locaux sur les vrais helpers : libération unique avec aliases et Cleaner, image inchangée/transférée, recadrage, erreurs d'allocation/copie, capacité et budget de queue, invalidation concurrente de génération. Aucune annonce de correction d'un pic FPS mesuré.
+- La CI du lot 2 a compilé les sources du mod, puis échoué sur un nom erroné du matériau glow **dans un test** (`CUTOUT_GLOW` au lieu de `CUTOUT_GLOWING`). Le nom est corrigé dans ce lot ; validation de géométrie et artefact final attendue dans la CI suivante.
+
+## État consolidé
+
 01, 03, 04, 19, 24, 28, 33 et S2–S5/S7 ont une réalisation partielle ou un prototype. Aucune des 40 pistes n'est déclarée entièrement validée. S1 et S8 exigent le scénario réel et des captures comparables. Les autres pistes restent étudiées ou à développer selon les nouvelles mesures.
 
 L'ordre est celui de [la cartographie](mtr-performance-map-fr.md). Les pistes conditionnelles nécessitent leurs compteurs/profils pour choisir une architecture et vérifier le gain net ; le code compilé ne suffit pas.

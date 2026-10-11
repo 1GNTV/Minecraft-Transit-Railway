@@ -3,6 +3,9 @@ package org.mtr.mod.mixin;
 import org.mtr.mapping.render.vertex.VertexAttributeMapping;
 import org.mtr.mapping.render.vertex.VertexAttributeSource;
 import org.mtr.mapping.render.object.IndexBuffer;
+import org.mtr.mapping.render.object.VertexArray;
+import org.mtr.mapping.render.batch.MaterialProperties;
+import org.mtr.mod.render.GpuMeshOwnership;
 import org.mtr.mod.render.GlVertexAttributeCache;
 import org.mtr.mod.render.RenderPipelineMetrics;
 import org.spongepowered.asm.mixin.Final;
@@ -19,6 +22,16 @@ public abstract class VertexArrayAttributeBoundaryMixin {
 
 	@Shadow @Final public VertexAttributeMapping mapping;
 	@Shadow @Final public IndexBuffer indexBuffer;
+
+	@Inject(method = "<init>(Lorg/mtr/mapping/render/object/VertexArray;Lorg/mtr/mapping/render/batch/MaterialProperties;)V", at = @At("RETURN"))
+	private void mtr$shareWorkBuffers(VertexArray original, MaterialProperties material, CallbackInfo ci) {
+		GpuMeshOwnership.alias((VertexArray) (Object) this, original);
+	}
+
+	@Inject(method = "close", at = @At("RETURN"))
+	private void mtr$releaseWorkBuffers(CallbackInfo ci) {
+		GpuMeshOwnership.close((VertexArray) (Object) this);
+	}
 
 	@Inject(method = "draw", at = @At("RETURN"))
 	private void mtr$afterDraw(CallbackInfo ci) {

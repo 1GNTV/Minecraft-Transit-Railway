@@ -27,6 +27,8 @@ jobs:
         run: python3 tools/test_render_diagnostics.py
       - name: Check rail sector budgets and ownership
         run: python3 tools/test_rail_sector_cache.py
+      - name: Check CPU image and GPU buffer ownership
+        run: python3 tools/test_resource_lifecycle.py
       - name: Build web resources
         run: |
           chmod +x gradlew

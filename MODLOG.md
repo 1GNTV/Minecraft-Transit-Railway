@@ -16,3 +16,6 @@
 ### Work : prototype de secteurs de rails
 
 Regroupement shaderless optionnel des rails opaques statiques : sélection originale conservée, lumière par segment, signature exacte, construction et résidence bornées. Ressources incompatibles et shader packs conservent le chemin précédent. Aucun gain FPS annoncé ; tests de propriété/invalidation locaux réussis, géométrie et compilation en CI.
+### Work : images dynamiques et propriété des buffers
+
+Résultats de textures invalidés par génération, file de complétions et publications bornées, recadrage CPU sur worker avec libération des images remplacées. Propriété explicite des buffers créés par le compilateur Work, fermeture unique des aliases et nettoyage des buffers à la collecte. Tests locaux de capacité, races et libération réussis. Correction du nom de matériau glow dans le test CI du prototype de rails.

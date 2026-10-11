@@ -71,6 +71,7 @@ public final class ModelMeshCompiler {
             Init.LOGGER.info("MTR Work mixed upload: blockbench-groups={}, obj-parts={}, source-draws={}, uploaded-draws={}", groups.size(), objects.size(), combiner.sourceDraws(), arrays.size());
         }
         final OptimizedModel model = new OptimizedModel(arrays);
+        for (int i = 0; i < arrays.size(); i++) GpuMeshOwnership.attach(arrays.get(i), meshes.get(i));
         if (retainRailGeometry) RailGeometrySnapshots.retain(model, combiner.meshes());
         return model;
     }

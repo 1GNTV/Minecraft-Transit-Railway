@@ -52,7 +52,7 @@ public class RailBatchGeometryTest {
         assertTrue(RailBatchGeometry.eligible(List.of(solid)));
         assertFalse(RailBatchGeometry.eligible(List.of()));
         assertFalse(RailBatchGeometry.eligible(List.of(solid, mesh(OptimizedModel.ShaderType.TRANSLUCENT))));
-        assertFalse(RailBatchGeometry.eligible(List.of(solid, mesh(OptimizedModel.ShaderType.CUTOUT_GLOW))));
+        assertFalse(RailBatchGeometry.eligible(List.of(solid, mesh(OptimizedModel.ShaderType.CUTOUT_GLOWING))));
         solid.vertices.get(0).normal = null;
         assertFalse(RailBatchGeometry.eligible(List.of(solid)));
     }
