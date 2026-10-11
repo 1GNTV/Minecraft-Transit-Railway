@@ -1,0 +1,30 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.mtr.mod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MaterialPropertiesMixin",
+    "VertexAttributeStateMixin",
+    "OptimizedRendererPassMixin",
+    "ShaderBatchBoundaryMixin",
+    "VertexArrayAttributeBoundaryMixin",
+    "HiddenTranslucentQueueMixin",
+    "OptimizedObjModelAccessor",
+    "OptimizedObjModelMixin",
+    "OptimizedMaterialGroupAccessor",
+    "OptimizedModelLayoutAccessor",
+    "RenderCallMetricsMixin",
+    "BatchInstancingMixin",
+    "ShaderReloadGenerationMixin",
+    "RawModelUploadMixin",
+    "PreparedObjModelAccessor",
+    "ModelAtlasAccessor",
+    "OculusInstanceShaderMixin",
+    "ModelDetailUploadMixin",
+    "ModShaderShadowStateMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

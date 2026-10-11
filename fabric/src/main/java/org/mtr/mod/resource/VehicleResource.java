@@ -218,6 +218,12 @@ public final class VehicleResource extends VehicleResourceSchema {
 		return null;
 	}
 
+	public void prepareModels(int carNumber, int totalCars) {
+		getAllModels(carNumber,totalCars).forEach(VehicleModel::prepareAsync);
+		bogie1Models.forEach(VehicleModel::prepareAsync);
+		bogie2Models.forEach(VehicleModel::prepareAsync);
+	}
+
 	public void queue(StoredMatrixTransformations storedMatrixTransformations, VehicleExtension vehicle, int carNumber, int totalCars, int light, boolean noOpenDoorways) {
 		final VehicleResourceCache vehicleResourceCache = getCachedVehicleResource(carNumber, totalCars, false);
 		if (vehicleResourceCache != null) {
@@ -520,8 +526,8 @@ public final class VehicleResource extends VehicleResourceSchema {
 			if (matchesCondition(vehicle, partCondition, noOpenDoorways)) {
 				MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 					storedMatrixTransformations.transform(graphicsHolder, offset);
-					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light);
-					graphicsHolder.pop();
+					double previousDistance=org.mtr.mod.render.ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
+					try { CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(optimizedModel, graphicsHolder, light, org.mtr.mod.render.RenderPipelineMetrics.Family.TRAIN); } finally { org.mtr.mod.render.ModelDetailCache.restoreDistance(previousDistance); graphicsHolder.pop(); }
 				});
 			}
 		});
@@ -534,21 +540,18 @@ public final class VehicleResource extends VehicleResourceSchema {
 	) {
 		return new CachedResource<>(() -> {
 			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.beginReload();
+			org.mtr.mod.render.ModelDetailCache.beginVehicleUpload();
+			try {
 			final Object2ObjectOpenHashMap<PartCondition, OptimizedModelWrapper> optimizedModels = new Object2ObjectOpenHashMap<>();
 
 			for (final PartCondition partCondition : PartCondition.values()) {
-				final OptimizedModelWrapper optimizedModel1;
 				final ObjectArrayList<OptimizedModelWrapper.MaterialGroupWrapper> materialGroups = materialGroupsModel.get(partCondition);
-				optimizedModel1 = materialGroups == null ? null : OptimizedModelWrapper.fromMaterialGroups(materialGroups);
-
-				final OptimizedModelWrapper optimizedModel2;
 				final ObjectArrayList<OptimizedModelWrapper.ObjModelWrapper> objModels = objModelsModel.get(partCondition);
-				optimizedModel2 = objModels == null ? null : OptimizedModelWrapper.fromObjModels(objModels);
-				optimizedModels.put(partCondition, new OptimizedModelWrapper(optimizedModel1, optimizedModel2));
+				optimizedModels.put(partCondition, OptimizedModelWrapper.fromCompatibleSources(materialGroups, objModels));
 			}
 
-			CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload();
 			return optimizedModels;
+			} finally { org.mtr.mod.render.ModelDetailCache.endVehicleUpload(); CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.finishReload(); }
 		}, modelLifespan);
 	}
 

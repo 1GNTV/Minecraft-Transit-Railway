@@ -1,0 +1,194 @@
+{
+  "reference_commit": "db74325bcdb362322c4df000057a58b38ae98fcf",
+  "source": "User-tested Forge artifact; crash report 2026-10-11 TJMetro 1.1.0 beforeRenderConnection",
+  "upstream_mixin": "https://github.com/ZiYueCommentary/Tianjin-Metro/blob/446ef46d997602e33f8dbe0eb7bc4ed1a37274ef/fabric/src/main/java/ziyue/tjmetro/mod/mixin/RenderVehiclesMixin.java",
+  "tjmetro_target_descriptor": "(ZZZLorg/mtr/mod/render/RenderVehicles$PreviousConnectionPositions;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mod/render/PositionAndRotation;ZDDDDDDZ)V",
+  "classes": {
+    "org.mtr.mod.render.RenderVehicles": [
+      {
+        "kind": "field",
+        "name": "CACHE_POSES",
+        "descriptor": "Z",
+        "flags": 26
+      },
+      {
+        "kind": "field",
+        "name": "POSES",
+        "descriptor": "Lorg/mtr/mod/render/FrameMemoizer;",
+        "flags": 26
+      },
+      {
+        "kind": "field",
+        "name": "RIDING_PLAYER_INTERPOLATIONS",
+        "descriptor": "Lorg/mtr/libraries/it/unimi/dsi/fastutil/objects/ObjectArrayList;",
+        "flags": 25
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "()V",
+        "flags": 1
+      },
+      {
+        "kind": "method",
+        "name": "beginFrame",
+        "descriptor": "()V",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "endFrame",
+        "descriptor": "()V",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "preparePose",
+        "descriptor": "(Lorg/mtr/mod/data/VehicleExtension;J)Lorg/mtr/libraries/it/unimi/dsi/fastutil/objects/ObjectArrayList;",
+        "flags": 10
+      },
+      {
+        "kind": "method",
+        "name": "render",
+        "descriptor": "(JLorg/mtr/mapping/holder/Vector3d;)V",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "getRenderPositionAndRotation",
+        "descriptor": "(Lorg/mtr/mapping/holder/Vector3d;Ljava/lang/Double;Lorg/mtr/mod/render/PositionAndRotation;Lorg/mtr/mod/render/PositionAndRotation;Lorg/mtr/mapping/holder/Vector3d;)Lorg/mtr/mod/render/PositionAndRotation;",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "getStoredMatrixTransformations",
+        "descriptor": "(ZLorg/mtr/mod/render/PositionAndRotation;D)Lorg/mtr/mod/render/StoredMatrixTransformations;",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "renderPlayer",
+        "descriptor": "(Lorg/mtr/mapping/holder/Entity;IDDLorg/mtr/mapping/holder/Vector3d;Lorg/mtr/mapping/holder/Vector3d;Ljava/lang/Double;Lorg/mtr/mod/render/PositionAndRotation;Lorg/mtr/mod/render/PositionAndRotation;Lorg/mtr/mapping/holder/Vector3d;)V",
+        "flags": 9
+      },
+      {
+        "kind": "method",
+        "name": "renderConnection",
+        "descriptor": "(ZZZLorg/mtr/mod/render/RenderVehicles$PreviousConnectionPositions;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mapping/holder/Identifier;Lorg/mtr/mod/render/PositionAndRotation;ZDDDDDDZ)V",
+        "flags": 10
+      },
+      {
+        "kind": "method",
+        "name": "drawTexture",
+        "descriptor": "(Lorg/mtr/mapping/mapper/GraphicsHolder;Lorg/mtr/core/tool/Vector;Lorg/mtr/core/tool/Vector;Lorg/mtr/core/tool/Vector;Lorg/mtr/core/tool/Vector;Lorg/mtr/mapping/holder/Vector3d;I)V",
+        "flags": 10
+      },
+      {
+        "kind": "method",
+        "name": "iterateWithIndex",
+        "descriptor": "(Lorg/mtr/libraries/it/unimi/dsi/fastutil/objects/ObjectArrayList;Lorg/mtr/mod/render/RenderVehicles$IndexedConsumer;)V",
+        "flags": 10
+      },
+      {
+        "kind": "method",
+        "name": "getPositionFromPercentage",
+        "descriptor": "(DDD)D",
+        "flags": 10
+      }
+    ],
+    "org.mtr.mod.render.RenderVehicles$PreviousConnectionPositions": [
+      {
+        "kind": "field",
+        "name": "position1",
+        "descriptor": "Lorg/mtr/core/tool/Vector;",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "position2",
+        "descriptor": "Lorg/mtr/core/tool/Vector;",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "position3",
+        "descriptor": "Lorg/mtr/core/tool/Vector;",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "position4",
+        "descriptor": "Lorg/mtr/core/tool/Vector;",
+        "flags": 2
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "()V",
+        "flags": 1
+      },
+      {
+        "kind": "method",
+        "name": "isValid",
+        "descriptor": "()Z",
+        "flags": 2
+      }
+    ],
+    "org.mtr.mod.render.RenderVehicles$RidingPlayerInterpolation": [
+      {
+        "kind": "field",
+        "name": "ridingCar",
+        "descriptor": "I",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "previousX",
+        "descriptor": "D",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "previousY",
+        "descriptor": "D",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "previousZ",
+        "descriptor": "D",
+        "flags": 2
+      },
+      {
+        "kind": "field",
+        "name": "uuid",
+        "descriptor": "Ljava/util/UUID;",
+        "flags": 17
+      },
+      {
+        "kind": "field",
+        "name": "interpolationX",
+        "descriptor": "Lorg/mtr/mod/resource/Interpolation;",
+        "flags": 18
+      },
+      {
+        "kind": "field",
+        "name": "interpolationY",
+        "descriptor": "Lorg/mtr/mod/resource/Interpolation;",
+        "flags": 18
+      },
+      {
+        "kind": "field",
+        "name": "interpolationZ",
+        "descriptor": "Lorg/mtr/mod/resource/Interpolation;",
+        "flags": 18
+      },
+      {
+        "kind": "method",
+        "name": "<init>",
+        "descriptor": "(Ljava/util/UUID;)V",
+        "flags": 1
+      }
+    ]
+  }
+}

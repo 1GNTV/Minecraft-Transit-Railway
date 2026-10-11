@@ -2,7 +2,7 @@
 
 ## Scope and baseline
 
-**Baseline:** `perf/forge-1201` (V2), not the slower `perf/forge-1201-v3` experiment.
+**Baseline correction (2026-10-11):** `perf/forge-1201` (`0242e7b`) predates the V2 rendering additions on `perf/forge-1201-render-pipeline` (`dadf9c9`). V4 was based on that earlier branch and therefore omitted those additions. Preserve the full V2 pipeline branch as the measured reference. See `mtr-v4-work-optimization.md` for the actual profile/source comparison and targeted recovery; the slower V3 experiment remains excluded.
 **Target:** heavy stations, including stationary camera/no nearby trains; same behavior, assets, shaders, signs, railway geometry, and inter-mod compatibility.
 **User measurements (same world, different branch tests):** V2 ~65–75 FPS with shaders and ~100–125 FPS without. V3 ~60–70 FPS with shaders and worse without. These measurements are approximate, **not** validated comparable 1% lows.
 **Goal:** sustained FPS above V2, with a stretch goal of +100 FPS versus original stock MTR only where the hardware-bound bottleneck permits it. No guaranteed FPS figure.

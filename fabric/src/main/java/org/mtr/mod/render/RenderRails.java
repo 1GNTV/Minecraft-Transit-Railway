@@ -286,17 +286,7 @@ public class RenderRails implements IGui {
 				final boolean flip = newStyle.endsWith("_2");
 				CustomResourceLoader.getRailById(RailResource.getIdWithoutDirection(newStyle), railResource -> renderWithinRenderDistance(rail, (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 					final int light = LightmapTextureManager.pack(clientWorld.getLightLevel(LightType.getBlockMapped(), blockPos), clientWorld.getLightLevel(LightType.getSkyMapped(), blockPos));
-					final double differenceX = x3 - x1;
-					final double differenceZ = z3 - z1;
-					final double yaw = Math.atan2(differenceZ, differenceX);
-					final double pitch = Math.atan2(y2 - y1, Math.sqrt(differenceX * differenceX + differenceZ * differenceZ));
-					final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations((x1 + x3) / 2, (y1 + y2) / 2 + railResource.getModelYOffset(), (z1 + z3) / 2);
-					storedMatrixTransformations.add(graphicsHolder -> {
-						graphicsHolder.rotateYRadians((float) (Math.PI / 2 - yaw + (flip ? Math.PI : 0)));
-						graphicsHolder.rotateXRadians((float) (Math.PI - pitch * (flip ? -1 : 1)));
-						graphicsHolder.rotateZDegrees((float) ((x1 * z1) % 10) / 100);
-					});
-					railResource.render(storedMatrixTransformations, light);
+					RailSectorBatcher.submit(railResource,x1,z1,x3,z3,y1,y2,flip,light);
 					renderType[1] = true;
 				}, railResource.getRepeatInterval(), 0, 0));
 			}

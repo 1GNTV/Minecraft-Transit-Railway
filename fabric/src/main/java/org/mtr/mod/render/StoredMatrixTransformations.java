@@ -51,6 +51,13 @@ public class StoredMatrixTransformations {
 		transformations.forEach(transformation -> transformation.accept(graphicsHolder));
 	}
 
+	public double distanceSquaredToCamera() {
+		if (!useDefaultOffset) return 0; // Riding transforms always retain full detail.
+		var camera=org.mtr.mapping.holder.MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
+		double x=initialTranslateX-camera.getXMapped(),y=initialTranslateY-camera.getYMapped(),z=initialTranslateZ-camera.getZMapped();
+		return x*x+y*y+z*z;
+	}
+
 	public StoredMatrixTransformations copy() {
 		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations(useDefaultOffset, initialTranslateX, initialTranslateY, initialTranslateZ);
 		storedMatrixTransformations.transformations.addAll(transformations);

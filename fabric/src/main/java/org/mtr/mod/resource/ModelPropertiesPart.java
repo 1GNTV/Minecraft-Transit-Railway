@@ -357,7 +357,9 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 					if (partDetails.flipped) {
 						graphicsHolder.rotateYDegrees(180);
 					}
-					CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(partDetails.optimizedModelDoor, graphicsHolder, light);
+					double previousDistance=org.mtr.mod.render.ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
+                    try { CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(partDetails.optimizedModelDoor, graphicsHolder, light, org.mtr.mod.render.RenderPipelineMetrics.Family.TRAIN); }
+                    finally { org.mtr.mod.render.ModelDetailCache.restoreDistance(previousDistance); }
 					graphicsHolder.pop();
 				}
 			} else {

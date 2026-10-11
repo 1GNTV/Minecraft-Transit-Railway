@@ -1,5 +1,10 @@
 # gradle
 
+# Local render/profile investigation inputs and downloaded build artifacts
+analysis/
+artifacts/
+__pycache__/
+
 .gradle/
 build/
 out/

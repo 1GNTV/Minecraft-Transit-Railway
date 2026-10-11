@@ -15,10 +15,14 @@ public final class PositionAndRotation {
 	public final int light;
 
 	public PositionAndRotation(Vector position, double yaw, double pitch) {
+		this(position, yaw, pitch, true);
+	}
+
+	private PositionAndRotation(Vector position, double yaw, double pitch, boolean sampleLight) {
 		this.position = position;
 		this.yaw = yaw;
 		this.pitch = pitch;
-		light = getLight(position);
+		light = sampleLight ? getLight(position) : 0;
 	}
 
 	public PositionAndRotation(Vector position1, Vector position2, boolean hasPitch) {
@@ -26,6 +30,10 @@ public final class PositionAndRotation {
 	}
 
 	public PositionAndRotation(ObjectArrayList<PositionAndRotation> bogiePositions, VehicleCar vehicleCar, boolean hasPitch) {
+		this(bogiePositions, vehicleCar, hasPitch, true);
+	}
+
+	public PositionAndRotation(ObjectArrayList<PositionAndRotation> bogiePositions, VehicleCar vehicleCar, boolean hasPitch, boolean sampleLight) {
 		if (bogiePositions.size() == 1 || bogiePositions.size() == 2) {
 			final Vector bogiesMidpoint;
 
@@ -56,8 +64,13 @@ public final class PositionAndRotation {
 			pitch = 0;
 		}
 
-		light = getLight(position);
+		light = sampleLight ? getLight(position) : 0;
 	}
+
+	public static PositionAndRotation geometry(Vector first, Vector second, boolean hasPitch) {
+		return new PositionAndRotation(Vector.getAverage(first, second), getYaw(first, second), hasPitch ? getPitch(first, second) : 0, false);
+	}
+	public PositionAndRotation withLight() { return new PositionAndRotation(position, yaw, pitch, true); }
 
 	public <T> T transformForwards(T initialValue, Rotate<T> rotateX, Rotate<T> rotateY, Translate<T> translate) {
 		return translate.apply(rotateY.apply(rotateX.apply(initialValue, (float) pitch), (float) yaw), position.x, position.y, position.z);

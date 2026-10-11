@@ -1,6 +1,6 @@
 package org.mtr.mod.client;
 
-import org.mtr.core.servlet.MessageQueue;
+import org.mtr.mod.render.GenerationUploadQueue;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -27,12 +27,14 @@ import java.util.function.Supplier;
 
 public class DynamicTextureCache implements IGui {
 
-	private Font font;
-	private Font fontCjk;
+	private volatile Font font;
+	private volatile Font fontCjk;
 
 	private final Object2ObjectLinkedOpenHashMap<String, DynamicResource> dynamicResources = new Object2ObjectLinkedOpenHashMap<>();
 	private final ObjectOpenHashSet<String> generatingResources = new ObjectOpenHashSet<>();
-	private final MessageQueue<Runnable> resourceRegistryQueue = new MessageQueue<>();
+	private final GenerationUploadQueue resourceRegistryQueue = new GenerationUploadQueue(16);
+	private static final boolean BUDGET_UPLOADS = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.textureUploadBudget", "true"));
+	private long nextUploadWindow;
 	private final Object2LongArrayMap<Identifier> deletedResources = new Object2LongArrayMap<>();
 
 	public static DynamicTextureCache instance = new DynamicTextureCache();
@@ -47,7 +49,7 @@ public class DynamicTextureCache implements IGui {
 	/**
 	 * Clear all asset-related cache and mark all dynamic textures to be drawn.
 	 */
-	public void reload() {
+	public synchronized void reload() {
 		font = null;
 		fontCjk = null;
 		refresh();
@@ -56,7 +58,8 @@ public class DynamicTextureCache implements IGui {
 	/**
 	 * Mark all dynamic textures to be redrawn.
 	 */
-	public void refresh() {
+	public synchronized void refresh() {
+		resourceRegistryQueue.invalidate();
 		Init.LOGGER.debug("Refreshing dynamic resources; {} textures in memory; {} textures queued to be destroyed", dynamicResources.size(), deletedResources.size());
 		dynamicResources.values().forEach(dynamicResource -> dynamicResource.needsRefresh = true);
 		generatingResources.clear();
@@ -65,6 +68,7 @@ public class DynamicTextureCache implements IGui {
 	private long lastExpirySweepMillis;
 
 	public void tick() {
+		drainUploads();
 		// Expiration is a housekeeping task, not a per-frame rendering task.
 		final long now = System.currentTimeMillis();
 		if (now - lastExpirySweepMillis < 1000) {
@@ -238,8 +242,54 @@ public class DynamicTextureCache implements IGui {
 		return pixels;
 	}
 
+	private void registerGenerated(String key, @Nullable NativeImage image) {
+		if (image == null) return;
+		NativeImageBackedTexture texture = null;
+		boolean registered = false;
+		try {
+			texture = new NativeImageBackedTexture(image);
+			final Identifier identifier = new Identifier(Init.MOD_ID, "id_" + Init.randomString());
+			MinecraftClient.getInstance().getTextureManager().registerTexture(identifier, new AbstractTexture(texture.data));
+			registered = true;
+			final DynamicResource previous = dynamicResources.put(key, new DynamicResource(identifier, texture));
+			if (previous != null) {
+				previous.remove();
+				deletedResources.put(previous.identifier, System.currentTimeMillis() + COOLDOWN_TIME);
+			}
+		} finally {
+			if (!registered) { if (texture != null) texture.close(); else image.close(); }
+		}
+	}
+
+	private void drainUploads() {
+		final long now = System.nanoTime();
+		if (BUDGET_UPLOADS && now < nextUploadWindow) return;
+		nextUploadWindow = now + 16_666_667L;
+		resourceRegistryQueue.drain(BUDGET_UPLOADS ? 2 : Integer.MAX_VALUE);
+	}
+
+	private void finishGeneration(String key, long generation) {
+		MinecraftClient.getInstance().execute(() -> {
+			if (generation == resourceRegistryQueue.generation()) generatingResources.remove(key);
+		});
+	}
+
+	private void loadFont(boolean cjk, long generation) {
+		if ((cjk ? fontCjk : font) != null) return;
+		ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID, cjk ? "font/noto-serif-cjk-tc-semibold.ttf" : "font/noto-sans-semibold.ttf"), inputStream -> {
+			try {
+				final Font loaded = Font.createFont(Font.TRUETYPE_FONT, inputStream);
+				synchronized (this) {
+					if (generation == resourceRegistryQueue.generation()) {
+						if (cjk) fontCjk = loaded; else font = loaded;
+					}
+				}
+			} catch (Exception error) { Init.LOGGER.error("Could not load dynamic texture font", error); }
+		});
+	}
+
 	private DynamicResource getResource(String key, Supplier<NativeImage> supplier, DefaultRenderingColor defaultRenderingColor) {
-		resourceRegistryQueue.process(Runnable::run);
+		drainUploads();
 		final DynamicResource dynamicResource = dynamicResources.get(key);
 
 		if (dynamicResource != null && !dynamicResource.needsRefresh) {
@@ -251,60 +301,27 @@ public class DynamicTextureCache implements IGui {
 			return defaultRenderingColor.dynamicResource;
 		}
 
+		final long generation = resourceRegistryQueue.generation();
+		final int maximumImageSize = MAX_IMAGE_SIZE * (int) Math.pow(2, Config.getClient().getDynamicTextureResolution());
 		MainRenderer.WORKER_THREAD.scheduleDynamicTextures(() -> {
-			while (font == null) {
-				ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID, "font/noto-sans-semibold.ttf"), inputStream -> {
-					try {
-						font = Font.createFont(Font.TRUETYPE_FONT, inputStream);
-					} catch (Exception e) {
-						Init.LOGGER.error("", e);
-					}
-				});
-			}
-
-			while (fontCjk == null) {
-				ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID, "font/noto-serif-cjk-tc-semibold.ttf"), inputStream -> {
-					try {
-						fontCjk = Font.createFont(Font.TRUETYPE_FONT, inputStream);
-					} catch (Exception e) {
-						Init.LOGGER.error("", e);
-					}
-				});
-			}
-
-			final NativeImage nativeImage = supplier.get();
-
-			resourceRegistryQueue.put(() -> {
-				final DynamicResource staticTextureProviderOld = dynamicResources.get(key);
-				if (staticTextureProviderOld != null) {
-					staticTextureProviderOld.remove();
-					deletedResources.put(staticTextureProviderOld.identifier, System.currentTimeMillis() + COOLDOWN_TIME);
+			try {
+				if (generation != resourceRegistryQueue.generation()) return;
+				loadFont(false, generation);
+				loadFont(true, generation);
+				if (font == null || fontCjk == null || generation != resourceRegistryQueue.generation()) {
+					finishGeneration(key, generation);
+					return;
 				}
-
-				final DynamicResource dynamicResourceNew;
-				if (nativeImage != null) {
-					final NativeImage newNativeImage;
-					final int newMaxImageSize = MAX_IMAGE_SIZE * (int) Math.pow(2, Config.getClient().getDynamicTextureResolution());
-					if (nativeImage.getWidth() > newMaxImageSize || nativeImage.getHeight() > newMaxImageSize) {
-						newNativeImage = new NativeImage(NativeImageFormat.getAbgrMapped(), Math.min(newMaxImageSize, nativeImage.getWidth()), Math.min(newMaxImageSize, nativeImage.getHeight()), false);
-						for (int x = 0; x < Math.min(newMaxImageSize, nativeImage.getWidth()); x++) {
-							for (int y = 0; y < Math.min(newMaxImageSize, nativeImage.getHeight()); y++) {
-								newNativeImage.setPixelColor(x, y, nativeImage.getColor(x, y));
-							}
-						}
-					} else {
-						newNativeImage = nativeImage;
-					}
-
-					final NativeImageBackedTexture nativeImageBackedTexture = new NativeImageBackedTexture(newNativeImage);
-					final Identifier identifier = new Identifier(Init.MOD_ID, "id_" + Init.randomString());
-					MinecraftClient.getInstance().getTextureManager().registerTexture(identifier, new AbstractTexture(nativeImageBackedTexture.data));
-					dynamicResourceNew = new DynamicResource(identifier, nativeImageBackedTexture);
-					dynamicResources.put(key, dynamicResourceNew);
-				}
-
-				generatingResources.remove(key);
-			});
+				final NativeImage nativeImage = org.mtr.mod.render.NativeImageCropper.crop(supplier.get(), maximumImageSize);
+				if (!resourceRegistryQueue.offer(generation, () -> {
+					try { registerGenerated(key, nativeImage); }
+					catch (Exception error) { Init.LOGGER.error("Could not register dynamic texture {}", key, error); }
+					finally { generatingResources.remove(key); }
+				}, () -> { if (nativeImage != null) nativeImage.close(); })) finishGeneration(key, generation);
+			} catch (Exception error) {
+				finishGeneration(key, generation);
+				Init.LOGGER.error("Could not prepare dynamic texture {}", key, error);
+			}
 		});
 		RouteMapGenerator.setConstants();
 		generatingResources.add(key);
@@ -328,6 +345,7 @@ public class DynamicTextureCache implements IGui {
 
 		private DynamicResource(Identifier identifier, @Nullable NativeImageBackedTexture nativeImageBackedTexture) {
 			this.identifier = identifier;
+			expiryTime = System.currentTimeMillis() + COOLDOWN_TIME;
 			if (nativeImageBackedTexture != null) {
 				final NativeImage nativeImage = nativeImageBackedTexture.getImage();
 				if (nativeImage != null) {

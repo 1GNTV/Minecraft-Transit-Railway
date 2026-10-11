@@ -67,6 +67,7 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 
 	@Override
 	public boolean shouldRender2(EntityRendering entity, Frustum frustum, double x, double y, double z) {
+		TrainVisibility.capture(frustum);
 		return true;
 	}
 
@@ -114,7 +115,9 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 		final Vector3d cameraShakeOffset = clientPlayerEntity.getPos().subtract(offset);
 		RenderVehicles.render(millisElapsed, cameraShakeOffset);
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
+		RailSectorBatcher.beginFrame();
 		RenderRails.render();
+		RailSectorBatcher.flush();
 
 		prepareRenderQueues();
 
@@ -155,11 +158,16 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 					if (renderLayer != null) {
 						graphicsHolder.createVertexConsumer(renderLayer);
 					}
-					value.forEach(renderer -> renderer.accept(graphicsHolder, offset));
+					value.forEach(renderer -> {
+                        WorldTextBatch.begin();
+                        try { renderer.accept(graphicsHolder, offset); }
+                        finally { WorldTextBatch.end(); }
+                    });
 				});
 			}
 		}
 
+		ModelDetailCache.beginPass();
 		CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.render(!Config.getClient().getHideTranslucentParts());
 	}
 

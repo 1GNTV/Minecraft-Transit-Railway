@@ -12,6 +12,7 @@ import org.mtr.mod.client.CustomResourceLoader;
 import org.mtr.mod.client.IDrawing;
 
 public class RenderEyeCandy extends BlockEntityRenderer<BlockEyeCandy.BlockEntity> {
+	private record RegionLocation(int x,int y,int z,String model) {}
 
 	public RenderEyeCandy(Argument dispatcher) {
 		super(dispatcher);
@@ -57,7 +58,7 @@ public class RenderEyeCandy extends BlockEntityRenderer<BlockEyeCandy.BlockEntit
 					graphicsHolderNew.rotateYRadians(blockEntity.getRotateY());
 					graphicsHolderNew.rotateZRadians(blockEntity.getRotateZ());
 				});
-				objectResource.render(storedMatrixTransformationsNew, newLight);
+				if (!StaticDecorationRegions.queue(objectResource, storedMatrixTransformationsNew, new RegionLocation(blockPos.getX(),blockPos.getY(),blockPos.getZ(),modelId), blockPos.getX()+0.5+blockEntity.getTranslateX(), blockPos.getY()+blockEntity.getTranslateY(), blockPos.getZ()+0.5+blockEntity.getTranslateZ(), 180-facing.asRotation(), blockEntity.getRotateX(), blockEntity.getRotateY(), blockEntity.getRotateZ(), newLight)) objectResource.render(storedMatrixTransformationsNew, newLight);
 			});
 		}
 	}
