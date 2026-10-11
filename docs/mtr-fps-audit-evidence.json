@@ -1,0 +1,229 @@
+{
+  "source_commit": "d6ae448394a6e36ab31204b059521cbe6a55d463",
+  "audit_type": "static repository inventory, detailed hotspot source and bytecode review; not a line-by-line review of every file",
+  "tree_entries": 5333,
+  "tree_blobs": 5135,
+  "tree_truncated": false,
+  "common_java_files": 422,
+  "common_java_lines": 39367,
+  "profile_file": "m156dT84Yo.sparkprofile",
+  "profile_sha256": "40334570190062d5795f81cd00767bcf0ac5486d00f639e0a5098d74c7a633d7",
+  "profile_code": "db74325bcdb362322c4df000057a58b38ae98fcf",
+  "profile_thread": "Render thread",
+  "profile_sampled_ms": 59996.0,
+  "profile_warning": "all-thread Java sampling perturbed gameplay; inclusive method costs overlap, not GPU timers or FPS forecasts; latest runtime 62db107 is not profiled here",
+  "gl_caller_attribution": [
+    {
+      "method": "org.lwjgl.opengl.GL11C.nglDrawElements",
+      "owner": "other",
+      "ms": 1808.0,
+      "percent": 3.014
+    },
+    {
+      "method": "org.lwjgl.opengl.GL30C.glBindFramebuffer",
+      "owner": "other",
+      "ms": 2468.0,
+      "percent": 4.114
+    },
+    {
+      "method": "net.irisshaders.iris.pipeline.programs.ExtendedShader.m_173363_",
+      "owner": "other",
+      "ms": 2104.0,
+      "percent": 3.507
+    },
+    {
+      "method": "net.irisshaders.iris.uniforms.custom.CustomUniforms.push",
+      "owner": "other",
+      "ms": 588.0,
+      "percent": 0.98
+    },
+    {
+      "method": "org.lwjgl.opengl.GL11C.nglDrawElements",
+      "owner": "MTR ordinary calls",
+      "ms": 708.0,
+      "percent": 1.18
+    },
+    {
+      "method": "net.irisshaders.iris.pipeline.programs.ExtendedShader.m_173363_",
+      "owner": "MTR ordinary calls",
+      "ms": 4452.0,
+      "percent": 7.42
+    },
+    {
+      "method": "org.lwjgl.opengl.GL30C.glBindFramebuffer",
+      "owner": "MTR ordinary calls",
+      "ms": 280.0,
+      "percent": 0.467
+    },
+    {
+      "method": "net.irisshaders.iris.uniforms.custom.CustomUniforms.push",
+      "owner": "MTR ordinary calls",
+      "ms": 2080.0,
+      "percent": 3.467
+    },
+    {
+      "method": "net.irisshaders.iris.pipeline.programs.ExtendedShader.m_173363_",
+      "owner": "MTR instance groups",
+      "ms": 360.0,
+      "percent": 0.6
+    },
+    {
+      "method": "org.lwjgl.opengl.GL30C.glBindFramebuffer",
+      "owner": "MTR instance groups",
+      "ms": 8.0,
+      "percent": 0.013
+    },
+    {
+      "method": "net.irisshaders.iris.uniforms.custom.CustomUniforms.push",
+      "owner": "MTR instance groups",
+      "ms": 168.0,
+      "percent": 0.28
+    },
+    {
+      "method": "org.lwjgl.opengl.GL11C.nglDrawElements",
+      "owner": "mapping immediate text",
+      "ms": 560.0,
+      "percent": 0.933
+    },
+    {
+      "method": "net.irisshaders.iris.pipeline.programs.ExtendedShader.m_173363_",
+      "owner": "mapping immediate text",
+      "ms": 1456.0,
+      "percent": 2.427
+    },
+    {
+      "method": "org.lwjgl.opengl.GL30C.glBindFramebuffer",
+      "owner": "mapping immediate text",
+      "ms": 1636.0,
+      "percent": 2.727
+    },
+    {
+      "method": "net.irisshaders.iris.uniforms.custom.CustomUniforms.push",
+      "owner": "mapping immediate text",
+      "ms": 312.0,
+      "percent": 0.52
+    }
+  ],
+  "reviewed_hotspot_sources": [
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/data/ArrivalsCache.java",
+      "lines": 62,
+      "sha256": "6ac37d074d5b4be5f0b1e2a88fddf4809abea838fe52e9d06ec64f8b2cc5f433"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/packet/PacketUpdateVehiclesLifts.java",
+      "lines": 122,
+      "sha256": "ec3dc10b2f125f37d159de14d4188fd9c00200c1667a7310ef41903325983403"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/ConsecutiveRuns.java",
+      "lines": 19,
+      "sha256": "b42579c17f62bd77caa84ed7d39d23251af6ca22ecf04bd55a87928654832496"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/InstancedModelRenderer.java",
+      "lines": 207,
+      "sha256": "bc77916e44546b7a8944eb635a7166610c6121f1d834f31f512ee6f715603ed1"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/MainRenderer.java",
+      "lines": 231,
+      "sha256": "418574582ba8494f99e3930f595405c6bfe57f260e93facdbb75c3beb2bf6530"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/ModelDetailCache.java",
+      "lines": 59,
+      "sha256": "dd6588bdfe0da1d3cd02b9c10a1b2b6409b346cd989450576293cab1b610010b"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/ModelDetailGeometry.java",
+      "lines": 31,
+      "sha256": "9650a7614c4122d445527f1a675d47a6db9d72925dd2f017cbf051e8d50eb8a8"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/OculusInstanceRenderer.java",
+      "lines": 71,
+      "sha256": "a887cb0782b4bf98b1a1be7186ad7a2123a65eddd6758009b07f7cd3c513a761"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/PersistentRegionCache.java",
+      "lines": 40,
+      "sha256": "4594fa1f2bb453b1f75e49efa83eda71eedbf36a2cc657ebcee61156f2855fc5"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/PredictiveVehiclePreloader.java",
+      "lines": 42,
+      "sha256": "e37aa56f16e34f18542584b7943d68560e39a1a30f372bd65b0ad408de9a4670"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RailBatchGeometry.java",
+      "lines": 39,
+      "sha256": "c15585809935bab2c01aec64e5451ff1a5f876acb17ca3e519cac8d482178a29"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RailGeometrySnapshots.java",
+      "lines": 31,
+      "sha256": "46f794599d4be02d72a4e2fda6a8f8317038169faabe314cb51fa99cda97a902"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RailSectorBatcher.java",
+      "lines": 16,
+      "sha256": "769dde808496cc16bd237255f9b45aae0756a13f7632aceb5c2cdabd5990f07b"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RenderEyeCandy.java",
+      "lines": 75,
+      "sha256": "0fd8632f13fdd313645d063ee489ebe7b6332e67e22f0c6e03b41ad17ea0cf85"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RenderRails.java",
+      "lines": 486,
+      "sha256": "6b84656dcadeb7a2dc34053a45d07dffcf62b6b813598454f8bb8098ab7efa9c"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/RenderVehicles.java",
+      "lines": 648,
+      "sha256": "0cc15abe3ae680951e2e596c62dd2097101f08cf900688973650c608e6766447"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/StaticRegionRenderer.java",
+      "lines": 85,
+      "sha256": "4e20f5755ae0edfcf44feab8ef1276ca8018870413d9054fa13f52a0a56ba6bc"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/TrainVisibility.java",
+      "lines": 46,
+      "sha256": "12ea286a1b06471e2a3ef16c91ad3fcaac83cf29ec081c0081e2cec68aa320c2"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/render/WorkerThread.java",
+      "lines": 132,
+      "sha256": "d1a9a9c303139b0ce2e36e6b74258e8d07cc5af625465cb3f230d1bd3ee99528"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/resource/ModelPreparation.java",
+      "lines": 93,
+      "sha256": "d70682c7b5eb0565828e9f0c898ab5082bbae37248d3a3fa45adfe937c372e24"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/resource/ModelPropertiesPart.java",
+      "lines": 745,
+      "sha256": "9c64c89427b51292b80987bd64b7e1d9167d09fa572a5f19ff7ea6cf8835c2dc"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/resource/OptimizedRendererWrapper.java",
+      "lines": 51,
+      "sha256": "69bf06a25ccf9ea68425c0423a98db299e948e9d820f7507e80fe83857a2924a"
+    },
+    {
+      "file": "fabric/src/main/java/org/mtr/mod/resource/VehicleResource.java",
+      "lines": 601,
+      "sha256": "928e6229a98e4dcc42f2533a16c0bdc9e8f1522a396a71c21be9665f20360c22"
+    }
+  ],
+  "exact_jar_bytecode_verified": [
+    "GraphicsHolder.drawText: three overloads, world BufferSource/endBatch or GUI flush",
+    "BatchManager.RenderCall.draw: bind, apply per-call, apply material, draw"
+  ],
+  "runtime_changes_this_audit": false
+}

@@ -1,5 +1,7 @@
 # État des quarante pistes
 
+Audit approfondi du code actuel et du dernier profil client : [constats, restrictions des optimisations existantes et priorites FPS](mtr-fps-deep-audit-fr.md). La carte initiale reste une reference historique ; ses descriptions ne remplacent pas cet audit.
+
 Dernière candidate : correction mesurée des détections d’ombres et du balayage des caches ; code `62db107`, CI 38157947923 réussie. [Bilan, artefact et refontes restantes](mtr-next-profile-followup-fr.md). Les FPS du dernier essai concernent db74325, pas encore ce nouveau JAR.
 
 Les nouveaux cinq chantiers sont détaillés dans [Next architecture](mtr-next-architecture-fr.md), avec compilation et tests CI réussis, validation en jeu à faire. La précédente version est décrite dans [son suivi](mtr-next-version-fr.md). Code précédent : `8574d7fb788b17e4dd19f0189948475ee260135d`. Les validations en jeu et la comparaison V2 restent à effectuer. Les mentions ci-dessous ont été mises à jour pour les mécanismes Next ; les preuves du précédent artefact restent conservées.

@@ -1,5 +1,7 @@
 # Suivi du chantier des 40 pistes
 
+Audit approfondi du code actuel et du dernier profil client : [constats, restrictions des optimisations existantes et priorites FPS](mtr-fps-deep-audit-fr.md). La carte initiale reste une reference historique ; ses descriptions ne remplacent pas cet audit.
+
 Demande du 11 octobre 2026 : implémenter la cartographie. Référence donnée par l'utilisateur : ancienne survie avec deux lignes de métro, grande gare centrale avec correspondances. L'utilisateur souhaite garder les détails de son monde privés ; la suite du chantier utilise les profils fournis et les sources. Aucune mesure en jeu n'est revendiquée.
 
 Ce suivi distingue code écrit, CI, validation en jeu et idées restantes. Aucune ligne ne vaut une annonce de gain FPS. Le [tableau des quarante statuts](mtr-performance-status-fr.md) explicite chaque réalisation et chaque reste à faire.
