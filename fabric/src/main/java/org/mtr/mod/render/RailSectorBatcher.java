@@ -38,6 +38,7 @@ public final class RailSectorBatcher {
     private record Prepared(Location location,StoredMatrixTransformations transform,org.joml.Matrix4f matrix){}
     private static final boolean REUSE_KEYS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLookup","true"));
     private static final Segment LOOKUP=new Segment();
+    private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
     private static final java.util.Map<Segment,Prepared> PREPARED=new java.util.LinkedHashMap<>(512,.75f,true);
     private record Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){}
     private RailSectorBatcher(){}
@@ -59,7 +60,7 @@ public final class RailSectorBatcher {
             var transform=new StoredMatrixTransformations(location.x,location.y,location.z);
             transform.add(holder->{holder.rotateYRadians(yaw);holder.rotateXRadians(pitch);holder.rotateZDegrees(roll);});
             prepared=new Prepared(location,transform,new org.joml.Matrix4f().rotateY(yaw).rotateX(pitch).rotateZ((float)Math.toRadians(roll)));
-            if(PREPARED.size()>=8192){var iterator=PREPARED.keySet().iterator();iterator.next();iterator.remove();}
+            if(PREPARED.size()>=MAX_PREPARED_POSES){var iterator=PREPARED.keySet().iterator();iterator.next();iterator.remove();}
             PREPARED.put(lookup.immutableCopy(),prepared);
         }
         Location location=prepared.location;
