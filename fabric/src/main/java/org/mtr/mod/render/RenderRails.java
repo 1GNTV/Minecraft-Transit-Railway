@@ -120,6 +120,8 @@ public class RenderRails implements IGui {
 			if (now - lastRailMetricsMillis >= 10000) {
 				lastRailMetricsMillis = now;
 				Init.LOGGER.info("MTR V4 rail prefilter: total={}, candidates={}, previously-visible={}, selection-us={}, index={}", data.railWrapperList.size(), railCandidateCount, visibleRailCount, (System.nanoTime() - railScanStartNanos) / 1000, USE_RAIL_SPATIAL_INDEX);
+                Init.LOGGER.info("MTR V3 visible samples: hits={}, misses={}, oversize={}, exact-camera-cache={}",
+                    data.railVisibilityCache.hits(), data.railVisibilityCache.misses(), data.railVisibilityCache.uncached(), USE_RAIL_FRUSTUM_BASIS);
 			}
 		}
 

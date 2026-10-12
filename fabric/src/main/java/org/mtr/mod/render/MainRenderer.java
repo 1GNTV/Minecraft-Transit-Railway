@@ -34,6 +34,8 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 
 	private static final int FLASHING_INTERVAL = 1000;
 	private static final int TOTAL_RENDER_STAGES = 2;
+	// Widened text batching remains opt-in until visual shader ordering is validated.
+	private static final boolean TEXT_ACROSS_CALLBACKS = Boolean.getBoolean("mtr.next.textAcrossCallbacks");
 	private static final QueuedRenderLayer[] RENDER_LAYERS = QueuedRenderLayer.values();
 	private static final Identifier UNTEXTURED = new Identifier("");
 	private static final RenderCallbackPool CALLBACK_POOL = new RenderCallbackPool();
@@ -127,6 +129,8 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 		prepareRenderQueues();
 		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.BUILD_QUEUES);
 
+		if(TEXT_ACROSS_CALLBACKS)WorldTextBatch.begin();
+		try {
 		for (int i = 0; i < TOTAL_RENDER_STAGES; i++) {
 			for (int j = 0; j < RENDER_LAYERS.length; j++) {
 				final QueuedRenderLayer queuedRenderLayer = RENDER_LAYERS[j];
@@ -165,12 +169,19 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 						graphicsHolder.createVertexConsumer(renderLayer);
 					}
 					value.forEach(renderer -> {
-                        WorldTextBatch.begin();
-                        try { renderer.accept(graphicsHolder, offset); }
-                        finally { WorldTextBatch.end(); }
+                        if (TEXT_ACROSS_CALLBACKS) renderer.accept(graphicsHolder, offset);
+                        else {
+                            WorldTextBatch.begin();
+                            try { renderer.accept(graphicsHolder, offset); }
+                            finally { WorldTextBatch.end(); }
+                        }
                     });
 				});
 			}
+		}
+
+		} finally {
+			if(TEXT_ACROSS_CALLBACKS)WorldTextBatch.end();
 		}
 
 		ModelDetailCache.beginPass();
