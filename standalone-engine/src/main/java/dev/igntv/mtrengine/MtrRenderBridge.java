@@ -18,9 +18,20 @@ public final class MtrRenderBridge {
         long frames;
         long lastReport;
     }
+    private static Object activeWorld;
     private MtrRenderBridge(){}
 
     public static void onFrameStart() {
+        if(dev.igntv.mtrengine.renderer.MtrRailModelBuilds.ENABLED) {
+            var client=org.mtr.mapping.holder.MinecraftClient.getInstance();
+            var world=client.getWorldMapped();
+            Object current=world==null?null:world.data;
+            if(activeWorld!=current) {
+                activeWorld=current;
+                dev.igntv.mtrengine.renderer.RailSectorBatcher.clear();
+                dev.igntv.mtrengine.renderer.MtrRailIndexes.clear();
+            }
+        }
         State state=STATE.get();
         state.start=System.nanoTime();
         state.railsNs=0;
