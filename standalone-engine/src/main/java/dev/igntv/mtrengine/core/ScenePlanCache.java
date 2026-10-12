@@ -1,0 +1,118 @@
+package dev.igntv.mtrengine.core;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.function.Predicate;
+import java.util.function.Function;
+
+/**
+ * CPU-only registry for immutable render plans. A plan is built once per
+ * location/revision and can survive camera and visibility changes. It must
+ * never retain frame callbacks, live world wrappers or GPU ownership.
+ *
+ * Entries are LRU-bounded and world/resource-reload invalidation is explicit.
+ * Evicting a plan only discards CPU metadata; its separately owned region
+ * buffers remain controlled by PersistentRegionCache.
+ */
+public final class ScenePlanCache<K, R, V> {
+    private record Entry<R, V>(R revision, V value) {}
+    private final int capacity;
+    private final Map<K, Entry<R, V>> plans;
+    private long hits, misses;
+
+    public ScenePlanCache(int capacity) {
+        if (capacity <= 0) throw new IllegalArgumentException("capacity must be positive");
+        this.capacity = capacity;
+        this.plans = new LinkedHashMap<>(Math.min(capacity, 1024), 0.75F, true);
+    }
+
+    public V resolve(K key, R revision, Supplier<V> build) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(revision, "revision");
+        Objects.requireNonNull(build, "build");
+        Entry<R, V> old = plans.get(key);
+        if (old != null && Objects.equals(old.revision, revision)) {
+            hits++;
+            return old.value;
+        }
+        // Don't mutate the existing entry until construction has succeeded.
+        // An exception must not install a partially prepared render plan.
+        V value = Objects.requireNonNull(build.get(), "new scene plan");
+        misses++;
+        plans.put(key, new Entry<>(revision, value));
+        while (plans.size() > capacity) {
+            K eldest = plans.keySet().iterator().next();
+            plans.remove(eldest);
+        }
+        return value;
+    }
+
+    /**
+     * Avoid allocating a new revision (such as a 16-float transform snapshot)
+     * for the common case of a stable scene. The predicate must read live
+     * values without mutating them; suppliers are invoked only on misses.
+     */
+    public V resolveLazy(K key, Predicate<R> unchanged, Supplier<R> revision, Function<R, V> build) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(unchanged, "unchanged");
+        Objects.requireNonNull(revision, "revision");
+        Objects.requireNonNull(build, "build");
+        Entry<R, V> old = plans.get(key);
+        if (old != null && unchanged.test(old.revision)) {
+            hits++;
+            return old.value;
+        }
+        R updatedRevision = Objects.requireNonNull(revision.get(), "new revision");
+        V value = Objects.requireNonNull(build.apply(updatedRevision), "new scene plan");
+        misses++;
+        plans.put(key, new Entry<>(updatedRevision, value));
+        while (plans.size() > capacity) {
+            K eldest = plans.keySet().iterator().next();
+            plans.remove(eldest);
+        }
+        return value;
+    }
+
+    /**
+     * Lookup with a render-thread-owned mutable scratch key. The scratch key
+     * must NEVER be inserted into the map: persistentCopy only runs after
+     * a successful build when a cache entry is actually replaced.
+     *
+     * This eliminates per-rail key allocations on stable scene-plan hits.
+     */
+    public V resolveLazyLookup(K lookupKey, Function<K,K> persistentCopy,
+                               Predicate<R> unchanged, Supplier<R> revision,
+                               Function<R,V> build) {
+        Objects.requireNonNull(lookupKey, "lookupKey");
+        Objects.requireNonNull(persistentCopy, "persistentCopy");
+        Objects.requireNonNull(unchanged, "unchanged");
+        Objects.requireNonNull(revision, "revision");
+        Objects.requireNonNull(build, "build");
+        Entry<R,V> old = plans.get(lookupKey);
+        if(old != null && unchanged.test(old.revision)) {
+            hits++;
+            return old.value;
+        }
+        R nextRevision=Objects.requireNonNull(revision.get(), "new revision");
+        V nextValue=Objects.requireNonNull(build.apply(nextRevision), "new scene plan");
+        K stable=Objects.requireNonNull(persistentCopy.apply(lookupKey), "persistent key");
+        if(stable==lookupKey)throw new IllegalArgumentException("Mutable lookup key cannot be stored");
+        misses++;
+        plans.put(stable, new Entry<>(nextRevision,nextValue));
+        while(plans.size()>capacity) {
+            K eldest=plans.keySet().iterator().next();
+            plans.remove(eldest);
+        }
+        return nextValue;
+    }
+
+    public int size() { return plans.size(); }
+    public long hits() { return hits; }
+    public long misses() { return misses; }
+    public void clear() {
+        plans.clear();
+        hits = misses = 0;
+    }
+}
