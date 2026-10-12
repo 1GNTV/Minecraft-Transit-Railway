@@ -75,39 +75,6 @@ public final class ScenePlanCache<K, R, V> {
         return value;
     }
 
-    /**
-     * Lookup with a render-thread-owned mutable scratch key. The scratch key
-     * must NEVER be inserted into the map: persistentCopy only runs after
-     * a successful build when a cache entry is actually replaced.
-     *
-     * This eliminates per-rail key allocations on stable scene-plan hits.
-     */
-    public V resolveLazyLookup(K lookupKey, Function<K,K> persistentCopy,
-                               Predicate<R> unchanged, Supplier<R> revision,
-                               Function<R,V> build) {
-        Objects.requireNonNull(lookupKey, "lookupKey");
-        Objects.requireNonNull(persistentCopy, "persistentCopy");
-        Objects.requireNonNull(unchanged, "unchanged");
-        Objects.requireNonNull(revision, "revision");
-        Objects.requireNonNull(build, "build");
-        Entry<R,V> old = plans.get(lookupKey);
-        if(old != null && unchanged.test(old.revision)) {
-            hits++;
-            return old.value;
-        }
-        R nextRevision=Objects.requireNonNull(revision.get(), "new revision");
-        V nextValue=Objects.requireNonNull(build.apply(nextRevision), "new scene plan");
-        K stable=Objects.requireNonNull(persistentCopy.apply(lookupKey), "persistent key");
-        if(stable==lookupKey)throw new IllegalArgumentException("Mutable lookup key cannot be stored");
-        misses++;
-        plans.put(stable, new Entry<>(nextRevision,nextValue));
-        while(plans.size()>capacity) {
-            K eldest=plans.keySet().iterator().next();
-            plans.remove(eldest);
-        }
-        return nextValue;
-    }
-
     public int size() { return plans.size(); }
     public long hits() { return hits; }
     public long misses() { return misses; }
