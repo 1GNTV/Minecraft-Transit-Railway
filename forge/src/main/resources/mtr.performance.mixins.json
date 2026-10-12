@@ -16,6 +16,7 @@
     "OptimizedModelLayoutAccessor",
     "RenderCallMetricsMixin",
     "BatchInstancingMixin",
+    "OculusShaderMapMixin",
     "ShaderReloadGenerationMixin",
     "RawModelUploadMixin",
     "PreparedObjModelAccessor",
