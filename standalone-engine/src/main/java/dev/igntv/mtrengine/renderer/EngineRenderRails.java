@@ -101,9 +101,12 @@ public class EngineRenderRails implements IGui {
 		final MinecraftClientData data = MinecraftClientData.getInstance();
 		// Never replace the existing detailed occlusion and per-segment visibility checks.
 		// This only keeps distant rails out of the per-frame global traversal.
-		// The 79-FPS fork added railSpatialIndex to MinecraftClientData.
-        // Stock MTR does not expose it; preserve the original live collection.
-        final Iterable<MinecraftClientData.RailWrapper> railCandidates = data.railWrapperList.values();
+		// Reuse the original 79-FPS rail spatial index via an independent
+        // per-world addon singleton, without changing official MTR fields.
+        final Iterable<MinecraftClientData.RailWrapper> railCandidates = USE_RAIL_SPATIAL_INDEX
+            ? MtrRailIndexes.query(data,cameraPosition.getXMapped(),cameraPosition.getZMapped(),
+                MinecraftClientHelper.getRenderDistance()*16+32)
+            : data.railWrapperList.values();
 		final long railScanStartNanos = LOG_RAIL_METRICS ? System.nanoTime() : 0;
 		int railCandidateCount = 0;
 		int visibleRailCount = 0;
