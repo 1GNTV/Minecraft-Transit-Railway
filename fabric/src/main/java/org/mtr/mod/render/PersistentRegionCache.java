@@ -15,6 +15,15 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         if(visible.isEmpty())return null;
         Entry<V,L,R> entry=entries.get(key);
         if(entry==null){if(!room(null,1,0))return null;entry=new Entry<>();entries.put(key,entry);}
+        // Hot path: compiled geometry ALREADY owns every currently visible
+        // selection. There is no new membership to record, so avoid hundreds
+        // of LinkedHashMap.put / hash computations per shadow/main pass.
+        // A changed model, light, matrix or unseen object fails containsAll
+        // and proceeds to the persistent membership update below.
+        if(entry.resource!=null && entry.compiled.containsAll(visible)){
+            entry.seen=frame;
+            return entry.resource;
+        }
         // Previous code added the sizes before accounting for duplicate locations:
         // a stable region with >256 visible pieces therefore cleared membership
         // EVERY frame, rebuilding hundreds of map entries for unchanged geometry.
@@ -25,7 +34,6 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
             entry.content.clear();
             for(V value:visible)entry.content.put(location.apply(value),value);
         }
-        if(entry.resource!=null && entry.compiled.containsAll(visible)){entry.seen=frame;return entry.resource;}
         if(entry.seen==frame || builds==0)return null;
         List<V> content=List.copyOf(entry.content.values());int count=content.stream().mapToInt(size).sum();
         if(count<=0 || count>maxBuildVertices || count>maxVertices)return null;
