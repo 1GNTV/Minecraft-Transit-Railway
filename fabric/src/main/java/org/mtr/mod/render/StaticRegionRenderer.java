@@ -70,6 +70,7 @@ public final class StaticRegionRenderer {
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
     private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
+    private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(8192);
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses;
@@ -84,14 +85,20 @@ public final class StaticRegionRenderer {
         org.joml.Matrix4f local=new org.joml.Matrix4f(matrix);local.m30((float)(x-sector.x*16D));local.m31((float)(y-sector.y*16D));local.m32((float)(z-sector.z*16D));
         java.util.function.Function<PlanRevision,ScenePlan> buildPlan=revision->{
             RegionPageLayout<Fragment> layout=layouts.computeIfAbsent(sector,k->new RegionPageLayout<>(RailGeometrySnapshots.PAGE_VERTICES));
+            int before=layout.locations();
             List<PlacedChunk> parts=new ArrayList<>(snapshot.chunks().size());
-            for(int n=0;n<snapshot.chunks().size();n++){
-                Fragment fragment=new Fragment(location,model,n);
-                Selection selection=new Selection(model,fragment,revision.matrix(),light,n);
-                PageKey page=new PageKey(sector,layout.page(fragment,snapshot.chunks().get(n).vertices()));
-                parts.add(new PlacedChunk(selection,page));
+            try {
+                for(int n=0;n<snapshot.chunks().size();n++){
+                    Fragment fragment=new Fragment(location,model,n);
+                    Selection selection=new Selection(model,fragment,revision.matrix(),light,n);
+                    PageKey page=new PageKey(sector,layout.page(fragment,snapshot.chunks().get(n).vertices()));
+                    parts.add(new PlacedChunk(selection,page));
+                }
+                return new ScenePlan(List.copyOf(parts));
+            } finally {
+                // Count newly registered fragments even if a later chunk fails.
+                layoutLocations+=layout.locations()-before;
             }
-            return new ScenePlan(List.copyOf(parts));
         };
         ScenePlan plan=CACHE_SCENE_PLANS
             ? scenePlans.resolveLazy(new PlanKey(sector,location),
@@ -106,11 +113,11 @@ public final class StaticRegionRenderer {
         cache.beginFrame();
         try {
             // Region page IDs and scene plans must be invalidated together.
-            if(layouts.values().stream().mapToInt(RegionPageLayout::locations).sum()>8192){
+            if(layoutLocations>8192){
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
-                cache.close();layouts.clear();scenePlans.clear();
+                cache.close();layouts.clear();scenePlans.clear();layoutLocations=0;
                 for(var region:groups.values())for(Instance instance:region.values())
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
@@ -193,5 +200,5 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
-    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();world=null;previousHits=previousMisses=0;}
+    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
