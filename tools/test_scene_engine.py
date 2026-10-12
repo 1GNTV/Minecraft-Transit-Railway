@@ -26,9 +26,19 @@ public class ScenePlanTest {
             check(same == a, "stable scene must preserve plan identity");
         }
         check(cache.hits() == 1000 && cache.misses() == 1, "cache statistics");
+        check(cache.resolveLazy("platform", old -> old.equals(first),
+                () -> { throw new AssertionError("stable scene allocated a revision"); },
+                rev -> { throw new AssertionError("stable scene recompiled"); }) == a,
+                "lazy matching without allocations");
+        Plan lazyChanged = cache.resolveLazy("platform", old -> false,
+                () -> new Revision(1, 11, 1),
+                rev -> new Plan(builds.incrementAndGet()));
+        check(lazyChanged != a, "lazy changed scene invalidates");
+        a = cache.resolve("platform", first, () -> new Plan(builds.incrementAndGet()));
+        check(builds.get() == 3, "lazy and eager rebuild counts");
         Plan relit = cache.resolve("platform", new Revision(1, 13, 1),
                 () -> new Plan(builds.incrementAndGet()));
-        check(relit != a && builds.get() == 2, "lighting revision invalidates");
+        check(relit != a && builds.get() == 4, "lighting revision invalidates");
         Plan reload = cache.resolve("platform", new Revision(1, 13, 2),
                 () -> new Plan(builds.incrementAndGet()));
         check(reload != relit, "resource generation invalidates");
