@@ -97,7 +97,8 @@ public class RailLookupTest {
   check(cachedHash==location.hashCode(),"pose hash must stay stable");
   RailSectorBatcher.clear();
   check(poses.isEmpty(),"world unload cleans pose cache");
-  RailSectorBatcher.submit(model,0,0,12,0,0,0,false,100);
+  // Access-order LRU: the eldest pose is x3=16 after the last x3=12 hit.
+  RailSectorBatcher.submit(model,0,0,16,0,0,0,false,100);
   Object regenerated=locationAccessor.invoke(poses.values().iterator().next());
   check(location!=regenerated && location.equals(regenerated)
       && regenerated.equals(location) && location.hashCode()==regenerated.hashCode(),
