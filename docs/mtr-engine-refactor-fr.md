@@ -38,6 +38,9 @@ pas un benchmark FPS.
   soumission, en conservant le système de régions antérieur.
 - `-Dmtr.engine.visibilityMasks=false` : reconstruit la sélection par matériau
   à chaque frame au lieu de réutiliser les masques.
+- `-Dmtr.engine.metrics=true` : log toutes les dix secondes les réutilisations,
+  reconstructions et nombres de plans par famille (rails/décoration).
+  À comparer avec `-Dmtr.v4.metrics=true` pour les draws et passes.
 - Les options n'affectent ni la simulation des trains, ni les interfaces d'addons,
   ni le rendu des shaders ; elles facilitent l'isolement d'une régression.
 
