@@ -65,6 +65,8 @@ jobs:
         run: python3 tools/test_region_cache_hotpath.py
       - name: Check persistent visible-rail reuse and invalidation
         run: python3 tools/test_rail_visibility_cache.py
+      - name: Check exact-frame MTR rail light caching
+        run: python3 tools/test_rail_light_cache.py
       - name: Check retained mesh upload implementation
         run: python3 tools/test_region_mesh_uploader.py
       - name: Check RTX indirect renderer and shader fallbacks

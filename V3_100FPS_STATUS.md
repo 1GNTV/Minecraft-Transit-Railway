@@ -10,6 +10,7 @@ CPU V1 regression: 64 AVG FPS. Do not merge work/mtr-engine-100fps-cpu-v1 until 
 - One-model hot lookup for rail geometry snapshots with explicit resource-reload invalidation.
 - Per-frame resource-to-model/snapshot memoization shared across main and Oculus shadow passes; cleared at render-tick START.
 - Additional visibility hit/miss counters in optional `-Dmtr.v4.metrics=true` logging.
+- Rail block+sky light reads memoized within one render frame across rail styles, shadow cascades and main pass (`-Dmtr.engine.railLightCache=false` to disable); next frame and unusual out-of-bounds positions always re-read light.
 - Opt-in callback-wide world-text batching via `-Dmtr.next.textAcrossCallbacks=true`. Off by default pending visual order tests.
 - Skips backwards player-space transforms and passenger-floor lists in shadow passes where riding interaction is impossible, while preserving gangway box computation and train geometry.
 - CI Java regression checks of view stability, camera movement, rotation, render-distance change, sample-key change, and network invalidation.
