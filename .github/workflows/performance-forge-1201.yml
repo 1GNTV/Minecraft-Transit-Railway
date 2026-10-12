@@ -53,6 +53,8 @@ jobs:
         run: python3 tools/test_scene_engine.py
       - name: Check RTX indirect renderer and shader fallbacks
         run: python3 tools/test_gpu_indirect.py
+      - name: Check dense static station membership stability
+        run: python3 tools/test_dense_regions.py
       - name: Check shader integration and persistent region content
         run: python3 tools/test_next_architecture.py
       - name: Check live shadow state and deadline resource expiry
