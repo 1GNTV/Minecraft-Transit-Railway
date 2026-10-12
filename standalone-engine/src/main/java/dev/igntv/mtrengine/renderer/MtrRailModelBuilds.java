@@ -21,7 +21,7 @@ public final class MtrRailModelBuilds {
         try {
             var materialGroups=new ArrayList<OptimizedModel.MaterialGroup>();
             for(var group:groups) {
-                if(!(group instanceof MtrMaterialWrapperAccessor accessor))
+                if(!((Object)group instanceof MtrMaterialWrapperAccessor accessor))
                     return OptimizedModelWrapper.fromMaterialGroups(groups);
                 var material=accessor.mtrengine$getMaterialGroup();
                 if(material!=null)materialGroups.add(material);
