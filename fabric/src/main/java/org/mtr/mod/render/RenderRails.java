@@ -50,6 +50,14 @@ public class RenderRails implements IGui {
 	private static final Identifier WOOL_TEXTURE = new Identifier("textures/block/white_wool.png");
 	private static final Identifier ONE_WAY_RAIL_ARROW_TEXTURE = new Identifier(Init.MOD_ID, "textures/block/one_way_rail_arrow.png");
 	private static final int INVALID_NODE_CHECK_RADIUS = 16;
+	private static final boolean EDITOR_CACHE = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.editorCache", "true"));
+	private static final long EDITOR_CACHE_NS = Math.max(50, Long.getLong("mtr.engine.editorCacheMs", 250L)) * 1_000_000L;
+	// Render-thread owned; only coordinates are cached, never mutable block states.
+	private static final ObjectArrayList<BlockPos> UNCONNECTED_NODE_CANDIDATES = new ObjectArrayList<>();
+	private static Object editorCacheWorld;
+	private static BlockPos editorCacheOrigin;
+	private static long editorCacheNanos;
+	private static int editorCandidateScans;
 	private static final boolean USE_RAIL_SPATIAL_INDEX = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.railIndex", "true"));
 	private static final boolean LOG_RAIL_METRICS = Boolean.getBoolean("mtr.v4.metrics");
 	private static final boolean USE_RAIL_FRUSTUM_BASIS = !"false".equalsIgnoreCase(System.getProperty("mtr.v4.frustumBasis", "true"));
@@ -215,21 +223,62 @@ public class RenderRails implements IGui {
 		});
 
 		if (holdingRailRelated) {
-			// Render nodes
+			// Only markers potentially in render range need a model and a block lookup.
+			final double nodeMaxDistance = MinecraftClientHelper.getRenderDistance() * 16.0 + 16.0;
+			final double nodeMaxDistanceSquared = nodeMaxDistance * nodeMaxDistance;
 			MinecraftClientData.getInstance().positionsToRail.keySet().forEach(position -> {
 				final BlockPos blockPos = Init.positionToBlockPos(position);
-				renderNode(clientWorld.getBlockState(blockPos), blockPos, () -> true, GraphicsHolder.getDefaultLight());
+				final double dx = blockPos.getX() - cameraPosition.getXMapped();
+				final double dz = blockPos.getZ() - cameraPosition.getZMapped();
+				if (dx * dx + dz * dz <= nodeMaxDistanceSquared)
+					renderNode(clientWorld.getBlockState(blockPos), blockPos, () -> true, GraphicsHolder.getDefaultLight());
 			});
 
-			// Render nodes with the connected block state but isn't actually connected
-			for (int x = -INVALID_NODE_CHECK_RADIUS; x <= INVALID_NODE_CHECK_RADIUS; x++) {
-				for (int y = -INVALID_NODE_CHECK_RADIUS; y <= INVALID_NODE_CHECK_RADIUS; y++) {
-					for (int z = -INVALID_NODE_CHECK_RADIUS; z <= INVALID_NODE_CHECK_RADIUS; z++) {
-						final BlockPos blockPos = clientPlayerEntity.getBlockPos().add(x, y, z);
-						final BlockState blockState = clientWorld.getBlockState(blockPos);
-						renderNode(blockState, blockPos, () -> blockState.get(new Property<>(BlockNode.IS_CONNECTED.data)) && !MinecraftClientData.getInstance().positionsToRail.containsKey(Init.blockPosToPosition(blockPos)), MainRenderer.getFlashingLight());
-					}
+			// The old path read 33^3 = 35,937 blocks every render, including
+			// every shadow pass. Cache only candidate POSITIONS, not block states:
+			// edits/connection changes are checked live for visible candidates.
+			if (EDITOR_CACHE) {
+				final Object worldKey = clientWorld.data;
+				final BlockPos playerBlock = clientPlayerEntity.getBlockPos();
+				final long now = System.nanoTime();
+				if (editorCacheWorld != worldKey) {
+					UNCONNECTED_NODE_CANDIDATES.clear();
+					editorCacheWorld = worldKey;
+					editorCacheOrigin = null;
+					editorCacheNanos = 0;
 				}
+				if (!OptimizedRenderer.renderingShadows() &&
+					(editorCacheOrigin == null || !editorCacheOrigin.equals(playerBlock)
+					|| now - editorCacheNanos >= EDITOR_CACHE_NS)) {
+					UNCONNECTED_NODE_CANDIDATES.clear();
+					for (int x = -INVALID_NODE_CHECK_RADIUS; x <= INVALID_NODE_CHECK_RADIUS; x++)
+						for (int y = -INVALID_NODE_CHECK_RADIUS; y <= INVALID_NODE_CHECK_RADIUS; y++)
+							for (int z = -INVALID_NODE_CHECK_RADIUS; z <= INVALID_NODE_CHECK_RADIUS; z++) {
+								final BlockPos pos = playerBlock.add(x, y, z);
+								if (clientWorld.getBlockState(pos).getBlock().data instanceof BlockNode)
+									UNCONNECTED_NODE_CANDIDATES.add(pos);
+							}
+					editorCacheOrigin = playerBlock;
+					editorCacheNanos = now;
+					editorCandidateScans++;
+				}
+				UNCONNECTED_NODE_CANDIDATES.forEach(pos -> {
+					final BlockState state = clientWorld.getBlockState(pos);
+					if (state.getBlock().data instanceof BlockNode)
+						renderNode(state, pos, () -> state.get(new Property<>(BlockNode.IS_CONNECTED.data))
+							&& !MinecraftClientData.getInstance().positionsToRail.containsKey(Init.blockPosToPosition(pos)),
+							MainRenderer.getFlashingLight());
+				});
+			} else {
+				for (int x = -INVALID_NODE_CHECK_RADIUS; x <= INVALID_NODE_CHECK_RADIUS; x++)
+					for (int y = -INVALID_NODE_CHECK_RADIUS; y <= INVALID_NODE_CHECK_RADIUS; y++)
+						for (int z = -INVALID_NODE_CHECK_RADIUS; z <= INVALID_NODE_CHECK_RADIUS; z++) {
+							final BlockPos pos = clientPlayerEntity.getBlockPos().add(x, y, z);
+							final BlockState state = clientWorld.getBlockState(pos);
+							renderNode(state, pos, () -> state.get(new Property<>(BlockNode.IS_CONNECTED.data))
+								&& !MinecraftClientData.getInstance().positionsToRail.containsKey(Init.blockPosToPosition(pos)),
+								MainRenderer.getFlashingLight());
+						}
 			}
 		}
 
