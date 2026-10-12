@@ -393,10 +393,6 @@ public class RenderRails implements IGui {
 		final Camera camera = MinecraftClient.getInstance().getGameRendererMapped().getCamera();
 		final Vector3d cameraPosition = camera.getPos();
 		final int renderDistance = MinecraftClientHelper.getRenderDistance() * 16;
-
-		// Camera rotation is a linear transform. Rotate its three basis vectors
-		// only when camera orientation changes, then reuse the projection for
-		// all distant rail samples. Retain the original path as an A/B fallback.
 		final float yaw = (float) Math.toRadians(camera.getYaw());
 		final float pitch = (float) Math.toRadians(camera.getPitch());
 		if (USE_RAIL_FRUSTUM_BASIS && (projectionYaw != yaw || projectionPitch != pitch)) {
@@ -406,27 +402,29 @@ public class RenderRails implements IGui {
 			projectionZFromY = new Vector3d(0, 1, 0).rotateY(yaw).rotateX(pitch).getZMapped();
 			projectionZFromZ = new Vector3d(0, 0, 1).rotateY(yaw).rotateX(pitch).getZMapped();
 		}
-
+		// Cache only visible immutable sample geometry. Dynamic light, signals,
+		// editor previews and addon callbacks still execute in EVERY render pass.
+		// Exact camera/view comparison ensures no stale culling on movement.
+		if (USE_RAIL_FRUSTUM_BASIS) {
+			final double x = cameraPosition.getXMapped(), y = cameraPosition.getYMapped(), z = cameraPosition.getZMapped();
+			MinecraftClientData data = MinecraftClientData.getInstance();
+			data.railVisibilityCache.render(rail.railMath, data.railGeometryCache,
+				(x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) ->
+					callback.renderRail(Init.newBlockPos(x1, y1 + LIGHT_REFERENCE_OFFSET, z1),
+						x1, z1, x2, z2, x3, z3, x4, z4, y1, y2),
+				interval, offsetRadius1, offsetRadius2, x, y, z, renderDistance,
+				projectionZFromX, projectionZFromY, projectionZFromZ);
+			return;
+		}
+		// A/B diagnostic fallback: -Dmtr.v4.frustumBasis=false retains the
+		// original angle and distance checks with no visibility caching.
 		MinecraftClientData.getInstance().railGeometryCache.render(rail.railMath, (x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 			final double dx = x1 - cameraPosition.getXMapped();
 			final double dz = z1 - cameraPosition.getZMapped();
 			final double distanceSquared = dx * dx + dz * dz;
 			if (distanceSquared <= (double) renderDistance * renderDistance) {
-				if (distanceSquared < 32 * 32) {
+				if (distanceSquared < 32 * 32 || new Vector3d(x1, y1, z1).subtract(cameraPosition).rotateY(yaw).rotateX(pitch).getZMapped() > 0) {
 					callback.renderRail(Init.newBlockPos(x1, y1 + LIGHT_REFERENCE_OFFSET, z1), x1, z1, x2, z2, x3, z3, x4, z4, y1, y2);
-				} else {
-					final boolean inFront;
-					if (USE_RAIL_FRUSTUM_BASIS) {
-						final double projectedZ = dx * projectionZFromX + (y1 - cameraPosition.getYMapped()) * projectionZFromY + dz * projectionZFromZ;
-						// Inclusive epsilon avoids precision-induced missing rail segments at the camera plane.
-						inFront = projectedZ > -0.00001;
-					} else {
-						final Vector3d rotatedVector = new Vector3d(x1, y1, z1).subtract(cameraPosition).rotateY(yaw).rotateX(pitch);
-						inFront = rotatedVector.getZMapped() > 0;
-					}
-					if (inFront) {
-						callback.renderRail(Init.newBlockPos(x1, y1 + LIGHT_REFERENCE_OFFSET, z1), x1, z1, x2, z2, x3, z3, x4, z4, y1, y2);
-					}
 				}
 			}
 		}, interval, offsetRadius1, offsetRadius2);

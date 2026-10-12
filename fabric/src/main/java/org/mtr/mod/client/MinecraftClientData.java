@@ -37,6 +37,7 @@ public final class MinecraftClientData extends ClientData {
 	private final LongAVLTreeSet routeIdsWithDisabledAnnouncements = new LongAVLTreeSet();
 	public final ClientSpatialIndex spatialIndex = new ClientSpatialIndex(this);
 	public final RailGeometryCache railGeometryCache = new RailGeometryCache();
+	public final RailVisibilityCache railVisibilityCache = new RailVisibilityCache();
 	public final RailSpatialIndex railSpatialIndex = new RailSpatialIndex();
 	/** Bumped only when synchronized static network content changes. */
 	public long networkRevision;
@@ -73,6 +74,7 @@ public final class MinecraftClientData extends ClientData {
 		simplifiedRoutes.forEach(simplifiedRoute -> simplifiedRouteIdMap.put(simplifiedRoute.getId(), simplifiedRoute));
 		spatialIndex.rebuild();
 		railGeometryCache.retainRails(rails);
+		railVisibilityCache.clear();
 		railSpatialIndex.rebuild(railWrapperList.values());
 		networkRevision++;
 	}

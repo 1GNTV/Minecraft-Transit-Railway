@@ -137,9 +137,9 @@ public class RenderVehicles implements IGui {
 						});
 
 						// Player position relative to the car
-						final Vector3d playerPosition = absoluteVehicleCarPositionAndRotation.transformBackwards(clientPlayerEntity.getPos(), Vector3d::rotateX, Vector3d::rotateY, Vector3d::add);
+						final Vector3d playerPosition = canRide ? absoluteVehicleCarPositionAndRotation.transformBackwards(clientPlayerEntity.getPos(), Vector3d::rotateX, Vector3d::rotateY, Vector3d::add) : null;
 						// A temporary list to store all floors and doorways for player movement
-						final ObjectArrayList<ObjectBooleanImmutablePair<Box>> floorsAndDoorways = new ObjectArrayList<>();
+						final ObjectArrayList<ObjectBooleanImmutablePair<Box>> floorsAndDoorways = canRide ? new ObjectArrayList<>() : null;
 						// Extra floors to be used to define where the gangways are
 						final GangwayMovementPositions gangwayMovementPositions1 = new GangwayMovementPositions(absoluteVehicleCarPositionAndRotation, false);
 						final GangwayMovementPositions gangwayMovementPositions2 = new GangwayMovementPositions(absoluteVehicleCarPositionAndRotation, true);
@@ -294,12 +294,12 @@ public class RenderVehicles implements IGui {
 
 						// If the vehicle has gangways, add extra floors to define where the gangways are
 						final Box gangwayConnectionFloor1 = gangwayMovementPositions1.getBox();
-						if (vehicleResource.hasGangway1()) {
+						if (vehicleResource.hasGangway1() && canRide) {
 							RenderVehicleHelper.renderFloorOrDoorway(gangwayConnectionFloor1, 0xFF0000FF, playerPosition, vehicleCarRenderingPositionAndRotation, offsetVector == null);
 							floorsAndDoorways.add(new ObjectBooleanImmutablePair<>(gangwayConnectionFloor1, true));
 						}
 						final Box gangwayConnectionFloor2 = gangwayMovementPositions2.getBox();
-						if (vehicleResource.hasGangway2()) {
+						if (vehicleResource.hasGangway2() && canRide) {
 							RenderVehicleHelper.renderFloorOrDoorway(gangwayConnectionFloor2, 0xFF0000FF, playerPosition, vehicleCarRenderingPositionAndRotation, offsetVector == null);
 							floorsAndDoorways.add(new ObjectBooleanImmutablePair<>(gangwayConnectionFloor2, true));
 						}

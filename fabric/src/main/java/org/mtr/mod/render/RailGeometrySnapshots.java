@@ -13,6 +13,10 @@ public final class RailGeometrySnapshots {
     public static final int PAGE_VERTICES = 16_000;
     private static final int MAX_RETAINED_VERTICES = 200_000;
     private static final WeakHashMap<OptimizedModel, Snapshot> SNAPSHOTS = new WeakHashMap<>();
+    // Rail styles submit the same model thousands of times each main/shadow pass.
+    // One bounded strong hot entry avoids repeating WeakHashMap hashing.
+    private static OptimizedModel hotModel;
+    private static Snapshot hotSnapshot;
     public record Chunk(List<RawMesh> meshes, int vertices) {}
     public record Snapshot(List<Chunk> chunks, int vertices, OptimizedModelWrapper remainder) {}
     private RailGeometrySnapshots() {}
@@ -30,7 +34,8 @@ public final class RailGeometrySnapshots {
             chunks.addAll(split);count+=size;
         }
         if(chunks.isEmpty())return;
-        SNAPSHOTS.put(model,new Snapshot(List.copyOf(chunks),count,residual.isEmpty()?null:OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(residual))));
+        Snapshot value=new Snapshot(List.copyOf(chunks),count,residual.isEmpty()?null:OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(residual)));
+        SNAPSHOTS.put(model,value);hotModel=model;hotSnapshot=value;
     }
     static List<Chunk> split(RawMesh mesh) {
         List<Chunk> result=new ArrayList<>(); RawMesh page=new RawMesh(mesh.materialProperties);Map<Integer,Integer> remap=new HashMap<>();
@@ -44,6 +49,10 @@ public final class RailGeometrySnapshots {
         }
         if(!page.faces.isEmpty())result.add(new Chunk(List.of(page),page.vertices.size()));return result;
     }
-    public static Snapshot get(OptimizedModel model) { return ENABLED ? SNAPSHOTS.get(model) : null; }
-    public static void clear() { SNAPSHOTS.clear(); }
+    public static Snapshot get(OptimizedModel model) {
+        if(!ENABLED || model==null)return null;
+        if(model==hotModel)return hotSnapshot;
+        hotModel=model;hotSnapshot=SNAPSHOTS.get(model);return hotSnapshot;
+    }
+    public static void clear() { SNAPSHOTS.clear(); hotModel=null;hotSnapshot=null; }
 }
