@@ -43,7 +43,37 @@ public final class RailSectorBatcher {
     private static final Segment LOOKUP=new Segment();
     private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
     private static final java.util.Map<Segment,Prepared> PREPARED=new java.util.LinkedHashMap<>(512,.75f,true);
-    private record Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){}
+    /**
+     * Pose locations are immutable and reused by the rail cache for thousands
+     * of frames. Cached hash codes avoid repeatedly hashing three doubles,
+     * three angles and a model reference inside scene-plan and region maps.
+     */
+    private static final class Location {
+        final RailResource resource;
+        final double x,y,z;
+        final float yaw,pitch,roll;
+        private final int hash;
+        Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){
+            this.resource=resource;this.x=x;this.y=y;this.z=z;
+            this.yaw=yaw;this.pitch=pitch;this.roll=roll;
+            int h=java.util.Objects.hashCode(resource);
+            h=31*h+Double.hashCode(x);h=31*h+Double.hashCode(y);h=31*h+Double.hashCode(z);
+            h=31*h+Float.hashCode(yaw);h=31*h+Float.hashCode(pitch);h=31*h+Float.hashCode(roll);
+            hash=h;
+        }
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            if(this==other)return true;
+            if(!(other instanceof Location o))return false;
+            return java.util.Objects.equals(resource,o.resource)
+                && Double.doubleToLongBits(x)==Double.doubleToLongBits(o.x)
+                && Double.doubleToLongBits(y)==Double.doubleToLongBits(o.y)
+                && Double.doubleToLongBits(z)==Double.doubleToLongBits(o.z)
+                && Float.floatToIntBits(yaw)==Float.floatToIntBits(o.yaw)
+                && Float.floatToIntBits(pitch)==Float.floatToIntBits(o.pitch)
+                && Float.floatToIntBits(roll)==Float.floatToIntBits(o.roll);
+        }
+    }
     private RailSectorBatcher(){}
     public static void beginFrame(){}
     public static boolean queue(RailResource resource,StoredMatrixTransformations fallback,double x,double y,double z,float yaw,float pitch,float roll,int light){
