@@ -55,6 +55,8 @@ jobs:
         run: python3 tools/test_gpu_indirect.py
       - name: Check dense static station membership stability
         run: python3 tools/test_dense_regions.py
+      - name: Check allocation-free rail lookup and cache identity
+        run: python3 tools/test_rail_lookup_engine.py
       - name: Check shader integration and persistent region content
         run: python3 tools/test_next_architecture.py
       - name: Check live shadow state and deadline resource expiry
