@@ -16,27 +16,64 @@ import java.util.*;
 
 /** Incremental immutable pages for solid rails/decorations; selected spans retain fine visibility. */
 public final class StaticRegionRenderer {
+    private static final boolean CACHE_SCENE_PLANS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.scenePlans", "true"));
+    private static final boolean CACHE_VISIBILITY_MASKS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.visibilityMasks", "true"));
+    private static final boolean ENGINE_METRICS = Boolean.getBoolean("mtr.engine.metrics");
     private record Sector(int x,int y,int z){}
     private static final class MatrixKey {
         final float[] values;final int hash;
         MatrixKey(org.joml.Matrix4f matrix){values=new float[16];matrix.get(values);hash=Arrays.hashCode(values);}
+        boolean matches(org.joml.Matrix4f m){
+            return Float.compare(values[0],m.m00())==0 && Float.compare(values[1],m.m01())==0
+                && Float.compare(values[2],m.m02())==0 && Float.compare(values[3],m.m03())==0
+                && Float.compare(values[4],m.m10())==0 && Float.compare(values[5],m.m11())==0
+                && Float.compare(values[6],m.m12())==0 && Float.compare(values[7],m.m13())==0
+                && Float.compare(values[8],m.m20())==0 && Float.compare(values[9],m.m21())==0
+                && Float.compare(values[10],m.m22())==0 && Float.compare(values[11],m.m23())==0
+                && Float.compare(values[12],m.m30())==0 && Float.compare(values[13],m.m31())==0
+                && Float.compare(values[14],m.m32())==0 && Float.compare(values[15],m.m33())==0;
+        }
         @Override public int hashCode(){return hash;}
         @Override public boolean equals(Object other){return other instanceof MatrixKey key && Arrays.equals(values,key.values);}
     }
     private record Selection(OptimizedModelWrapper model,Object location,MatrixKey matrix,int light,int chunk){}
     private record Fragment(Object location,OptimizedModelWrapper model,int chunk){}
     private record PageKey(Sector sector,int page){}
-    private record Instance(Selection selection,RailGeometrySnapshots.Snapshot snapshot,StoredModelResourceBase resource,StoredMatrixTransformations fallback){}
+    // Immutable spatial scene plans survive frames; transient resources never enter this cache.
+    private record PlanKey(Sector sector,Object location){}
+    private record PlanRevision(OptimizedModelWrapper model,RailGeometrySnapshots.Snapshot snapshot,MatrixKey matrix,int light){}
+    private record PlacedChunk(Selection selection,PageKey page){}
+    private record ScenePlan(List<PlacedChunk> chunks){}
+    private record Instance(ScenePlan plan,RailGeometrySnapshots.Snapshot snapshot,StoredModelResourceBase resource,StoredMatrixTransformations fallback,int light){}
     private record MaterialSpan(MaterialProperties material,RegionVertexRanges.Span span){}
     private static final class Page implements AutoCloseable{
         final Map<MaterialProperties,VertexArray> arrays=new LinkedHashMap<>();final List<Mesh> meshes=new ArrayList<>();
         final Map<Selection,List<MaterialSpan>> spans=new HashMap<>();OptimizedModelWrapper model;
-        @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);}
+        private List<Selection> lastVisible=List.of();
+        private Map<MaterialProperties,List<RegionVertexRanges.Span>> lastRanges=Map.of();
+        // Only visibility changes require regrouping index spans; camera-stable pages reuse
+        // the immutable material mask instead of allocating new hash maps each frame.
+        Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges(List<Selection> visible){
+            if(CACHE_VISIBILITY_MASKS && lastVisible.equals(visible))return lastRanges;
+            Map<MaterialProperties,List<RegionVertexRanges.Span>> result=new HashMap<>();
+            for(Selection selection:visible){
+                List<MaterialSpan> contributions=spans.get(selection);
+                if(contributions==null)throw new IllegalStateException("Region selection lacks compiled spans");
+                for(MaterialSpan span:contributions)result.computeIfAbsent(span.material,k->new ArrayList<>()).add(span.span);
+            }
+            lastVisible=List.copyOf(visible);
+            lastRanges=result;
+            return result;
+        }
+        @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);lastVisible=List.of();lastRanges=Map.of();}
     }
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
     private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
+    private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
+    private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(8192);
     private final RenderPipelineMetrics.Family family;
+    private long lastMetricsNanos, previousHits, previousMisses;
     private Object world;
     public StaticRegionRenderer(RenderPipelineMetrics.Family family){this.family=family;}
     public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
@@ -46,51 +83,101 @@ public final class StaticRegionRenderer {
         var snapshot=RailGeometrySnapshots.get(model.getModel());if(snapshot==null)return false;
         var sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
         org.joml.Matrix4f local=new org.joml.Matrix4f(matrix);local.m30((float)(x-sector.x*16D));local.m31((float)(y-sector.y*16D));local.m32((float)(z-sector.z*16D));
-        Selection selection=new Selection(model,location,new MatrixKey(local),light,0);
-        groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(selection,snapshot,resource,fallback));return true;
+        java.util.function.Function<PlanRevision,ScenePlan> buildPlan=revision->{
+            RegionPageLayout<Fragment> layout=layouts.computeIfAbsent(sector,k->new RegionPageLayout<>(RailGeometrySnapshots.PAGE_VERTICES));
+            int before=layout.locations();
+            List<PlacedChunk> parts=new ArrayList<>(snapshot.chunks().size());
+            try {
+                for(int n=0;n<snapshot.chunks().size();n++){
+                    Fragment fragment=new Fragment(location,model,n);
+                    Selection selection=new Selection(model,fragment,revision.matrix(),light,n);
+                    PageKey page=new PageKey(sector,layout.page(fragment,snapshot.chunks().get(n).vertices()));
+                    parts.add(new PlacedChunk(selection,page));
+                }
+                return new ScenePlan(List.copyOf(parts));
+            } finally {
+                // Count newly registered fragments even if a later chunk fails.
+                layoutLocations+=layout.locations()-before;
+            }
+        };
+        ScenePlan plan=CACHE_SCENE_PLANS
+            ? scenePlans.resolveLazy(new PlanKey(sector,location),
+                previous->previous.model()==model && previous.snapshot()==snapshot
+                    && previous.light()==light && previous.matrix().matches(local),
+                ()->new PlanRevision(model,snapshot,new MatrixKey(local),light),
+                buildPlan)
+            : buildPlan.apply(new PlanRevision(model,snapshot,new MatrixKey(local),light));
+        groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
     }
     public void flush(){
         cache.beginFrame();
         try {
-            // Layout metadata is bounded too. Reset only before current-pass resources are queued.
-            if(layouts.values().stream().mapToInt(RegionPageLayout::locations).sum()>8192){cache.close();layouts.clear();}
+            // Region page IDs and scene plans must be invalidated together.
+            if(layoutLocations>8192){
+                // Plans already queued this pass still refer to old page IDs.
+                // Never reuse them after resetting the page layout: render the
+                // complete original models for this one pass instead.
+                cache.close();layouts.clear();scenePlans.clear();layoutLocations=0;
+                for(var region:groups.values())for(Instance instance:region.values())
+                    instance.resource().render(instance.fallback(),instance.light());
+                return;
+            }
             Map<PageKey,List<Selection>> wanted=new LinkedHashMap<>();
-            Map<Instance,List<Selection>> fragments=new LinkedHashMap<>();
-            Map<Selection,PageKey> placement=new HashMap<>();
-            groups.forEach((sector,instances)->{
-                var layout=layouts.computeIfAbsent(sector,k->new RegionPageLayout<>(RailGeometrySnapshots.PAGE_VERTICES));
-                for(Instance instance:instances.values()) {
-                    List<Selection> parts=new ArrayList<>();Selection original=instance.selection;
-                    for(int n=0;n<instance.snapshot.chunks().size();n++) {
-                        Fragment location=new Fragment(original.location,original.model,n);
-                        Selection part=new Selection(original.model,location,original.matrix,original.light,n);
-                        PageKey key=new PageKey(sector,layout.page(location,instance.snapshot.chunks().get(n).vertices()));
-                        parts.add(part);placement.put(part,key);wanted.computeIfAbsent(key,k->new ArrayList<>()).add(part);
-                    }
-                    fragments.put(instance,parts);
-                }
-            });
+            for(var region:groups.values())for(Instance instance:region.values())
+                for(PlacedChunk part:instance.plan().chunks())
+                    wanted.computeIfAbsent(part.page(),k->new ArrayList<>()).add(part.selection());
+
             Map<PageKey,Page> ready=new HashMap<>();
             wanted.forEach((key,selected)->{
-                try { Page page=cache.get(key,selected,Selection::location,s->{var snapshot=RailGeometrySnapshots.get(s.model.getModel());return snapshot==null?16_001:snapshot.chunks().get(s.chunk).vertices();},this::build);if(page!=null)ready.put(key,page); }
-                catch(RuntimeException error){Init.LOGGER.error("MTR region page retained original rendering",error);}
+                try {
+                    Page page=cache.get(key,selected,Selection::location,
+                        selection->{var snapshot=RailGeometrySnapshots.get(selection.model().getModel());
+                            return snapshot==null?16_001:snapshot.chunks().get(selection.chunk()).vertices();},
+                        this::build);
+                    if(page!=null)ready.put(key,page);
+                }catch(RuntimeException error){Init.LOGGER.error("MTR region page retained original rendering",error);}
             });
             Map<PageKey,List<Selection>> drawing=new LinkedHashMap<>();
-            fragments.forEach((instance,parts)->{
-                // Transaction per object: never duplicate half of a large model with its fallback.
-                if(parts.stream().anyMatch(s->!ready.containsKey(placement.get(s)))) { instance.resource.render(instance.fallback,instance.selection.light);return; }
-                parts.forEach(s->drawing.computeIfAbsent(placement.get(s),k->new ArrayList<>()).add(s));
-                OptimizedModelWrapper remainder=instance.snapshot.remainder();
-                if(remainder!=null)MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{instance.fallback.transform(holder,offset);try{CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(remainder,holder,instance.selection.light,family);}finally{holder.pop();}});
-            });
+            for(var region:groups.values())for(Instance instance:region.values()){
+                List<PlacedChunk> parts=instance.plan().chunks();
+                boolean allReady=true;
+                for(PlacedChunk part:parts)if(!ready.containsKey(part.page())){allReady=false;break;}
+                // Atomic per-object decision: never draw a partial mesh plus its fallback.
+                if(!allReady){instance.resource().render(instance.fallback(),instance.light());continue;}
+                for(PlacedChunk part:parts)
+                    drawing.computeIfAbsent(part.page(),k->new ArrayList<>()).add(part.selection());
+                OptimizedModelWrapper remainder=instance.snapshot().remainder();
+                if(remainder!=null)MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
+                    instance.fallback().transform(holder,offset);
+                    try{CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(remainder,holder,instance.light(),family);}
+                    finally{holder.pop();}
+                });
+            }
             drawing.forEach((key,selected)->{
-                Page page=ready.get(key);Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=new HashMap<>();
-                for(Selection selection:selected)for(MaterialSpan span:page.spans.get(selection))ranges.computeIfAbsent(span.material,k->new ArrayList<>()).add(span.span);
+                Page page=ready.get(key);
+                Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=page.ranges(selected);
                 page.arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
-                Sector sector=key.sector;
-                MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{holder.push();try{holder.translate(sector.x*16D-offset.getXMapped(),sector.y*16D-offset.getYMapped(),sector.z*16D-offset.getZMapped());CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);}finally{holder.pop();}});
+                Sector sector=key.sector();
+                MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
+                    holder.push();
+                    try{
+                        holder.translate(sector.x()*16D-offset.getXMapped(),sector.y()*16D-offset.getYMapped(),sector.z()*16D-offset.getZMapped());
+                        CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);
+                    }finally{holder.pop();}
+                });
             });
-        } finally { groups.clear(); }
+        } finally {
+            groups.clear();
+            if(ENGINE_METRICS){
+                long now=System.nanoTime();
+                if(now-lastMetricsNanos>=10_000_000_000L){
+                    Init.LOGGER.info("MTR Engine scene: family={}, cached-plans={}, plan-hits={}, plan-builds={}, enabled={}",
+                        family,scenePlans.size(),scenePlans.hits()-previousHits,scenePlans.misses()-previousMisses,CACHE_SCENE_PLANS);
+                    previousHits=scenePlans.hits();previousMisses=scenePlans.misses();
+                    lastMetricsNanos=now;
+                }
+            }
+        }
     }
     private Page build(List<Selection> content){
         Page page=new Page();Map<MaterialProperties,RawMesh> combined=new LinkedHashMap<>();
@@ -113,5 +200,5 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
-    public void clear(){cache.close();groups.clear();layouts.clear();world=null;}
+    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
