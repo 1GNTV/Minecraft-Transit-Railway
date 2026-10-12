@@ -37,6 +37,29 @@ jobs:
           assert 'mixin' in build
           print('PASS: independent mod ID; MTR mandatory external dependency; Oculus crash injector absent')
           PY
+      - name: Check original 79-FPS region cache invariants
+        run: |
+          python3 standalone-engine/tools/test_scene_engine.py
+          python3 standalone-engine/tools/test_region_cache_hotpath.py
+          python3 standalone-engine/tools/test_dense_regions.py
+      - name: Verify standalone rail hooks and original fallback
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("standalone-engine")
+          mix=json.loads((root/"src/main/resources/mtrengine.mixins.json").read_text())
+          assert "MtrRailLoadScopeMixin" in mix["client"]
+          assert "MtrModelFactoryMixin" in mix["client"]
+          assert "MtrClientRailIndexMixin" in mix["client"]
+          assert "MtrVertexArrayDrawMixin" in mix["client"]
+          assert "MtrRailResourceLoadMixin" not in mix["client"]
+          file=(root/"src/main/java/dev/igntv/mtrengine/renderer/MtrRailModelBuilds.java").read_text()
+          assert 'Boolean.getBoolean("mtr.engine.addon.regions")' in file
+          assert "OptimizedModelWrapper.fromObjModels(objects)" in file
+          assert "OptimizedModelWrapper.fromMaterialGroups(groups)" in file
+          print("PASS: 79-FPS model pipeline port, opt-in gate, upstream rendering fallback")
+          PY
       - name: Build independent Forge addon
         run: |
           chmod +x ./gradlew
