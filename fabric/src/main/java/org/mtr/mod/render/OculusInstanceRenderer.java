@@ -16,7 +16,7 @@ public final class OculusInstanceRenderer {
     private static final IntBuffer LIGHTS=ByteBuffer.allocateDirect(8*8).order(ByteOrder.nativeOrder()).asIntBuffer(),OVERLAYS=ByteBuffer.allocateDirect(8*8).order(ByteOrder.nativeOrder()).asIntBuffer();
     private static final org.joml.Matrix4f MATRIX=new org.joml.Matrix4f();
     private static final org.joml.Matrix3f NORMAL=new org.joml.Matrix3f();
-    private static boolean failed;
+    private static boolean failed, shaderSourcesPatched;
     private OculusInstanceRenderer() {}
     private static FloatBuffer buffer(int n){return ByteBuffer.allocateDirect(n*4).order(ByteOrder.nativeOrder()).asFloatBuffer();}
     public static InstanceShaderSource.Pair prepare(String v,String f){
@@ -31,10 +31,15 @@ public final class OculusInstanceRenderer {
             if(GL33.glGetShaderi(fs,GL33.GL_COMPILE_STATUS)==0)return null;
             program=GL33.glCreateProgram();GL33.glAttachShader(program,vs);GL33.glAttachShader(program,fs);GL33.glLinkProgram(program);
             if(GL33.glGetProgrami(program,GL33.GL_LINK_STATUS)==0)return null;
+            shaderSourcesPatched=true;
             return pair;
         }catch(RuntimeException error){Init.LOGGER.debug("MTR Oculus instancing preflight retained original shader",error);return null;}
         finally{if(program!=0)GL33.glDeleteProgram(program);if(vs!=0)GL33.glDeleteShader(vs);if(fs!=0)GL33.glDeleteShader(fs);}
     }
+    /** False unless an Oculus shader variant actually passed compile/link checks.
+     * If the optional mixin is not installed, avoid expensive per-call grouping
+     * and repeated uniform location lookups entirely. */
+    public static boolean shaderBridgeReady(){return shaderSourcesPatched && !failed;}
     public static boolean draw(List<?> calls,int start,int end){
         if(failed || end-start>8)return false;
         RenderCallData first=(RenderCallData)calls.get(start);
@@ -84,6 +89,6 @@ public final class OculusInstanceRenderer {
         finally{GL33.glUniform1i(locations.mode,0);}
         return submitted;
     }
-    public static void clear(){PROGRAMS.clear();failed=false;}
+    public static void clear(){PROGRAMS.clear();failed=false;shaderSourcesPatched=false;}
     public static void invalidatePrograms(){PROGRAMS.clear();failed=false;}
 }
