@@ -112,14 +112,20 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 			ArrivalsCacheClient.INSTANCE.tick();
 		}
 
+		final boolean shadowPass = OptimizedRenderer.renderingShadows();
+		long phaseStart=EnginePhaseProfiler.begin();
 		final Vector3d cameraShakeOffset = clientPlayerEntity.getPos().subtract(offset);
 		RenderVehicles.render(millisElapsed, cameraShakeOffset);
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
+		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.VEHICLES);
 		RailSectorBatcher.beginFrame();
 		RenderRails.render();
+		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.RAILS);
 		RailSectorBatcher.flush();
+		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.REGION_FLUSH);
 
 		prepareRenderQueues();
+		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.BUILD_QUEUES);
 
 		for (int i = 0; i < TOTAL_RENDER_STAGES; i++) {
 			for (int j = 0; j < RENDER_LAYERS.length; j++) {
@@ -169,6 +175,8 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 
 		ModelDetailCache.beginPass();
 		CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.render(!Config.getClient().getHideTranslucentParts());
+		EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.SUBMIT);
+		EnginePhaseProfiler.end(shadowPass);
 	}
 
 	static void prepareRenderQueues() {
