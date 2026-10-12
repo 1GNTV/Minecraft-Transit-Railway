@@ -69,6 +69,23 @@ public final class StaticRegionRenderer {
     }
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
     private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
+    // Reuse the temporary per-pass staging maps/lists. No references to these
+    // scratch lists survive inside compiled GPU pages or persistent scene plans.
+    private final Map<PageKey,List<Selection>> wantedScratch=new LinkedHashMap<>();
+    private final Map<PageKey,Page> readyScratch=new HashMap<>();
+    private final Map<PageKey,List<Selection>> drawingScratch=new LinkedHashMap<>();
+    private final ArrayDeque<ArrayList<Selection>> listPool=new ArrayDeque<>();
+    private List<Selection> scratchList() {
+        ArrayList<Selection> reuse=listPool.pollFirst();
+        return reuse==null?new ArrayList<>():reuse;
+    }
+    private void recycle(Map<PageKey,List<Selection>> values) {
+        for(List<Selection> list:values.values()){
+            list.clear();
+            if(listPool.size()<256)listPool.addLast((ArrayList<Selection>)list);
+        }
+        values.clear();
+    }
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
     private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(8192);
@@ -122,12 +139,12 @@ public final class StaticRegionRenderer {
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
             }
-            Map<PageKey,List<Selection>> wanted=new LinkedHashMap<>();
+            Map<PageKey,List<Selection>> wanted=wantedScratch;
             for(var region:groups.values())for(Instance instance:region.values())
                 for(PlacedChunk part:instance.plan().chunks())
-                    wanted.computeIfAbsent(part.page(),k->new ArrayList<>()).add(part.selection());
+                    wanted.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
 
-            Map<PageKey,Page> ready=new HashMap<>();
+            Map<PageKey,Page> ready=readyScratch;
             wanted.forEach((key,selected)->{
                 try {
                     Page page=cache.get(key,selected,Selection::location,
@@ -137,7 +154,7 @@ public final class StaticRegionRenderer {
                     if(page!=null)ready.put(key,page);
                 }catch(RuntimeException error){Init.LOGGER.error("MTR region page retained original rendering",error);}
             });
-            Map<PageKey,List<Selection>> drawing=new LinkedHashMap<>();
+            Map<PageKey,List<Selection>> drawing=drawingScratch;
             for(var region:groups.values())for(Instance instance:region.values()){
                 List<PlacedChunk> parts=instance.plan().chunks();
                 boolean allReady=true;
@@ -145,7 +162,7 @@ public final class StaticRegionRenderer {
                 // Atomic per-object decision: never draw a partial mesh plus its fallback.
                 if(!allReady){instance.resource().render(instance.fallback(),instance.light());continue;}
                 for(PlacedChunk part:parts)
-                    drawing.computeIfAbsent(part.page(),k->new ArrayList<>()).add(part.selection());
+                    drawing.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
                 OptimizedModelWrapper remainder=instance.snapshot().remainder();
                 if(remainder!=null)MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
                     instance.fallback().transform(holder,offset);
@@ -168,6 +185,9 @@ public final class StaticRegionRenderer {
             });
         } finally {
             groups.clear();
+            recycle(wantedScratch);
+            recycle(drawingScratch);
+            readyScratch.clear();
             if(ENGINE_METRICS){
                 long now=System.nanoTime();
                 if(now-lastMetricsNanos>=10_000_000_000L){
@@ -200,5 +220,5 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
-    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
