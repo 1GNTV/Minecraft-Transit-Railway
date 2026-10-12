@@ -6,7 +6,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 STUBS = {
-"org/mtr/mod/render/OculusInstanceRenderer.java": "package org.mtr.mod.render; import java.util.*; public class OculusInstanceRenderer {public static boolean draw(List<?> x,int a,int b){return false;}public static void clear(){}}",
+"org/mtr/mod/render/OculusInstanceRenderer.java": "package org.mtr.mod.render; import java.util.*; public class OculusInstanceRenderer {public static boolean draw(List<?> x,int a,int b){return false;}public static boolean shaderBridgeReady(){return false;}public static void clear(){}}",
 "org/mtr/mod/render/RegionVertexRanges.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray; public class RegionVertexRanges {public static boolean contains(VertexArray a){return false;}}",
 "org/mtr/mod/render/ModelPartVisibility.java": "package org.mtr.mod.render; import org.mtr.mapping.render.object.VertexArray;import org.mtr.mapping.render.vertex.VertexAttributeState; public class ModelPartVisibility {public static boolean visible(VertexArray a,VertexAttributeState s){return true;}public static org.mtr.mod.render.BoundedDrawGrouping.Rect screenBounds(VertexArray a,VertexAttributeState s){return null;}}",
 "com/mojang/blaze3d/systems/RenderSystem.java": "package com.mojang.blaze3d.systems; public class RenderSystem {public static boolean isOnRenderThread(){return true;} public static void recordRenderCall(Runnable r){r.run();}}",
