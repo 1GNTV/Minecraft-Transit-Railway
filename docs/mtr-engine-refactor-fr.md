@@ -32,6 +32,15 @@ pas un benchmark FPS.
 - `ScenePlanCache` construit atomiquement : échec de reconstruction = ancien
   plan conservé, pas de plan partiellement publié.
 
+### Interrupteurs A/B sans modification d'addons
+
+- `-Dmtr.engine.scenePlans=false` : reconstruit les plans CPU à chaque
+  soumission, en conservant le système de régions antérieur.
+- `-Dmtr.engine.visibilityMasks=false` : reconstruit la sélection par matériau
+  à chaque frame au lieu de réutiliser les masques.
+- Les options n'affectent ni la simulation des trains, ni les interfaces d'addons,
+  ni le rendu des shaders ; elles facilitent l'isolement d'une régression.
+
 **Ce que E0 ne fait PAS :** supprimer le parcours par frame des rails,
 accélérer les shaders par magie, remplacer le système de commandes de MTR ou
 assurer déjà la victoire sur V2. La construction de matrices d'entrée et
