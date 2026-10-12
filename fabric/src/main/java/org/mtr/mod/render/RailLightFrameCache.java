@@ -1,10 +1,8 @@
 package org.mtr.mod.render;
 
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import org.mtr.mapping.holder.BlockPos;
-import org.mtr.mapping.holder.ClientWorld;
-import org.mtr.mapping.mapper.LightType;
-import org.mtr.mapping.mapper.LightmapTextureManager;
+import org.mtr.mapping.holder.*;
+import org.mtr.mapping.mapper.*;
 
 /** Main + shader cascades reuse world lighting samples only inside one render tick.
  * Dynamic lighting can change after any tick; nothing survives beginFrame().
