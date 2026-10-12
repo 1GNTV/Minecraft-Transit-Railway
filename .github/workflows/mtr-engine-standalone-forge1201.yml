@@ -1,0 +1,65 @@
+name: MTR Engine standalone addon - Forge 1.20.1
+on:
+  push:
+    branches: [ "work/mtr-engine-standalone-addon-forge1201" ]
+    paths:
+      - "standalone-engine/**"
+      - ".github/workflows/mtr-engine-standalone-forge1201.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  forge-addon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify mod is independent and never bundles MTR
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          from tomllib import loads
+          root=Path('standalone-engine')
+          mixins=json.loads((root/'src/main/resources/mtrengine.mixins.json').read_text())
+          meta=loads((root/'src/main/resources/META-INF/mods.toml').read_text().replace('${addon_version}','0.1.0').replace('${minecraft_version}','1.20.1'))
+          assert meta['mods'][0]['modId']=='mtrengine'
+          assert any(d['modId']=='mtr' and d['mandatory'] for d in meta['dependencies']['mtrengine'])
+          assert all('Oculus' not in entry for entry in mixins['client'])
+          build=(root/'build.gradle').read_text()
+          assert 'compileOnly fg.deobf(' in build
+          assert 'minecraft-transit-railway:' in build
+          assert 'mixin' in build
+          print('PASS: independent mod ID; MTR mandatory external dependency; Oculus crash injector absent')
+          PY
+      - name: Build independent Forge addon
+        run: |
+          chmod +x ./gradlew
+          ./gradlew -p standalone-engine clean build --stacktrace --no-daemon
+      - name: Check separate distributable
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          jars=[p for p in Path('standalone-engine/build/libs').glob('*.jar') if 'sources' not in p.name]
+          assert len(jars)>=1, 'Addon jar missing'
+          jar=next((p for p in jars if 'standalone' in p.name),jars[0])
+          with ZipFile(jar) as z:
+              names=set(z.namelist())
+              assert 'META-INF/mods.toml' in names, 'Missing addon mod registration'
+              assert 'mtrengine.mixins.json' in names, 'Missing mixin configuration'
+              assert 'dev/igntv/mtrengine/MtrEngineForge.class' in names, 'Missing Forge entry point'
+              assert not any(p.startswith('org/mtr/mod/') for p in names), 'MTR was accidentally bundled'
+              print('PASS: standalone JAR:',jar,'size',jar.stat().st_size,'bytes')
+          PY
+      - name: Upload standalone addon prototype
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTR-Engine-Standalone-Prototype-Forge-1.20.1
+          path: standalone-engine/build/libs/*.jar
+          if-no-files-found: error
