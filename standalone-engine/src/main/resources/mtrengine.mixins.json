@@ -15,6 +15,7 @@
     "MaterialPropertiesMixin",
     "ShaderBatchBoundaryMixin",
     "OptimizedRendererPassMixin",
+    "GraphicsHolderTextMixin",
     "MtrMaterialWrapperAccessor",
     "OptimizedModelLayoutAccessor",
     "OptimizedObjModelAccessor",
