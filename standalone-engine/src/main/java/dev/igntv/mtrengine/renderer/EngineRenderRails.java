@@ -1,7 +1,7 @@
 package dev.igntv.mtrengine.renderer;
 
-import com.logisticscraft.occlusionculling.OcclusionCullingInstance;
-import com.logisticscraft.occlusionculling.util.Vec3d;
+import org.mtr.libraries.com.logisticscraft.occlusionculling.OcclusionCullingInstance;
+import org.mtr.libraries.com.logisticscraft.occlusionculling.util.Vec3d;
 import org.mtr.core.data.Rail;
 import org.mtr.core.data.TransportMode;
 import org.mtr.core.tool.Angle;
