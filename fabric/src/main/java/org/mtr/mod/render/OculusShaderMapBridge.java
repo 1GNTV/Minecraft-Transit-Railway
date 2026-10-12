@@ -41,7 +41,14 @@ public final class OculusShaderMapBridge {
             }
         }
         if(vertex==null || fragment==null)return transformed;
-        InstanceShaderSource.Pair patched=prepare.apply(vertex,fragment);
+        final InstanceShaderSource.Pair patched;
+        try {
+            patched=prepare.apply(vertex,fragment);
+        } catch (RuntimeException unsupportedShader) {
+            // Shader-pack syntax and optional Oculus integrations vary widely.
+            // A failed candidate must never stop normal shader loading.
+            return transformed;
+        }
         if(patched==null)return transformed;
         Map<Object,Object> copy=new HashMap<>(transformed);
         copy.put(vertexKey,patched.vertex());
