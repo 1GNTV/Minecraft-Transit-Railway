@@ -90,7 +90,13 @@ public final class StaticRegionRenderer {
         try {
             // Region page IDs and scene plans must be invalidated together.
             if(layouts.values().stream().mapToInt(RegionPageLayout::locations).sum()>8192){
+                // Plans already queued this pass still refer to old page IDs.
+                // Never reuse them after resetting the page layout: render the
+                // complete original models for this one pass instead.
                 cache.close();layouts.clear();scenePlans.clear();
+                for(var region:groups.values())for(Instance instance:region.values())
+                    instance.resource().render(instance.fallback(),instance.light());
+                return;
             }
             Map<PageKey,List<Selection>> wanted=new LinkedHashMap<>();
             for(var region:groups.values())for(Instance instance:region.values())
