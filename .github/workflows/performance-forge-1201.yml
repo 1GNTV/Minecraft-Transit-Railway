@@ -1,7 +1,7 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-oculus-map-experiment" ]
   workflow_dispatch:
 
 permissions:
@@ -51,6 +51,8 @@ jobs:
         run: python3 tools/test_next_renderer.py
       - name: Check persistent MTR Engine scene plans
         run: python3 tools/test_scene_engine.py
+      - name: Check opt-in Oculus source map bridge and original fallback
+        run: python3 tools/test_oculus_map_bridge.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
@@ -102,7 +104,7 @@ jobs:
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-Engine-Queue-Hotpath-v2-Forge-1.20.1
+          name: MTR-Engine-Oculus-Map-Experimental-Forge-1.20.1
           path: |
             forge/build/libs/*-all.jar
           if-no-files-found: error
