@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '6.0.36'
+    id 'org.spongepowered.mixin' version '0.7.+'
+}
+group = 'dev.igntv.mtrengine'
+version = "${addon_version}+${minecraft_version}"
+base { archivesName = 'MTR-Engine-standalone-forge' }
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+repositories {
+    mavenCentral()
+    maven { url = "https://maven.minecraftforge.net/" }
+    maven { url = "https://api.modrinth.com/maven" }
+}
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+    runs {
+        client { workingDirectory project.file('run') }
+    }
+}
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    // Follow the dependency strategy used by Joban Client Mod: compile
+    // against official MTR, but never package MTR in the addon JAR.
+    compileOnly fg.deobf("maven.modrinth:minecraft-transit-railway:FORGE-${mtr_version}+${minecraft_version}")
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+mixin {
+    add sourceSets.main, 'mtrengine.refmap.json'
+    config 'mtrengine.mixins.json'
+}
+tasks.named('processResources') {
+    inputs.properties([addon_version: addon_version, minecraft_version: minecraft_version])
+    filesMatching('META-INF/mods.toml') {
+        expand addon_version: addon_version, minecraft_version: minecraft_version
+    }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+jar {
+    manifest { attributes('MixinConfigs': 'mtrengine.mixins.json') }
+    finalizedBy 'reobfJar'
+}
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
