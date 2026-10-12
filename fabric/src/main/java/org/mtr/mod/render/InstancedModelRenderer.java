@@ -73,6 +73,13 @@ public final class InstancedModelRenderer {
             calls.forEach(ordinary); return;
         }
         if (!GL.getCapabilities().OpenGL33) { calls.forEach(ordinary); return; }
+        // On Forge the unsafe @ModifyArgs Oculus bridge is not installed.
+        // Without patched shader programs, grouping models only reorders and
+        // checks thousands of calls before falling back to individual draws.
+        if (!Utilities.canUseCustomShader() && !OculusInstanceRenderer.shaderBridgeReady()) {
+            calls.forEach(ordinary);
+            return;
+        }
         List<?> ordered=Utilities.canUseCustomShader() && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true")) ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,call->call instanceof RenderCallData data?data.mtr$screenBounds():null,24) : calls;
         ConsecutiveRuns.visit(ordered, Utilities.canUseCustomShader() ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
             boolean drawn = false;
