@@ -8,6 +8,8 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
     private final Map<K,Entry<V,L,R>> entries=new LinkedHashMap<>(64,.75f,true);
     private final int maxEntries,maxVertices,maxBuildVertices;
     private int vertices,builds;
+    // Diagnostic counters, read only by the optional 10-second engine logger.
+    private long compiledHits,pageBuilds,pageEvictions;
     private long frame;
     public PersistentRegionCache(int entries,int vertices,int build){maxEntries=entries;maxVertices=vertices;maxBuildVertices=build;}
     public void beginFrame(){frame++;builds=1;}
@@ -22,6 +24,7 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         // and proceeds to the persistent membership update below.
         if(entry.resource!=null && entry.compiled.containsAll(visible)){
             entry.seen=frame;
+            compiledHits++;
             return entry.resource;
         }
         // Previous code added the sizes before accounting for duplicate locations:
@@ -42,15 +45,18 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         builds--;
         R replacement;try{replacement=builder.apply(content);}catch(RuntimeException error){entry.failed=signature;throw error;}if(replacement==null){entry.failed=signature;return null;}
         entry.failed=Set.of();
-        release(entry);entry.resource=replacement;entry.compiled=Set.copyOf(content);entry.vertices=count;vertices+=count;entry.seen=frame;return replacement;
+        release(entry);entry.resource=replacement;entry.compiled=Set.copyOf(content);entry.vertices=count;vertices+=count;entry.seen=frame;pageBuilds++;return replacement;
     }
     private boolean room(Entry<V,L,R> keep,int additional,int vertexDelta){
         var it=entries.values().iterator();
         while((entries.size()+additional>maxEntries || vertices+vertexDelta>maxVertices) && it.hasNext()){
-            var victim=it.next();if(victim==keep || victim.seen==frame)continue;release(victim);it.remove();
+            var victim=it.next();if(victim==keep || victim.seen==frame)continue;release(victim);it.remove();pageEvictions++;
         }return entries.size()+additional<=maxEntries && vertices+vertexDelta<=maxVertices;
     }
     private void release(Entry<V,L,R> entry){if(entry.resource==null)return;try{entry.resource.close();}catch(Exception e){throw new IllegalStateException(e);}finally{vertices-=entry.vertices;entry.vertices=0;entry.resource=null;}}
     public int residentVertices(){return vertices;}
+    public long compiledHits(){return compiledHits;}
+    public long pageBuilds(){return pageBuilds;}
+    public long pageEvictions(){return pageEvictions;}
     @Override public void close(){entries.values().forEach(this::release);entries.clear();vertices=0;}
 }
