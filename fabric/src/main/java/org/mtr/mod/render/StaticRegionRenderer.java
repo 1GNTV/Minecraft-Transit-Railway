@@ -67,7 +67,12 @@ public final class StaticRegionRenderer {
         }
         @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);lastVisible=List.of();lastRanges=Map.of();}
     }
-    private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(64,256_000,16_000);
+    // Dense stations can retain many region pages; the previous 64-page /
+    // 256k-vertex cap evicted visible geometry repeatedly, causing fresh uploads.
+    private static final int MAX_REGION_PAGES=Math.max(64,Math.min(512,Integer.getInteger("mtr.engine.regionPages",256)));
+    private static final int MAX_REGION_VERTICES=Math.max(256_000,Math.min(4_000_000,Integer.getInteger("mtr.engine.regionVertices",1_000_000)));
+    private static final int MAX_SCENE_LOCATIONS=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.sceneLocations",32768)));
+    private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(MAX_REGION_PAGES,MAX_REGION_VERTICES,16_000);
     private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
     // Reuse the temporary per-pass staging maps/lists. No references to these
     // scratch lists survive inside compiled GPU pages or persistent scene plans.
@@ -88,7 +93,7 @@ public final class StaticRegionRenderer {
     }
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
     private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
-    private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(8192);
+    private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(MAX_SCENE_LOCATIONS);
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses;
     private Object world;
@@ -130,7 +135,7 @@ public final class StaticRegionRenderer {
         cache.beginFrame();
         try {
             // Region page IDs and scene plans must be invalidated together.
-            if(layoutLocations>8192){
+            if(layoutLocations>MAX_SCENE_LOCATIONS){
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
