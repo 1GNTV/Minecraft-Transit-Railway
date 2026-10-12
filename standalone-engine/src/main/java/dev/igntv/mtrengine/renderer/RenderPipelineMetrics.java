@@ -1,8 +1,14 @@
 package dev.igntv.mtrengine.renderer;
 
-/** Separate addon's pipeline families. The production profiling port follows
- * after rendering hooks are validated on official MTR and Oculus. */
+/** Standalone render families and lightweight diagnostic API.
+ * Full GPU timestamp metrics remain optional on this external renderer.
+ */
 public final class RenderPipelineMetrics {
     public enum Family { RAIL, TRAIN, DECORATION, OTHER }
     private RenderPipelineMetrics() {}
+    public static void begin(boolean shaderless) {}
+    public static void end() {}
+    public static void draw(int indices) {}
+    public static void material() {}
+    public static void matrixShaderPath() {}
 }
