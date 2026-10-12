@@ -16,6 +16,8 @@ import java.util.*;
 
 /** Incremental immutable pages for solid rails/decorations; selected spans retain fine visibility. */
 public final class StaticRegionRenderer {
+    private static final boolean CACHE_SCENE_PLANS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.scenePlans", "true"));
+    private static final boolean CACHE_VISIBILITY_MASKS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.visibilityMasks", "true"));
     private record Sector(int x,int y,int z){}
     private static final class MatrixKey {
         final float[] values;final int hash;
@@ -41,7 +43,7 @@ public final class StaticRegionRenderer {
         // Only visibility changes require regrouping index spans; camera-stable pages reuse
         // the immutable material mask instead of allocating new hash maps each frame.
         Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges(List<Selection> visible){
-            if(lastVisible.equals(visible))return lastRanges;
+            if(CACHE_VISIBILITY_MASKS && lastVisible.equals(visible))return lastRanges;
             Map<MaterialProperties,List<RegionVertexRanges.Span>> result=new HashMap<>();
             for(Selection selection:visible){
                 List<MaterialSpan> contributions=spans.get(selection);
@@ -69,7 +71,7 @@ public final class StaticRegionRenderer {
         var sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
         org.joml.Matrix4f local=new org.joml.Matrix4f(matrix);local.m30((float)(x-sector.x*16D));local.m31((float)(y-sector.y*16D));local.m32((float)(z-sector.z*16D));
         PlanRevision revision=new PlanRevision(model,snapshot,new MatrixKey(local),light);
-        ScenePlan plan=scenePlans.resolve(new PlanKey(sector,location),revision,()->{
+        java.util.function.Supplier<ScenePlan> buildPlan=()->{
             RegionPageLayout<Fragment> layout=layouts.computeIfAbsent(sector,k->new RegionPageLayout<>(RailGeometrySnapshots.PAGE_VERTICES));
             List<PlacedChunk> parts=new ArrayList<>(snapshot.chunks().size());
             for(int n=0;n<snapshot.chunks().size();n++){
@@ -79,7 +81,8 @@ public final class StaticRegionRenderer {
                 parts.add(new PlacedChunk(selection,page));
             }
             return new ScenePlan(List.copyOf(parts));
-        });
+        };
+        ScenePlan plan=CACHE_SCENE_PLANS ? scenePlans.resolve(new PlanKey(sector,location),revision,buildPlan) : buildPlan.get();
         groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
     }
     public void flush(){
