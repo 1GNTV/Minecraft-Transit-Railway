@@ -22,5 +22,6 @@ public final class MtrRailIndexes {
     public static void clear() {
         data=null;
         INDEX.rebuild(java.util.List.of());
+        MtrRailGeometryCaches.clear();
     }
 }
