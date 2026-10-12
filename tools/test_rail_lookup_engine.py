@@ -89,8 +89,21 @@ public class RailLookupTest {
   check(poses.size()==2 && originalKey.hashCode()==hash,"stable immutable keys");
   RailSectorBatcher.submit(model,0,0,12,0,0,0,false,120);
   check(poses.size()==2,"light change must not rebuild transforms");
+  Object prepared=poses.values().iterator().next();
+  var locationAccessor=prepared.getClass().getDeclaredMethod("location");
+  locationAccessor.setAccessible(true);
+  Object location=locationAccessor.invoke(prepared);
+  int cachedHash=location.hashCode();
+  check(cachedHash==location.hashCode(),"pose hash must stay stable");
   RailSectorBatcher.clear();
   check(poses.isEmpty(),"world unload cleans pose cache");
+  RailSectorBatcher.submit(model,0,0,12,0,0,0,false,100);
+  Object regenerated=locationAccessor.invoke(poses.values().iterator().next());
+  check(location!=regenerated && location.equals(regenerated)
+      && regenerated.equals(location) && location.hashCode()==regenerated.hashCode(),
+      "cached hash must preserve value equality after reload");
+  RailSectorBatcher.clear();
+  check(poses.isEmpty(),"reloaded rail state releases resources");
   System.out.println("PASS: 500 hot-path lookups, stable keys, light independence, exact cleanup");
  }
 }
