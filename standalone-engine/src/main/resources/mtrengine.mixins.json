@@ -6,7 +6,13 @@
   "refmap": "mtrengine.refmap.json",
   "client": [
     "MtrMainPassMixin",
-    "MtrRailsPassMixin"
+    "MtrRailsPassMixin",
+    "MtrRailResourceLoadMixin",
+    "MtrMaterialWrapperAccessor",
+    "OptimizedModelLayoutAccessor",
+    "OptimizedObjModelAccessor",
+    "OptimizedMaterialGroupAccessor",
+    "MtrVertexArrayDrawMixin"
   ],
   "injectors": {
     "defaultRequire": 1
