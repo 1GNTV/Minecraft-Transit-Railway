@@ -216,7 +216,7 @@ public final class StaticRegionRenderer {
         GlStateTracker.capture();
         try{
             // Keep segment index ranges stable. Do not apply global triangle reordering here.
-            for(var entry:combined.entrySet()){Mesh mesh=entry.getValue().upload(mapping);page.meshes.add(mesh);page.arrays.put(entry.getKey(),new VertexArray(mesh,mapping));}
+            for(var entry:combined.entrySet()){Mesh mesh=FastRegionMeshUploader.upload(entry.getValue(),mapping);page.meshes.add(mesh);page.arrays.put(entry.getKey(),new VertexArray(mesh,mapping));}
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
