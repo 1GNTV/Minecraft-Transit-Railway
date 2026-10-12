@@ -23,15 +23,17 @@ public final class StaticRegionRenderer {
     private static final class MatrixKey {
         final float[] values;final int hash;
         MatrixKey(org.joml.Matrix4f matrix){values=new float[16];matrix.get(values);hash=Arrays.hashCode(values);}
-        boolean matches(org.joml.Matrix4f m){
+        // Compare local-space translation from primitives: creating a JOML
+        // Matrix4f per rail per frame is pointless when nothing moved.
+        boolean matchesLocal(org.joml.Matrix4f m,float x,float y,float z){
             return Float.compare(values[0],m.m00())==0 && Float.compare(values[1],m.m01())==0
                 && Float.compare(values[2],m.m02())==0 && Float.compare(values[3],m.m03())==0
                 && Float.compare(values[4],m.m10())==0 && Float.compare(values[5],m.m11())==0
                 && Float.compare(values[6],m.m12())==0 && Float.compare(values[7],m.m13())==0
                 && Float.compare(values[8],m.m20())==0 && Float.compare(values[9],m.m21())==0
                 && Float.compare(values[10],m.m22())==0 && Float.compare(values[11],m.m23())==0
-                && Float.compare(values[12],m.m30())==0 && Float.compare(values[13],m.m31())==0
-                && Float.compare(values[14],m.m32())==0 && Float.compare(values[15],m.m33())==0;
+                && Float.compare(values[12],x)==0 && Float.compare(values[13],y)==0
+                && Float.compare(values[14],z)==0 && Float.compare(values[15],m.m33())==0;
         }
         @Override public int hashCode(){return hash;}
         @Override public boolean equals(Object other){return other instanceof MatrixKey key && Arrays.equals(values,key.values);}
@@ -104,7 +106,7 @@ public final class StaticRegionRenderer {
         OptimizedModelWrapper model=resource.getOptimizedModel();if(model==null || model.getModel()==null)return false;
         var snapshot=RailGeometrySnapshots.get(model.getModel());if(snapshot==null)return false;
         var sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
-        org.joml.Matrix4f local=new org.joml.Matrix4f(matrix);local.m30((float)(x-sector.x*16D));local.m31((float)(y-sector.y*16D));local.m32((float)(z-sector.z*16D));
+        float localX=(float)(x-sector.x*16D),localY=(float)(y-sector.y*16D),localZ=(float)(z-sector.z*16D);
         java.util.function.Function<PlanRevision,ScenePlan> buildPlan=revision->{
             RegionPageLayout<Fragment> layout=layouts.computeIfAbsent(sector,k->new RegionPageLayout<>(RailGeometrySnapshots.PAGE_VERTICES));
             int before=layout.locations();
@@ -125,11 +127,16 @@ public final class StaticRegionRenderer {
         ScenePlan plan=CACHE_SCENE_PLANS
             ? scenePlans.resolveLazy(new PlanKey(sector,location),
                 previous->previous.model()==model && previous.snapshot()==snapshot
-                    && previous.light()==light && previous.matrix().matches(local),
-                ()->new PlanRevision(model,snapshot,new MatrixKey(local),light),
+                    && previous.light()==light && previous.matrix().matchesLocal(matrix,localX,localY,localZ),
+                ()->new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light),
                 buildPlan)
-            : buildPlan.apply(new PlanRevision(model,snapshot,new MatrixKey(local),light));
+            : buildPlan.apply(new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light));
         groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
+    }
+    private static org.joml.Matrix4f localMatrix(org.joml.Matrix4f source,float x,float y,float z){
+        // Called on plan cache misses only; never on a stable queue hit.
+        org.joml.Matrix4f matrix=new org.joml.Matrix4f(source);
+        return matrix.m30(x).m31(y).m32(z);
     }
     public void flush(){
         cache.beginFrame();
