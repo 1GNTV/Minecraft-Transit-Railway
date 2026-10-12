@@ -1,0 +1,31 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "mtrengine"
+version = "${addon_version}"
+displayName = "MTR Engine (standalone prototype)"
+authors = "IGNTV"
+description = "Client-only MTR render integration prototype. Original renderer preserved until standalone GPU region batching is validated."
+
+[[dependencies.mtrengine]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}]"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.mtrengine]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.mtrengine]]
+modId = "mtr"
+mandatory = true
+versionRange = "[4.0.5,4.1)"
+ordering = "AFTER"
+side = "CLIENT"
