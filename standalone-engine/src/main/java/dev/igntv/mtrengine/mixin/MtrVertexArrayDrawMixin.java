@@ -16,7 +16,9 @@ public abstract class MtrVertexArrayDrawMixin {
     @Redirect(method="draw",at=@At(value="INVOKE",
         target="Lorg/lwjgl/opengl/GL33;glDrawElements(IIIJ)V"),require=1,remap=false)
     private void mtrengine$drawRanges(int mode,int count,int type,long offset){
-        RegionVertexRanges.draw((VertexArray)(Object)this,mode,count,type,offset);
+        if(dev.igntv.mtrengine.renderer.MtrRailModelBuilds.ENABLED)
+            RegionVertexRanges.draw((VertexArray)(Object)this,mode,count,type,offset);
+        else org.lwjgl.opengl.GL33.glDrawElements(mode,count,type,offset);
     }
     @Inject(method="close",at=@At("HEAD"),require=1,remap=false)
     private void mtrengine$cleanupRanges(CallbackInfo ci){
