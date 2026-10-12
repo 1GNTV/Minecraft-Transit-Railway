@@ -14,6 +14,9 @@ import dev.igntv.mtrengine.mixin.OptimizedModelLayoutAccessor;
 import org.mtr.mod.resource.*;
 import org.mtr.mod.render.StoredMatrixTransformations;
 import java.util.*;
+import dev.igntv.mtrengine.core.PersistentRegionCache;
+import dev.igntv.mtrengine.core.RegionPageLayout;
+import dev.igntv.mtrengine.core.ScenePlanCache;
 
 /** Incremental immutable pages for solid rails/decorations; selected spans retain fine visibility. */
 public final class StaticRegionRenderer {
