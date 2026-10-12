@@ -3,6 +3,7 @@ package dev.igntv.mtrengine.mixin;
 import dev.igntv.mtrengine.MtrRenderBridge;
 import dev.igntv.mtrengine.renderer.MtrRailModelBuilds;
 import dev.igntv.mtrengine.renderer.RailSectorBatcher;
+import dev.igntv.mtrengine.renderer.WorldTextBatch;
 import org.mtr.mod.render.MainRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,6 +20,7 @@ public abstract class MtrMainPassMixin {
             at=@At("HEAD"), remap=false)
     private static void mtrengine$startPass(CallbackInfo ci){
         MtrRenderBridge.onFrameStart();
+        WorldTextBatch.begin();
     }
 
     @Inject(method="render(Lorg/mtr/mapping/mapper/GraphicsHolder;Lorg/mtr/mapping/holder/Vector3d;)V",
@@ -36,6 +38,7 @@ public abstract class MtrMainPassMixin {
     @Inject(method="render(Lorg/mtr/mapping/mapper/GraphicsHolder;Lorg/mtr/mapping/holder/Vector3d;)V",
             at=@At("RETURN"), remap=false)
     private static void mtrengine$endPass(CallbackInfo ci){
+        WorldTextBatch.end();
         MtrRenderBridge.onFrameEnd();
     }
 }
