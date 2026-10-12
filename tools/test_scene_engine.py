@@ -12,6 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ScenePlanTest {
     record Revision(int geometry, int lighting, int resourceGeneration) {}
     record Plan(int token) {}
+    static final class MutableKey {
+        int id;
+        MutableKey(int id){this.id=id;}
+        MutableKey copy(){return new MutableKey(id);}
+        @Override public int hashCode(){return id;}
+        @Override public boolean equals(Object o){return o instanceof MutableKey key && key.id==id;}
+    }
     static void check(boolean ok, String context) {
         if (!ok) throw new AssertionError(context);
     }
@@ -60,6 +67,45 @@ public class ScenePlanTest {
         check(cache.resolve("platform", new Revision(1, 13, 2),
                 () -> new Plan(builds.incrementAndGet())) != reload,
                 "LRU entry must be rebuilt after eviction");
+        // Verify render-thread scratch lookups never enter the persistent
+        // HashMap, that stable frames allocate zero persistent copies, and
+        // that a mutated scratch key cannot corrupt a cached map entry.
+        var fast = new ScenePlanCache<MutableKey, Revision, Plan>(2);
+        var scratch = new MutableKey(42);
+        var copies = new AtomicInteger();
+        Revision hotRevision = new Revision(7, 15, 3);
+        Plan hot = fast.resolveLazyLookup(scratch, k -> {
+                copies.incrementAndGet(); return k.copy();
+            }, old -> false, () -> hotRevision,
+            revision -> new Plan(101));
+        check(copies.get()==1 && fast.size()==1, "cold miss retains one immutable key");
+        for(int i=0;i<10000;i++) {
+            check(fast.resolveLazyLookup(scratch, k -> {
+                    copies.incrementAndGet(); return k.copy();
+                }, old -> old.equals(hotRevision),
+                () -> {throw new AssertionError("stable hit must not allocate revision");},
+                revision -> {throw new AssertionError("stable hit must not rebuild");})==hot,
+                "stable hot-path identity");
+        }
+        check(copies.get()==1 && fast.hits()==10000,
+                "scratch key must not be copied on stable hits");
+        scratch.id=99;
+        fast.resolveLazyLookup(scratch, MutableKey::copy, old -> false,
+                () -> hotRevision, revision -> new Plan(102));
+        scratch.id=42;
+        check(fast.resolveLazyLookup(scratch, MutableKey::copy,
+                old -> old.equals(hotRevision),
+                () -> {throw new AssertionError("stored key was mutated");},
+                revision -> {throw new AssertionError("stable key evicted");})==hot,
+                "mutable scratch must not be stored as key");
+        try {
+            scratch.id=101;
+            fast.resolveLazyLookup(scratch, MutableKey::copy, old -> false,
+                    () -> hotRevision,
+                    revision -> {throw new IllegalArgumentException("failed build");});
+            throw new AssertionError("expected failed build");
+        } catch(IllegalArgumentException expected) {}
+        check(fast.size()==2, "failed build must not insert permanent key");
         cache.clear();
         check(cache.size() == 0 && cache.hits() == 0 && cache.misses() == 0,
                 "world and resource reload clear");
