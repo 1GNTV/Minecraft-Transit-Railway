@@ -24,6 +24,8 @@ import java.util.*;
 public final class RegionVertexRanges {
     public record Span(int first, int count) {}
     private static final boolean INDIRECT = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.indirect", "true"));
+    // GPU buffer bindings/uploads do not amortize over tiny 2-3 span pages.
+    private static final int MIN_INDIRECT_SPANS = Math.max(2, Integer.getInteger("mtr.engine.indirectMinSpans", 8));
     private static final Map<VertexArray, Ranges> ACTIVE = Collections.synchronizedMap(new WeakHashMap<>());
     private static boolean indirectFailed;
 
@@ -117,7 +119,7 @@ public final class RegionVertexRanges {
             GL33.glDrawElements(mode, s.count, type, (long) s.first * bytes);
             return;
         }
-        if (eligibleForIndirect()) {
+        if (ranges.last.size() >= MIN_INDIRECT_SPANS && eligibleForIndirect()) {
             final int previous = GL43.glGetInteger(GL43.GL_DRAW_INDIRECT_BUFFER_BINDING);
             boolean ready = false;
             try {
