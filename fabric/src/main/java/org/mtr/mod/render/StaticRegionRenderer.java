@@ -42,7 +42,26 @@ public final class StaticRegionRenderer {
     private record Fragment(Object location,OptimizedModelWrapper model,int chunk){}
     private record PageKey(Sector sector,int page){}
     // Immutable spatial scene plans survive frames; transient resources never enter this cache.
-    private record PlanKey(Sector sector,Object location){}
+    private static final class PlanKey {
+        // Mutable only for the single render-thread lookup. Stable map keys
+        // are fresh immutable copies made on misses, never the scratch object.
+        private Sector sector;
+        private Object location;
+        private int hash;
+        PlanKey() {}
+        PlanKey(Sector sector,Object location){set(sector,location);}
+        PlanKey set(Sector sector,Object location) {
+            this.sector=sector;this.location=location;
+            this.hash=31*sector.hashCode()+Objects.hashCode(location);
+            return this;
+        }
+        PlanKey immutableCopy(){return new PlanKey(sector,location);}
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            return this==other || other instanceof PlanKey key
+                && sector.equals(key.sector) && Objects.equals(location,key.location);
+        }
+    }
     private record PlanRevision(OptimizedModelWrapper model,RailGeometrySnapshots.Snapshot snapshot,MatrixKey matrix,int light){}
     private record PlacedChunk(Selection selection,PageKey page){}
     private record ScenePlan(List<PlacedChunk> chunks){}
@@ -96,6 +115,8 @@ public final class StaticRegionRenderer {
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
     private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(MAX_SCENE_LOCATIONS);
+    // Never inserted in scenePlans; key is copied only on cache misses.
+    private final PlanKey planLookup=new PlanKey();
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
     private Object world;
@@ -125,7 +146,7 @@ public final class StaticRegionRenderer {
             }
         };
         ScenePlan plan=CACHE_SCENE_PLANS
-            ? scenePlans.resolveLazy(new PlanKey(sector,location),
+            ? scenePlans.resolveLazyLookup(planLookup.set(sector,location),PlanKey::immutableCopy,
                 previous->previous.model()==model && previous.snapshot()==snapshot
                     && previous.light()==light && previous.matrix().matchesLocal(matrix,localX,localY,localZ),
                 ()->new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light),
