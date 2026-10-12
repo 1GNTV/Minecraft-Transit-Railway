@@ -1,7 +1,7 @@
 name: MTR Engine standalone addon - Forge 1.20.1
 on:
   push:
-    branches: [ "work/mtr-engine-standalone-addon-forge1201" ]
+    branches: [ "work/mtr-engine-standalone-addon-forge1201", "work/mtr-engine-standalone-region-port-v1" ]
     paths:
       - "standalone-engine/**"
       - ".github/workflows/mtr-engine-standalone-forge1201.yml"
@@ -60,6 +60,6 @@ jobs:
       - name: Upload standalone addon prototype
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-Engine-Standalone-Prototype-Forge-1.20.1
+          name: MTR-Engine-Standalone-79FPS-Region-Port-Forge-1.20.1
           path: standalone-engine/build/libs/*.jar
           if-no-files-found: error
