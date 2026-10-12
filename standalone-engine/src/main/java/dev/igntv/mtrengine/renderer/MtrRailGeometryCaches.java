@@ -13,6 +13,9 @@ public final class MtrRailGeometryCaches {
                               double interval,float offset1,float offset2){
         CACHE.render(math,draw,interval,offset1,offset2);
     }
+    public static void clear(){
+        CACHE.retainRails(java.util.List.of());
+    }
     public static void retain(MinecraftClientData data){
         var live=new ArrayList<Rail>();
         data.railWrapperList.values().forEach(wrapper->live.add(wrapper.getRail()));
