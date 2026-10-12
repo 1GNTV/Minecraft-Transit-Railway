@@ -12,6 +12,7 @@ public final class MtrRailIndexes {
         if(current==null)return;
         data=current;
         INDEX.rebuild(current.railWrapperList.values());
+        MtrRailGeometryCaches.retain(current);
     }
     public static Iterable<MinecraftClientData.RailWrapper> query(
             MinecraftClientData current,double x,double z,int radius) {
