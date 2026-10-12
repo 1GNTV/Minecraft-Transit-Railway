@@ -1,5 +1,6 @@
 package org.mtr.mod.render;
 import org.mtr.mod.resource.RailResource;
+import org.mtr.mod.Init;
 /** Persistent solid rail regions, including Oculus; per-segment selection remains unchanged. */
 public final class RailSectorBatcher {
     private static final StaticRegionRenderer REGIONS=new StaticRegionRenderer(RenderPipelineMetrics.Family.RAIL);
@@ -37,6 +38,8 @@ public final class RailSectorBatcher {
     }
     private record Prepared(Location location,StoredMatrixTransformations transform,org.joml.Matrix4f matrix){}
     private static final boolean REUSE_KEYS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLookup","true"));
+    private static final boolean ENGINE_METRICS=Boolean.getBoolean("mtr.engine.metrics");
+    private static long railLookupHits,railLookupMisses,lastMetricsNanos;
     private static final Segment LOOKUP=new Segment();
     private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
     private static final java.util.Map<Segment,Prepared> PREPARED=new java.util.LinkedHashMap<>(512,.75f,true);
@@ -51,6 +54,7 @@ public final class RailSectorBatcher {
         Segment lookup=REUSE_KEYS?LOOKUP.set(resource,x1,z1,x3,z3,y1,y2,flip)
                                   :new Segment().set(resource,x1,z1,x3,z3,y1,y2,flip);
         Prepared prepared=PREPARED.get(lookup);
+        if(ENGINE_METRICS){if(prepared==null)railLookupMisses++;else railLookupHits++;}
         if(prepared==null){
             double dx=x3-x1,dz=z3-z1;
             float yaw=(float)(Math.PI/2-Math.atan2(dz,dx)+(flip?Math.PI:0));
@@ -66,7 +70,19 @@ public final class RailSectorBatcher {
         Location location=prepared.location;
         if(!REGIONS.queue(resource,prepared.transform,location,location.x,location.y,location.z,prepared.matrix,light))resource.render(prepared.transform,light);
     }
-    public static void flush(){REGIONS.flush();StaticDecorationRegions.flush();}
+    public static void flush(){
+        REGIONS.flush();
+        StaticDecorationRegions.flush();
+        if(ENGINE_METRICS){
+            long now=System.nanoTime();
+            if(now-lastMetricsNanos>=10_000_000_000L){
+                Init.LOGGER.info("MTR Engine rail pose lookup: hits={}, misses={}, cached-poses={}",
+                    railLookupHits,railLookupMisses,PREPARED.size());
+                railLookupHits=railLookupMisses=0;
+                lastMetricsNanos=now;
+            }
+        }
+    }
     public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }
