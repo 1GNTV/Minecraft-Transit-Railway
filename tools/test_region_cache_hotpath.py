@@ -45,6 +45,14 @@ public class CacheHotpathTest {
     cache.beginFrame();
     ok(cache.get("rail",relit,locate,p->1,builder)==second,
        "relit stable page must be retained");
+    // A scene-plan LRU eviction may recreate equal-but-distinct Selection
+    // objects. The fast identity check must fall back to value equality.
+    var equivalent=new ArrayList<Piece>();
+    for(Piece p:relit)equivalent.add(new Piece(p.id(),p.revision()));
+    cache.beginFrame();
+    ok(cache.get("rail",equivalent,locate,p->1,builder)==second,
+       "equal selection objects after scene-plan eviction must still reuse page");
+    ok(builds.get()==2,"equal-but-distinct selections must not rebuild");
     cache.beginFrame();
     List<Piece> subset=relit.subList(0,100);
     ok(cache.get("rail",subset,locate,p->1,builder)==second,
