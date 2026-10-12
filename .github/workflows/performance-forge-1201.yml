@@ -98,7 +98,7 @@ jobs:
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-v4-work-forge-1.20.1
+          name: MTR-Engine-MaxPerf-Oculus-startup-fix-forge-1.20.1
           path: |
             forge/build/libs/*-all.jar
           if-no-files-found: error
