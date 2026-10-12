@@ -136,4 +136,4 @@ with tempfile.TemporaryDirectory(prefix="mtr-gpu-indirect-") as dirname:
   path.parent.mkdir(parents=True,exist_ok=True)
   path.write_text(content)
  subprocess.run(["javac","-d",dirname,str(SHIPPING),*map(str,root.rglob("*.java"))],check=True)
- subprocess.run(["java","-cp",dirname,"EngineIndirectTest"],check=True)
+ subprocess.run(["java","-Dmtr.engine.indirectMinSpans=2","-cp",dirname,"EngineIndirectTest"],check=True)
