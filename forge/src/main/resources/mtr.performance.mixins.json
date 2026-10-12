@@ -20,7 +20,6 @@
     "RawModelUploadMixin",
     "PreparedObjModelAccessor",
     "ModelAtlasAccessor",
-    "OculusInstanceShaderMixin",
     "ModelDetailUploadMixin",
     "ModShaderShadowStateMixin"
   ],
