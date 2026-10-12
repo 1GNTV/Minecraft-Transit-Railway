@@ -5,6 +5,13 @@ import subprocess, tempfile
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/"fabric/src/main/java/org/mtr/mod/render/RailSectorBatcher.java"
 STUBS={
+"org/mtr/mod/Init.java":"""
+package org.mtr.mod;
+public class Init {
+ public static final Log LOGGER=new Log();
+ public static class Log {public void info(String line,Object... args){}}
+}
+""",
 "org/mtr/mod/resource/RailResource.java":"""
 package org.mtr.mod.resource;
 import org.mtr.mod.render.StoredMatrixTransformations;
