@@ -10,6 +10,7 @@
     "MtrRailLoadScopeMixin",
     "MtrModelFactoryMixin",
     "MtrClientRailIndexMixin",
+    "MtrResourceReloadMixin",
     "MtrMaterialWrapperAccessor",
     "OptimizedModelLayoutAccessor",
     "OptimizedObjModelAccessor",
