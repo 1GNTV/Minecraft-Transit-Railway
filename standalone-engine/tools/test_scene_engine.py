@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 HELPER = ROOT / "standalone-engine/src/main/java/dev/igntv/mtrengine/core/ScenePlanCache.java"
 TEST = r"""
 import dev.igntv.mtrengine.core.ScenePlanCache;
