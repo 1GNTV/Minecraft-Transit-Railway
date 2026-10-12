@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.function.Predicate;
+import java.util.function.Function;
 
 /**
  * CPU-only registry for immutable render plans. A plan is built once per
@@ -40,6 +42,32 @@ public final class ScenePlanCache<K, R, V> {
         V value = Objects.requireNonNull(build.get(), "new scene plan");
         misses++;
         plans.put(key, new Entry<>(revision, value));
+        while (plans.size() > capacity) {
+            K eldest = plans.keySet().iterator().next();
+            plans.remove(eldest);
+        }
+        return value;
+    }
+
+    /**
+     * Avoid allocating a new revision (such as a 16-float transform snapshot)
+     * for the common case of a stable scene. The predicate must read live
+     * values without mutating them; suppliers are invoked only on misses.
+     */
+    public V resolveLazy(K key, Predicate<R> unchanged, Supplier<R> revision, Function<R, V> build) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(unchanged, "unchanged");
+        Objects.requireNonNull(revision, "revision");
+        Objects.requireNonNull(build, "build");
+        Entry<R, V> old = plans.get(key);
+        if (old != null && unchanged.test(old.revision)) {
+            hits++;
+            return old.value;
+        }
+        R updatedRevision = Objects.requireNonNull(revision.get(), "new revision");
+        V value = Objects.requireNonNull(build.apply(updatedRevision), "new scene plan");
+        misses++;
+        plans.put(key, new Entry<>(updatedRevision, value));
         while (plans.size() > capacity) {
             K eldest = plans.keySet().iterator().next();
             plans.remove(eldest);
