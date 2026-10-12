@@ -18,6 +18,7 @@ import java.util.*;
 public final class StaticRegionRenderer {
     private static final boolean CACHE_SCENE_PLANS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.scenePlans", "true"));
     private static final boolean CACHE_VISIBILITY_MASKS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.visibilityMasks", "true"));
+    private static final boolean ENGINE_METRICS = Boolean.getBoolean("mtr.engine.metrics");
     private record Sector(int x,int y,int z){}
     private static final class MatrixKey {
         final float[] values;final int hash;
@@ -71,6 +72,7 @@ public final class StaticRegionRenderer {
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(8192);
     private final RenderPipelineMetrics.Family family;
+    private long lastMetricsNanos, previousHits, previousMisses;
     private Object world;
     public StaticRegionRenderer(RenderPipelineMetrics.Family family){this.family=family;}
     public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
@@ -157,7 +159,18 @@ public final class StaticRegionRenderer {
                     }finally{holder.pop();}
                 });
             });
-        } finally { groups.clear(); }
+        } finally {
+            groups.clear();
+            if(ENGINE_METRICS){
+                long now=System.nanoTime();
+                if(now-lastMetricsNanos>=10_000_000_000L){
+                    Init.LOGGER.info("MTR Engine scene: family={}, cached-plans={}, plan-hits={}, plan-builds={}, enabled={}",
+                        family,scenePlans.size(),scenePlans.hits()-previousHits,scenePlans.misses()-previousMisses,CACHE_SCENE_PLANS);
+                    previousHits=scenePlans.hits();previousMisses=scenePlans.misses();
+                    lastMetricsNanos=now;
+                }
+            }
+        }
     }
     private Page build(List<Selection> content){
         Page page=new Page();Map<MaterialProperties,RawMesh> combined=new LinkedHashMap<>();
@@ -180,5 +193,5 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
-    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();world=null;}
+    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();world=null;previousHits=previousMisses=0;}
 }
