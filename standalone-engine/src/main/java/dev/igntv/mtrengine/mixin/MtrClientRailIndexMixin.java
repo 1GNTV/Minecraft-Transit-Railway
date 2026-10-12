@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MtrClientRailIndexMixin {
     @Inject(method="sync()V",at=@At("RETURN"),remap=false,require=1)
     private void mtrengine$reindex(CallbackInfo ci){
-        MtrRailIndexes.rebuild((MinecraftClientData)(Object)this);
+        if(dev.igntv.mtrengine.renderer.MtrRailModelBuilds.ENABLED)
+            MtrRailIndexes.rebuild((MinecraftClientData)(Object)this);
     }
 }
