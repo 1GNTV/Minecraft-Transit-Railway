@@ -78,10 +78,16 @@ public class RenderRails implements IGui {
 			return;
 		}
 
-		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = new ObjectArrayList<>();
+		final boolean shadowPass = OptimizedRenderer.renderingShadows();
+		// Worker occlusion tasks are only consumed by the main pass. The old code
+		// allocated one captured lambda per rail in EACH Oculus shadow cascade.
+		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = shadowPass ? null : new ObjectArrayList<>();
 		final Vector3d cameraPosition = minecraftClient.getGameRendererMapped().getCamera().getPos();
-		final Vec3d camera = new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
+		final Vec3d camera = shadowPass ? null : new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
 		final boolean holdingRailRelated = isHoldingRailRelated(clientPlayerEntity);
+		// Editor-only overlays do not cast physical shadows; keep the normal
+		// rails in shadow passes, but not bright selection markers/arrow labels.
+		final boolean editorOverlay = holdingRailRelated && !shadowPass;
 
 		// Finding visible rails
 		final ObjectArrayList<Rail> railsToRender = new ObjectArrayList<>();
@@ -98,7 +104,7 @@ public class RenderRails implements IGui {
 			if (LOG_RAIL_METRICS) {
 				railCandidateCount++;
 			}
-			cullingTasks.add(occlusionCullingInstance -> {
+			if (!shadowPass) cullingTasks.add(occlusionCullingInstance -> {
 				final boolean shouldRender = occlusionCullingInstance.isAABBVisible(railWrapper.startVector, railWrapper.endVector, camera);
 				return () -> railWrapper.shouldRender = shouldRender;
 			});
@@ -179,7 +185,7 @@ public class RenderRails implements IGui {
 		}
 
 		railsToRender.forEach(rail -> {
-			final RenderState renderState = holdingRailRelated ? hoverRails.contains(rail) ? RenderState.FLASHING : RenderState.COLORED : RenderState.NORMAL;
+			final RenderState renderState = editorOverlay ? hoverRails.contains(rail) ? RenderState.FLASHING : RenderState.COLORED : RenderState.NORMAL;
 			switch (rail.getTransportMode()) {
 				case TRAIN:
 					renderRailStandard(clientWorld, rail, renderState, 1);
@@ -222,7 +228,7 @@ public class RenderRails implements IGui {
 			}
 		});
 
-		if (holdingRailRelated) {
+		if (editorOverlay) {
 			// Only markers potentially in render range need a model and a block lookup.
 			final double nodeMaxDistance = MinecraftClientHelper.getRenderDistance() * 16.0 + 16.0;
 			final double nodeMaxDistanceSquared = nodeMaxDistance * nodeMaxDistance;
@@ -282,7 +288,7 @@ public class RenderRails implements IGui {
 			}
 		}
 
-		if (!OptimizedRenderer.renderingShadows()) {
+		if (!shadowPass) {
 			MainRenderer.WORKER_THREAD.scheduleMTRRails(occlusionCullingInstance -> {
 				final ObjectArrayList<Runnable> tasks = new ObjectArrayList<>();
 				cullingTasks.forEach(occlusionCullingInstanceRunnableFunction -> tasks.add(occlusionCullingInstanceRunnableFunction.apply(occlusionCullingInstance)));
