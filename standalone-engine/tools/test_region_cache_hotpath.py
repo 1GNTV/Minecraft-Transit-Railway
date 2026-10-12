@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "standalone-engine/src/main/java/dev/igntv/mtrengine/core/PersistentRegionCache.java"
 TEST = r"""
 import java.util.*;
