@@ -18,6 +18,7 @@ public final class PerformanceFrameHooks {
         if (event.phase == TickEvent.Phase.START) {
             Object current = Minecraft.getInstance().level;
             if (world != current) { InstancedModelRenderer.clear(); org.mtr.mod.render.ModelDetailCache.clear(); org.mtr.mod.render.RailSectorBatcher.clear(); org.mtr.mod.render.PredictiveVehiclePreloader.clear(); org.mtr.mod.resource.ModelPreparation.clear(); world = current; }
+            org.mtr.mod.render.StaticRegionRenderer.beginFrame();
             RenderVehicles.beginFrame();
         } else { RenderVehicles.endFrame(); org.mtr.mod.render.PredictiveVehiclePreloader.drain(); }
     }

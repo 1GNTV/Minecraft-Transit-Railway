@@ -19,6 +19,11 @@ public final class StaticRegionRenderer {
     private static final boolean CACHE_SCENE_PLANS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.scenePlans", "true"));
     private static final boolean CACHE_VISIBILITY_MASKS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.visibilityMasks", "true"));
     private static final boolean ENGINE_METRICS = Boolean.getBoolean("mtr.engine.metrics");
+    // Reuse immutable model/snapshot metadata across main and Oculus shadow passes
+    // within the same frame. Never pin a model for more than one render tick.
+    private record ResourceSnapshot(OptimizedModelWrapper model, RailGeometrySnapshots.Snapshot snapshot){}
+    private static final IdentityHashMap<StoredModelResourceBase,ResourceSnapshot> FRAME_RESOURCES = new IdentityHashMap<>();
+    public static void beginFrame(){FRAME_RESOURCES.clear();}
     private record Sector(int x,int y,int z){}
     private static final class MatrixKey {
         final float[] values;final int hash;
@@ -103,8 +108,17 @@ public final class StaticRegionRenderer {
     public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
         if(!RailGeometrySnapshots.ENABLED || !OptimizedRenderer.hasOptimizedRendering() || GlStateTracker.isGl4ES())return false;
         Object current=MinecraftClient.getInstance().getWorldMapped().data;if(current!=world){clear();world=current;}
-        OptimizedModelWrapper model=resource.getOptimizedModel();if(model==null || model.getModel()==null)return false;
-        var snapshot=RailGeometrySnapshots.get(model.getModel());if(snapshot==null)return false;
+        ResourceSnapshot cachedResource=FRAME_RESOURCES.get(resource);
+        if(cachedResource==null){
+            OptimizedModelWrapper resolved=resource.getOptimizedModel();
+            if(resolved==null || resolved.getModel()==null)return false;
+            RailGeometrySnapshots.Snapshot geometry=RailGeometrySnapshots.get(resolved.getModel());
+            if(geometry==null)return false;
+            cachedResource=new ResourceSnapshot(resolved,geometry);
+            FRAME_RESOURCES.put(resource,cachedResource);
+        }
+        OptimizedModelWrapper model=cachedResource.model();
+        RailGeometrySnapshots.Snapshot snapshot=cachedResource.snapshot();
         var sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
         float localX=(float)(x-sector.x*16D),localY=(float)(y-sector.y*16D),localZ=(float)(z-sector.z*16D);
         java.util.function.Function<PlanRevision,ScenePlan> buildPlan=revision->{
@@ -237,5 +251,5 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
-    public void clear(){cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }

@@ -8,6 +8,7 @@ CPU V1 regression: 64 AVG FPS. Do not merge work/mtr-engine-100fps-cpu-v1 until 
 - Exact-camera, exact-render-distance rail visibility sample cache across shadow/main passes and stable-camera frames. Invalidated on rail-network sync and view change; feature toggle `-Dmtr.engine.visibleRails=false`.
 - Retains the existing per-pass light, shaders, dynamic callbacks, and rail editor overlays. Only cached **immutable visible sample coordinates**, not rendered colors or GPU commands.
 - One-model hot lookup for rail geometry snapshots with explicit resource-reload invalidation.
+- Per-frame resource-to-model/snapshot memoization shared across main and Oculus shadow passes; cleared at render-tick START.
 - Skips backwards player-space transforms and passenger-floor lists in shadow passes where riding interaction is impossible, while preserving gangway box computation and train geometry.
 - CI Java regression checks of view stability, camera movement, rotation, render-distance change, sample-key change, and network invalidation.
 - Existing phase and GPU metrics remain available via `-Dmtr.engine.phaseMetrics=true` and `-Dmtr.v4.gpuMetrics=true`.
