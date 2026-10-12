@@ -4,7 +4,15 @@ import java.util.function.*;
 
 /** Content membership survives visibility changes; immutable queued resources are pinned for a pass. */
 public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implements AutoCloseable {
-    private static final class Entry<V,L,R>{Map<L,V> content=new LinkedHashMap<>();Set<V> compiled=Set.of(),failed=Set.of();R resource;long seen;int vertices;}
+    private static final class Entry<V,L,R>{
+        Map<L,V> content=new LinkedHashMap<>();
+        Set<V> compiled=Set.of(),failed=Set.of();
+        // ScenePlanCache retains the SAME Selection objects across frames.
+        // Identity membership avoids deeply hashing model/location/matrix records
+        // on the common camera-stable render path. Equality remains the fallback.
+        Set<V> compiledIdentity=Collections.newSetFromMap(new IdentityHashMap<>());
+        R resource;long seen;int vertices;
+    }
     private final Map<K,Entry<V,L,R>> entries=new LinkedHashMap<>(64,.75f,true);
     private final int maxEntries,maxVertices,maxBuildVertices;
     private int vertices,builds;
@@ -22,7 +30,7 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         // of LinkedHashMap.put / hash computations per shadow/main pass.
         // A changed model, light, matrix or unseen object fails containsAll
         // and proceeds to the persistent membership update below.
-        if(entry.resource!=null && entry.compiled.containsAll(visible)){
+        if(entry.resource!=null && (entry.compiledIdentity.containsAll(visible) || entry.compiled.containsAll(visible))){
             entry.seen=frame;
             compiledHits++;
             return entry.resource;
@@ -45,7 +53,9 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         builds--;
         R replacement;try{replacement=builder.apply(content);}catch(RuntimeException error){entry.failed=signature;throw error;}if(replacement==null){entry.failed=signature;return null;}
         entry.failed=Set.of();
-        release(entry);entry.resource=replacement;entry.compiled=Set.copyOf(content);entry.vertices=count;vertices+=count;entry.seen=frame;pageBuilds++;return replacement;
+        release(entry);entry.resource=replacement;entry.compiled=Set.copyOf(content);
+        entry.compiledIdentity.clear();entry.compiledIdentity.addAll(content);
+        entry.vertices=count;vertices+=count;entry.seen=frame;pageBuilds++;return replacement;
     }
     private boolean room(Entry<V,L,R> keep,int additional,int vertexDelta){
         var it=entries.values().iterator();
