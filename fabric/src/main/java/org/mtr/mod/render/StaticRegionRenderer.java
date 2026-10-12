@@ -97,7 +97,7 @@ public final class StaticRegionRenderer {
     private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(MAX_SCENE_LOCATIONS);
     private final RenderPipelineMetrics.Family family;
-    private long lastMetricsNanos, previousHits, previousMisses;
+    private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
     private Object world;
     public StaticRegionRenderer(RenderPipelineMetrics.Family family){this.family=family;}
     public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
@@ -206,6 +206,11 @@ public final class StaticRegionRenderer {
                     Init.LOGGER.info("MTR Engine scene: family={}, cached-plans={}, plan-hits={}, plan-builds={}, enabled={}",
                         family,scenePlans.size(),scenePlans.hits()-previousHits,scenePlans.misses()-previousMisses,CACHE_SCENE_PLANS);
                     previousHits=scenePlans.hits();previousMisses=scenePlans.misses();
+                    Init.LOGGER.info("MTR Engine regions: family={}, compiled-hits={}, page-builds={}, evictions={}, resident-vertices={}",
+                        family,cache.compiledHits()-previousCompiledHits,cache.pageBuilds()-previousBuilds,
+                        cache.pageEvictions()-previousEvictions,cache.residentVertices());
+                    previousCompiledHits=cache.compiledHits();previousBuilds=cache.pageBuilds();
+                    previousEvictions=cache.pageEvictions();
                     lastMetricsNanos=now;
                 }
             }
