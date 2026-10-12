@@ -39,6 +39,7 @@ import org.mtr.mod.resource.RailResource;
 import javax.annotation.Nullable;
 import org.mtr.mod.render.MainRenderer;
 import org.mtr.mod.render.QueuedRenderLayer;
+import org.mtr.mod.render.StoredMatrixTransformations;
 import java.util.Collections;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -417,7 +418,7 @@ public class EngineRenderRails implements IGui {
 			projectionZFromZ = new Vector3d(0, 0, 1).rotateY(yaw).rotateX(pitch).getZMapped();
 		}
 
-		MinecraftClientData.getInstance().railGeometryCache.render(rail.railMath, (x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
+		MtrRailGeometryCaches.render(rail.railMath, (x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 			final double dx = x1 - cameraPosition.getXMapped();
 			final double dz = z1 - cameraPosition.getZMapped();
 			final double distanceSquared = dx * dx + dz * dz;
