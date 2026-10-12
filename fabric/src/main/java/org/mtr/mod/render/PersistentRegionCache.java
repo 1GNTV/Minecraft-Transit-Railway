@@ -15,8 +15,16 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         if(visible.isEmpty())return null;
         Entry<V,L,R> entry=entries.get(key);
         if(entry==null){if(!room(null,1,0))return null;entry=new Entry<>();entries.put(key,entry);}
-        if (entry.content.size()+visible.size()>512) { entry.content.clear(); }
+        // Previous code added the sizes before accounting for duplicate locations:
+        // a stable region with >256 visible pieces therefore cleared membership
+        // EVERY frame, rebuilding hundreds of map entries for unchanged geometry.
         for(V value:visible)entry.content.put(location.apply(value),value);
+        if(entry.content.size()>512){
+            // Trim only when the real UNIQUE membership cap is exceeded.
+            // Keep this frame's visible set, never leave stale geometry selected.
+            entry.content.clear();
+            for(V value:visible)entry.content.put(location.apply(value),value);
+        }
         if(entry.resource!=null && entry.compiled.containsAll(visible)){entry.seen=frame;return entry.resource;}
         if(entry.seen==frame || builds==0)return null;
         List<V> content=List.copyOf(entry.content.values());int count=content.stream().mapToInt(size).sum();
