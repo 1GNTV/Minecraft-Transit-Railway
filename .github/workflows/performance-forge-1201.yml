@@ -1,7 +1,7 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2" ]
   workflow_dispatch:
 
 permissions:
@@ -61,6 +61,8 @@ jobs:
           assert 'BatchInstancingMixin' in config['client'], 'Unrelated optimizations must be retained'
           print('PASS: no Oculus @ModifyArgs; CPU/GPU performance mixins intact')
           PY
+      - name: Check compiled region cache stable-frame fast path
+        run: python3 tools/test_region_cache_hotpath.py
       - name: Check retained mesh upload implementation
         run: python3 tools/test_region_mesh_uploader.py
       - name: Check RTX indirect renderer and shader fallbacks
@@ -100,7 +102,7 @@ jobs:
       - name: Upload Forge jar
         uses: actions/upload-artifact@v4
         with:
-          name: MTR-Engine-Render-Overhaul-Forge-1.20.1
+          name: MTR-Engine-Queue-Hotpath-v2-Forge-1.20.1
           path: |
             forge/build/libs/*-all.jar
           if-no-files-found: error
