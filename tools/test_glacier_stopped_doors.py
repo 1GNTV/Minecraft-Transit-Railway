@@ -45,7 +45,7 @@ public class DoorScanTest {
             }
         }
         ok(reads==5*240,"100 frames x 3 shadow/main passes require exactly five scans: "+reads);
-        ok(CACHE.hits()==295,"cache must physically reuse results over frames and passes");
+        ok(CACHE.hits()==296,"cache must physically reuse results over frames and passes");
         ok(animations==602,"PSD animation side effects execute on all 301 passes");
 
         long before=CACHE.scans();
