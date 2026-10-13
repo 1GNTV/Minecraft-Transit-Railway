@@ -75,6 +75,24 @@ public final class ScenePlanCache<K, R, V> {
         return value;
     }
 
+    /**
+     * Event-driven invalidation for modified sectors. Other immutable plans
+     * remain available even if the camera moves or a different rail changes.
+     * Must be invoked by the render thread.
+     */
+    public int invalidateWhere(Predicate<K> dirty) {
+        Objects.requireNonNull(dirty, "dirty");
+        int removed = 0;
+        var it = plans.keySet().iterator();
+        while (it.hasNext()) {
+            if (dirty.test(it.next())) {
+                it.remove();
+                removed++;
+            }
+        }
+        return removed;
+    }
+
     public int size() { return plans.size(); }
     public long hits() { return hits; }
     public long misses() { return misses; }
