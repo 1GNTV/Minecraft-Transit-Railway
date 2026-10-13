@@ -19,6 +19,8 @@ public final class ClassicRailQuadBatch {
     public static final boolean ENABLED=!"false".equalsIgnoreCase(
         System.getProperty("mtr.engine.classicRailBatch", "true"));
     private static final int MAX_QUADS=256;
+    private final Object railIdentity;
+    private int pageIndex;
     private final Identifier texture;
     private final int color;
     private final double yOffset,smallOffset;
@@ -30,7 +32,11 @@ public final class ClassicRailQuadBatch {
 
     public ClassicRailQuadBatch(Identifier texture,int color,double yOffset,double smallOffset,
                                 float u1,float v1,float u2,float v2) {
-        this.texture=texture;this.color=color;this.yOffset=yOffset;this.smallOffset=smallOffset;
+        this(null,texture,color,yOffset,smallOffset,u1,v1,u2,v2);
+    }
+    public ClassicRailQuadBatch(Object railIdentity,Identifier texture,int color,double yOffset,double smallOffset,
+                                float u1,float v1,float u2,float v2) {
+        this.railIdentity=railIdentity;this.texture=texture;this.color=color;this.yOffset=yOffset;this.smallOffset=smallOffset;
         this.u1=u1;this.v1=v1;this.u2=u2;this.v2=v2;
     }
 
@@ -61,6 +67,13 @@ public final class ClassicRailQuadBatch {
         final double[] coords=Arrays.copyOf(coordinates,length*10);
         final int[] levels=Arrays.copyOf(lights,length);
         final float[] stripe=Arrays.copyOf(stripeOffsets,length);
+        // Prefer a persistent GL page only when explicitly requested. Failed or
+        // unsupported uploads revert to the exact same CPU draw path below.
+        if(ClassicRailGpuCache.queue(railIdentity,texture,pageIndex++,coords,levels,stripe,
+                                     u1,v1,u2,v2,yOffset,smallOffset,color)){
+            count=0;
+            return;
+        }
         final float uu1=u1<0?0:u1,uu2=u2<0?1:u2;
         MainRenderer.scheduleRender(texture,false,QueuedRenderLayer.EXTERIOR,(graphicsHolder,offset)->{
             for(int i=0;i<length;i++){
