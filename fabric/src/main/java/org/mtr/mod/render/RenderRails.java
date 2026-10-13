@@ -108,8 +108,14 @@ public class RenderRails implements IGui {
 				final boolean shouldRender = occlusionCullingInstance.isAABBVisible(railWrapper.startVector, railWrapper.endVector, camera);
 				return () -> railWrapper.shouldRender = shouldRender;
 			});
-			if (railWrapper.shouldRender) {
-				railsToRender.add(railWrapper.getRail());
+			// Shadow-pass-only: a valid, current pass frustum may reject rails
+            // more than the conservative margin outside all shadow cascades.
+            // Without the optional flag/frustum this always returns true.
+            final Rail candidateRail=railWrapper.getRail();
+            if (railWrapper.shouldRender && (!shadowPass || TrainVisibility.railShadowVisible(
+                    candidateRail.railMath.minX,candidateRail.railMath.minY,candidateRail.railMath.minZ,
+                    candidateRail.railMath.maxX,candidateRail.railMath.maxY,candidateRail.railMath.maxZ))) {
+				railsToRender.add(candidateRail);
 				if (LOG_RAIL_METRICS) {
 					visibleRailCount++;
 				}
