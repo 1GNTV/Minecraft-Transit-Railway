@@ -7,14 +7,14 @@ Based on V3 scene/shadow branch. This branch is EXPERIMENTAL, not a validated FP
 - `ScenePlanCache.invalidateWhere` and `PersistentRegionCache.invalidateWhere`: event-targeted invalidation APIs that keep unrelated sector content resident.
 - `StaticRegionRenderer.invalidateSector(x,y,z)`: drops only a changed 16-block sector's scene plans, layout and GPU meshes. Must be called on the render thread between passes.
 - Per-frame absolute train-car and bogie transformation memoization, reused across main/Oculus passes where the absolute pose and oscillation amount match. Rider-relative paths remain uncached. Opt out with `-Dmtr.engine.trainTransforms=false`.
-- Native Java smoke tests for scene-plan invalidation, retained GPU-page lifetime, frame-only memoization, rail-delta edge cases and classic rail callback fidelity, plus source integration checks.
+- Native Java smoke tests for scene-plan invalidation, retained GPU-page lifetime, frame-only memoization, rail-delta edge cases and classic rail callback fidelity, plus source integration checks. The optional GPU geometry/render path is compiled by Gradle but NOT validated by these stubs or in-game tests.
 - CI compiles Forge 1.20.1 and, on success, publishes the shaded JAR directly to a GLACIER GitHub *prerelease*, with run-number suffix and SHA-256 sidecar.
 
 ## Important limitations / E1+E2 backlog
-- No in-game FPS benchmark has been run. The existing V2 74 AVG FPS is not a V4 result; `-Dmtr.engine.classicRailBatch=false` isolates classic batching.
+- No in-game FPS benchmark has been run. The existing V2 74 AVG FPS is not a V4 result; `-Dmtr.engine.classicRailBatch=false` isolates classic batching and `-Dmtr.engine.classicGpu=true` opts into GPU mesh persistence. GPU meshes are disabled by default.
 - Automatic rail diffing is now wired to `networkRevision`: track additions, removals, changed geometry identities, style fingerprints and both old/new X/Z bounds. The render thread invalidates only affected 16-block columns; very large/invalid changes trigger a safe global fallback. Full invalidation may be chosen with `-Dmtr.engine.railDelta=false`. Unchanged data retains GPU pages.
 - Default opaque classic-rail quads now queue up to 256 segments per callback using the original `IDrawing` textured faces and lighting. Animated/editor-coloured rails keep the original path. Disable with `-Dmtr.engine.classicRailBatch=false`.
-- **Fully persistent GPU meshes for classic rails are still NOT complete**. Current classic batching removes CPU callback churn but does not upload all standard rails once. Existing 3D static rail region meshes remain GPU-resident.
+- **Experimental GPU-resident classic-rail path now exists** behind `-Dmtr.engine.classicGpu=true` (OFF by default). Bounded 256-segment GL pages reuse exact visible geometry, UVs and per-segment light, with a safe CPU fallback and render-thread eviction. Meshes are reused while camera selection and lighting remain stable; dynamic visibility still requires CPU sampling and changed pages can be rebuilt. Shader rendering and runtime correctness require an actual in-game test; this is not yet a production-safe default.
 - Rail changes are checked at static network sync granularity, not a per-block event stream; a broad network replacement may still invalidate many columns.
 - Train model queueing, doors, animations, oscillations, sounds and lighting remain dynamic; only absolute transformation objects are memoized.
 - Oculus compatibility, shader-order rendering and JCM beta need in-game verification.
