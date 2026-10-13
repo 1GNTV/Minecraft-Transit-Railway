@@ -149,7 +149,7 @@ public final class ClassicRailGpuCache {
     private static final boolean RAIL_EXTERIOR_LIGHTING=!"false".equalsIgnoreCase(System.getProperty("sillon.aurora.railExteriorLighting","true"));
 
     private static void schedule(Page page) {
-        MainRenderer.scheduleRender(RAIL_EXTERIOR_LIGHTING ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{
+        MainRenderer.scheduleRender(RAIL_EXTERIOR_LIGHTING && !OptimizedRenderer.renderingShadows() ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{
             holder.push();
             try{
                 holder.translate(page.originX-offset.getXMapped(),
