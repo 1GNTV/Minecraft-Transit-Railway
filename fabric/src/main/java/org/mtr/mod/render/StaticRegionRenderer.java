@@ -139,6 +139,11 @@ public final class StaticRegionRenderer {
     // Reuse the temporary per-pass staging maps/lists. No references to these
     // scratch lists survive inside compiled GPU pages or persistent scene plans.
     private final Map<PageKey,List<Selection>> wantedScratch=new LinkedHashMap<>();
+    private static final boolean CACHE_SECTOR_LISTS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.sectorLists","true"));
+    private final SectorRenderPlanCache<Sector,ScenePlan,Map<PageKey,List<Selection>>> sectorLists=
+        new SectorRenderPlanCache<>(512);
+    private long previousSectorHits,previousSectorBuilds;
+
     private final Map<PageKey,Page> readyScratch=new HashMap<>();
     private final Map<PageKey,List<Selection>> drawingScratch=new LinkedHashMap<>();
     private final ArrayDeque<ArrayList<Selection>> listPool=new ArrayDeque<>();
@@ -229,15 +234,36 @@ public final class StaticRegionRenderer {
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
-                cache.close();layouts.clear();scenePlans.clear();railPlanKeys.clear();layoutLocations=0;
+                cache.close();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();layoutLocations=0;
                 for(var region:groups.values())for(Instance instance:region.values())
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
             }
             Map<PageKey,List<Selection>> wanted=wantedScratch;
-            for(var region:groups.values())for(Instance instance:region.values())
-                for(PlacedChunk part:instance.plan().chunks())
-                    wanted.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
+            if(CACHE_SECTOR_LISTS){
+                // The plan identity includes model, matrix, light and page
+                // membership. Compare only one identity per model rather than
+                // re-enumerating hundreds of PlacedChunks every shader pass.
+                for(var region:groups.entrySet()){
+                    List<ScenePlan> plans=new ArrayList<>(region.getValue().size());
+                    for(Instance instance:region.getValue().values())plans.add(instance.plan());
+                    Map<PageKey,List<Selection>> pages=sectorLists.resolve(region.getKey(),plans,()->{
+                        Map<PageKey,List<Selection>> built=new LinkedHashMap<>();
+                        for(ScenePlan plan:plans)for(PlacedChunk part:plan.chunks())
+                            built.computeIfAbsent(part.page(),k->new ArrayList<>()).add(part.selection());
+                        Map<PageKey,List<Selection>> stable=new LinkedHashMap<>();
+                        built.forEach((key,items)->stable.put(key,List.copyOf(items)));
+                        return Collections.unmodifiableMap(stable);
+                    });
+                    // PageKey embeds sector: pages from different sectors
+                    // cannot collide, so no mutable merged lists are needed.
+                    wanted.putAll(pages);
+                }
+            }else{
+                for(var region:groups.values())for(Instance instance:region.values())
+                    for(PlacedChunk part:instance.plan().chunks())
+                        wanted.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
+            }
 
             Map<PageKey,Page> ready=readyScratch;
             wanted.forEach((key,selected)->{
@@ -280,7 +306,9 @@ public final class StaticRegionRenderer {
             });
         } finally {
             groups.clear();
-            recycle(wantedScratch);
+            // Retained sector lists are IMMUTABLE; never clear/recycle them.
+            if(CACHE_SECTOR_LISTS)wantedScratch.clear();
+            else recycle(wantedScratch);
             recycle(drawingScratch);
             readyScratch.clear();
             if(ENGINE_METRICS){
@@ -289,6 +317,10 @@ public final class StaticRegionRenderer {
                     Init.LOGGER.info("MTR Engine scene: family={}, cached-plans={}, plan-hits={}, plan-builds={}, enabled={}",
                         family,scenePlans.size(),scenePlans.hits()-previousHits,scenePlans.misses()-previousMisses,CACHE_SCENE_PLANS);
                     previousHits=scenePlans.hits();previousMisses=scenePlans.misses();
+                    Init.LOGGER.info("MTR Engine retained sector lists: family={}, hits={}, builds={}, resident-sectors={}, enabled={}",
+                        family,sectorLists.hits()-previousSectorHits,sectorLists.builds()-previousSectorBuilds,
+                        sectorLists.size(),CACHE_SECTOR_LISTS);
+                    previousSectorHits=sectorLists.hits();previousSectorBuilds=sectorLists.builds();
                     Init.LOGGER.info("MTR Engine regions: family={}, compiled-hits={}, page-builds={}, evictions={}, resident-vertices={}",
                         family,cache.compiledHits()-previousCompiledHits,cache.pageBuilds()-previousBuilds,
                         cache.pageEvictions()-previousEvictions,cache.residentVertices());
@@ -329,6 +361,7 @@ public final class StaticRegionRenderer {
         Sector sector=new Sector(x,y,z);
         cache.invalidateWhere(page->page.sector().equals(sector));
         scenePlans.invalidateWhere(plan->plan.sector().equals(sector));
+        sectorLists.invalidateWhere(s->s.equals(sector));
         RegionPageLayout<Fragment> discarded=layouts.remove(sector);
         if(discarded!=null)layoutLocations=Math.max(0,layoutLocations-discarded.locations());
         groups.remove(sector);
@@ -345,6 +378,7 @@ public final class StaticRegionRenderer {
             columns.contains((((long)sector.x())<<32) ^ (sector.z()&0xffffffffL));
         cache.invalidateWhere(page->dirty.test(page.sector()));
         scenePlans.invalidateWhere(plan->dirty.test(plan.sector()));
+        sectorLists.invalidateWhere(dirty);
         var iterator=layouts.entrySet().iterator();
         while(iterator.hasNext()){
             var entry=iterator.next();
@@ -355,5 +389,5 @@ public final class StaticRegionRenderer {
         }
         groups.keySet().removeIf(dirty);
     }
-    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();railPlanKeys.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
