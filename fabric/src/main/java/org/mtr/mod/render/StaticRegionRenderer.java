@@ -364,7 +364,7 @@ public final class StaticRegionRenderer {
                 Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=page.ranges(selected);
                 page.arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
                 Sector sector=key.sector();
-                MainRenderer.scheduleRender(RAIL_EXTERIOR_LIGHTING && family==RenderPipelineMetrics.Family.RAIL
+                MainRenderer.scheduleRender(RAIL_EXTERIOR_LIGHTING && !OptimizedRenderer.renderingShadows() && family==RenderPipelineMetrics.Family.RAIL
                     ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{
                     holder.push();
                     try{
