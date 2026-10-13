@@ -11,6 +11,10 @@ package org.mtr.mod;
 public class Init {
  public static final Log LOGGER=new Log();
  public static class Log {public void info(String line,Object... args){}}
+ public static int blockPositions;
+ public static org.mtr.mapping.holder.BlockPos newBlockPos(double x,double y,double z){
+  blockPositions++;return new org.mtr.mapping.holder.BlockPos((int)Math.floor(x),(int)Math.floor(y),(int)Math.floor(z));
+ }
 }
 """,
 "org/mtr/core/data/Rail.java":"""
@@ -19,9 +23,34 @@ import java.util.List;
 public class Rail {
  public final RailMath railMath=new RailMath();
  public java.util.List<String> getStyles(){return List.of("default");}
- public static class RailMath{
-  public double minX,maxX,minZ,maxZ;
- }
+}
+""",
+"org/mtr/core/data/RailMath.java":"""
+package org.mtr.core.data;
+public class RailMath {
+ public double minX,maxX,minZ,maxZ;
+}
+""",
+"org/mtr/mapping/holder/BlockPos.java":"""
+package org.mtr.mapping.holder;
+public class BlockPos {
+ public final int x,y,z;
+ public BlockPos(int x,int y,int z){this.x=x;this.y=y;this.z=z;}
+}
+""",
+"org/mtr/mapping/holder/ClientWorld.java":"""
+package org.mtr.mapping.holder;
+public class ClientWorld {
+ public final Object data;
+ public ClientWorld(Object data){this.data=data;}
+}
+""",
+"org/mtr/mod/render/RailLightFrameCache.java":"""
+package org.mtr.mod.render;
+import org.mtr.mapping.holder.*;
+public class RailLightFrameCache {
+ public static int sampled;
+ public static int get(ClientWorld world,BlockPos pos){return ++sampled;}
 }
 """,
 "org/mtr/mod/client/MinecraftClientData.java":"""
@@ -74,8 +103,9 @@ public class StoredMatrixTransformations {
 package org.mtr.mod.render;
 import org.mtr.mod.resource.RailResource;
 public class StaticRegionRenderer{
+ public static int queued,lastLight;
  public StaticRegionRenderer(RenderPipelineMetrics.Family family){}
- public boolean queue(RailResource resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){return true;}
+ public boolean queue(RailResource resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){queued++;lastLight=light;return true;}
  public void flush(){}
  public void clear(){}
  public void invalidateColumns(java.util.Set<Long> columns){}
@@ -128,7 +158,34 @@ public class RailLookupTest {
   check(poses.size()==2,"light change must not rebuild transforms");
   RailSectorBatcher.clear();
   check(poses.isEmpty(),"world unload cleans pose cache");
-  System.out.println("PASS: 500 hot-path lookups, stable keys, light independence, exact cleanup");
+
+  // Production submitVisible entry point, not an unused helper class.
+  org.mtr.core.data.RailMath rail=new org.mtr.core.data.RailMath();
+  org.mtr.mapping.holder.ClientWorld world=new org.mtr.mapping.holder.ClientWorld(new Object());
+  double[] samples={0,0,0,1,12,0,12,1,64,64, 12,0,12,1,24,0,24,1,64,64};
+  Class<?> owner=RailSectorBatcher.class;
+  Field planField=owner.getDeclaredField("RAIL_PLANS");planField.setAccessible(true);
+  org.mtr.mod.render.RailRenderPlanCache<?> plans=
+      (org.mtr.mod.render.RailRenderPlanCache<?>)planField.get(null);
+  int firstCreated=org.mtr.mod.Init.blockPositions;
+  int firstQueues=org.mtr.mod.render.StaticRegionRenderer.queued;
+  for(int i=0;i<500;i++)
+      check(RailSectorBatcher.submitVisible(rail,model,samples,false,world),"cached batch selected");
+  check(plans.builds()==1 && plans.hits()==499,"500 passes must build ONE prepared rail plan");
+  check(org.mtr.mod.Init.blockPositions-firstCreated==2,"cached plan must allocate lighting positions only once");
+  check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==1000,
+        "all visible GPU region selections still submitted every pass");
+  check(org.mtr.mod.render.RailLightFrameCache.sampled==1000,
+        "lighting must remain dynamic on all 500 draws");
+  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==1000,"last sampled lighting used");
+  RailSectorBatcher.submitVisible(rail,model,samples,true,world);
+  check(plans.builds()==2,"flipped style requires separate immutable plan");
+  RailSectorBatcher.submitVisible(rail,model,samples,true,
+           new org.mtr.mapping.holder.ClientWorld(new Object()));
+  check(plans.builds()==3,"world swap invalidates retained plans");
+  RailSectorBatcher.clear();
+  check(plans.size()==0,"world unload releases prepared plans");
+  System.out.println("PASS: 500 live rail passes -> 1 immutable plan; no repeated pose scans or BlockPos allocations, dynamic lighting and invalidation");
  }
 }
 """
@@ -137,5 +194,7 @@ with tempfile.TemporaryDirectory(prefix="mtr-rail-lookup-") as dirname:
  root=Path(dirname)
  for name,src in STUBS.items():
   f=root/name;f.parent.mkdir(parents=True,exist_ok=True);f.write_text(src)
- subprocess.run(["javac","-d",dirname,str(SOURCE),str(RAIL_DELTA),*map(str,root.rglob("*.java"))],check=True)
+ subprocess.run(["javac","-d",dirname,str(SOURCE),str(RAIL_DELTA),
+                 str(ROOT/"fabric/src/main/java/org/mtr/mod/render/RailRenderPlanCache.java"),
+                 *map(str,root.rglob("*.java"))],check=True)
  subprocess.run(["java","-cp",dirname,"RailLookupTest"],check=True)
