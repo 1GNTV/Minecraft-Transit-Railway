@@ -32,6 +32,17 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 	private final ObjectArrayList<DisplayPartDetails> displayPartDetailsList = new ObjectArrayList<>();
 	private final int displayColorCjkInt;
 	private final int displayColorInt;
+    // Display options belong to the resource model, not the per-frame vehicle.
+    // Resolve (including any invalid/legacy options) ONCE during model loading,
+    // never by EnumHelper.valueOf during every text render/shader callback.
+    private final DisplayOption[] parsedDisplayOptions;
+    private DisplayOption[] resolveDisplayOptions() {
+        DisplayOption[] options=new DisplayOption[displayOptions.size()];
+        for(int i=0;i<options.length;i++)
+            options[i]=EnumHelper.valueOf(DisplayOption.NONE,displayOptions.get(i));
+        return options;
+    }
+
 
 	private static final int LINE_PADDING = 2;
 
@@ -40,6 +51,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 		updateData(readerBase);
 		displayColorInt = parseColor(displayColor, 0xFF9900);
 		displayColorCjkInt = parseColor(displayColorCjk, displayColorInt);
+        parsedDisplayOptions = resolveDisplayOptions();
 	}
 
 	ModelPropertiesPart(ObjectSet<String> names) {
@@ -48,6 +60,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 		positionDefinitions.add("");
 		displayColorInt = 0;
 		displayColorCjkInt = 0;
+        parsedDisplayOptions = resolveDisplayOptions();
 	}
 
 	ModelPropertiesPart(
@@ -104,6 +117,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 		this.displayOptions.addAll(displayOptions);
 		displayColorInt = parseColor(displayColor, 0xFF9900);
 		displayColorCjkInt = parseColor(displayColorCjk, displayColorInt);
+        parsedDisplayOptions = resolveDisplayOptions();
 	}
 
 	/**
@@ -409,6 +423,7 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 
 	private void renderSevenSegmentDisplay(StoredMatrixTransformations storedMatrixTransformations, VehicleExtension vehicle) {
 		final String text = formatText(vehicle);
+        final Integer sevenSegmentNumber=org.mtr.mod.client.DisplayNumberParsing.parseIntOrNull(text);
 		final HorizontalAlignment horizontalAlignment = getHorizontalAlignment(false);
 
 		MainRenderer.scheduleRender(new Identifier(Init.MOD_ID, "textures/overlay/seven_segment.png"), true, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
@@ -422,9 +437,9 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 				displayPartDetails.modelDisplayParts.forEach(displayParts -> displayParts.forEach(displayPart -> {
 					displayPart.storedMatrixTransformations.transform(graphicsHolder, Vector3d.getZeroMapped());
 					graphicsHolder.translate(0, displayYPadding / 16, -SMALL_OFFSET);
-					IDrawing.drawSevenSegment(
+					if (sevenSegmentNumber!=null) IDrawing.drawSevenSegment(
 							graphicsHolder,
-							text,
+                        sevenSegmentNumber.intValue(),
 							(displayPart.width - (float) displayXPadding * 2) / 16,
 							0, 0,
 							(displayPart.height - (float) displayYPadding * 2) / 16,
@@ -587,9 +602,9 @@ public final class ModelPropertiesPart extends ModelPropertiesPartSchema impleme
 		}
 
 		String newText = text;
-		for (final String displayOption : displayOptions) {
-			newText = EnumHelper.valueOf(DisplayOption.NONE, displayOption).format(newText);
-		}
+		for (final DisplayOption option : parsedDisplayOptions) {
+            newText = option.format(newText);
+        }
 		return newText;
 	}
 
