@@ -56,6 +56,10 @@ def main():
     assert "if(CACHE_SECTOR_LISTS)wantedScratch.clear()" in src, "retained immutable pages may be destructively recycled"
     assert "sectorLists.invalidateWhere(dirty)" in src, "changed rail column must evict cached page selection lists"
     assert "sectorLists.clear()" in src, "resource/world invalidation missing"
+    assert "boolean everyPageReady=ready.size()==wanted.size()" in src, "all-resident fast path not used"
+    assert "drawing=everyPageReady?wanted:drawingScratch" in src, "drawing groups rebuilt even when all GPU pages are ready"
+    assert "if(!everyPageReady)" in src, "missing-page per-instance fallback was removed"
+
     with TemporaryDirectory(prefix="glacier-sectors-") as folder:
         p=Path(folder)/"RetainedSectorTest.java"
         p.write_text(JAVA,encoding="utf-8")
