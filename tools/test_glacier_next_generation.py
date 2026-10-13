@@ -25,7 +25,10 @@ assert 'SHADER_INDIRECT=!"false".equalsIgnoreCase(System.getProperty("mtr.engine
 assert "!OptimizedRenderer.renderingShadows()" not in gpu # guard is positive renderingShadows => false
 assert "OptimizedRenderer.renderingShadows()" in gpu
 assert "!SHADER_INDIRECT" in gpu and "GL43.glMultiDrawElementsIndirect" in gpu
-assert "TrainVisibility.railShadowVisible" in renderer
+# STRATA moves the shadow culling policy behind the engine boundary while
+# preserving the actual legacy rail-renderer entry points for JCM.
+assert "StrataRailEngine.visible(railWrapper, shadowPass)" in renderer
+assert "TrainVisibility.railShadowVisible" in src("org/mtr/mod/render/strata/StrataRailEngine.java")
 assert "if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;" in shadow
 assert "frustum.isVisible(new Box(minX-SHADOW_MARGIN" in shadow
 assert 'RAIL_LOD=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"))' in lod
