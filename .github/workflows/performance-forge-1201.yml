@@ -1,4 +1,4 @@
-name: Forge 1.20.1 performance build
+name: Sillon Forge 1.20.1 performance build
 on:
   push:
     branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170" ]
@@ -122,7 +122,7 @@ jobs:
           name: MTR-v4-geometry-test-reports
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
-      - name: Publish MTRium GLACIER Final or AURORA research JAR
+      - name: Publish Sillon GLACIER Final or AURORA research JAR
         if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170'
         shell: bash
         env:
@@ -132,11 +132,11 @@ jobs:
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
           if [[ "$GITHUB_REF" == "refs/heads/release/mtrium-glacier-final" ]]; then
-            tag="v4.0.0-GLACIER-FINAL"
-            jar="MTRium-GLACIER-FINAL-Forge-1.20.1.jar"
-            title="MTRium GLACIER — FINAL (Forge 1.20.1)"
+            tag="v4.0.1-SILLON-GLACIER-FINAL"
+            jar="Sillon-GLACIER-FINAL-Forge-1.20.1.jar"
+            title="Sillon — GLACIER FINAL (Forge 1.20.1)"
             cat > RELEASE_NOTES.md <<'EOF'
-          GLACIER FINAL: the last release in the GLACIER family, based on the b147 engine.
+          Sillon GLACIER FINAL: the last release in the GLACIER family, based on the b147 engine.\n          Sillon is the project name; the original MTR mod ID, Java packages and binary compatibility hooks are preserved for existing addons, especially Joban Client Mod.
           
           All MAX experimental paths are enabled by default, with explicit JVM `-D...=false` controls:
           `mtr.engine.shaderIndirect`, `mtr.engine.shadowRailCull`,
@@ -159,12 +159,12 @@ jobs:
           EOF
           else
             tag="v5.0.0-AURORA-${build}"
-            jar="MTRium-AURORA-${build}-Forge-1.20.1.jar"
-            title="MTRium AURORA — ${build} (170 FPS research)"
+            jar="Sillon-AURORA-${build}-Forge-1.20.1.jar"
+            title="Sillon AURORA — ${build} (170 FPS research)"
             extra+=(--prerelease)
             cat > RELEASE_NOTES.md <<'EOF'
-          AURORA is the successor to GLACIER Final, exploring removal of
-          remaining MTR submission and region-cache CPU costs. The observed
+          Sillon AURORA is the successor to GLACIER Final, exploring removal of
+          remaining MTR submission and region-cache CPU costs, with compatibility gates for Joban Client Mod mixin injection signatures. The observed
           170 FPS without visible MTR elements is a reference scene, not a
           guaranteed result with active railway geometry and shaders.
           All GLACIER Final optimizations and reversible toggles are retained.
