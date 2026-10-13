@@ -40,7 +40,7 @@ public final class MinecraftClientData extends ClientData {
 	public final RailVisibilityCache railVisibilityCache = new RailVisibilityCache();
 	public final RailSpatialIndex railSpatialIndex = new RailSpatialIndex();
 	/** Bumped only when synchronized static network content changes. */
-	public long networkRevision;
+	public volatile long networkRevision;
 
 	private static MinecraftClientData instance = new MinecraftClientData();
 	private static MinecraftClientData dashboardInstance = new MinecraftClientData();
