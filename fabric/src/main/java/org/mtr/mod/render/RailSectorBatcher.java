@@ -2,6 +2,9 @@ package org.mtr.mod.render;
 import org.mtr.mod.resource.RailResource;
 import org.mtr.mod.Init;
 import org.mtr.mod.client.MinecraftClientData;
+import org.mtr.core.data.Rail;
+import java.util.HashMap;
+import java.util.Map;
 /** Persistent solid rail regions, including Oculus; per-segment selection remains unchanged. */
 public final class RailSectorBatcher {
     private static final StaticRegionRenderer REGIONS=new StaticRegionRenderer(RenderPipelineMetrics.Family.RAIL);
@@ -43,7 +46,10 @@ public final class RailSectorBatcher {
     // Network sync may arrive between frames. GPU cleanup is deferred to this
     // render-thread entry point; never release GL buffers on the packet thread.
     private static long appliedNetworkRevision=Long.MIN_VALUE;
-    private static long networkInvalidations;
+    private static long networkInvalidations,networkPartialInvalidations;
+    private static final boolean DELTA_INVALIDATION=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railDelta", "true"));
+    private static final RailColumnDelta RAIL_CHANGES=new RailColumnDelta(
+        Math.max(32, Math.min(8192, Integer.getInteger("mtr.engine.maxDirtyRailColumns", 1024))));
     private static long railLookupHits,railLookupMisses,lastMetricsNanos;
     private static final Segment LOOKUP=new Segment();
     private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
@@ -51,13 +57,31 @@ public final class RailSectorBatcher {
     private record Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){}
     private RailSectorBatcher(){}
     public static void beginFrame(){
-        long revision=MinecraftClientData.getInstance().networkRevision;
-        if(revision!=appliedNetworkRevision){
+        MinecraftClientData data=MinecraftClientData.getInstance();
+        long revision=data.networkRevision;
+        if(revision==appliedNetworkRevision)return;
+        // Static sync is infrequent: scan the updated rail registry only on
+        // revision changes, never every frame or shader pass.
+        Map<String,RailColumnDelta.RailState> current=new HashMap<>(data.railWrapperList.size());
+        for(MinecraftClientData.RailWrapper wrapper:data.railWrapperList.values()){
+            Rail rail=wrapper.getRail();
+            int signature=31*rail.getStyles().hashCode()+System.identityHashCode(rail.railMath);
+            current.put(wrapper.hexId,new RailColumnDelta.RailState(
+                rail,signature,rail.railMath.minX,rail.railMath.maxX,rail.railMath.minZ,rail.railMath.maxZ));
+        }
+        RailColumnDelta.Change changed=RAIL_CHANGES.update(current);
+        if(!DELTA_INVALIDATION || changed.full()){
             PREPARED.clear();
             REGIONS.clear();
-            appliedNetworkRevision=revision;
             networkInvalidations++;
+        }else if(!changed.columns().isEmpty()){
+            // Pose entries may contain obsolete rail/resource shapes: cheap CPU
+            // reset, but retain all GPU pages outside the dirty columns.
+            PREPARED.clear();
+            REGIONS.invalidateColumns(changed.columns());
+            networkPartialInvalidations++;
         }
+        appliedNetworkRevision=revision;
     }
     public static boolean queue(RailResource resource,StoredMatrixTransformations fallback,double x,double y,double z,float yaw,float pitch,float roll,int light){
         var matrix=new org.joml.Matrix4f().rotateY(yaw).rotateX(pitch).rotateZ((float)Math.toRadians(roll));
@@ -89,13 +113,13 @@ public final class RailSectorBatcher {
         if(ENGINE_METRICS){
             long now=System.nanoTime();
             if(now-lastMetricsNanos>=10_000_000_000L){
-                Init.LOGGER.info("MTR Engine rail pose lookup: hits={}, misses={}, cached-poses={}, static-network-invalidations={}",
-                    railLookupHits,railLookupMisses,PREPARED.size(),networkInvalidations);
+                Init.LOGGER.info("MTR Engine rail pose lookup: hits={}, misses={}, cached-poses={}, full-network-invalidations={}, targeted-invalidations={}",
+                    railLookupHits,railLookupMisses,PREPARED.size(),networkInvalidations,networkPartialInvalidations);
                 railLookupHits=railLookupMisses=0;
                 lastMetricsNanos=now;
             }
         }
     }
-    public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();appliedNetworkRevision=Long.MIN_VALUE;}
+    public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }
