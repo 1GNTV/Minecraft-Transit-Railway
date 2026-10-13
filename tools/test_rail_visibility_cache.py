@@ -44,8 +44,15 @@ public final class Verify {
     drawn[0]=0;
     visible.render(rail,geometry,draw,1,.1f,.2f,0,0,0,192,0,0,1);
     check(drawn[0]==first&&geometry.calls==1&&visible.hits()==1,"stable view hit");
+    double[] immutable=visible.visibleSamples(rail,geometry,1,.1f,.2f,0,0,0,192,0,0,1);
+    double[] reused=visible.visibleSamples(rail,geometry,1,.1f,.2f,0,0,0,192,0,0,1);
+    check(immutable!=null && immutable==reused,"actual exact-view sample ARRAY IDENTITY reused across passes");
+    check(immutable.length/10==first && geometry.calls==1,"same sample count, no callback/reconstruction");
+
     visible.render(rail,geometry,draw,1,.1f,.2f,10,0,0,192,0,0,1);
     check(geometry.calls==2,"camera movement invalidates");
+    check(visible.visibleSamples(rail,geometry,1,.1f,.2f,10,0,0,192,0,0,1)!=immutable,
+          "camera move must change the immutable visibility revision");
     visible.render(rail,geometry,draw,1,.1f,.2f,10,0,0,192,1,0,0);
     check(geometry.calls==3,"camera orientation invalidates");
     visible.render(rail,geometry,draw,1,.1f,.2f,10,0,0,96,1,0,0);
