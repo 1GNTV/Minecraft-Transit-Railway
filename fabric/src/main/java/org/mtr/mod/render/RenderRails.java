@@ -358,7 +358,7 @@ public class RenderRails implements IGui {
 			// uncoloured classic rails, retain the same two faces and light per
 			// segment but batch up to 256 quads under each queued callback.
 			final ClassicRailQuadBatch classicBatch = ClassicRailQuadBatch.ENABLED && !renderState.hasColor
-					? new ClassicRailQuadBatch(texture, color, yOffset, SMALL_OFFSET, u1, v1, u2, v2)
+					? new ClassicRailQuadBatch(rail, texture, color, yOffset, SMALL_OFFSET, u1, v1, u2, v2)
 					: null;
 			renderWithinRenderDistance(rail, (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 				final int light = renderState == RenderState.FLASHING || renderState == RenderState.COLORED ? GraphicsHolder.getDefaultLight() : RailLightFrameCache.get(clientWorld, blockPos);
