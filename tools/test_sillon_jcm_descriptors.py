@@ -26,6 +26,7 @@ def report(cls):
 
 vehicles=report("org.mtr.mod.render.RenderVehicles")
 rails=report("org.mtr.mod.render.RenderRails")
+lifts=report("org.mtr.mod.render.RenderLifts")
 print("SILLON/JCM ABI: RenderVehicles render lambdas:")
 for k in sorted(vehicles): 
     if k.startswith("lambda$render$"): print(f"  {k} {vehicles[k]}")
@@ -54,6 +55,9 @@ expected={
   ("RenderVehicles","lambda$render$5"):desc(["Vector3d","Double","PositionAndRotation","Vector3d","VehicleResource","VehicleExtension","PositionAndRotation","int","int[]","boolean","int","PositionAndRotation"]),
   ("RenderVehicles","lambda$render$12"):desc(["StoredMatrixTransformations","VehicleExtension","int","int[]","PositionAndRotation","ObjectArrayList","boolean","ObjectArrayList","ObjectArrayList","VehicleResource","PositionAndRotation","Vector3d","ObjectObjectImmutablePair","double","int","DynamicVehicleModel"]),
   ("RenderRails","lambda$render$5"):desc(["boolean","ObjectArraySet","ClientWorld","Rail"]),
+  # JCM's gradient text injection: this is a real invoked callback in renderRailStats.
+  ("RenderRails","lambda$renderRailStats$24"):"(Lorg/mtr/mapping/holder/BlockPos;DLorg/mtr/mapping/holder/BlockPos;"+("Ljava/lang/String;"*6)+"Lorg/mtr/mapping/mapper/GraphicsHolder;Lorg/mtr/mapping/holder/Vector3d;)V",
+
 }
 failed=0
 for (cls,m),want in expected.items():
@@ -63,4 +67,12 @@ for (cls,m),want in expected.items():
     failed+=not match
 if failed and os.getenv("SILLON_JCM_STRICT")=="true":
     sys.exit(f"{failed} JCM Mixin injection descriptor(s) incompatible")
-print(f"JCM ABI checks: {len(expected)-failed} compatible, {failed} require a bridge")
+# JCM also hooks the actual lift rendering lambda when its scripting module loads.
+if "lambda$render$6" not in lifts:
+    failed+=1
+    print("INCOMPATIBLE JCM RenderLifts.lambda$render$6 missing")
+else:
+    print("PASS JCM RenderLifts.lambda$render$6 exists")
+if failed and os.getenv("SILLON_JCM_STRICT")=="true":
+    sys.exit(f"{failed} JCM Mixin target(s) incompatible")
+print(f"JCM ABI checks: {len(expected)-sum(1 for (cls,m),d in expected.items() if d not in (vehicles if cls=='RenderVehicles' else rails).get(m,[]))} exact compatible; {failed} incompatible incl lift check")
