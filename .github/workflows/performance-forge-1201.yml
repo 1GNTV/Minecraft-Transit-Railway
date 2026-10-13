@@ -1,7 +1,7 @@
 name: Sillon Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/sillon-aurora-170" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -70,6 +70,8 @@ jobs:
         run: python3 tools/test_glacier_sector_lists.py
       - name: Verify next GLACIER real queue bypass and all four GPU/shadow/LOD paths
         run: python3 tools/test_glacier_next_generation.py
+      - name: Verify corrected rail lighting pipeline under Sillon AURORA
+        run: python3 tools/test_sillon_rail_lighting.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
@@ -115,6 +117,8 @@ jobs:
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Verify final shaded Forge artifact
         run: python3 tools/verify_work_jar.py
+      - name: Inspect compiled Joban Client Mod 2.3.0 mixin ABI
+        run: python3 tools/test_sillon_jcm_descriptors.py
       - name: Upload geometry test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -123,7 +127,7 @@ jobs:
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
       - name: Publish Sillon GLACIER Final or AURORA research JAR
-        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170'
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/sillon-aurora-170'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -163,7 +167,7 @@ jobs:
             title="Sillon AURORA — ${build} (170 FPS research)"
             extra+=(--prerelease)
             cat > RELEASE_NOTES.md <<'EOF'
-          Sillon AURORA is the successor to GLACIER Final, exploring removal of
+          Sillon AURORA is the successor to GLACIER Final. It also corrects cached rail lightmap render-layer handling while preserving the GPU cache (rollback: `-Dsillon.aurora.railExteriorLighting=false`). AURORA explores removal of
           remaining MTR submission and region-cache CPU costs, with compatibility gates for Joban Client Mod mixin injection signatures. The observed
           170 FPS without visible MTR elements is a reference scene, not a
           guaranteed result with active railway geometry and shaders.
