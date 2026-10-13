@@ -3,6 +3,9 @@ import org.mtr.mod.resource.RailResource;
 import org.mtr.mod.Init;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.core.data.Rail;
+import org.mtr.core.data.RailMath;
+import org.mtr.mapping.holder.BlockPos;
+import org.mtr.mapping.holder.ClientWorld;
 import java.util.HashMap;
 import java.util.Map;
 /** Persistent solid rail regions, including Oculus; per-segment selection remains unchanged. */
@@ -54,6 +57,15 @@ public final class RailSectorBatcher {
     private static final Segment LOOKUP=new Segment();
     private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
     private static final java.util.Map<Segment,Prepared> PREPARED=new java.util.LinkedHashMap<>(512,.75f,true);
+    // One immutable render submission plan per visible rail/resource/direction.
+    // Cached plan replays skip the segment callback, pose HashMap lookup,
+    // trig computations and per-sample BlockPos creation on stable views.
+    private static final boolean RETAIN_RAIL_PLANS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railPlans","true"));
+    private static final RailRenderPlanCache<RailPiece[]> RAIL_PLANS=new RailRenderPlanCache<>();
+    private static Object planWorld;
+    private record RailPiece(Prepared prepared,BlockPos lightPosition) {}
+    private static long previousPlanHits, previousPlanBuilds;
+
     /**
      * Stable location identity shared by the pose cache, scene plan lookup and
      * compiled region selection. Record auto-hash re-traversed all seven fields
@@ -111,13 +123,16 @@ public final class RailSectorBatcher {
             ClassicRailGpuCache.invalidateColumns(changed.columns());
             networkPartialInvalidations++;
         }
+        RAIL_PLANS.clear();
         appliedNetworkRevision=revision;
     }
     public static boolean queue(RailResource resource,StoredMatrixTransformations fallback,double x,double y,double z,float yaw,float pitch,float roll,int light){
         var matrix=new org.joml.Matrix4f().rotateY(yaw).rotateX(pitch).rotateZ((float)Math.toRadians(roll));
         return REGIONS.queue(resource,fallback,new Location(resource,x,y,z,yaw,pitch,roll),x,y,z,matrix,light);
     }
-    public static void submit(RailResource resource,double x1,double z1,double x3,double z3,double y1,double y2,boolean flip,int light){
+    /** Source of truth for segment pose construction. Only plan misses call it. */
+    private static Prepared prepare(RailResource resource,double x1,double z1,double x3,double z3,
+                                    double y1,double y2,boolean flip){
         Segment lookup=REUSE_KEYS?LOOKUP.set(resource,x1,z1,x3,z3,y1,y2,flip)
                                   :new Segment().set(resource,x1,z1,x3,z3,y1,y2,flip);
         Prepared prepared=PREPARED.get(lookup);
@@ -134,8 +149,48 @@ public final class RailSectorBatcher {
             if(PREPARED.size()>=MAX_PREPARED_POSES){var iterator=PREPARED.keySet().iterator();iterator.next();iterator.remove();}
             PREPARED.put(lookup.immutableCopy(),prepared);
         }
-        Location location=prepared.location;
-        if(!REGIONS.queue(resource,prepared.transform,location,location.x,location.y,location.z,prepared.matrix,light))resource.render(prepared.transform,light);
+        return prepared;
+    }
+
+    /**
+     * Reuse a truly prepared visible rail across normal and shadow passes.
+     * Every pass still resamples live block lighting and queues precisely the
+     * currently visible set; only immutable geometry/pose work is retained.
+     * Returns false if a budget/fallback forces the original sample callbacks.
+     */
+    public static boolean submitVisible(RailMath railMath,RailResource resource,double[] visible,
+                                        boolean flip,ClientWorld clientWorld){
+        if(!RETAIN_RAIL_PLANS || visible==null)return false;
+        if(planWorld!=clientWorld.data){RAIL_PLANS.clear();planWorld=clientWorld.data;}
+        RailPiece[] pieces=RAIL_PLANS.resolve(railMath,resource,visible,flip,samples->{
+            RailPiece[] built=new RailPiece[samples.length/10];
+            for(int n=0;n<built.length;n++){
+                int i=n*10;
+                Prepared prepared=prepare(resource,samples[i],samples[i+1],samples[i+4],samples[i+5],
+                                          samples[i+8],samples[i+9],flip);
+                BlockPos lightPos=Init.newBlockPos(samples[i],samples[i+8]+0.1,samples[i+1]);
+                built[n]=new RailPiece(prepared,lightPos);
+            }
+            return built;
+        });
+        if(pieces==null)return false;
+        for(RailPiece piece:pieces){
+            Prepared prepared=piece.prepared();
+            Location location=prepared.location();
+            int light=RailLightFrameCache.get(clientWorld,piece.lightPosition());
+            if(!REGIONS.queue(resource,prepared.transform(),location,location.x,location.y,location.z,prepared.matrix(),light))
+                resource.render(prepared.transform(),light);
+        }
+        return true;
+    }
+
+    /** Original compatibility path: addon/editors/oversized rail caches. */
+    public static void submit(RailResource resource,double x1,double z1,double x3,double z3,
+                              double y1,double y2,boolean flip,int light){
+        Prepared prepared=prepare(resource,x1,z1,x3,z3,y1,y2,flip);
+        Location location=prepared.location();
+        if(!REGIONS.queue(resource,prepared.transform(),location,location.x,location.y,location.z,prepared.matrix(),light))
+            resource.render(prepared.transform(),light);
     }
     public static void flush(){
         REGIONS.flush();
@@ -146,10 +201,13 @@ public final class RailSectorBatcher {
                 Init.LOGGER.info("MTR Engine rail pose lookup: hits={}, misses={}, cached-poses={}, full-network-invalidations={}, targeted-invalidations={}",
                     railLookupHits,railLookupMisses,PREPARED.size(),networkInvalidations,networkPartialInvalidations);
                 railLookupHits=railLookupMisses=0;
+                Init.LOGGER.info("MTR Engine retained rail plans: hits={}, builds={}, live-plans={}, enabled={}",
+                    RAIL_PLANS.hits()-previousPlanHits,RAIL_PLANS.builds()-previousPlanBuilds,RAIL_PLANS.size(),RETAIN_RAIL_PLANS);
+                previousPlanHits=RAIL_PLANS.hits();previousPlanBuilds=RAIL_PLANS.builds();
                 lastMetricsNanos=now;
             }
         }
     }
-    public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
+    public static void clear(){RAIL_PLANS.clear();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }
