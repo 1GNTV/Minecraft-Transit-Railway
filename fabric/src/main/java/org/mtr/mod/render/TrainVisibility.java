@@ -22,7 +22,7 @@ public final class TrainVisibility {
     // platform overhangs prevents aggressive clipping at the shadow frustum.
     // Missing/stale frusta ALWAYS fail open. Default off until shader screenshots
     // verify shadow quality across the user's shader-pack configurations.
-    private static final boolean SHADOW_RAIL_CULL=Boolean.getBoolean("mtr.engine.shadowRailCull");
+    private static final boolean SHADOW_RAIL_CULL=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shadowRailCull","true"));
     private static final double SHADOW_MARGIN=Math.max(96,Integer.getInteger("mtr.engine.shadowRailMargin",128));
     public static boolean railShadowVisible(double minX,double minY,double minZ,
                                             double maxX,double maxY,double maxZ) {
