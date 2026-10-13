@@ -58,6 +58,8 @@ jobs:
         run: python3 tools/test_scene_engine.py
       - name: Check V4 fused scene, GPU region and train transform caches
         run: python3 tools/test_fusion_engine.py
+      - name: Check GLACIER rail-column diff and classic draw batching
+        run: python3 tools/test_glacier_finish.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
