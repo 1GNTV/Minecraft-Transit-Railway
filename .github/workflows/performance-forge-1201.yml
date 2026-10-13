@@ -1,11 +1,11 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train" ]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   shader-bridge:
@@ -51,6 +51,8 @@ jobs:
         run: python3 tools/test_next_renderer.py
       - name: Check persistent MTR Engine scene plans
         run: python3 tools/test_scene_engine.py
+      - name: Check V4 fused scene, GPU region and train transform caches
+        run: python3 tools/test_fusion_engine.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
@@ -103,10 +105,26 @@ jobs:
           name: MTR-v4-geometry-test-reports
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
-      - name: Upload Forge jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: MTR-Engine-V3-Scene-Shadow-Forge-1.20.1
-          path: |
-            forge/build/libs/*-all.jar
-          if-no-files-found: error
+      - name: Publish GLACIER experimental JAR directly to GitHub Releases
+        if: github.ref == 'refs/heads/work/mtr-engine-v4-fusion-scene-rail-train'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
+          tag="v4.0.0-GLACIER-${build}"
+          jar="MTR-V4-GLACIER-${build}-Forge-1.20.1.jar"
+          mapfile -t candidates < <(find forge/build/libs -maxdepth 1 -type f -name '*-all.jar' | sort)
+          if [ "${#candidates[@]}" -ne 1 ]; then
+            echo "Expected exactly one shaded Forge JAR, found ${#candidates[@]}" >&2
+            exit 1
+          fi
+          cp "${candidates[0]}" "$jar"
+          sha256sum "$jar" > "$jar.sha256"
+          gh release create "$tag" "$jar" "$jar.sha256" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "MTR Engine V4 — GLACIER (${build}, Experimental)" \
+            --notes "EXPERIMENTAL: V3-based E1/E2 scene and train pipeline fusion. Persistent GPU regions with targeted invalidation, network revision safety and frame-local train transforms. Forge 1.20.1. Automated regression checks passed; in-game FPS and Oculus/JCM behavior remain unverified. Keep V2 ALPINE as stable fallback." \
+            --prerelease
