@@ -66,6 +66,8 @@ jobs:
         run: python3 tools/test_glacier_stopped_doors.py
       - name: Verify retained rail plans and exception-free displays are actually wired
         run: python3 tools/test_glacier_retained_rails_displays.py
+      - name: Verify stable sector GPU page selections are really reused
+        run: python3 tools/test_glacier_sector_lists.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
@@ -139,5 +141,5 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "MTR Engine V4 — GLACIER (${build}, Experimental)" \
-            --notes "EXPERIMENTAL: GLACIER retains exact-view visible rail submission plans across main and Oculus shadow passes, eliminating repeated per-segment pose/hash/trig/callback work on cache hits while sampling live lighting every pass; disable with -Dmtr.engine.railPlans=false. Seven-segment displays now use exception-free numeric parsing; display options are pre-resolved once per loaded model. Retains stopped-door cache from b115 and b109 scene key optimization. In-game FPS, shader visuals and addon compatibility not verified: test against b115 with matching settings. Includes E1+E2 GPU region invalidation, train frame transforms and classic rail batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
+            --notes "EXPERIMENTAL: GLACIER retains exact-view rail submission plans and immutable per-sector GPU page selection lists across main/Oculus passes, avoiding repeated segment preparation and GPU page membership reconstruction on stable views while sampling live lighting every pass. A/B toggles: -Dmtr.engine.railPlans=false and -Dmtr.engine.sectorLists=false. Seven-segment displays now use exception-free numeric parsing; display options are pre-resolved once per loaded model. Retains stopped-door cache from b115 and b109 scene key optimization. In-game FPS, shader visuals and addon compatibility not verified: test against b115 with matching settings. Includes E1+E2 GPU region invalidation, train frame transforms and classic rail batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
             --prerelease
