@@ -18,6 +18,20 @@ public final class TrainVisibility {
     public static void beginFrame() { frustum = null; }
     public static void capture(Frustum current) { frustum = current; shadows = OptimizedRenderer.renderingShadows(); }
     private static boolean usable() { return ENABLED && frustum != null && shadows == OptimizedRenderer.renderingShadows(); }
+    // Optional light-pass cull. A margin larger than nearby rail models and
+    // platform overhangs prevents aggressive clipping at the shadow frustum.
+    // Missing/stale frusta ALWAYS fail open. Default off until shader screenshots
+    // verify shadow quality across the user's shader-pack configurations.
+    private static final boolean SHADOW_RAIL_CULL=Boolean.getBoolean("mtr.engine.shadowRailCull");
+    private static final double SHADOW_MARGIN=Math.max(96,Integer.getInteger("mtr.engine.shadowRailMargin",128));
+    public static boolean railShadowVisible(double minX,double minY,double minZ,
+                                            double maxX,double maxY,double maxZ) {
+        if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;
+        if(!Double.isFinite(minX+minY+minZ+maxX+maxY+maxZ))return true;
+        return frustum.isVisible(new Box(minX-SHADOW_MARGIN,minY-SHADOW_MARGIN,minZ-SHADOW_MARGIN,
+                                        maxX+SHADOW_MARGIN,maxY+SHADOW_MARGIN,maxZ+SHADOW_MARGIN));
+    }
+
     private static double radius(VehicleExtension vehicle, int index) {
         if (index >= vehicle.persistentVehicleData.longestDimensions.length) return Double.NaN;
         // Include pitched cars, gangways and overhang. Invalid metadata disables this rejection.
