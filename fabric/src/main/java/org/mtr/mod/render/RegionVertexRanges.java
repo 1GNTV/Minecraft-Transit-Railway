@@ -27,7 +27,7 @@ public final class RegionVertexRanges {
     // Oculus-compatible shader draws can use the same standard GL4.3
     // DrawElementsIndirectCommand as shaderless. Keep this as an EXPLICIT
     // experiment until shader-pack visuals are validated on real hardware.
-    private static final boolean SHADER_INDIRECT=Boolean.getBoolean("mtr.engine.shaderIndirect");
+    private static final boolean SHADER_INDIRECT=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shaderIndirect","true"));
     // GPU buffer bindings/uploads do not amortize over tiny 2-3 span pages.
     private static final int MIN_INDIRECT_SPANS = Math.max(2, Integer.getInteger("mtr.engine.indirectMinSpans", 8));
     private static final Map<VertexArray, Ranges> ACTIVE = Collections.synchronizedMap(new WeakHashMap<>());
