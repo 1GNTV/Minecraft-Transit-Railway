@@ -60,6 +60,8 @@ jobs:
         run: python3 tools/test_fusion_engine.py
       - name: Check GLACIER rail-column diff and classic draw batching
         run: python3 tools/test_glacier_finish.py
+      - name: Verify memoized scene keys and compiled page hashes
+        run: python3 tools/test_glacier_hash_hotpath.py
       - name: Check Oculus startup-safe mixin registration
         run: |
           python3 - <<'PY'
@@ -133,5 +135,5 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "MTR Engine V4 — GLACIER (${build}, Experimental)" \
-            --notes "EXPERIMENTAL: GLACIER fuses the E1+E2 engine, per-rail GPU region invalidation, frame-local train transforms and bounded default-rail CPU batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
+            --notes "EXPERIMENTAL: GLACIER hash-hotpath update memoizes rail location, scene-plan, fragment and compiled page selection hashes; reuses plan keys across shader/main passes. Includes E1+E2 GPU region invalidation, train frame transforms and classic rail batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
             --prerelease
