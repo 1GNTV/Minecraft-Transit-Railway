@@ -1,7 +1,7 @@
 name: Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -122,16 +122,56 @@ jobs:
           name: MTR-v4-geometry-test-reports
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
-      - name: Publish GLACIER experimental JAR directly to GitHub Releases
-        if: github.ref == 'refs/heads/work/mtr-engine-v4-fusion-scene-rail-train'
+      - name: Publish MTRium GLACIER Final or AURORA research JAR
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
-          tag="v4.0.0-GLACIER-${build}"
-          jar="MTR-V4-GLACIER-${build}-Forge-1.20.1.jar"
+          extra=()
+          if [[ "$GITHUB_REF" == "refs/heads/release/mtrium-glacier-final" ]]; then
+            tag="v4.0.0-GLACIER-FINAL"
+            jar="MTRium-GLACIER-FINAL-Forge-1.20.1.jar"
+            title="MTRium GLACIER — FINAL (Forge 1.20.1)"
+            cat > RELEASE_NOTES.md <<'EOF'
+          GLACIER FINAL: the last release in the GLACIER family, based on the b147 engine.
+          
+          All MAX experimental paths are enabled by default, with explicit JVM `-D...=false` controls:
+          `mtr.engine.shaderIndirect`, `mtr.engine.shadowRailCull`,
+          `mtr.engine.railLod`, `mtr.next.shaderLod`,
+          `mtr.engine.classicGpu`, `mtr.next.textAcrossCallbacks`.
+          Persistent scene replay, stopped-door caching, hashed scene plans,
+          retained GPU sector lists and live lighting remain enabled.
+          
+          Verified by CI: unit/integration tests, software-GL shader bridge tests,
+          full Forge 1.20.1 build and shaded JAR validation.
+          b147 MAX was user-benchmarked at approximately 129 FPS shown, with
+          reports of peaks around 142 FPS and comparable results without JVM flags.
+          Those FPS are observational, not a controlled proof of gains from individual flags.
+          
+          Keep b134/b147 as backups. The full default-on combination still has
+          compatibility risks with particular shader packs, third-party addons and
+          train models. If visual glitches occur, disable the relevant feature via
+          `-Dmtr.engine.<feature>=false` and report the scenario. Not a guarantee
+          that the mod is free of all bugs.
+          EOF
+          else
+            tag="v5.0.0-AURORA-${build}"
+            jar="MTRium-AURORA-${build}-Forge-1.20.1.jar"
+            title="MTRium AURORA — ${build} (170 FPS research)"
+            extra+=(--prerelease)
+            cat > RELEASE_NOTES.md <<'EOF'
+          AURORA is the successor to GLACIER Final, exploring removal of
+          remaining MTR submission and region-cache CPU costs. The observed
+          170 FPS without visible MTR elements is a reference scene, not a
+          guaranteed result with active railway geometry and shaders.
+          All GLACIER Final optimizations and reversible toggles are retained.
+          This is an experimental build: compare with GLACIER Final, inspect
+          actual rendered rails/trains/shadows, and capture Spark + latest.log.
+          EOF
+          fi
           mapfile -t candidates < <(find forge/build/libs -maxdepth 1 -type f -name '*-all.jar' | sort)
           if [ "${#candidates[@]}" -ne 1 ]; then
             echo "Expected exactly one shaded Forge JAR, found ${#candidates[@]}" >&2
@@ -142,6 +182,4 @@ jobs:
           gh release create "$tag" "$jar" "$jar.sha256" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "MTR Engine V4 — GLACIER (${build}, Experimental)" \
-            --notes "EXPERIMENTAL: GLACIER adds REAL persistent per-segment scene replay: after first full scene resolution, stable visible rails skip StaticRegionRenderer.queue entirely; changed model, world, light, rail or resource generation invalidates safely. Real queue vs replay counters: -Dmtr.engine.metrics=true. Disable with -Dmtr.engine.persistentQueue=false. Adds Oculus OpenGL 4.3 indirect rendering (-Dmtr.engine.shaderIndirect=true, OFF by default pending hardware shader screenshots; shadow GL draws retain proven fallback), conservative shadow-frustum rail culling (-Dmtr.engine.shadowRailCull=true, OFF by default pending cascade validation), and static rail page LOD via existing background screen-error simplifier (-Dmtr.engine.railLod=true plus -Dmtr.next.shaderLod=true with shaderpacks, BOTH OFF pending screenshot/seam checks). Existing rail plans/sector lists remain enabled: -Dmtr.engine.railPlans=false and -Dmtr.engine.sectorLists=false. Seven-segment displays now use exception-free numeric parsing; display options are pre-resolved once per loaded model. Retains stopped-door cache from b115 and b109 scene key optimization. In-game FPS, shader visuals and addon compatibility not verified: test against b115 with matching settings. Includes E1+E2 GPU region invalidation, train frame transforms and classic rail batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
-            --prerelease
+            --title "$title" --notes-file RELEASE_NOTES.md "${extra[@]}"
