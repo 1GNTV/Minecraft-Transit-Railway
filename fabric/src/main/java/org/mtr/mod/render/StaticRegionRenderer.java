@@ -251,5 +251,18 @@ public final class StaticRegionRenderer {
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
+    /**
+     * Targeted static-world invalidation, called on the render thread between
+     * passes. Keep unrelated GPU region pages and scene plans resident.
+     * Sector coordinates are world block coordinates divided by 16 (floored).
+     */
+    public void invalidateSector(int x,int y,int z){
+        Sector sector=new Sector(x,y,z);
+        cache.invalidateWhere(page->page.sector().equals(sector));
+        scenePlans.invalidateWhere(plan->plan.sector().equals(sector));
+        RegionPageLayout<Fragment> discarded=layouts.remove(sector);
+        if(discarded!=null)layoutLocations=Math.max(0,layoutLocations-discarded.locations());
+        groups.remove(sector);
+    }
     public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
