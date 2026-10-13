@@ -194,6 +194,9 @@ public final class StaticRegionRenderer {
     }
     private static final boolean PERSISTENT_QUEUE=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.persistentQueue","true"));
     private static final boolean RAIL_LOD_PAGES=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"));
+    // Rail faces must use the exterior render/lightmap stage. The old TEXT
+    // stage bypasses exterior layer setup under shaderpacks. Easy rollback.
+    private static final boolean RAIL_EXTERIOR_LIGHTING=!"false".equalsIgnoreCase(System.getProperty("sillon.aurora.railExteriorLighting","true"));
     private long generation=1, queueCalls, replayCalls, previousQueues, previousReplays;
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
@@ -361,7 +364,8 @@ public final class StaticRegionRenderer {
                 Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=page.ranges(selected);
                 page.arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
                 Sector sector=key.sector();
-                MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
+                MainRenderer.scheduleRender(RAIL_EXTERIOR_LIGHTING && family==RenderPipelineMetrics.Family.RAIL
+                    ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{
                     holder.push();
                     try{
                         holder.translate(sector.x()*16D-offset.getXMapped(),sector.y()*16D-offset.getYMapped(),sector.z()*16D-offset.getZMapped());
