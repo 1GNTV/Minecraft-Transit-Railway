@@ -1,7 +1,7 @@
 name: Sillon Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -42,6 +42,8 @@ jobs:
         with:
           node-version: '20'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Validate STRATA compatibility layer
+        run: python3 tools/test_strata_contract.py
       - name: Check generic attribute cache boundaries
         run: python3 tools/test_attribute_cache.py
       - name: Check asynchronous render diagnostics
@@ -101,7 +103,14 @@ jobs:
           python3 tools/test_profile_hotspots.py
           python3 tools/test_fps_fixes.py
           python3 tools/test_detail_async.py
+      - name: Restore cached web resources
+        id: strata-web
+        uses: actions/cache@v4
+        with:
+          path: website/dist
+          key: strata-web-v1-${{ runner.os }}-${{ hashFiles('website/package-lock.json', 'website/src/**', 'fabric/src/main/java/org/mtr/core/**') }}
       - name: Build web resources
+        if: steps.strata-web.outputs.cache-hit != 'true'
         run: |
           chmod +x gradlew
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.1
@@ -122,8 +131,21 @@ jobs:
           name: MTR-v4-geometry-test-reports
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
+      - name: Verify STRATA engine exists in the released shaded artifact
+        if: github.ref == 'refs/heads/work/sillon-strata'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          jars=list(Path("forge/build/libs").glob("*-all.jar"))
+          assert len(jars)==1,jars
+          with zipfile.ZipFile(jars[0]) as z:
+              assert "org/mtr/mod/render/strata/StrataRailEngine.class" in z.namelist()
+              assert z.testzip() is None
+          print("PASS STRATA Forge single-JAR engine boundary")
+          PY
       - name: Publish Sillon GLACIER Final or AURORA research JAR
-        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170'
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -131,7 +153,24 @@ jobs:
           set -euo pipefail
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
-          if [[ "$GITHUB_REF" == "refs/heads/release/mtrium-glacier-final" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-strata" ]]; then
+            tag="v1.0.0-STRATA-${build}"
+            jar="Sillon-STRATA-${build}-Forge-1.20.1.jar"
+            title="SILLON STRATA — ${build} (Forge 1.20.1)"
+            extra+=(--prerelease)
+            cat > RELEASE_NOTES.md <<'EOF'
+          SILLON STRATA is a fresh renderer generation based on GLACIER b147, NOT
+          AURORA. It keeps the upstream MTR mod ID (`mtr`) and exports a single
+          mod JAR. The first STRATA change moves rail spatial filtering, live
+          culling policy and metrics to an internal renderer engine, while keeping
+          original JCM injection points and rail-editor rendering callbacks in
+          RenderRails.render. This is a first-layer compatibility prototype.
+          CI validates build and source-level invariants but cannot prove JCM
+          runtime compatibility, visual correctness or FPS improvements.
+          Please test with JCM + MTR Scripting + Oculus in the same scene as b147.
+          STRATA does not yet attempt AURORA's unfinished rail lighting fix.
+          EOF
+          elif [[ "$GITHUB_REF" == "refs/heads/release/mtrium-glacier-final" ]]; then
             tag="v4.0.1-SILLON-GLACIER-FINAL"
             jar="Sillon-GLACIER-FINAL-Forge-1.20.1.jar"
             title="Sillon — GLACIER FINAL (Forge 1.20.1)"
