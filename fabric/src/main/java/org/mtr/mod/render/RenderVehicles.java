@@ -37,7 +37,7 @@ public class RenderVehicles implements IGui {
 	// cascades and the main pass. Never cache rider-relative transformations.
 	private static final boolean CACHE_ABSOLUTE_TRANSFORMS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.trainTransforms", "true"));
 	private static final FrameMemoizer<PositionAndRotation, StoredMatrixTransformations> ABSOLUTE_TRANSFORMS = new FrameMemoizer<>(2048);
-	public static void beginFrame() { POSES.beginFrame(); ABSOLUTE_TRANSFORMS.beginFrame(); TrainVisibility.beginFrame(); org.mtr.mod.resource.ModelPreparation.beginFrame(); }
+	public static void beginFrame() { POSES.beginFrame(); ABSOLUTE_TRANSFORMS.beginFrame(); RenderVehicleHelper.beginFrame(); TrainVisibility.beginFrame(); org.mtr.mod.resource.ModelPreparation.beginFrame(); }
 	public static void endFrame() { POSES.endFrame(); ABSOLUTE_TRANSFORMS.endFrame(); }
 	private static StoredMatrixTransformations absoluteTransform(PositionAndRotation pose, double oscillation) {
 		return CACHE_ABSOLUTE_TRANSFORMS
@@ -176,7 +176,8 @@ public class RenderVehicles implements IGui {
 								}
 							});
 							openDoorways = new ObjectArrayList<>();
-							vehicleResourceCache.doorways.forEach(doorway -> {
+							for (int doorIndex = 0; doorIndex < vehicleResourceCache.doorways.size(); doorIndex++) {
+                                final Box doorway = vehicleResourceCache.doorways.get(doorIndex);
 								final double[] doorBlockedAmount = {0};
 								doorHoldingPlayerOffsetPositions.forEach(doorHoldingPlayerOffset -> {
 									final double thisDoorBlockedAmount = RenderVehicleHelper.getDoorBlockedAmount(doorway, doorHoldingPlayerOffset.getXMapped(), doorHoldingPlayerOffset.getYMapped(), doorHoldingPlayerOffset.getZMapped());
@@ -187,11 +188,11 @@ public class RenderVehicles implements IGui {
 										doorBlockedAmount[0] = thisDoorBlockedAmount;
 									}
 								});
-								final boolean canOpenDoors = RenderVehicleHelper.canOpenDoors(doorway, absoluteVehicleCarPositionAndRotation, Math.max(doorBlockedAmount[0], vehicle.persistentVehicleData.getDoorValue() * 2));
+								final boolean canOpenDoors = RenderVehicleHelper.canOpenDoors(doorway, absoluteVehicleCarPositionAndRotation, Math.max(doorBlockedAmount[0], vehicle.persistentVehicleData.getDoorValue() * 2), vehicle, carNumber, doorIndex);
 								if ((doorBlockedAmount[0] > 0 || vehicle.persistentVehicleData.checkCanOpenDoors()) && canOpenDoors) {
 									openDoorways.add(new ObjectDoubleImmutablePair<>(doorway, doorBlockedAmount[0]));
 								}
-							});
+                            }
 						}
 						final double oscillationAmount = vehicle.persistentVehicleData.getOscillation(carNumber).getAmount() * Config.getClient().getVehicleOscillationMultiplier();
 
