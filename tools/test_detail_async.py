@@ -21,7 +21,7 @@ STUBS={
 'org/mtr/mod/render/ModelDetailGeometry.java':'package org.mtr.mod.render;public class ModelDetailGeometry{public static int[] indices(org.mtr.mapping.render.model.RawMesh raw,double size){return null;}}',
 'org/mtr/mod/render/ModelPartVisibility.java':'package org.mtr.mod.render;public class ModelPartVisibility{public static int copies;public static void retain(org.mtr.mapping.render.object.VertexArray a,org.mtr.mapping.render.model.RawMesh r){}public static void copy(org.mtr.mapping.render.object.VertexArray a,org.mtr.mapping.render.object.VertexArray b){copies++;}public static void remove(org.mtr.mapping.render.object.VertexArray a){}}',
 'org/mtr/mod/render/GlVertexAttributeCache.java':'package org.mtr.mod.render;public class GlVertexAttributeCache{public static void invalidate(){}}',
-'org/mtr/mod/render/RenderPipelineMetrics.java':'package org.mtr.mod.render;public class RenderPipelineMetrics{public enum Family{TRAIN,OTHER}}',
+'org/mtr/mod/render/RenderPipelineMetrics.java':'package org.mtr.mod.render;public class RenderPipelineMetrics{public enum Family{RAIL,TRAIN,OTHER}}',
 'org/mtr/mod/Init.java':'package org.mtr.mod;public class Init{public static Log LOGGER=new Log();public static class Log{public void error(String message,Object... args){throw new AssertionError(message);}}}',
 'DetailAsyncTest.java':r'''import org.mtr.mod.render.*;import org.mtr.mapping.render.model.*;import org.mtr.mapping.render.object.*;import org.mtr.mapping.render.vertex.*;import org.lwjgl.opengl.GL33;import com.mojang.blaze3d.systems.RenderSystem;import java.util.concurrent.*;
 public class DetailAsyncTest{
