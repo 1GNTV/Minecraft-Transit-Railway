@@ -156,6 +156,11 @@ public final class StaticRegionRenderer {
     // Reuse the temporary per-pass staging maps/lists. No references to these
     // scratch lists survive inside compiled GPU pages or persistent scene plans.
     private final Map<PageKey,List<Selection>> wantedScratch=new LinkedHashMap<>();
+    // Recycle the per-sector plan list instead of allocating one ArrayList for
+    // every Oculus cascade and main pass. resolve() copies plans on misses;
+    // on hits the temporary list is never retained.
+    private final ArrayList<ScenePlan> sectorPlanScratch=new ArrayList<>();
+    private static final boolean STRATA_IMMUTABLE_MASK=!"false".equalsIgnoreCase(System.getProperty("mtr.strata.immutableMasks","true"));
     private static final boolean CACHE_SECTOR_LISTS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.sectorLists","true"));
     private final SectorRenderPlanCache<Sector,ScenePlan,Map<PageKey,List<Selection>>> sectorLists=
         new SectorRenderPlanCache<>(512);
@@ -303,8 +308,9 @@ public final class StaticRegionRenderer {
                 // membership. Compare only one identity per model rather than
                 // re-enumerating hundreds of PlacedChunks every shader pass.
                 for(var region:groups.entrySet()){
-                    List<ScenePlan> plans=new ArrayList<>(region.getValue().size());
-                    for(Instance instance:region.getValue().values())plans.add(instance.plan());
+                    sectorPlanScratch.clear();
+                    for(Instance instance:region.getValue().values())sectorPlanScratch.add(instance.plan());
+                    final List<ScenePlan> plans=sectorPlanScratch;
                     Map<PageKey,List<Selection>> pages=sectorLists.resolve(region.getKey(),plans,()->{
                         Map<PageKey,List<Selection>> built=new LinkedHashMap<>();
                         for(ScenePlan plan:plans)for(PlacedChunk part:plan.chunks())
@@ -329,7 +335,7 @@ public final class StaticRegionRenderer {
                     Page page=cache.get(key,selected,Selection::location,
                         selection->{var snapshot=RailGeometrySnapshots.get(selection.model().getModel());
                             return snapshot==null?16_001:snapshot.chunks().get(selection.chunk()).vertices();},
-                        this::build);
+                        this::build,CACHE_SECTOR_LISTS && STRATA_IMMUTABLE_MASK);
                     if(page!=null)ready.put(key,page);
                 }catch(RuntimeException error){Init.LOGGER.error("MTR region page retained original rendering",error);}
             });

@@ -36,6 +36,23 @@ public class CacheHotpathTest {
     }
     ok(builds.get()==1,"stable geometry must not reupload");
     ok(mapping.get()==0,"stable page must not rewrite location map");
+    // Real STRATA renderer passes immutable SectorRenderPlanCache snapshots.
+    // Confirm repeated main/shadow masks avoid repeated containsAll scans.
+    List<Piece> main=List.copyOf(initial);
+    cache.beginFrame();
+    ok(cache.get("rail",main,locate,p->1,builder,true)==first,"immutable first validation");
+    long baselineFast=cache.immutableHits();
+    for(int pass=0;pass<30;pass++){
+      cache.beginFrame();
+      ok(cache.get("rail",main,locate,p->1,builder,true)==first,"immutable identity replay");
+    }
+    ok(cache.immutableHits()-baselineFast==30,"stable masks must bypass membership verification");
+    List<Piece> shadow=List.copyOf(initial.subList(0,100));
+    cache.beginFrame();cache.get("rail",shadow,locate,p->1,builder,true);
+    long beforeShadow=cache.immutableHits();
+    cache.beginFrame();
+    ok(cache.get("rail",shadow,locate,p->1,builder,true)==first &&
+       cache.immutableHits()==beforeShadow+1,"shadow subset identity replay");
     cache.beginFrame();
     var relit=new ArrayList<>(initial);
     relit.set(1,new Piece(1,1));
@@ -57,6 +74,15 @@ public class CacheHotpathTest {
     cache.beginFrame();
     ok(cache.get("rail",initial.subList(2,20),locate,p->1,builder)==third,
        "old visible geometry must remain resident");
+    // Mutable lists must keep the expensive but correct membership path.
+    long beforeMutable=cache.immutableHits();
+    ArrayList<Piece> moving=new ArrayList<>(initial.subList(0,90));
+    cache.beginFrame();
+    cache.get("rail",moving,locate,p->1,builder);
+    moving.set(0,new Piece(555,0));
+    cache.beginFrame();
+    cache.get("rail",moving,locate,p->1,builder);
+    ok(cache.immutableHits()==beforeMutable,"mutable lists must not use identity cache");
     cache.close();
     ok(third.closed,"final resource release");
     System.out.println("PASS: no stable-frame location writes, light revisions, visible subsets, new geometry, GPU cleanup");

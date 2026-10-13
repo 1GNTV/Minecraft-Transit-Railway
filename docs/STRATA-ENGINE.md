@@ -50,3 +50,25 @@ visibility decision without capturing an extra parameter. Exceptions and
 nested renderer callbacks restore the previous state. The compiled JCM ABI
 gate remains strict; no callbacks are faked. This adds one thread-local lookup
 per model, not per vertex, and must still be benchmarked and runtime-tested.
+
+
+## STRATA b164 — measured hotpath experiment
+
+Spark flagged repeated `RailSectorBatcher.submitVisible` and
+`StaticRegionRenderer.flush` during both Oculus shadow and main passes.
+STRATA now caches **positive identity checks** on immutable visible-selection
+lists returned by `SectorRenderPlanCache`. A stable page avoids recalculating
+the entire `compiled.containsAll(visible)` membership every shader pass.
+An immutable plan with a changed light/model/membership resolves to a new list,
+and the fast path must therefore validate again. On GPU rebuild or eviction
+the identities are cleared; mutable scratch lists never use this optimization.
+The stored identity snapshots are capped at eight per page.
+
+The renderer additionally reuses one `ArrayList<ScenePlan>` across sectors
+rather than constructing a new list for every sector on every shadow cascade.
+This list is **not** retained by the cache, which copies on cache misses.
+
+Rollback this particular new experiment with
+`-Dmtr.strata.immutableMasks=false`; the GLACIER caches and JCM callback
+signatures otherwise remain unchanged. These are inferred hotpath
+improvements, not a claimed FPS gain without comparable game benchmarks.

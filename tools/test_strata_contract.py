@@ -47,3 +47,12 @@ assert "if (visualCar)" not in models and "&& visualCar," not in models
 assert "StrataVehicleVisibility.push(visualCar)" in vehicles
 assert "StrataVehicleVisibility.pop(previousStrataVisibility)" in vehicles
 print("PASS STRATA train model callbacks: no extra visualCar lambda capture")
+
+# New STRATA cache fast path must be opt-in per immutable sector page.
+regions=Path("fabric/src/main/java/org/mtr/mod/render/StaticRegionRenderer.java").read_text()
+cache=Path("fabric/src/main/java/org/mtr/mod/render/PersistentRegionCache.java").read_text()
+assert "CACHE_SECTOR_LISTS && STRATA_IMMUTABLE_MASK" in regions
+assert "sectorPlanScratch.clear()" in regions
+assert "immutableVisible && entry.verifiedImmutableLists.contains(visible)" in cache
+assert "verifiedImmutableLists.clear()" in cache
+print("PASS STRATA immutable selection fast path: protected by immutable sector cache and invalidation")
