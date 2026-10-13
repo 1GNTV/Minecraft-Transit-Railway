@@ -193,7 +193,9 @@ public class RenderRails implements IGui {
 		}
 
 		railsToRender.forEach(rail -> {
-			final RenderState renderState = editorOverlay ? hoverRails.contains(rail) ? RenderState.FLASHING : RenderState.COLORED : RenderState.NORMAL;
+			// Recompute this cheap pass flag here instead of capturing a second boolean.
+			// JCM injects into this exact callback and requires the original captures.
+			final RenderState renderState = (holdingRailRelated && !OptimizedRenderer.renderingShadows()) ? hoverRails.contains(rail) ? RenderState.FLASHING : RenderState.COLORED : RenderState.NORMAL;
 			switch (rail.getTransportMode()) {
 				case TRAIN:
 					renderRailStandard(clientWorld, rail, renderState, 1);

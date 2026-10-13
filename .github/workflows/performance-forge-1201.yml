@@ -41,6 +41,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+          cache-dependency-path: website/package-lock.json
       - uses: gradle/actions/setup-gradle@v4
       - name: Check generic attribute cache boundaries
         run: python3 tools/test_attribute_cache.py
@@ -103,7 +105,17 @@ jobs:
           python3 tools/test_profile_hotspots.py
           python3 tools/test_fps_fixes.py
           python3 tools/test_detail_async.py
-      - name: Build web resources
+      # Website Angular bundles are unchanged across Java render-engine edits.
+      # Cache only generated output, never node_modules: the Gradle setupFiles
+      # task will package the identical web resources in the final Forge JAR.
+      - name: Restore cached website assets
+        id: sillon-web
+        uses: actions/cache@v4
+        with:
+          path: website/dist
+          key: sillon-web-v1-${{ runner.os }}-${{ hashFiles('website/package-lock.json', 'website/src/**', 'fabric/src/main/java/org/mtr/core/**') }}
+      - name: Build web resources when changed
+        if: steps.sillon-web.outputs.cache-hit != 'true'
         run: |
           chmod +x gradlew
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.1
@@ -117,6 +129,9 @@ jobs:
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Verify final shaded Forge artifact
         run: python3 tools/verify_work_jar.py
+      - name: Restore stable JCM injection targets in the actual release JAR
+        if: github.ref == 'refs/heads/work/sillon-aurora-170'
+        run: python3 tools/patch_sillon_jcm_abi.py
       - name: Enforce JCM 2.3.0-beta.1 exact Mixin ABI before publishing
         run: SILLON_JCM_STRICT=true python3 tools/test_sillon_jcm_descriptors.py
       - name: Upload geometry test reports

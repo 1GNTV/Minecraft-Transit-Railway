@@ -240,12 +240,15 @@ public class RenderVehicles implements IGui {
 						final StoredMatrixTransformations storedMatrixTransformations = offsetVector == null
 								? absoluteTransform(vehicleCarDetails.right().right(), oscillationAmount)
 								: getStoredMatrixTransformations(false, vehicleCarRenderingPositionAndRotation, oscillationAmount);
+						// Per-car visibility is read by the JCM-compatible model callback without
+						// changing its captured argument ABI. The model iteration is synchronous.
+						storedMatrixTransformations.sillonModelVisible = visualCar;
 						if (visualCar && OptimizedRenderer.hasOptimizedRendering()) {
 							vehicleResource.queue(storedMatrixTransformations, vehicle, carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), absoluteVehicleCarPositionAndRotation.light, openDoorways.isEmpty());
 						}
 
 						vehicleResource.iterateModels(carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), (modelIndex, model) -> {
-                            if (visualCar) {
+                            if (storedMatrixTransformations.sillonModelVisible) {
                                 double previousDistance=ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
                                 try { model.render(storedMatrixTransformations, vehicle, carNumber, scrollingDisplayIndexTracker, absoluteVehicleCarPositionAndRotation.light, openDoorways, fromResourcePackCreator); }
                                 finally { ModelDetailCache.restoreDistance(previousDistance); }
@@ -261,7 +264,7 @@ public class RenderVehicles implements IGui {
 
 							// Render gangway
 							renderConnection(
-									vehicleResource.hasGangway1() && visualCar,
+									vehicleResource.hasGangway1() && storedMatrixTransformations.sillonModelVisible,
 									vehicleResource.hasGangway2(),
 									true,
 									previousGangwayPositionsList.get(modelIndex),
@@ -284,7 +287,7 @@ public class RenderVehicles implements IGui {
 
 							// Render barrier
 							renderConnection(
-									vehicleResource.hasBarrier1() && visualCar,
+									vehicleResource.hasBarrier1() && storedMatrixTransformations.sillonModelVisible,
 									vehicleResource.hasBarrier2(),
 									false,
 									previousBarrierPositionsList.get(modelIndex),

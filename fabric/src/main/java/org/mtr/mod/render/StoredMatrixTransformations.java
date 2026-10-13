@@ -9,6 +9,9 @@ import java.util.function.Consumer;
 public class StoredMatrixTransformations {
 
 	public final boolean useDefaultOffset;
+	// Render-thread callback state; set immediately before synchronous model iteration.
+	// Keeps the optimized rendering path while preserving Joban's lambda capture ABI.
+	boolean sillonModelVisible;
 	private final ObjectArrayList<Consumer<GraphicsHolder>> transformations = new ObjectArrayList<>();
 	private final double initialTranslateX;
 	private final double initialTranslateY;
