@@ -188,10 +188,15 @@ public class RailLookupTest {
   RailSectorBatcher.submitVisible(rail,model,samples,false,world);
   check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==4,
         "changed light must force full scene queue for both pieces");
+  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==101,
+        "new light was submitted, not stale cached light");
   org.mtr.mod.render.RailLightFrameCache.light=100;
-  check(org.mtr.mod.render.RailLightFrameCache.sampled==1002,
+  RailSectorBatcher.submitVisible(rail,model,samples,false,world);
+  check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==6,
+        "changing light back also invalidates both scene tickets");
+  check(org.mtr.mod.render.RailLightFrameCache.sampled==1004,
         "lighting must remain live on every draw even cached passes");
-  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==100,"last sampled lighting used");
+  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==100,"restored light actually drawn");
   RailSectorBatcher.submitVisible(rail,model,samples,true,world);
   check(plans.builds()==2,"flipped style requires separate immutable plan");
   RailSectorBatcher.submitVisible(rail,model,samples,true,
