@@ -29,11 +29,13 @@ import org.mtr.mod.packet.PacketCheckRouteIdHasDisabledAnnouncements;
 import org.mtr.mod.packet.PacketTurnOnBlockEntity;
 import org.mtr.mod.render.DrivingGuiRenderer;
 import org.mtr.mod.resource.VehicleResource;
+import org.mtr.mod.render.strata.StrataVehiclePositionCache;
 
 import javax.annotation.Nullable;
 
 public class VehicleExtension extends Vehicle implements Utilities {
 	private long renderRevision;
+	private final StrataVehiclePositionCache<ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>>> positionCache = new StrataVehiclePositionCache<>();
 	public long getRenderRevision() { return renderRevision; }
 
 	private double oldSpeed;
@@ -57,6 +59,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 
 	public void updateData(@Nullable JsonObject jsonObject) {
 		renderRevision++;
+		positionCache.clear();
 		if (jsonObject != null) {
 			updateData(new JsonReader(jsonObject.getAsJsonObject("vehicle")));
 			vehicleExtraData.updateData(new JsonReader(jsonObject.getAsJsonObject("data")));
@@ -65,6 +68,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 
 	public void simulate(long millisElapsed) {
 		renderRevision++;
+		positionCache.clear();
 		final double oldRailProgress = railProgress;
 		oldSpeed = speed;
 		simulate(millisElapsed, null, null);
@@ -298,6 +302,49 @@ public class VehicleExtension extends Vehicle implements Utilities {
 		}
 	}
 
+
+	/**
+	 * Accelerates the original method used by unchanged JCM and scripting
+	 * addons. Separate keys for unsmoothed/smoothed progress prevent pose
+	 * corruption while MTR temporarily changes railProgress during rendering.
+	 */
+	@Override
+	public ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> getVehicleCarsAndPositions() {
+		// Virtual dispatch can happen before subclass fields initialize.
+		if (!StrataVehiclePositionCache.enabled() || positionCache == null)
+			return super.getVehicleCarsAndPositions();
+
+		final long revision = renderRevision;
+		final double progress = railProgress;
+		final boolean backwards = getReversed();
+		final Object path = vehicleExtraData.immutablePath;
+		final Object cars = vehicleExtraData.immutableVehicleCars;
+		final long network = MinecraftClientData.getInstance().networkRevision;
+		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> saved =
+				positionCache.find(revision, progress, backwards, path, cars, network);
+		if (saved != null) return copyPositions(saved);
+
+		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> fresh = super.getVehicleCarsAndPositions();
+		// Never retain a collection that is exposed to another addon.
+		positionCache.store(revision, progress, backwards, path, cars, network, copyPositions(fresh));
+		return fresh;
+	}
+
+	private static ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> copyPositions(ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> source) {
+		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> result = new ObjectArrayList<>(source.size());
+		for (ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>> car : source) {
+			final ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>> bogies =
+					new ObjectArrayList<>(car.right().size());
+			for (ObjectObjectImmutablePair<Vector, Vector> bogie : car.right()) {
+				final Vector a = bogie.left(), b = bogie.right();
+				bogies.add(new ObjectObjectImmutablePair<>(
+						new Vector(a.x, a.y, a.z), new Vector(b.x, b.y, b.z)));
+			}
+			result.add(new ObjectObjectImmutablePair<>(car.left(), bogies));
+		}
+		return result;
+	}
+
 	public ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> getSmoothedVehicleCarsAndPositions(long millisElapsed) {
 		final double oldRailProgress = railProgress;
 		railProgress = persistentVehicleData.getSmoothedRailProgress(railProgress, persistentVehicleData.getDoorValue() > 0 ? 0 : millisElapsed * (speed == 0 ? Integer.MAX_VALUE : speed / 10));
@@ -372,6 +419,7 @@ public class VehicleExtension extends Vehicle implements Utilities {
 	 * Dispose the vehicle and execute the associated clean-up work, such as stopping vehicle sounds.
 	 */
 	public void dispose() {
+		positionCache.clear();
 		persistentVehicleData.dispose();
 	}
 }

@@ -72,3 +72,35 @@ Rollback this particular new experiment with
 `-Dmtr.strata.immutableMasks=false`; the GLACIER caches and JCM callback
 signatures otherwise remain unchanged. These are inferred hotpath
 improvements, not a claimed FPS gain without comparable game benchmarks.
+
+
+## STRATA b165 — single-JAR JCM vehicle-position cache
+
+JCM 2.3.0-beta.1's `ModelPropertiesPartMixin.jsblock$hideDisplayParts`
+calls `Vehicle.getVehicleCarsAndPositions()` even for non-DISPLAY
+model parts. The scripting `VehicleResourceMixin` also calls it for
+sound positioning. Repeated route and bogie reconstruction accounts for
+the dominant extra CPU samples in the GLACIER-without-JCM vs
+STRATA-with-JCM comparison.
+
+SILLON now overrides this upstream non-final Java method in
+`VehicleExtension`, preserving its Java binary descriptor and all
+original JCM and MTR Scripting APIs. Original, unchanged JCM calls
+automatically dispatch to the SILLON implementation: no patch mod,
+extra dependencies, bundled JCM, or second SILLON JAR.
+
+The per-vehicle `StrataVehiclePositionCache` retains a maximum of two
+separate snapshots (smoothed and unsmoothed progress). Its keys include
+render revision, exact progress bits, direction, path and vehicle-car
+list identity, and rail-network revision; update, simulation, and disposal
+clear it explicitly. Critically, each cache hit **returns a fresh deep
+copy** of the mutable outer/inner arrays and position vectors, and
+a cache miss stores a private deep-copy snapshot, keeping addons from
+mutating the cache through their returned data.
+
+Rollback with `-Dmtr.strata.vehiclePositionCache=false`.
+`tools/test_strata_vehicle_positions.py` tests the real Java cache,
+key isolation, revision handling and rollback before the Forge build.
+The post-build JCM mixin-descriptor checks still run. Actual FPS gains
+and client-side compatibility need a live world test with JCM,
+MTR Scripting, Oculus, and the user's selected train resources.
