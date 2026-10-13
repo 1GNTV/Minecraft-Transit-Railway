@@ -1,3 +1,16 @@
+# Sillon
+
+**Sillon** is an optimized Minecraft Transit Railway 4 fork for **Forge 1.20.1**. The performance-engine generations are **GLACIER Final** (release) and **AURORA** (experimental, targeting the observed 170 FPS reference).
+
+- [Sillon GLACIER Final releases](https://github.com/1GNTV/Minecraft-Transit-Railway/releases)
+- JCM / Joban Client Mod compatibility is a mandatory goal for AURORA; it requires verifying Mixin injection descriptors against compiled game classes, not only unit tests.
+- **Compatibility requirement:** retain MTR's `mtr` mod ID, `org.mtr.*` packages and upstream credits/licenses. The Sillon name applies to the fork and distributed artifact, *not* the embedded mod ID.
+- Optional renderer features can be rolled back individually with `-Dfeature=false`. See the GLACIER Final release notes for details.
+
+---
+
+## Upstream Minecraft Transit Railway
+
 ## Minecraft Transit Railway 4.0.0
 
 _Minecraft Transit Railway_ is a [Minecraft mod](https://minecraft.wiki/w/Mods) that allows you to build your own transport network with automated trains, boats, cable cars, and planes!
