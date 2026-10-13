@@ -117,8 +117,8 @@ jobs:
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Verify final shaded Forge artifact
         run: python3 tools/verify_work_jar.py
-      - name: Inspect compiled Joban Client Mod 2.3.0 mixin ABI
-        run: python3 tools/test_sillon_jcm_descriptors.py
+      - name: Enforce JCM 2.3.0-beta.1 exact Mixin ABI before publishing
+        run: SILLON_JCM_STRICT=true python3 tools/test_sillon_jcm_descriptors.py
       - name: Upload geometry test reports
         if: always()
         uses: actions/upload-artifact@v4
