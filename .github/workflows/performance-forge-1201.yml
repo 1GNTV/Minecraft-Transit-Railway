@@ -133,5 +133,5 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "MTR Engine V4 — GLACIER (${build}, Experimental)" \
-            --notes "EXPERIMENTAL: V3-based E1/E2 scene and train pipeline fusion. Persistent GPU regions with targeted invalidation, network revision safety and frame-local train transforms. Forge 1.20.1. Automated regression checks passed; in-game FPS and Oculus/JCM behavior remain unverified. Keep V2 ALPINE as stable fallback." \
+            --notes "EXPERIMENTAL: GLACIER fuses the E1+E2 engine, per-rail GPU region invalidation, frame-local train transforms and bounded default-rail CPU batching. Optional retained classic GPU pages: -Dmtr.engine.classicGpu=true (OFF by default pending visual tests). Forge 1.20.1. Automated checks and build passed before publication; no in-game FPS/Oculus/JCM guarantee. Keep V2 ALPINE as stable fallback." \
             --prerelease
