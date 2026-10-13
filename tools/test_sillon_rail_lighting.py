@@ -13,9 +13,9 @@ rails=(p/"RenderRails.java").read_text()
 main=(p/"MainRenderer.java").read_text()
 assert 'System.getProperty("sillon.aurora.railExteriorLighting","true")' in region
 assert 'System.getProperty("sillon.aurora.railExteriorLighting","true")' in classic
-assert "RAIL_EXTERIOR_LIGHTING && family==RenderPipelineMetrics.Family.RAIL" in region
+assert "RAIL_EXTERIOR_LIGHTING && !OptimizedRenderer.renderingShadows() && family==RenderPipelineMetrics.Family.RAIL" in region
 assert "QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{" in region
-assert "RAIL_EXTERIOR_LIGHTING ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{" in classic
+assert "RAIL_EXTERIOR_LIGHTING && !OptimizedRenderer.renderingShadows() ? QueuedRenderLayer.EXTERIOR : QueuedRenderLayer.TEXT,(holder,offset)->{" in classic
 assert ".set(VertexAttributeType.UV_LIGHTMAP,VertexAttributeSource.VERTEX_BUFFER)" in region
 assert ".set(VertexAttributeType.UV_LIGHTMAP,VertexAttributeSource.VERTEX_BUFFER)" in classic
 assert "baked.vertices.forEach(v->v.light=light)" in region
