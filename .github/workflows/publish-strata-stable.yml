@@ -1,0 +1,56 @@
+name: Publish SILLON STRATA Stable
+
+on:
+  push:
+    branches: [ "release/sillon-strata-stable" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-sillon-strata-stable
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == '1GNTV/Minecraft-Transit-Railway'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout stable release notes
+        uses: actions/checkout@v4
+      - name: Reuse exact verified STRATA b165 binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_TAG="v1.0.0-STRATA-b165-r1"
+          STABLE_TAG="v1.0.0-STRATA-STABLE"
+          SOURCE_COMMIT="78153fdc00fd02fdc5419fd455fcc8b4239cb3dc"
+          EXPECTED_SHA256="8977f79d51010d825cd1f1db81fc969b44129944ae4cae582d59a7333d44c8cb"
+          SOURCE_JAR="Sillon-STRATA-b165-r1-Forge-1.20.1.jar"
+          STABLE_JAR="Sillon-STRATA-STABLE-Forge-1.20.1.jar"
+
+          # Pin the source release and binary: never silently package a newer commit.
+          SOURCE_TARGET="$(gh release view "$SOURCE_TAG" --json targetCommitish --jq '.targetCommitish')"
+          test "$SOURCE_TARGET" = "$SOURCE_COMMIT"
+          gh release download "$SOURCE_TAG" \
+            --pattern "$SOURCE_JAR" --pattern "$SOURCE_JAR.sha256"
+          echo "$EXPECTED_SHA256  $SOURCE_JAR" | sha256sum -c -
+          sha256sum -c "$SOURCE_JAR.sha256"
+          mv "$SOURCE_JAR" "$STABLE_JAR"
+          sha256sum "$STABLE_JAR" > "$STABLE_JAR.sha256"
+
+          # Stable tag identifies tested b165, not the publication workflow commit.
+          if gh release view "$STABLE_TAG" >/dev/null 2>&1; then
+            echo "Stable release already exists: $STABLE_TAG"
+            exit 0
+          fi
+          gh release create "$STABLE_TAG" \
+            "$STABLE_JAR" "$STABLE_JAR.sha256" \
+            --target "$SOURCE_COMMIT" \
+            --title "SILLON STRATA — Stable (Forge 1.20.1)" \
+            --notes-file docs/STRATA-STABLE-RELEASE.md \
+            --latest
