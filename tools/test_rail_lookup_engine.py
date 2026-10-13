@@ -89,6 +89,13 @@ public class RenderPipelineMetrics {public enum Family{RAIL,TRAIN,DECORATION,OTH
 package org.mtr.mod.render;
 public class StaticDecorationRegions {public static void flush(){}public static void clear(){}}
 """,
+"org/mtr/mod/render/ClassicRailGpuCache.java":"""
+package org.mtr.mod.render;
+public class ClassicRailGpuCache{
+ public static void clear(){}
+ public static void invalidateColumns(java.util.Set<Long> columns){}
+}
+""",
 "org/mtr/mod/render/ModelDetailCache.java":"""
 package org.mtr.mod.render;
 public class ModelDetailCache{public static void clear(){}}
