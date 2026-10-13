@@ -35,5 +35,5 @@ assert "railsToRender.forEach(rail ->" in render, "JCM real rail rendering callb
 assert render.count("renderRailStats(")==4, "JCM inject ordinals changed"
 assert "railSpatialIndex.query" in engine
 assert "TrainVisibility.railShadowVisible" in engine
-assert "shadowPass" not in render[render.index("StrataRailEngine.finishPass"):render.index("// Ghost rails (when holding brush)")]
+assert "shadowPass" not in render[render.index("StrataRailEngine.finishPass(shadowPass);") + len("StrataRailEngine.finishPass(shadowPass);"):render.index("// Ghost rails (when holding brush)")]
 print("PASS STRATA: rail selector isolated; 3 JCM rail-stat capture sites and performance paths retained")
