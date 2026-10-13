@@ -49,8 +49,8 @@ public class ClientWorld {
 package org.mtr.mod.render;
 import org.mtr.mapping.holder.*;
 public class RailLightFrameCache {
- public static int sampled;
- public static int get(ClientWorld world,BlockPos pos){return ++sampled;}
+ public static int sampled,light=100;
+ public static int get(ClientWorld world,BlockPos pos){sampled++;return light;}
 }
 """,
 "org/mtr/mod/client/MinecraftClientData.java":"""
@@ -103,8 +103,15 @@ public class StoredMatrixTransformations {
 package org.mtr.mod.render;
 import org.mtr.mod.resource.RailResource;
 public class StaticRegionRenderer{
- public static int queued,lastLight;
+ public static int queued,replayed,lastLight;
+ public static class ReplayToken {}
  public StaticRegionRenderer(RenderPipelineMetrics.Family family){}
+ public Object modelForReplay(RailResource resource){return resource;}
+ public ReplayToken capture(Object location,double x,double y,double z){return new ReplayToken();}
+ public boolean replay(ReplayToken ticket,Object world,Object model,int light){
+  if(ticket==null||model==null)return false;
+  replayed++;lastLight=light;return true;
+ }
  public boolean queue(RailResource resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){queued++;lastLight=light;return true;}
  public void flush(){}
  public void clear(){}
@@ -173,11 +180,18 @@ public class RailLookupTest {
       check(RailSectorBatcher.submitVisible(rail,model,samples,false,world),"cached batch selected");
   check(plans.builds()==1 && plans.hits()==499,"500 passes must build ONE prepared rail plan");
   check(org.mtr.mod.Init.blockPositions-firstCreated==2,"cached plan must allocate lighting positions only once");
-  check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==1000,
-        "all visible GPU region selections still submitted every pass");
-  check(org.mtr.mod.render.RailLightFrameCache.sampled==1000,
-        "lighting must remain dynamic on all 500 draws");
-  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==1000,"last sampled lighting used");
+  check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==2,
+        "500 stable passes must call real StaticRegionRenderer.queue only twice");
+  check(org.mtr.mod.render.StaticRegionRenderer.replayed==998,
+        "remaining 998 submissions must REPLAY without queue()");
+  org.mtr.mod.render.RailLightFrameCache.light=101;
+  RailSectorBatcher.submitVisible(rail,model,samples,false,world);
+  check(org.mtr.mod.render.StaticRegionRenderer.queued-firstQueues==4,
+        "changed light must force full scene queue for both pieces");
+  org.mtr.mod.render.RailLightFrameCache.light=100;
+  check(org.mtr.mod.render.RailLightFrameCache.sampled==1002,
+        "lighting must remain live on every draw even cached passes");
+  check(org.mtr.mod.render.StaticRegionRenderer.lastLight==100,"last sampled lighting used");
   RailSectorBatcher.submitVisible(rail,model,samples,true,world);
   check(plans.builds()==2,"flipped style requires separate immutable plan");
   RailSectorBatcher.submitVisible(rail,model,samples,true,
@@ -185,7 +199,7 @@ public class RailLookupTest {
   check(plans.builds()==3,"world swap invalidates retained plans");
   RailSectorBatcher.clear();
   check(plans.size()==0,"world unload releases prepared plans");
-  System.out.println("PASS: 500 live rail passes -> 1 immutable plan; no repeated pose scans or BlockPos allocations, dynamic lighting and invalidation");
+  System.out.println("PASS: 500 passes -> exactly 2 queue calls, 998 retained replays, dynamic light invalidation and world cleanup");
  }
 }
 """
