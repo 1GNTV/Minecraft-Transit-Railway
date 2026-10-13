@@ -354,14 +354,25 @@ public class RenderRails implements IGui {
 			final int color = renderState.hasColor ? renderState == RenderState.FLASHING ? MainRenderer.getFlashingColor(RailType.getRailColor(rail), 1) : RailType.getRailColor(rail) : ARGB_WHITE;
 
 			final Identifier texture = renderType[1] && !renderType[0] ? IRON_BLOCK_TEXTURE : defaultTexture;
+			// Animated rail previews stay on the original per-quad path. For
+			// uncoloured classic rails, retain the same two faces and light per
+			// segment but batch up to 256 quads under each queued callback.
+			final ClassicRailQuadBatch classicBatch = ClassicRailQuadBatch.ENABLED && !renderState.hasColor
+					? new ClassicRailQuadBatch(texture, color, yOffset, SMALL_OFFSET, u1, v1, u2, v2)
+					: null;
 			renderWithinRenderDistance(rail, (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
-				final float textureOffset = (((int) (x1 + z1)) % 4) * 0.25F;
 				final int light = renderState == RenderState.FLASHING || renderState == RenderState.COLORED ? GraphicsHolder.getDefaultLight() : RailLightFrameCache.get(clientWorld, blockPos);
+				if (classicBatch != null) {
+					classicBatch.add(x1, z1, x2, z2, x3, z3, x4, z4, y1, y2, light);
+					return;
+				}
+				final float textureOffset = (((int) (x1 + z1)) % 4) * 0.25F;
 				MainRenderer.scheduleRender(texture, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
 					IDrawing.drawTexture(graphicsHolder, x1, y1 + yOffset, z1, x2, y1 + yOffset + SMALL_OFFSET, z2, x3, y2 + yOffset, z3, x4, y2 + yOffset + SMALL_OFFSET, z4, offset, u1 < 0 ? 0 : u1, v1 < 0 ? 0.1875F + textureOffset : v1, u2 < 0 ? 1 : u2, v2 < 0 ? 0.3125F + textureOffset : v2, Direction.UP, color, light);
 					IDrawing.drawTexture(graphicsHolder, x2, y1 + yOffset + SMALL_OFFSET, z2, x1, y1 + yOffset, z1, x4, y2 + yOffset + SMALL_OFFSET, z4, x3, y2 + yOffset, z3, offset, u1 < 0 ? 0 : u1, v1 < 0 ? 0.1875F + textureOffset : v1, u2 < 0 ? 1 : u2, v2 < 0 ? 0.3125F + textureOffset : v2, Direction.UP, color, light);
 				});
 			}, 0.5, -railWidth, railWidth);
+			if (classicBatch != null) classicBatch.flush();
 		}
 	}
 
