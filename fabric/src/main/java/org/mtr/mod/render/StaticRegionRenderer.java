@@ -193,6 +193,7 @@ public final class StaticRegionRenderer {
         return created;
     }
     private static final boolean PERSISTENT_QUEUE=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.persistentQueue","true"));
+    private static final boolean RAIL_LOD_PAGES=Boolean.getBoolean("mtr.engine.railLod");
     private long generation=1, queueCalls, replayCalls, previousQueues, previousReplays;
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
@@ -364,7 +365,17 @@ public final class StaticRegionRenderer {
                     holder.push();
                     try{
                         holder.translate(sector.x()*16D-offset.getXMapped(),sector.y()*16D-offset.getYMapped(),sector.z()*16D-offset.getZMapped());
-                        CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);
+                        if(RAIL_LOD_PAGES && family==RenderPipelineMetrics.Family.RAIL){
+                            var camera=MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
+                            double dx=sector.x()*16D+8-camera.getXMapped();
+                            double dy=sector.y()*16D+8-camera.getYMapped();
+                            double dz=sector.z()*16D+8-camera.getZMapped();
+                            double before=ModelDetailCache.pushDistance(dx*dx+dy*dy+dz*dz);
+                            try{CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);}
+                            finally{ModelDetailCache.restoreDistance(before);}
+                        }else{
+                            CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);
+                        }
                     }finally{holder.pop();}
                 });
             });
@@ -416,7 +427,20 @@ public final class StaticRegionRenderer {
         GlStateTracker.capture();
         try{
             // Keep segment index ranges stable. Do not apply global triangle reordering here.
-            for(var entry:combined.entrySet()){Mesh mesh=FastRegionMeshUploader.upload(entry.getValue(),mapping);page.meshes.add(mesh);page.arrays.put(entry.getKey(),new VertexArray(mesh,mapping));}
+            for(var entry:combined.entrySet()){
+                Mesh mesh=FastRegionMeshUploader.upload(entry.getValue(),mapping);
+                page.meshes.add(mesh);
+                if(RAIL_LOD_PAGES && family==RenderPipelineMetrics.Family.RAIL){
+                    // Static region pages are immutable and opaque: retain a
+                    // bounded CPU snapshot for the existing background LOD
+                    // simplifier, then attach to the uploaded vertex array.
+                    ModelDetailCache.beginVehicleUpload();
+                    try{
+                        ModelDetailCache.uploaded(mesh,entry.getValue());
+                        page.arrays.put(entry.getKey(),new VertexArray(mesh,mapping));
+                    }finally{ModelDetailCache.endVehicleUpload();}
+                }else page.arrays.put(entry.getKey(),new VertexArray(mesh,mapping));
+            }
             page.model=OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(new ArrayList<>(page.arrays.values())));return page;
         }catch(RuntimeException|Error error){page.close();throw error;}finally{GlStateTracker.restore();}
     }
