@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   shader-bridge:
@@ -99,10 +99,29 @@ jobs:
           name: MTR-v4-geometry-test-reports
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
-      - name: Upload Forge jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: MTR-Engine-Queue-Hotpath-v2-Forge-1.20.1
-          path: |
-            forge/build/libs/*-all.jar
-          if-no-files-found: error
+      - name: Publish V2 ALPINE direct JAR to GitHub Releases
+        if: github.ref == 'refs/heads/work/mtr-engine-queue-hotpath-v2'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='v2.0.0-ALPINE'
+          jar='MTR-V2-ALPINE-Forge-1.20.1.jar'
+          mapfile -t candidates < <(find forge/build/libs -maxdepth 1 -type f -name '*-all.jar' | sort)
+          if [ "${#candidates[@]}" -ne 1 ]; then
+            echo "Expected exactly one shaded Forge JAR, found ${#candidates[@]}" >&2
+            exit 1
+          fi
+          cp "${candidates[0]}" "$jar"
+          sha256sum "$jar" > "$jar.sha256"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "ALPINE release already exists, leaving immutable stable build intact."
+            exit 0
+          fi
+          gh release create "$tag" "$jar" "$jar.sha256" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "MTR Engine V2 — ALPINE (Stable)" \
+            --notes "Stable Forge 1.20.1 Queue Hotpath V2. Tested reference: about 74 average FPS in the benchmark world with Complementary HIGH. This is a custom performance fork, not an upstream MTR release. SHA-256 checksum supplied. V3+ experiments are published separately." \
+            --latest
