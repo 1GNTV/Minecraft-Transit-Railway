@@ -64,6 +64,12 @@ STUBS={
 "org/mtr/mapping/holder/Direction.java":'package org.mtr.mapping.holder; public enum Direction { UP }',
 "org/mtr/mapping/holder/Vector3d.java":'package org.mtr.mapping.holder; public class Vector3d {}',
 "org/mtr/mapping/holder/GraphicsHolder.java":'package org.mtr.mapping.holder; public class GraphicsHolder {}',
+"org/mtr/mod/render/ClassicRailGpuCache.java":'''package org.mtr.mod.render;
+import org.mtr.mapping.holder.Identifier;
+public class ClassicRailGpuCache {
+ public static boolean queue(Object rail,Identifier texture,int index,double[] coords,int[] lights,float[] stripes,
+    float u1,float v1,float u2,float v2,double yOffset,double smallOffset,int color){return false;}
+}''',
 "org/mtr/mod/render/QueuedRenderLayer.java":'package org.mtr.mod.render; public enum QueuedRenderLayer { EXTERIOR }',
 "org/mtr/mod/render/MainRenderer.java":'''package org.mtr.mod.render;
 import org.mtr.mapping.holder.*;
