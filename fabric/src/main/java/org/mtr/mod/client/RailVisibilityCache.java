@@ -54,13 +54,19 @@ public final class RailVisibilityCache {
         }
         double[] done(){return overflow?null:Arrays.copyOf(values,count);}
     }
-    public void render(RailMath rail, RailGeometryCache geometry, RailMath.RenderRail draw,
-                       double interval,float r1,float r2,double x,double y,double z,int renderDistance,
-                       double normalX,double normalY,double normalZ) {
-        if (!ENABLED) {
-            filter(rail,geometry,draw,null,interval,r1,r2,x,y,z,renderDistance,normalX,normalY,normalZ);
-            return;
-        }
+    /**
+     * Return an immutable array of exactly visible geometry samples, retaining
+     * the SAME array identity until the camera, direction, view distance, rail
+     * or geometry registry changes. A null result means use the original
+     * callback path (cache disabled, or sample budget exceeded).
+     *
+     * Allows the rail submitter to memoize prepared transforms per visible
+     * rail rather than recreate the segment callback chain every shader pass.
+     */
+    public double[] visibleSamples(RailMath rail, RailGeometryCache geometry,
+                                   double interval,float r1,float r2,double x,double y,double z,int renderDistance,
+                                   double normalX,double normalY,double normalZ) {
+        if (!ENABLED) return null;
         if (!hasView || x!=vx || y!=vy || z!=vz || normalX!=nx || normalY!=ny || normalZ!=nz || renderDistance!=distance) {
             cached.clear();storedDoubles=0;hasView=true;
             vx=x;vy=y;vz=z;nx=normalX;ny=normalY;nz=normalZ;distance=renderDistance;
@@ -69,22 +75,36 @@ public final class RailVisibilityCache {
         double[] existing=cached.get(key);
         if(existing!=null) {
             hits++;
-            for(int i=0;i<existing.length;i+=10)
-                draw.renderRail(existing[i],existing[i+1],existing[i+2],existing[i+3],existing[i+4],
-                                existing[i+5],existing[i+6],existing[i+7],existing[i+8],existing[i+9]);
-            return;
+            return existing;
         }
         misses++;
         Samples samples=new Samples();
-        filter(rail,geometry,draw,samples,interval,r1,r2,x,y,z,renderDistance,normalX,normalY,normalZ);
+        filter(rail,geometry,(x1,z1,x2,z2,x3,z3,x4,z4,y1,y2)->samples.append(x1,z1,x2,z2,x3,z3,x4,z4,y1,y2),
+               null,interval,r1,r2,x,y,z,renderDistance,normalX,normalY,normalZ);
         double[] visible=samples.done();
-        if(visible==null){uncached++;return;}
-        if(visible.length>MAX_DOUBLES)return;
+        if(visible==null){uncached++;return null;}
+        if(visible.length>MAX_DOUBLES)return null;
         cached.put(key,visible);storedDoubles+=visible.length;
         Iterator<double[]> it=cached.values().iterator();
         while(cached.size()>MAX_ENTRIES || storedDoubles>MAX_DOUBLES){
             storedDoubles-=it.next().length;
             it.remove();
+        }
+        return visible;
+    }
+
+    /** Existing callback API retains exact lighting/editor semantics. */
+    public void render(RailMath rail, RailGeometryCache geometry, RailMath.RenderRail draw,
+                       double interval,float r1,float r2,double x,double y,double z,int renderDistance,
+                       double normalX,double normalY,double normalZ) {
+        double[] visible=visibleSamples(rail,geometry,interval,r1,r2,x,y,z,renderDistance,normalX,normalY,normalZ);
+        if(visible==null) {
+            filter(rail,geometry,draw,null,interval,r1,r2,x,y,z,renderDistance,normalX,normalY,normalZ);
+            return;
+        }
+        for(int i=0;i<visible.length;i+=10) {
+            draw.renderRail(visible[i],visible[i+1],visible[i+2],visible[i+3],visible[i+4],
+                            visible[i+5],visible[i+6],visible[i+7],visible[i+8],visible[i+9]);
         }
     }
     private static void filter(RailMath rail,RailGeometryCache geometry,RailMath.RenderRail draw,Samples samples,
