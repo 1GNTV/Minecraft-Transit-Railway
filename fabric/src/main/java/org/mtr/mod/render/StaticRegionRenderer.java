@@ -107,6 +107,23 @@ public final class StaticRegionRenderer {
     private record PlacedChunk(Selection selection,PageKey page){}
     private record ScenePlan(List<PlacedChunk> chunks){}
     private record Instance(ScenePlan plan,RailGeometrySnapshots.Snapshot snapshot,StoredModelResourceBase resource,StoredMatrixTransformations fallback,int light){}
+    /**
+     * Real persistent render queue ticket, captured only after a successful
+     * scene-plan resolution. A replay bypasses queue(), scene-key lookup and
+     * per-segment model/matrix validation. No GL buffers are owned here.
+     */
+    public static final class ReplayToken {
+        private final Sector sector;
+        private final Object location;
+        private final Instance instance;
+        private final OptimizedModelWrapper model;
+        private final long generation;
+        private ReplayToken(Sector sector,Object location,Instance instance,OptimizedModelWrapper model,long generation){
+            this.sector=sector;this.location=location;this.instance=instance;
+            this.model=model;this.generation=generation;
+        }
+    }
+
     private record MaterialSpan(MaterialProperties material,RegionVertexRanges.Span span){}
     private static final class Page implements AutoCloseable{
         final Map<MaterialProperties,VertexArray> arrays=new LinkedHashMap<>();final List<Mesh> meshes=new ArrayList<>();
@@ -175,11 +192,51 @@ public final class StaticRegionRenderer {
         railPlanKeys.put(location,created);
         return created;
     }
+    private static final boolean PERSISTENT_QUEUE=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.persistentQueue","true"));
+    private long generation=1, queueCalls, replayCalls, previousQueues, previousReplays;
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
     private Object world;
     public StaticRegionRenderer(RenderPipelineMetrics.Family family){this.family=family;}
+
+    /** Resolve the resource model ONCE per styled rail, not per segment. */
+    public OptimizedModelWrapper modelForReplay(StoredModelResourceBase resource){
+        if(!PERSISTENT_QUEUE)return null;
+        return resource.getOptimizedModel();
+    }
+
+    public ReplayToken capture(Object location,double x,double y,double z){
+        if(!PERSISTENT_QUEUE)return null;
+        Sector sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
+        Map<Object,Instance> slot=groups.get(sector);
+        Instance instance=slot==null?null:slot.get(location);
+        if(instance==null)return null;
+        ResourceSnapshot snapshot=FRAME_RESOURCES.get(instance.resource());
+        if(snapshot==null || snapshot.snapshot()!=instance.snapshot())return null;
+        return new ReplayToken(sector,location,instance,snapshot.model(),generation);
+    }
+
+    /**
+     * True if and only if the original full scene submission was skipped.
+     * All changed lighting, model/resource generations, network edits, world
+     * swaps and unsupported rendering modes force queue() fallback.
+     */
+    public boolean replay(ReplayToken ticket,Object currentWorld,OptimizedModelWrapper model,int light){
+        if(!PERSISTENT_QUEUE || ticket==null || currentWorld!=world
+                || ticket.generation!=generation || ticket.model!=model
+                || ticket.instance.light()!=light
+                || !RailGeometrySnapshots.ENABLED || !OptimizedRenderer.hasOptimizedRendering()
+                || GlStateTracker.isGl4ES())return false;
+        // The instance and scene plan are immutable. Only the per-pass group
+        // membership is registered; queue(), hashes and scene resolution vanish.
+        groups.computeIfAbsent(ticket.sector,k->new LinkedHashMap<>())
+              .put(ticket.location,ticket.instance);
+        replayCalls++;
+        return true;
+    }
+
     public boolean queue(StoredModelResourceBase resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){
+        queueCalls++;
         if(!RailGeometrySnapshots.ENABLED || !OptimizedRenderer.hasOptimizedRendering() || GlStateTracker.isGl4ES())return false;
         Object current=MinecraftClient.getInstance().getWorldMapped().data;if(current!=world){clear();world=current;}
         ResourceSnapshot cachedResource=FRAME_RESOURCES.get(resource);
@@ -234,7 +291,7 @@ public final class StaticRegionRenderer {
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
-                cache.close();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();layoutLocations=0;
+                generation++;cache.close();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();layoutLocations=0;
                 for(var region:groups.values())for(Instance instance:region.values())
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
@@ -324,6 +381,10 @@ public final class StaticRegionRenderer {
                     Init.LOGGER.info("MTR Engine scene: family={}, cached-plans={}, plan-hits={}, plan-builds={}, enabled={}",
                         family,scenePlans.size(),scenePlans.hits()-previousHits,scenePlans.misses()-previousMisses,CACHE_SCENE_PLANS);
                     previousHits=scenePlans.hits();previousMisses=scenePlans.misses();
+                    Init.LOGGER.info("MTR Persistent queue: family={}, real-queue-calls={}, replayed-without-queue={}, enabled={}",
+                        family,queueCalls-previousQueues,replayCalls-previousReplays,PERSISTENT_QUEUE);
+                    previousQueues=queueCalls;previousReplays=replayCalls;
+
                     Init.LOGGER.info("MTR Engine retained sector lists: family={}, hits={}, builds={}, resident-sectors={}, enabled={}",
                         family,sectorLists.hits()-previousSectorHits,sectorLists.builds()-previousSectorBuilds,
                         sectorLists.size(),CACHE_SECTOR_LISTS);
@@ -365,6 +426,7 @@ public final class StaticRegionRenderer {
      * Sector coordinates are world block coordinates divided by 16 (floored).
      */
     public void invalidateSector(int x,int y,int z){
+        generation++;
         Sector sector=new Sector(x,y,z);
         cache.invalidateWhere(page->page.sector().equals(sector));
         scenePlans.invalidateWhere(plan->plan.sector().equals(sector));
@@ -381,6 +443,7 @@ public final class StaticRegionRenderer {
      */
     public void invalidateColumns(Set<Long> columns){
         if(columns.isEmpty())return;
+        generation++;
         java.util.function.Predicate<Sector> dirty=sector->
             columns.contains((((long)sector.x())<<32) ^ (sector.z()&0xffffffffL));
         cache.invalidateWhere(page->dirty.test(page.sector()));
@@ -396,5 +459,5 @@ public final class StaticRegionRenderer {
         }
         groups.keySet().removeIf(dirty);
     }
-    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){generation++;FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
