@@ -70,7 +70,7 @@ public class HelixSmootherContract {
         eq(HelixMotionSmoother.enabled(),"enabled");
         double left=4.0;
         // Arrival while braking must approach zero smoothly, including exact zero speed.
-        for(int i=0;i<180;i++){
+        for(int i=0;i<180 && left!=0;i++){
             double next=HelixMotionSmoother.remainingCorrection(left,16);
             eq(next>=0 && next<left,"monotonic braking "+i);
             left=next;
