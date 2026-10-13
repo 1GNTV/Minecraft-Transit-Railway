@@ -54,6 +54,24 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
         }return entries.size()+additional<=maxEntries && vertices+vertexDelta<=maxVertices;
     }
     private void release(Entry<V,L,R> entry){if(entry.resource==null)return;try{entry.resource.close();}catch(Exception e){throw new IllegalStateException(e);}finally{vertices-=entry.vertices;entry.vertices=0;entry.resource=null;}}
+    /**
+     * An editor/network event can invalidate only affected GPU pages. Releasing
+     * buffers remains a render-thread operation, never a packet-thread action.
+     */
+    public int invalidateWhere(Predicate<K> dirty){
+        Objects.requireNonNull(dirty,"dirty");
+        int removed=0;
+        var it=entries.entrySet().iterator();
+        while(it.hasNext()){
+            var next=it.next();
+            if(dirty.test(next.getKey())){
+                release(next.getValue());
+                it.remove();
+                removed++;
+            }
+        }
+        return removed;
+    }
     public int residentVertices(){return vertices;}
     public long compiledHits(){return compiledHits;}
     public long pageBuilds(){return pageBuilds;}
