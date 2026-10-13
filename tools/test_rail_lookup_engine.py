@@ -4,12 +4,41 @@ import subprocess, tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/"fabric/src/main/java/org/mtr/mod/render/RailSectorBatcher.java"
+RAIL_DELTA=ROOT/"fabric/src/main/java/org/mtr/mod/render/RailColumnDelta.java"
 STUBS={
 "org/mtr/mod/Init.java":"""
 package org.mtr.mod;
 public class Init {
  public static final Log LOGGER=new Log();
  public static class Log {public void info(String line,Object... args){}}
+}
+""",
+"org/mtr/core/data/Rail.java":"""
+package org.mtr.core.data;
+import java.util.List;
+public class Rail {
+ public final RailMath railMath=new RailMath();
+ public java.util.List<String> getStyles(){return List.of("default");}
+ public static class RailMath{
+  public double minX,maxX,minZ,maxZ;
+ }
+}
+""",
+"org/mtr/mod/client/MinecraftClientData.java":"""
+package org.mtr.mod.client;
+import org.mtr.core.data.Rail;
+import java.util.*;
+public class MinecraftClientData {
+ private static final MinecraftClientData INSTANCE=new MinecraftClientData();
+ public long networkRevision;
+ public final Map<String,RailWrapper> railWrapperList=new LinkedHashMap<>();
+ public static MinecraftClientData getInstance(){return INSTANCE;}
+ public static class RailWrapper {
+  public final String hexId;
+  private final Rail rail;
+  public RailWrapper(String id,Rail rail){this.hexId=id;this.rail=rail;}
+  public Rail getRail(){return rail;}
+ }
 }
 """,
 "org/mtr/mod/resource/RailResource.java":"""
@@ -49,6 +78,7 @@ public class StaticRegionRenderer{
  public boolean queue(RailResource resource,StoredMatrixTransformations fallback,Object location,double x,double y,double z,org.joml.Matrix4f matrix,int light){return true;}
  public void flush(){}
  public void clear(){}
+ public void invalidateColumns(java.util.Set<Long> columns){}
 }
 """,
 "org/mtr/mod/render/RenderPipelineMetrics.java":"""
@@ -100,5 +130,5 @@ with tempfile.TemporaryDirectory(prefix="mtr-rail-lookup-") as dirname:
  root=Path(dirname)
  for name,src in STUBS.items():
   f=root/name;f.parent.mkdir(parents=True,exist_ok=True);f.write_text(src)
- subprocess.run(["javac","-d",dirname,str(SOURCE),*map(str,root.rglob("*.java"))],check=True)
+ subprocess.run(["javac","-d",dirname,str(SOURCE),str(RAIL_DELTA),*map(str,root.rglob("*.java"))],check=True)
  subprocess.run(["java","-cp",dirname,"RailLookupTest"],check=True)
