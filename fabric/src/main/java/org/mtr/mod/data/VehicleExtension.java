@@ -30,6 +30,7 @@ import org.mtr.mod.packet.PacketTurnOnBlockEntity;
 import org.mtr.mod.render.DrivingGuiRenderer;
 import org.mtr.mod.resource.VehicleResource;
 import org.mtr.mod.render.strata.StrataVehiclePositionCache;
+import org.mtr.mod.render.helix.HelixMotionSmoother;
 
 import javax.annotation.Nullable;
 
@@ -73,6 +74,8 @@ public class VehicleExtension extends Vehicle implements Utilities {
 		oldSpeed = speed;
 		simulate(millisElapsed, null, null);
 		persistentVehicleData.tick(railProgress, millisElapsed, vehicleExtraData);
+		if (HelixMotionSmoother.enabled())
+			persistentVehicleData.advanceHelixSmoothedRailProgress(railProgress,millisElapsed,persistentVehicleData.getDoorValue()>0);
 		final MinecraftClient minecraftClient = MinecraftClient.getInstance();
 		final ClientWorld clientWorld = minecraftClient.getWorldMapped();
 		final ClientPlayerEntity clientPlayerEntity = minecraftClient.getPlayerMapped();
@@ -347,7 +350,9 @@ public class VehicleExtension extends Vehicle implements Utilities {
 
 	public ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> getSmoothedVehicleCarsAndPositions(long millisElapsed) {
 		final double oldRailProgress = railProgress;
-		railProgress = persistentVehicleData.getSmoothedRailProgress(railProgress, persistentVehicleData.getDoorValue() > 0 ? 0 : millisElapsed * (speed == 0 ? Integer.MAX_VALUE : speed / 10));
+		railProgress = HelixMotionSmoother.enabled()
+				? persistentVehicleData.getHelixSmoothedRailProgress(railProgress)
+				: persistentVehicleData.getSmoothedRailProgress(railProgress, persistentVehicleData.getDoorValue() > 0 ? 0 : millisElapsed * (speed == 0 ? Integer.MAX_VALUE : speed / 10));
 		try { return getVehicleCarsAndPositions(); }
 		finally { railProgress = oldRailProgress; }
 	}

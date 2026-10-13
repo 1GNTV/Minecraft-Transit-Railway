@@ -39,7 +39,8 @@ assert "ScreenErrorBudget.permits(" in lod
 assert 'SHADOW_RAIL_CULL=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shadowRailCull","true"))' in shadow
 assert 'RAIL_LOD_PAGES=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"))' in scene
 assert 'System.getProperty("mtr.next.shaderLod","true")' in lod
-assert 'System.getProperty("mtr.engine.classicGpu","true")' in src("org/mtr/mod/render/ClassicRailGpuCache.java")
+# HELIX defaults the unverified shader-light GPU rail path off for fidelity.
+assert 'System.getProperty("mtr.engine.classicGpu","false")' in src("org/mtr/mod/render/ClassicRailGpuCache.java")
 assert 'System.getProperty("mtr.next.textAcrossCallbacks","true")' in src("org/mtr/mod/render/MainRenderer.java")
 print("PASS: all four features are called by production paths, with safe fallbacks and generation invalidation")
 

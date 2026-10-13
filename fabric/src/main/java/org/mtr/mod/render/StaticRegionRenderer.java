@@ -1,6 +1,9 @@
 package org.mtr.mod.render;
 import org.mtr.mapping.holder.Matrix4f;
 import org.mtr.mapping.holder.MinecraftClient;
+import org.mtr.mapping.holder.GraphicsHolder;
+import org.mtr.mapping.holder.Vector3d;
+import java.util.function.BiConsumer;
 import org.mtr.mapping.mapper.OptimizedModel;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mapping.render.batch.MaterialProperties;
@@ -128,6 +131,9 @@ public final class StaticRegionRenderer {
     private static final class Page implements AutoCloseable{
         final Map<MaterialProperties,VertexArray> arrays=new LinkedHashMap<>();final List<Mesh> meshes=new ArrayList<>();
         final Map<Selection,List<MaterialSpan>> spans=new HashMap<>();OptimizedModelWrapper model;
+        // Render state and model are stable for this GPU page. The callback
+        // reads the current pass and camera offset when invoked.
+        BiConsumer<GraphicsHolder,Vector3d> drawCommand;
         private List<Selection> lastVisible=List.of();
         private Map<MaterialProperties,List<RegionVertexRanges.Span>> lastRanges=Map.of();
         // Only visibility changes require regrouping index spans; camera-stable pages reuse
@@ -153,6 +159,33 @@ public final class StaticRegionRenderer {
     private static final int MAX_SCENE_LOCATIONS=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.sceneLocations",32768)));
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(MAX_REGION_PAGES,MAX_REGION_VERTICES,16_000);
     private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
+    // Reuse sector membership maps across the main + shadow passes.
+    // Only the most recent sector bypasses group-map lookups. Ordered
+    // location semantics and the original addon fallback remain unchanged.
+    private static final boolean HELIX_STAGED_GROUPS =
+        !"false".equalsIgnoreCase(System.getProperty("mtr.helix.stagedGroups","true"));
+    private final ArrayDeque<LinkedHashMap<Object,Instance>> freeGroups = new ArrayDeque<>();
+    private Sector hotSector;
+    private LinkedHashMap<Object,Instance> hotGroup;
+    private LinkedHashMap<Object,Instance> groupFor(Sector sector) {
+        if(HELIX_STAGED_GROUPS && hotGroup != null && sector.equals(hotSector)) return hotGroup;
+        LinkedHashMap<Object,Instance> result=groups.get(sector);
+        if(result==null) {
+            result=HELIX_STAGED_GROUPS ? freeGroups.pollFirst() : null;
+            if(result==null) result=new LinkedHashMap<>();
+            groups.put(sector,result);
+        }
+        hotSector=sector;hotGroup=result;
+        return result;
+    }
+    private void releaseGroups(){
+        for(LinkedHashMap<Object,Instance> map : groups.values()) {
+            map.clear();
+            if(HELIX_STAGED_GROUPS && freeGroups.size()<128) freeGroups.addLast(map);
+        }
+        groups.clear();
+        hotSector=null;hotGroup=null;
+    }
     // Reuse the temporary per-pass staging maps/lists. No references to these
     // scratch lists survive inside compiled GPU pages or persistent scene plans.
     private final Map<PageKey,List<Selection>> wantedScratch=new LinkedHashMap<>();
@@ -235,8 +268,7 @@ public final class StaticRegionRenderer {
                 || GlStateTracker.isGl4ES())return false;
         // The instance and scene plan are immutable. Only the per-pass group
         // membership is registered; queue(), hashes and scene resolution vanish.
-        groups.computeIfAbsent(ticket.sector,k->new LinkedHashMap<>())
-              .put(ticket.location,ticket.instance);
+        groupFor(ticket.sector).put(ticket.location,ticket.instance);
         replayCalls++;
         return true;
     }
@@ -282,7 +314,7 @@ public final class StaticRegionRenderer {
                 ()->new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light),
                 buildPlan)
             : buildPlan.apply(new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light));
-        groups.computeIfAbsent(sector,k->new LinkedHashMap<>()).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
+        groupFor(sector).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
     }
     private static org.joml.Matrix4f localMatrix(org.joml.Matrix4f source,float x,float y,float z){
         // Called on plan cache misses only; never on a stable queue hit.
@@ -366,27 +398,11 @@ public final class StaticRegionRenderer {
                 Page page=ready.get(key);
                 Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=page.ranges(selected);
                 page.arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
-                Sector sector=key.sector();
-                MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
-                    holder.push();
-                    try{
-                        holder.translate(sector.x()*16D-offset.getXMapped(),sector.y()*16D-offset.getYMapped(),sector.z()*16D-offset.getZMapped());
-                        if(RAIL_LOD_PAGES && family==RenderPipelineMetrics.Family.RAIL){
-                            var camera=MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
-                            double dx=sector.x()*16D+8-camera.getXMapped();
-                            double dy=sector.y()*16D+8-camera.getYMapped();
-                            double dz=sector.z()*16D+8-camera.getZMapped();
-                            double before=ModelDetailCache.pushDistance(dx*dx+dy*dy+dz*dz);
-                            try{CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);}
-                            finally{ModelDetailCache.restoreDistance(before);}
-                        }else{
-                            CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);
-                        }
-                    }finally{holder.pop();}
-                });
+                if(page.drawCommand==null) page.drawCommand=pageDrawCommand(page,key.sector());
+                MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,page.drawCommand);
             });
         } finally {
-            groups.clear();
+            releaseGroups();
             // Retained sector lists are IMMUTABLE; never clear/recycle them.
             if(CACHE_SECTOR_LISTS)wantedScratch.clear();
             else recycle(wantedScratch);
@@ -416,6 +432,29 @@ public final class StaticRegionRenderer {
             }
         }
     }
+
+    /** One safe render command per retained GPU page, rather than one Java
+     * callback allocation per shadow cascade and main pass. */
+    private BiConsumer<GraphicsHolder,Vector3d> pageDrawCommand(Page page,Sector sector) {
+        return (holder,offset)->{
+                    holder.push();
+                    try{
+                        holder.translate(sector.x()*16D-offset.getXMapped(),sector.y()*16D-offset.getYMapped(),sector.z()*16D-offset.getZMapped());
+                        if(RAIL_LOD_PAGES && family==RenderPipelineMetrics.Family.RAIL){
+                            var camera=MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
+                            double dx=sector.x()*16D+8-camera.getXMapped();
+                            double dy=sector.y()*16D+8-camera.getYMapped();
+                            double dz=sector.z()*16D+8-camera.getZMapped();
+                            double before=ModelDetailCache.pushDistance(dx*dx+dy*dy+dz*dz);
+                            try{CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);}
+                            finally{ModelDetailCache.restoreDistance(before);}
+                        }else{
+                            CustomResourceLoader.OPTIMIZED_RENDERER_WRAPPER.queue(page.model,holder,0,family);
+                        }
+                    }finally{holder.pop();}
+        };
+    }
+
     private Page build(List<Selection> content){
         Page page=new Page();Map<MaterialProperties,RawMesh> combined=new LinkedHashMap<>();
         for(Selection s:content){
@@ -464,6 +503,7 @@ public final class StaticRegionRenderer {
         RegionPageLayout<Fragment> discarded=layouts.remove(sector);
         if(discarded!=null)layoutLocations=Math.max(0,layoutLocations-discarded.locations());
         groups.remove(sector);
+        hotSector=null;hotGroup=null;
     }
 
     /** Invalidate only the columns touched by edited rail geometry.
@@ -488,6 +528,7 @@ public final class StaticRegionRenderer {
             }
         }
         groups.keySet().removeIf(dirty);
+        hotSector=null;hotGroup=null;
     }
-    public void clear(){generation++;FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){generation++;FRAME_RESOURCES.clear();cache.close();releaseGroups();freeGroups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }

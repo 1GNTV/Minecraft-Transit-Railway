@@ -17,6 +17,7 @@ import org.mtr.mod.resource.VehicleResource;
 import org.mtr.mod.sound.VehicleSoundBase;
 
 import java.util.function.Supplier;
+import org.mtr.mod.render.helix.HelixMotionSmoother;
 
 public final class PersistentVehicleData {
 
@@ -66,6 +67,17 @@ public final class PersistentVehicleData {
 		}
 		smoothedRailProgress = railProgress - railProgressSmoothingAdjustment;
 		return smoothedRailProgress;
+	}
+
+	/** Advance ONCE during simulation: not once per Oculus shadow cascade. */
+	public void advanceHelixSmoothedRailProgress(double progress,long millisElapsed,boolean doorsOpen) {
+		if (!doorsOpen) railProgressSmoothingAdjustment = HelixMotionSmoother.remainingCorrection(railProgressSmoothingAdjustment,millisElapsed);
+		smoothedRailProgress = progress-railProgressSmoothingAdjustment;
+	}
+
+	/** A read-only position shared by train and shadow render passes. */
+	public double getHelixSmoothedRailProgress(double progress) {
+		return progress-railProgressSmoothingAdjustment;
 	}
 
 	public ObjectArrayList<ScrollingText> getScrollingText(int carNumber) {
