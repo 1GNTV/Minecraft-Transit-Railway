@@ -347,7 +347,7 @@ public class RenderRails implements IGui {
                     // lookups. Lighting is refreshed live, every render pass.
                     double[] visible=visibleModelRailSamples(rail,railResource.getRepeatInterval());
                     if (visible!=null && RailSectorBatcher.submitVisible(rail.railMath,railResource,visible,flip,clientWorld)) {
-                        renderType[1]=true;
+                        if(visible.length>0)renderType[1]=true;
                     } else {
                         // Full compatibility fallback for editor views, disabled
                         // caching and oversized or unsupported rail networks.
