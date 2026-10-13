@@ -21,18 +21,23 @@ assert "ticket.generation!=generation || ticket.model!=model" in scene
 assert "ticket.instance.light()!=light" in scene
 assert "generation++;" in scene and "public void invalidateColumns" in scene
 assert "MTR Persistent queue:" in scene and "queueCalls++" in scene and "replayCalls++" in scene
-assert "SHADER_INDIRECT=Boolean.getBoolean" in gpu
+assert 'SHADER_INDIRECT=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shaderIndirect","true"))' in gpu
 assert "!OptimizedRenderer.renderingShadows()" not in gpu # guard is positive renderingShadows => false
 assert "OptimizedRenderer.renderingShadows()" in gpu
 assert "!SHADER_INDIRECT" in gpu and "GL43.glMultiDrawElementsIndirect" in gpu
 assert "TrainVisibility.railShadowVisible" in renderer
 assert "if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;" in shadow
 assert "frustum.isVisible(new Box(minX-SHADOW_MARGIN" in shadow
-assert "RAIL_LOD=Boolean.getBoolean" in lod
+assert 'RAIL_LOD=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"))' in lod
 assert "RAIL_LOD && family==RenderPipelineMetrics.Family.RAIL" in lod
 assert "ModelDetailCache.uploaded(mesh,entry.getValue())" in scene
 assert "ModelDetailCache.pushDistance(dx*dx+dy*dy+dz*dz)" in scene
 assert "ScreenErrorBudget.permits(" in lod
+assert 'SHADOW_RAIL_CULL=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shadowRailCull","true"))' in shadow
+assert 'RAIL_LOD_PAGES=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"))' in scene
+assert 'System.getProperty("mtr.next.shaderLod","true")' in lod
+assert 'System.getProperty("mtr.engine.classicGpu","true")' in src("org/mtr/mod/render/ClassicRailGpuCache.java")
+assert 'System.getProperty("mtr.next.textAcrossCallbacks","true")' in src("org/mtr/mod/render/MainRenderer.java")
 print("PASS: all four features are called by production paths, with safe fallbacks and generation invalidation")
 
 STUBS={
@@ -52,7 +57,7 @@ import org.mtr.mapping.mapper.OptimizedRenderer;
 public class ShadowRailTest {
 static void ok(boolean b,String m){if(!b)throw new AssertionError(m);}
 public static void main(String[]args) {
- boolean enabled=Boolean.getBoolean("mtr.engine.shadowRailCull");
+ boolean enabled=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shadowRailCull","true"));
  TrainVisibility.beginFrame();OptimizedRenderer.shadows=true;
  ok(TrainVisibility.railShadowVisible(10000,0,0,10001,1,1),"unknown frustum must fail open");
  TrainVisibility.capture(new Frustum());
@@ -70,8 +75,9 @@ with TemporaryDirectory(prefix="glacier-next-") as d:
  for n,s in STUBS.items():
     p=root/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(s,encoding="utf-8")
  subprocess.run(["javac","-d",d,str(ROOT/"org/mtr/mod/render/TrainVisibility.java"),*map(str,root.rglob("*.java"))],check=True)
- for setting in ["false","true"]:
-    subprocess.run(["java",f"-Dmtr.engine.shadowRailCull={setting}","-cp",d,"ShadowRailTest"],check=True)
+ for setting in [None,"false","true"]:
+    cmd=["java"] + ([f"-Dmtr.engine.shadowRailCull={setting}"] if setting else []) + ["-cp",d,"ShadowRailTest"]
+    subprocess.run(cmd,check=True)
 
 # Screen-error budget is the actual LOD selection algorithm, not a fake formula.
 LODTEST="""
