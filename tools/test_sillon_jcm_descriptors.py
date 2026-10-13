@@ -9,7 +9,7 @@ Set SILLON_JCM_STRICT=true once we establish a working compatibility bridge.
 from pathlib import Path
 import subprocess,sys,re,os,zipfile
 
-jars=[p for p in Path("forge/build/libs").glob("*-all.jar")]
+jars=[Path(os.environ["SILLON_JAR_PATH"])] if os.getenv("SILLON_JAR_PATH") else list(Path("forge/build/libs").glob("*-all.jar"))
 if len(jars)!=1: raise SystemExit(f"Need exactly one real shaded Forge jar, got {jars}")
 jar=jars[0]
 def report(cls):

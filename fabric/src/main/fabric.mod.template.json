@@ -30,7 +30,8 @@
 		]
 	},
 	"mixins": [
-		"mtr.mixins.json"
+		"mtr.mixins.json",
+		"mtr.strata.performance.mixins.json"
 	],
 	"depends": {
 		"fabric": "*",
