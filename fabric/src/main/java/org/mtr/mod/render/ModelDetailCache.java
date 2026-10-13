@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /** CPU detail preparation never runs on the render thread. Original geometry stays available. */
 public final class ModelDetailCache {
     private static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.next.lod","true"));
+    // Static rail pages require explicit opt-in because simplifying adjacent
+    // meshes can reveal seams. The train LOD path remains unchanged.
+    private static final boolean RAIL_LOD=Boolean.getBoolean("mtr.engine.railLod");
     private static final Map<Mesh,RawMesh> PENDING=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<VertexArray,Owner> LEVELS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Cleaner CLEANER=Cleaner.create();
@@ -107,7 +110,9 @@ public final class ModelDetailCache {
     }}
     private static IndexBuffer upload(int[] indices){IndexBuffer index=new IndexBuffer(indices.length/3,GL33.GL_UNSIGNED_INT);ByteBuffer data=ByteBuffer.allocateDirect(indices.length*4).order(ByteOrder.nativeOrder());data.asIntBuffer().put(indices);try{index.upload(data,VertexBuffer.USAGE_STATIC_DRAW);return index;}catch(RuntimeException|Error error){index.close();throw error;}}
     public static VertexArray select(VertexArray original,RenderPipelineMetrics.Family family,double distanceSquared){
-        if(!ENABLED || family!=RenderPipelineMetrics.Family.TRAIN || !Double.isFinite(distanceSquared))return original;
+        if(!ENABLED || (family!=RenderPipelineMetrics.Family.TRAIN
+                && !(RAIL_LOD && family==RenderPipelineMetrics.Family.RAIL))
+                || !Double.isFinite(distanceSquared))return original;
         Owner owner=LEVELS.get(original);if(owner==null || owner.closed)return original;
         if(!org.mtr.mapping.render.tool.Utilities.canUseCustomShader() && !Boolean.getBoolean("mtr.next.shaderLod"))return original;
         boolean shadows=OptimizedRenderer.renderingShadows();double error=(shadows?.25:.125)*Math.sqrt(3),pixels=shadows?1:.75;
