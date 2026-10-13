@@ -17,7 +17,7 @@ public final class ModelDetailCache {
     private static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.next.lod","true"));
     // Static rail pages require explicit opt-in because simplifying adjacent
     // meshes can reveal seams. The train LOD path remains unchanged.
-    private static final boolean RAIL_LOD=Boolean.getBoolean("mtr.engine.railLod");
+    private static final boolean RAIL_LOD=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railLod","true"));
     private static final Map<Mesh,RawMesh> PENDING=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<VertexArray,Owner> LEVELS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final Cleaner CLEANER=Cleaner.create();
@@ -71,7 +71,7 @@ public final class ModelDetailCache {
     public static void attach(VertexArray original,Mesh mesh,VertexAttributeMapping mapping){
         RawMesh raw=PENDING.remove(mesh);if(raw==null)return;ModelPartVisibility.retain(original,raw);
         if(!ENABLED || raw.faces.size()<16 || raw.faces.size()>200_000 || raw.vertices.size()>MAX_CPU_VERTICES || raw.materialProperties.translucent || raw.materialProperties.cutoutHack || !raw.materialProperties.writeDepthBuf)return;
-        if(!org.mtr.mapping.render.tool.Utilities.canUseCustomShader() && !Boolean.getBoolean("mtr.next.shaderLod"))return;
+        if(!org.mtr.mapping.render.tool.Utilities.canUseCustomShader() && "false".equalsIgnoreCase(System.getProperty("mtr.next.shaderLod","true")))return;
         int vertices=raw.vertices.size(),reserved=raw.faces.size()*24;
         if(BYTES.addAndGet(reserved)>MAX_BYTES){BYTES.addAndGet(-reserved);return;}
         if(CPU_VERTICES.addAndGet(vertices)>MAX_CPU_VERTICES){CPU_VERTICES.addAndGet(-vertices);BYTES.addAndGet(-reserved);return;}
@@ -114,7 +114,7 @@ public final class ModelDetailCache {
                 && !(RAIL_LOD && family==RenderPipelineMetrics.Family.RAIL))
                 || !Double.isFinite(distanceSquared))return original;
         Owner owner=LEVELS.get(original);if(owner==null || owner.closed)return original;
-        if(!org.mtr.mapping.render.tool.Utilities.canUseCustomShader() && !Boolean.getBoolean("mtr.next.shaderLod"))return original;
+        if(!org.mtr.mapping.render.tool.Utilities.canUseCustomShader() && "false".equalsIgnoreCase(System.getProperty("mtr.next.shaderLod","true")))return original;
         boolean shadows=OptimizedRenderer.renderingShadows();double error=(shadows?.25:.125)*Math.sqrt(3),pixels=shadows?1:.75;
         if(!ScreenErrorBudget.permits(error,distanceSquared,owner.radius,passProjectionY,passHeight,passPerspective,pixels))return original;
         VertexArray level=shadows?owner.shadow:owner.main;return level==null?original:level;
