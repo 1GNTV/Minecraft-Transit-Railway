@@ -341,11 +341,23 @@ public class RenderRails implements IGui {
 				renderType[0] = true;
 			} else {
 				final boolean flip = newStyle.endsWith("_2");
-				CustomResourceLoader.getRailById(RailResource.getIdWithoutDirection(newStyle), railResource -> renderWithinRenderDistance(rail, (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
-					final int light = RailLightFrameCache.get(clientWorld, blockPos);
-					RailSectorBatcher.submit(railResource,x1,z1,x3,z3,y1,y2,flip,light);
-					renderType[1] = true;
-				}, railResource.getRepeatInterval(), 0, 0));
+                CustomResourceLoader.getRailById(RailResource.getIdWithoutDirection(newStyle), railResource -> {
+                    // First attempt a retained immutable visible submission plan.
+                    // A hit skips ALL geometry callbacks and per-segment pose
+                    // lookups. Lighting is refreshed live, every render pass.
+                    double[] visible=visibleModelRailSamples(rail,railResource.getRepeatInterval());
+                    if (visible!=null && RailSectorBatcher.submitVisible(rail.railMath,railResource,visible,flip,clientWorld)) {
+                        renderType[1]=true;
+                    } else {
+                        // Full compatibility fallback for editor views, disabled
+                        // caching and oversized or unsupported rail networks.
+                        renderWithinRenderDistance(rail,(blockPos,x1,z1,x2,z2,x3,z3,x4,z4,y1,y2)->{
+                            final int light=RailLightFrameCache.get(clientWorld,blockPos);
+                            RailSectorBatcher.submit(railResource,x1,z1,x3,z3,y1,y2,flip,light);
+                            renderType[1]=true;
+                        },railResource.getRepeatInterval(),0,0);
+                    }
+                });
 			}
 		}
 
@@ -401,6 +413,30 @@ public class RenderRails implements IGui {
 			}, 1, u1 - 1, u2 - 1);
 		}
 	}
+
+    /**
+     * Geometry is selected using exactly the same camera/frustum parameters as
+     * renderWithinRenderDistance. Return the identity-stable sample array that
+     * the retained submission plan uses as its visibility revision.
+     */
+    private static double[] visibleModelRailSamples(Rail rail,double interval) {
+        if(!USE_RAIL_FRUSTUM_BASIS)return null;
+        final Camera camera=MinecraftClient.getInstance().getGameRendererMapped().getCamera();
+        final Vector3d pos=camera.getPos();
+        final float yaw=(float)Math.toRadians(camera.getYaw());
+        final float pitch=(float)Math.toRadians(camera.getPitch());
+        if(projectionYaw!=yaw || projectionPitch!=pitch){
+            projectionYaw=yaw;projectionPitch=pitch;
+            projectionZFromX=new Vector3d(1,0,0).rotateY(yaw).rotateX(pitch).getZMapped();
+            projectionZFromY=new Vector3d(0,1,0).rotateY(yaw).rotateX(pitch).getZMapped();
+            projectionZFromZ=new Vector3d(0,0,1).rotateY(yaw).rotateX(pitch).getZMapped();
+        }
+        MinecraftClientData data=MinecraftClientData.getInstance();
+        return data.railVisibilityCache.visibleSamples(
+            rail.railMath,data.railGeometryCache,interval,0,0,
+            pos.getXMapped(),pos.getYMapped(),pos.getZMapped(),MinecraftClientHelper.getRenderDistance()*16,
+            projectionZFromX,projectionZFromY,projectionZFromZ);
+    }
 
 	private static void renderWithinRenderDistance(Rail rail, RenderRailWithBlockPos callback, double interval, float offsetRadius1, float offsetRadius2) {
 		final Camera camera = MinecraftClient.getInstance().getGameRendererMapped().getCamera();
