@@ -73,12 +73,14 @@ public final class RailSectorBatcher {
         if(!DELTA_INVALIDATION || changed.full()){
             PREPARED.clear();
             REGIONS.clear();
+            ClassicRailGpuCache.clear();
             networkInvalidations++;
         }else if(!changed.columns().isEmpty()){
             // Pose entries may contain obsolete rail/resource shapes: cheap CPU
             // reset, but retain all GPU pages outside the dirty columns.
             PREPARED.clear();
             REGIONS.invalidateColumns(changed.columns());
+            ClassicRailGpuCache.invalidateColumns(changed.columns());
             networkPartialInvalidations++;
         }
         appliedNetworkRevision=revision;
@@ -120,6 +122,6 @@ public final class RailSectorBatcher {
             }
         }
     }
-    public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
+    public static void clear(){PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }
