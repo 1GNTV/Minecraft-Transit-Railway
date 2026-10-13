@@ -275,15 +275,22 @@ public final class StaticRegionRenderer {
                     if(page!=null)ready.put(key,page);
                 }catch(RuntimeException error){Init.LOGGER.error("MTR region page retained original rendering",error);}
             });
-            Map<PageKey,List<Selection>> drawing=drawingScratch;
+            // In a stable compiled frame EVERY needed page is ready. Drawing
+            // then equals the immutable wanted membership exactly: rebuilding
+            // the drawing lists per model would be wasted work. On any missing
+            // page retain the original atomic per-object fallback below.
+            boolean everyPageReady=ready.size()==wanted.size();
+            Map<PageKey,List<Selection>> drawing=everyPageReady?wanted:drawingScratch;
             for(var region:groups.values())for(Instance instance:region.values()){
-                List<PlacedChunk> parts=instance.plan().chunks();
-                boolean allReady=true;
-                for(PlacedChunk part:parts)if(!ready.containsKey(part.page())){allReady=false;break;}
-                // Atomic per-object decision: never draw a partial mesh plus its fallback.
-                if(!allReady){instance.resource().render(instance.fallback(),instance.light());continue;}
-                for(PlacedChunk part:parts)
-                    drawing.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
+                if(!everyPageReady){
+                    List<PlacedChunk> parts=instance.plan().chunks();
+                    boolean allReady=true;
+                    for(PlacedChunk part:parts)if(!ready.containsKey(part.page())){allReady=false;break;}
+                    // Atomic per-object decision: never mix partial GPU mesh with fallback.
+                    if(!allReady){instance.resource().render(instance.fallback(),instance.light());continue;}
+                    for(PlacedChunk part:parts)
+                        drawing.computeIfAbsent(part.page(),k->scratchList()).add(part.selection());
+                }
                 OptimizedModelWrapper remainder=instance.snapshot().remainder();
                 if(remainder!=null)MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,(holder,offset)->{
                     instance.fallback().transform(holder,offset);
