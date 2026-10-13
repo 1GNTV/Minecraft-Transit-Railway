@@ -44,9 +44,8 @@ public final class RailColumnDelta {
             }
         }
         previous=new HashMap<>(current);
-        // Defensive: an in-place update that was not expressible by geometry
-        // identity/style fingerprint must not leave previously baked GPU data.
-        if(changed==0 && !current.isEmpty())return new Change(true,Set.of(),0);
+        // No static rail changes: preserve cached pages through network heartbeat.
+        // Style fingerprints detect mutable style edits even with a stable rail ref.
         if(overflow)return new Change(true,Set.of(),changed);
         return new Change(false,Set.copyOf(dirty),changed);
     }
@@ -66,9 +65,11 @@ public final class RailColumnDelta {
         double z0=Math.floor(state.minZ/16D),z1=Math.floor(state.maxZ/16D);
         if(x0<Integer.MIN_VALUE || x1>Integer.MAX_VALUE
                 || z0<Integer.MIN_VALUE || z1>Integer.MAX_VALUE)return false;
-        long count=(long)(x1-x0+1)*(long)(z1-z0+1);
-        if(count<=0 || count>maxDirtyColumns || output.size()+count>maxDirtyColumns)return false;
-        for(int x=(int)x0;x<=x1;x++)for(int z=(int)z0;z<=z1;z++) {
+        long width=(long)(x1-x0+1),depth=(long)(z1-z0+1);
+        if(width<=0 || depth<=0 || width>maxDirtyColumns || depth>maxDirtyColumns)return false;
+        long count=width*depth;
+        if(count>maxDirtyColumns || output.size()+count>maxDirtyColumns)return false;
+        for(long x=(long)x0;x<=x1;x++)for(long z=(long)z0;z<=z1;z++) {
             output.add((((long)x)<<32) ^ (z&0xffffffffL));
             if(output.size()>maxDirtyColumns)return false;
         }
