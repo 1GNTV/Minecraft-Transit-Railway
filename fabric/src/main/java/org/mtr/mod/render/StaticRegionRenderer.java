@@ -264,5 +264,27 @@ public final class StaticRegionRenderer {
         if(discarded!=null)layoutLocations=Math.max(0,layoutLocations-discarded.locations());
         groups.remove(sector);
     }
+
+    /** Invalidate only the columns touched by edited rail geometry.
+     * Geometry's rail model Y offset may cross a chunk-height boundary, so
+     * every 16-block Y-sector in a changed X/Z column must be invalidated.
+     * Active camera and shader-pass visibility never affect membership.
+     */
+    public void invalidateColumns(Set<Long> columns){
+        if(columns.isEmpty())return;
+        java.util.function.Predicate<Sector> dirty=sector->
+            columns.contains((((long)sector.x())<<32) ^ (sector.z()&0xffffffffL));
+        cache.invalidateWhere(page->dirty.test(page.sector()));
+        scenePlans.invalidateWhere(plan->dirty.test(plan.sector()));
+        var iterator=layouts.entrySet().iterator();
+        while(iterator.hasNext()){
+            var entry=iterator.next();
+            if(dirty.test(entry.getKey())){
+                layoutLocations=Math.max(0,layoutLocations-entry.getValue().locations());
+                iterator.remove();
+            }
+        }
+        groups.keySet().removeIf(dirty);
+    }
     public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
