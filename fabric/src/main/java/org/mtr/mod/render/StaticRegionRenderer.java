@@ -43,11 +43,66 @@ public final class StaticRegionRenderer {
         @Override public int hashCode(){return hash;}
         @Override public boolean equals(Object other){return other instanceof MatrixKey key && Arrays.equals(values,key.values);}
     }
-    private record Selection(OptimizedModelWrapper model,Object location,MatrixKey matrix,int light,int chunk){}
-    private record Fragment(Object location,OptimizedModelWrapper model,int chunk){}
+    /** Immutable region signature: hashing must not recurse through the rail
+     * location, matrix and fragment on every compiled-page membership lookup. */
+    private static final class Selection {
+        private final OptimizedModelWrapper model;
+        private final Object location;
+        private final MatrixKey matrix;
+        private final int light,chunk,hash;
+        Selection(OptimizedModelWrapper model,Object location,MatrixKey matrix,int light,int chunk){
+            this.model=model;this.location=location;this.matrix=matrix;this.light=light;this.chunk=chunk;
+            int h=Objects.hashCode(model);
+            h=31*h+Objects.hashCode(location);h=31*h+Objects.hashCode(matrix);
+            h=31*h+light;hash=31*h+chunk;
+        }
+        OptimizedModelWrapper model(){return model;}
+        Object location(){return location;}
+        MatrixKey matrix(){return matrix;}
+        int light(){return light;}
+        int chunk(){return chunk;}
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            if(this==other)return true;
+            if(!(other instanceof Selection s))return false;
+            return model==s.model && Objects.equals(location,s.location)
+                && Objects.equals(matrix,s.matrix) && light==s.light && chunk==s.chunk;
+        }
+    }
+    private static final class Fragment {
+        private final Object location;
+        private final OptimizedModelWrapper model;
+        private final int chunk,hash;
+        Fragment(Object location,OptimizedModelWrapper model,int chunk){
+            this.location=location;this.model=model;this.chunk=chunk;
+            int h=Objects.hashCode(location);
+            h=31*h+Objects.hashCode(model);hash=31*h+chunk;
+        }
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            if(this==other)return true;
+            if(!(other instanceof Fragment f))return false;
+            return Objects.equals(location,f.location) && model==f.model && chunk==f.chunk;
+        }
+    }
     private record PageKey(Sector sector,int page){}
     // Immutable spatial scene plans survive frames; transient resources never enter this cache.
-    private record PlanKey(Sector sector,Object location){}
+    private static final class PlanKey {
+        private final Sector sector;
+        private final Object location;
+        private final int hash;
+        PlanKey(Sector sector,Object location){
+            this.sector=sector;this.location=location;
+            hash=31*sector.hashCode()+Objects.hashCode(location);
+        }
+        Sector sector(){return sector;}
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            if(this==other)return true;
+            return other instanceof PlanKey k && sector.equals(k.sector)
+                && Objects.equals(location,k.location);
+        }
+    }
     private record PlanRevision(OptimizedModelWrapper model,RailGeometrySnapshots.Snapshot snapshot,MatrixKey matrix,int light){}
     private record PlacedChunk(Selection selection,PageKey page){}
     private record ScenePlan(List<PlacedChunk> chunks){}
@@ -101,6 +156,20 @@ public final class StaticRegionRenderer {
     private final Map<Sector,RegionPageLayout<Fragment>> layouts=new HashMap<>();
     private int layoutLocations; // Incrementally maintained; no global layout traversal each frame.
     private final ScenePlanCache<PlanKey,PlanRevision,ScenePlan> scenePlans=new ScenePlanCache<>(MAX_SCENE_LOCATIONS);
+    // Rail poses retain immutable Location instances for their whole lifetime.
+    // Reuse the same PlanKey across main and shadow passes, rather than
+    // allocating a new key and recomputing its nested location hash each time.
+    // Decorations can receive mutable locations; those keep the ordinary path.
+    private final IdentityHashMap<Object,PlanKey> railPlanKeys=new IdentityHashMap<>();
+    private PlanKey planKey(Sector sector,Object location){
+        if(family!=RenderPipelineMetrics.Family.RAIL)return new PlanKey(sector,location);
+        PlanKey existing=railPlanKeys.get(location);
+        if(existing!=null && existing.sector().equals(sector))return existing;
+        PlanKey created=new PlanKey(sector,location);
+        if(railPlanKeys.size()>=MAX_SCENE_LOCATIONS)railPlanKeys.clear();
+        railPlanKeys.put(location,created);
+        return created;
+    }
     private final RenderPipelineMetrics.Family family;
     private long lastMetricsNanos, previousHits, previousMisses, previousCompiledHits, previousBuilds, previousEvictions;
     private Object world;
@@ -139,7 +208,7 @@ public final class StaticRegionRenderer {
             }
         };
         ScenePlan plan=CACHE_SCENE_PLANS
-            ? scenePlans.resolveLazy(new PlanKey(sector,location),
+            ? scenePlans.resolveLazy(planKey(sector,location),
                 previous->previous.model()==model && previous.snapshot()==snapshot
                     && previous.light()==light && previous.matrix().matchesLocal(matrix,localX,localY,localZ),
                 ()->new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light),
@@ -160,7 +229,7 @@ public final class StaticRegionRenderer {
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
-                cache.close();layouts.clear();scenePlans.clear();layoutLocations=0;
+                cache.close();layouts.clear();scenePlans.clear();railPlanKeys.clear();layoutLocations=0;
                 for(var region:groups.values())for(Instance instance:region.values())
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
@@ -286,5 +355,5 @@ public final class StaticRegionRenderer {
         }
         groups.keySet().removeIf(dirty);
     }
-    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){FRAME_RESOURCES.clear();cache.close();groups.clear();layouts.clear();scenePlans.clear();railPlanKeys.clear();recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }
