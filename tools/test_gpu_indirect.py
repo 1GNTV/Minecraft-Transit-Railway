@@ -111,10 +111,13 @@ public class EngineIndirectTest {
   check(GL43.uploads==1 && GL43.draws==2,"stable camera must not reupload");
   Utilities.shaderless=false;
   RegionVertexRanges.draw(vao,4,0,2,0);
-  check(GL33.legacy==1 && GL43.draws==2,"Oculus retains original GL multi-draw");
+  boolean experimental=Boolean.getBoolean("mtr.engine.shaderIndirect");
+  check(experimental ? GL43.draws==3 && GL33.legacy==0 : GL33.legacy==1 && GL43.draws==2,
+        "Oculus shader indirect explicit opt-in, otherwise legacy multi-draw");
   Utilities.shaderless=true; OptimizedRenderer.shadows=true;
   RegionVertexRanges.draw(vao,4,0,2,0);
-  check(GL33.legacy==2,"shadow pass retains legacy");
+  check(GL33.legacy==(experimental?1:2),
+        "shadow pass MUST retain original multi-draw even when shader indirect is enabled");
   OptimizedRenderer.shadows=false;
   RegionVertexRanges.select(vao,List.of(new Span(4,12)));
   RegionVertexRanges.draw(vao,4,0,2,0);
@@ -137,3 +140,5 @@ with tempfile.TemporaryDirectory(prefix="mtr-gpu-indirect-") as dirname:
   path.write_text(content)
  subprocess.run(["javac","-d",dirname,str(SHIPPING),*map(str,root.rglob("*.java"))],check=True)
  subprocess.run(["java","-Dmtr.engine.indirectMinSpans=2","-cp",dirname,"EngineIndirectTest"],check=True)
+ subprocess.run(["java","-Dmtr.engine.indirectMinSpans=2","-Dmtr.engine.shaderIndirect=true",
+                 "-cp",dirname,"EngineIndirectTest"],check=True)
