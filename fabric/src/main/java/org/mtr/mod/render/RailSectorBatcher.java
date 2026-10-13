@@ -54,7 +54,35 @@ public final class RailSectorBatcher {
     private static final Segment LOOKUP=new Segment();
     private static final int MAX_PREPARED_POSES=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.railPoses",32768)));
     private static final java.util.Map<Segment,Prepared> PREPARED=new java.util.LinkedHashMap<>(512,.75f,true);
-    private record Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){}
+    /**
+     * Stable location identity shared by the pose cache, scene plan lookup and
+     * compiled region selection. Record auto-hash re-traversed all seven fields
+     * on every main/shadow pass (and once more for each nested region key).
+     * Keep record-compatible equals semantics, but memoize its immutable hash.
+     */
+    private static final class Location {
+        final RailResource resource;
+        final double x,y,z;
+        final float yaw,pitch,roll;
+        private final int hash;
+        Location(RailResource resource,double x,double y,double z,float yaw,float pitch,float roll){
+            this.resource=resource;this.x=x;this.y=y;this.z=z;
+            this.yaw=yaw;this.pitch=pitch;this.roll=roll;
+            int h=java.util.Objects.hashCode(resource);
+            h=31*h+Double.hashCode(x);h=31*h+Double.hashCode(y);h=31*h+Double.hashCode(z);
+            h=31*h+Float.hashCode(yaw);h=31*h+Float.hashCode(pitch);h=31*h+Float.hashCode(roll);
+            hash=h;
+        }
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            if(this==other)return true;
+            if(!(other instanceof Location l))return false;
+            return java.util.Objects.equals(resource,l.resource)
+                && Double.compare(x,l.x)==0 && Double.compare(y,l.y)==0 && Double.compare(z,l.z)==0
+                && Float.compare(yaw,l.yaw)==0 && Float.compare(pitch,l.pitch)==0
+                && Float.compare(roll,l.roll)==0;
+        }
+    }
     private RailSectorBatcher(){}
     public static void beginFrame(){
         MinecraftClientData data=MinecraftClientData.getInstance();
