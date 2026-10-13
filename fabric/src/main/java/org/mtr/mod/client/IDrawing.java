@@ -134,11 +134,10 @@ public interface IDrawing {
 	}
 
 	static void drawSevenSegment(GraphicsHolder graphicsHolder, String numberString, float availableSpace, float x, float y, float height, IGui.HorizontalAlignment horizontalAlignment, int color, int light) {
-		try {
-			drawSevenSegment(graphicsHolder, Integer.parseInt(numberString), availableSpace, x, y, height, horizontalAlignment, color, light);
-		} catch (Exception ignored) {
-		}
-	}
+        final Integer parsed=DisplayNumberParsing.parseIntOrNull(numberString);
+        if(parsed!=null)
+            drawSevenSegment(graphicsHolder,parsed.intValue(),availableSpace,x,y,height,horizontalAlignment,color,light);
+    }
 
 	static void drawSevenSegment(GraphicsHolder graphicsHolder, int number, float availableSpace, float x, float y, float height, IGui.HorizontalAlignment horizontalAlignment, int color, int light) {
 		// Negatives and decimals are not supported right now
