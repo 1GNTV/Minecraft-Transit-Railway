@@ -78,20 +78,23 @@ public class RenderRails implements IGui {
 			return;
 		}
 
-		final boolean shadowPass = OptimizedRenderer.renderingShadows();
 		// Worker occlusion tasks are only consumed by the main pass. The old code
 		// allocated one captured lambda per rail in EACH Oculus shadow cascade.
-		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = shadowPass ? null : new ObjectArrayList<>();
+		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = OptimizedRenderer.renderingShadows() ? null : new ObjectArrayList<>();
 		final Vector3d cameraPosition = minecraftClient.getGameRendererMapped().getCamera().getPos();
-		final Vec3d camera = shadowPass ? null : new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
+		final Vec3d camera = OptimizedRenderer.renderingShadows() ? null : new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
 		final boolean holdingRailRelated = isHoldingRailRelated(clientPlayerEntity);
 		// Editor-only overlays do not cast physical shadows; keep the normal
 		// rails in shadow passes, but not bright selection markers/arrow labels.
-		final boolean editorOverlay = holdingRailRelated && !shadowPass;
 
 		// Finding visible rails
 		final ObjectArrayList<Rail> railsToRender = new ObjectArrayList<>();
-		final MinecraftClientData data = MinecraftClientData.getInstance();
+		// JCM/JSBlock captures exact javac locals at the three rail-stat call sites.
+		// Keep the temporary index/metrics locals strictly inside this scope so
+		// they cannot alter the addon-visible render() local capture layout.
+		{
+			final boolean shadowPass = OptimizedRenderer.renderingShadows();
+			final MinecraftClientData data = MinecraftClientData.getInstance();
 		// Never replace the existing detailed occlusion and per-segment visibility checks.
 		// This only keeps distant rails out of the per-frame global traversal.
 		final Iterable<MinecraftClientData.RailWrapper> railCandidates = USE_RAIL_SPATIAL_INDEX
@@ -130,6 +133,8 @@ public class RenderRails implements IGui {
                     data.railVisibilityCache.hits(), data.railVisibilityCache.misses(), data.railVisibilityCache.uncached(), USE_RAIL_FRUSTUM_BASIS);
 			}
 		}
+
+		} // End the spatial-index/metrics locals BEFORE JCM rail-stat captures.
 
 		// Ghost rails (when holding brush)
 		final ObjectArraySet<Rail> hoverRails = new ObjectArraySet<>();
@@ -238,7 +243,7 @@ public class RenderRails implements IGui {
 			}
 		});
 
-		if (editorOverlay) {
+		if (holdingRailRelated && !OptimizedRenderer.renderingShadows()) {
 			// Only markers potentially in render range need a model and a block lookup.
 			final double nodeMaxDistance = MinecraftClientHelper.getRenderDistance() * 16.0 + 16.0;
 			final double nodeMaxDistanceSquared = nodeMaxDistance * nodeMaxDistance;
@@ -298,7 +303,7 @@ public class RenderRails implements IGui {
 			}
 		}
 
-		if (!shadowPass) {
+		if (!OptimizedRenderer.renderingShadows()) {
 			MainRenderer.WORKER_THREAD.scheduleMTRRails(occlusionCullingInstance -> {
 				final ObjectArrayList<Runnable> tasks = new ObjectArrayList<>();
 				cullingTasks.forEach(occlusionCullingInstanceRunnableFunction -> tasks.add(occlusionCullingInstanceRunnableFunction.apply(occlusionCullingInstance)));

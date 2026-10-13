@@ -1,7 +1,7 @@
 name: Sillon AURORA fast JCM crash hotfix
 on:
-  push:
-    branches: [ "work/sillon-aurora-170" ]
+  # Manual only: this hotfix was tied to the immutable b156 binary and tag.
+  # All subsequent commits use the full AURORA build/release workflow.
   workflow_dispatch:
 
 permissions:
