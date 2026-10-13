@@ -33,8 +33,17 @@ import java.util.stream.Collectors;
 public class RenderVehicles implements IGui {
 	private static final boolean CACHE_POSES = !"false".equalsIgnoreCase(System.getProperty("mtr.next.poseCache", "true"));
 	private static final FrameMemoizer<VehicleExtension, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>>> POSES = new FrameMemoizer<>(1024);
-	public static void beginFrame() { POSES.beginFrame(); TrainVisibility.beginFrame(); org.mtr.mod.resource.ModelPreparation.beginFrame(); }
-	public static void endFrame() { POSES.endFrame(); }
+	// Immutable, absolute car and bogie transforms may be reused across Oculus shadow
+	// cascades and the main pass. Never cache rider-relative transformations.
+	private static final boolean CACHE_ABSOLUTE_TRANSFORMS = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.trainTransforms", "true"));
+	private static final FrameMemoizer<PositionAndRotation, StoredMatrixTransformations> ABSOLUTE_TRANSFORMS = new FrameMemoizer<>(2048);
+	public static void beginFrame() { POSES.beginFrame(); ABSOLUTE_TRANSFORMS.beginFrame(); TrainVisibility.beginFrame(); org.mtr.mod.resource.ModelPreparation.beginFrame(); }
+	public static void endFrame() { POSES.endFrame(); ABSOLUTE_TRANSFORMS.endFrame(); }
+	private static StoredMatrixTransformations absoluteTransform(PositionAndRotation pose, double oscillation) {
+		return CACHE_ABSOLUTE_TRANSFORMS
+			? ABSOLUTE_TRANSFORMS.get(pose, Double.doubleToLongBits(oscillation), () -> getStoredMatrixTransformations(true, pose, oscillation))
+			: getStoredMatrixTransformations(true, pose, oscillation);
+	}
 	private static ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> preparePose(VehicleExtension vehicle, long elapsed) {
 		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> result = new ObjectArrayList<>();
 		for (var car : vehicle.getSmoothedVehicleCarsAndPositions(elapsed)) {
@@ -128,7 +137,9 @@ public class RenderVehicles implements IGui {
 						// Render each bogie of the car
 						if (visualCar) iterateWithIndex(vehicleCarDetails.right().left(), (bogieIndex, absoluteBogiePositionAndRotation) -> {
 							final PositionAndRotation bogieRenderingPositionAndRotation = getRenderPositionAndRotation(offsetVector, offsetRotation, ridingCarPositionAndRotation, absoluteBogiePositionAndRotation, cameraShakeOffset);
-							final StoredMatrixTransformations storedMatrixTransformations = getStoredMatrixTransformations(offsetVector == null, bogieRenderingPositionAndRotation, 0);
+							final StoredMatrixTransformations storedMatrixTransformations = offsetVector == null
+								? absoluteTransform(absoluteBogiePositionAndRotation, 0)
+								: getStoredMatrixTransformations(false, bogieRenderingPositionAndRotation, 0);
 							if (OptimizedRenderer.hasOptimizedRendering()) {
 								vehicleResource.queueBogie(bogieIndex, storedMatrixTransformations, vehicle, absoluteVehicleCarPositionAndRotation.light);
 							} else {
@@ -225,7 +236,9 @@ public class RenderVehicles implements IGui {
 						}
 
 						// Each car can have more than one model defined
-						final StoredMatrixTransformations storedMatrixTransformations = getStoredMatrixTransformations(offsetVector == null, vehicleCarRenderingPositionAndRotation, oscillationAmount);
+						final StoredMatrixTransformations storedMatrixTransformations = offsetVector == null
+								? absoluteTransform(vehicleCarDetails.right().right(), oscillationAmount)
+								: getStoredMatrixTransformations(false, vehicleCarRenderingPositionAndRotation, oscillationAmount);
 						if (visualCar && OptimizedRenderer.hasOptimizedRendering()) {
 							vehicleResource.queue(storedMatrixTransformations, vehicle, carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), absoluteVehicleCarPositionAndRotation.light, openDoorways.isEmpty());
 						}
