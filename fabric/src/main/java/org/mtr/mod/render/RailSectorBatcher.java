@@ -63,7 +63,17 @@ public final class RailSectorBatcher {
     private static final boolean RETAIN_RAIL_PLANS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railPlans","true"));
     private static final RailRenderPlanCache<RailPiece[]> RAIL_PLANS=new RailRenderPlanCache<>();
     private static Object planWorld;
-    private record RailPiece(Prepared prepared,BlockPos lightPosition) {}
+    private static final class RailPiece {
+        private final Prepared prepared;
+        private final BlockPos lightPosition;
+        private StaticRegionRenderer.ReplayToken ticket;
+        private int cachedLight=Integer.MIN_VALUE;
+        RailPiece(Prepared prepared,BlockPos lightPosition){
+            this.prepared=prepared;this.lightPosition=lightPosition;
+        }
+        Prepared prepared(){return prepared;}
+        BlockPos lightPosition(){return lightPosition;}
+    }
     private static long previousPlanHits, previousPlanBuilds;
 
     /**
@@ -174,12 +184,27 @@ public final class RailSectorBatcher {
             return built;
         });
         if(pieces==null)return false;
+        // One model validation per rail, not per segment. Replay tickets own
+        // immutable ScenePlan instances; dynamic light still samples each pass.
+        var currentModel=REGIONS.modelForReplay(resource);
         for(RailPiece piece:pieces){
             Prepared prepared=piece.prepared();
             Location location=prepared.location();
             int light=RailLightFrameCache.get(clientWorld,piece.lightPosition());
-            if(!REGIONS.queue(resource,prepared.transform(),location,location.x,location.y,location.z,prepared.matrix(),light))
+            if(piece.cachedLight==light
+                    && REGIONS.replay(piece.ticket,clientWorld.data,currentModel,light))
+                continue;
+            // First occurrence, changed light/model or invalidated network:
+            // resolve the normal production path and capture a new ticket.
+            if(REGIONS.queue(resource,prepared.transform(),location,
+                    location.x,location.y,location.z,prepared.matrix(),light)){
+                piece.ticket=REGIONS.capture(location,location.x,location.y,location.z);
+                piece.cachedLight=light;
+            }else{
+                piece.ticket=null;
+                piece.cachedLight=Integer.MIN_VALUE;
                 resource.render(prepared.transform(),light);
+            }
         }
         return true;
     }
