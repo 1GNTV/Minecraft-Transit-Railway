@@ -34,7 +34,7 @@ import java.util.*;
  * pending. CPU-side rail geometry/light sampling is still performed each pass.
  */
 public final class ClassicRailGpuCache {
-    public static final boolean ENABLED=Boolean.getBoolean("mtr.engine.classicGpu");
+    public static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.classicGpu","true"));
     private static final int MAX_PAGES=Math.max(16,Math.min(512,Integer.getInteger("mtr.engine.classicGpuPages",192)));
     private static final int MAX_VERTICES=Math.max(131_072,Math.min(2_097_152,Integer.getInteger("mtr.engine.classicGpuVertices",786_432)));
     private static final LinkedHashMap<Key,Page> PAGES=new LinkedHashMap<>(64,.75f,true);
