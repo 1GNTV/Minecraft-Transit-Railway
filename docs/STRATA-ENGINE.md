@@ -34,3 +34,19 @@ We must never replace invoked callbacks with dead redirect stubs.
   Rail lightmap fixes require a separate controlled shader comparison.
 
 Important: don't use `mtr` and `strata` as two distinct mod IDs.
+
+
+## b162 JCM descriptor failure: nested train visibility
+
+The strict b162 build gate caught the real failure: `RenderVehicles.lambda$render$12`
+had the expected JCM model-render parameters prefixed by an extra captured
+`boolean visualCar`. Renaming a method cannot fix an incompatible descriptor,
+and weakening the verifier would just ship another crashing client.
+
+STRATA now scopes the previously computed visual-car flag in a reentrant,
+thread-owned `StrataVehicleVisibility` context around the synchronous
+`VehicleResource.iterateModels` callback. The lambda reads the exact same
+visibility decision without capturing an extra parameter. Exceptions and
+nested renderer callbacks restore the previous state. The compiled JCM ABI
+gate remains strict; no callbacks are faked. This adds one thread-local lookup
+per model, not per vertex, and must still be benchmarked and runtime-tested.

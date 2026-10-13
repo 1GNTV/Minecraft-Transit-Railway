@@ -23,6 +23,7 @@ import org.mtr.mod.item.ItemDriverKey;
 import org.mtr.mod.resource.Interpolation;
 import org.mtr.mod.resource.VehicleResource;
 import org.mtr.mod.resource.VehicleResourceCache;
+import org.mtr.mod.render.strata.StrataVehicleVisibility;
 import org.mtr.mod.servlet.ResourcePackCreatorOperationServlet;
 
 import javax.annotation.Nullable;
@@ -244,8 +245,14 @@ public class RenderVehicles implements IGui {
 							vehicleResource.queue(storedMatrixTransformations, vehicle, carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), absoluteVehicleCarPositionAndRotation.light, openDoorways.isEmpty());
 						}
 
+						// Preserve the real callback descriptor expected by JCM: do not
+						// capture visualCar in the model-render lambda. The thread-local
+						// context is scoped and restored even if an addon throws.
+						final boolean previousStrataVisibility = StrataVehicleVisibility.push(visualCar);
+						try {
 						vehicleResource.iterateModels(carNumber, vehicle.vehicleExtraData.immutableVehicleCars.size(), (modelIndex, model) -> {
-                            if (visualCar) {
+							final boolean visualCarHere = StrataVehicleVisibility.visible();
+                            if (visualCarHere) {
                                 double previousDistance=ModelDetailCache.pushDistance(storedMatrixTransformations.distanceSquaredToCamera());
                                 try { model.render(storedMatrixTransformations, vehicle, carNumber, scrollingDisplayIndexTracker, absoluteVehicleCarPositionAndRotation.light, openDoorways, fromResourcePackCreator); }
                                 finally { ModelDetailCache.restoreDistance(previousDistance); }
@@ -261,7 +268,7 @@ public class RenderVehicles implements IGui {
 
 							// Render gangway
 							renderConnection(
-									vehicleResource.hasGangway1() && visualCar,
+									vehicleResource.hasGangway1() && visualCarHere,
 									vehicleResource.hasGangway2(),
 									true,
 									previousGangwayPositionsList.get(modelIndex),
@@ -284,7 +291,7 @@ public class RenderVehicles implements IGui {
 
 							// Render barrier
 							renderConnection(
-									vehicleResource.hasBarrier1() && visualCar,
+									vehicleResource.hasBarrier1() && visualCarHere,
 									vehicleResource.hasBarrier2(),
 									false,
 									previousBarrierPositionsList.get(modelIndex),
@@ -305,6 +312,9 @@ public class RenderVehicles implements IGui {
 									vehicle.getIsOnRoute()
 							);
 						});
+						} finally {
+							StrataVehicleVisibility.pop(previousStrataVisibility);
+						}
 
 						// If the vehicle has gangways, add extra floors to define where the gangways are
 						final Box gangwayConnectionFloor1 = gangwayMovementPositions1.getBox();

@@ -37,3 +37,13 @@ assert "railSpatialIndex.query" in engine
 assert "TrainVisibility.railShadowVisible" in engine
 assert "shadowPass" not in render[render.index("StrataRailEngine.finishPass(shadowPass);") + len("StrataRailEngine.finishPass(shadowPass);"):render.index("// Ghost rails (when holding brush)")]
 print("PASS STRATA: rail selector isolated; 3 JCM rail-stat capture sites and performance paths retained")
+
+# STRATA/JCM RenderVehicles: the actual model callback must not capture an
+# extra visualCar boolean or JCM fails with InvalidInjectionException.
+vehicles=Path("fabric/src/main/java/org/mtr/mod/render/RenderVehicles.java").read_text()
+models=vehicles.split("vehicleResource.iterateModels(",1)[1].split("\n\t\t\t\t\t\t});",1)[0]
+assert "final boolean visualCarHere = StrataVehicleVisibility.visible();" in models
+assert "if (visualCar)" not in models and "&& visualCar," not in models
+assert "StrataVehicleVisibility.push(visualCar)" in vehicles
+assert "StrataVehicleVisibility.pop(previousStrataVisibility)" in vehicles
+print("PASS STRATA train model callbacks: no extra visualCar lambda capture")
