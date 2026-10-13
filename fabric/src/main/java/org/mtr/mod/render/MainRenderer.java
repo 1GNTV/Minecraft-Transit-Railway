@@ -35,7 +35,7 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 	private static final int FLASHING_INTERVAL = 1000;
 	private static final int TOTAL_RENDER_STAGES = 2;
 	// Widened text batching remains opt-in until visual shader ordering is validated.
-	private static final boolean TEXT_ACROSS_CALLBACKS = Boolean.getBoolean("mtr.next.textAcrossCallbacks");
+	private static final boolean TEXT_ACROSS_CALLBACKS = !"false".equalsIgnoreCase(System.getProperty("mtr.next.textAcrossCallbacks","true"));
 	private static final QueuedRenderLayer[] RENDER_LAYERS = QueuedRenderLayer.values();
 	private static final Identifier UNTEXTURED = new Identifier("");
 	private static final RenderCallbackPool CALLBACK_POOL = new RenderCallbackPool();
