@@ -44,6 +44,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify PANAM production pixels, geometry, states and CPU profile
         run: python3 tools/test_panam_pixel.py
+      - name: Verify PIXEL worker and GPU ownership lifecycle
+        run: python3 tools/test_panam_lifecycle.py
       - name: Save PANAM visual verification and measured CPU profile
         uses: actions/upload-artifact@v4
         with:
@@ -267,4 +269,3 @@ jobs:
           name: SILLON-PANAM-Forge-1.20.1
           path: forge/build/libs/*-all.jar
           if-no-files-found: error
-
