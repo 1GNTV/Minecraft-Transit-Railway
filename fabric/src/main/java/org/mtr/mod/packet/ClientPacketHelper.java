@@ -70,9 +70,11 @@ public final class ClientPacketHelper {
 
 	public static void openPIDSConfigScreen(BlockPos blockPos, int maxArrivals) {
 		getBlockEntity(blockPos, blockEntity -> {
-			if (blockEntity.data instanceof BlockPIDSBase.BlockEntityBase) {
-				openScreen(new PIDSConfigScreen(blockPos, maxArrivals), screenExtension -> screenExtension instanceof PIDSConfigScreen);
-			}
+			if (blockEntity.data instanceof BlockPANAMPIDS.BlockEntity) {
+                openScreen(new PanamConfigScreen(blockPos, (BlockPANAMPIDS.BlockEntity) blockEntity.data), screenExtension -> screenExtension instanceof PanamConfigScreen);
+            } else if (blockEntity.data instanceof BlockPIDSBase.BlockEntityBase) {
+                openScreen(new PIDSConfigScreen(blockPos, maxArrivals), screenExtension -> screenExtension instanceof PIDSConfigScreen);
+            }
 		});
 	}
 

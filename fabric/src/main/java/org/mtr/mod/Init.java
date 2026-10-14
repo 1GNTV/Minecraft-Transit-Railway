@@ -112,6 +112,7 @@ public final class Init implements Utilities {
 		REGISTRY.registerPacket(PacketUpdateLastRailStyles.class, PacketUpdateLastRailStyles::new);
 		REGISTRY.registerPacket(PacketUpdateLiftTrackFloorConfig.class, PacketUpdateLiftTrackFloorConfig::new);
 		REGISTRY.registerPacket(PacketUpdatePIDSConfig.class, PacketUpdatePIDSConfig::new);
+		REGISTRY.registerPacket(PacketPanamNewsSync.class, PacketPanamNewsSync::new);
 		REGISTRY.registerPacket(PacketUpdateRailwaySignConfig.class, PacketUpdateRailwaySignConfig::new);
 		REGISTRY.registerPacket(PacketUpdateSignalConfig.class, PacketUpdateSignalConfig::new);
 		REGISTRY.registerPacket(PacketUpdateTrainAnnouncerConfig.class, PacketUpdateTrainAnnouncerConfig::new);
@@ -129,6 +130,38 @@ public final class Init implements Utilities {
 			// Instant deploy depot(s) by name
 			commandBuilderMtr.then("instantDeploy", commandBuilderInstantDeploy -> depotOperationFromCommand(commandBuilderInstantDeploy, DepotOperation.INSTANT_DEPLOY));
 			// Force copy a world backup from one folder another
+
+            // Operator-only announcements, persisted once per save in the overworld
+            // and broadcast as snapshots; a dash clears an existing bulletin.
+            commandBuilderMtr.then("panam", panam -> {
+                panam.permissionLevel(2);
+                panam.then("global", global -> global.then("message", StringArgumentType.greedyString(), arg -> arg.executes(ctx -> {
+                    final org.mtr.mod.data.PersistentStateData store =
+                            (org.mtr.mod.data.PersistentStateData) org.mtr.mapping.mapper.PersistenceStateExtension.register(
+                                    ctx.getServer().getOverworld(), org.mtr.mod.data.PersistentStateData::new, MOD_ID);
+                    String message = ctx.getString("message");
+                    store.setPanamGlobal("-".equals(message) ? "" : message);
+                    PacketPanamNewsSync.broadcast(ctx.getServer());
+                    ctx.sendSuccess("PANAM : information générale actualisée", true);
+                    return 1;
+                })));
+                panam.then("line", line -> line.then("routeId", StringArgumentType.word(), route -> route.then("message", StringArgumentType.greedyString(), arg -> arg.executes(ctx -> {
+                    try {
+                        long id = Long.parseLong(ctx.getString("routeId"));
+                        final org.mtr.mod.data.PersistentStateData store =
+                                (org.mtr.mod.data.PersistentStateData) org.mtr.mapping.mapper.PersistenceStateExtension.register(
+                                        ctx.getServer().getOverworld(), org.mtr.mod.data.PersistentStateData::new, MOD_ID);
+                        String message = ctx.getString("message");
+                        store.setPanamRoute(id, "-".equals(message) ? "" : message);
+                        PacketPanamNewsSync.broadcast(ctx.getServer());
+                        ctx.sendSuccess("PANAM : information de ligne actualisée", true);
+                        return 1;
+                    } catch (NumberFormatException ex) {
+                        ctx.sendFailure("PANAM : identifiant de ligne invalide");
+                        return -1;
+                    }
+                }))));
+            });
 			commandBuilderMtr.then("restoreWorld", commandBuilderRestoreWorld -> {
 				commandBuilderRestoreWorld.permissionLevel(4);
 				commandBuilderRestoreWorld.then("worldDirectory", StringArgumentType.string(), innerCommandBuilder1 -> innerCommandBuilder1.then("backupDirectory", StringArgumentType.string(), innerCommandBuilder2 -> innerCommandBuilder2.executes(contextHandler -> {
@@ -261,7 +294,10 @@ public final class Init implements Utilities {
 			}
 		});
 
-		REGISTRY.eventRegistry.registerPlayerJoin((minecraftServer, serverPlayerEntity) -> updatePlayer(serverPlayerEntity, false));
+		REGISTRY.eventRegistry.registerPlayerJoin((minecraftServer, serverPlayerEntity) -> {
+            updatePlayer(serverPlayerEntity, false);
+            PacketPanamNewsSync.send(serverPlayerEntity);
+        });
 		REGISTRY.eventRegistry.registerPlayerDisconnect((minecraftServer, serverPlayerEntity) -> RIDING_PLAYERS.remove(serverPlayerEntity.getUuid()));
 
 		// Finish registration

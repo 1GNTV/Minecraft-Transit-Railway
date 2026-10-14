@@ -12,6 +12,7 @@ import org.mtr.mod.block.IBlock;
 import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.data.ArrivalsCacheClient;
+import org.mtr.mod.data.PanamNewsClient;
 import org.mtr.mod.render.pixel.*;
 import java.time.LocalTime;
 import java.util.*;
@@ -23,12 +24,13 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
         PanamSurface.Spec spec;
-        long revision=-1,config=-1,network=-1,sampled,platformAt,clockMinute=-1;
+        long revision=-1,config=-1,network=-1,newsRevision=-1,sampled,platformAt,clockMinute=-1;
+        long activeRouteId=-1;
         String line="?",destination="En attente";int color=0x808080,hour,minute;
         List<String> notices=List.of(); boolean suspended,last;
     }
     public RenderPANAMPIDS(Argument dispatcher){super(dispatcher);}
-    public static void reset(){PANELS.clear();PixelAtlasCache.INSTANCE.reset();}
+    public static void reset(){PANELS.clear();PixelAtlasCache.INSTANCE.reset();PanamNewsClient.reset();}
     @Override public void render(BlockPANAMPIDS.BlockEntity entity,float tickDelta,GraphicsHolder ignored,int light,int overlay){
         World world=entity.getWorld2();if(world==null)return;BlockPos pos=entity.getPos2();
         if(!entity.canStoreData.test(world,pos))return;
@@ -38,7 +40,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         Vector3d eye=MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
         double dx=eye.getXMapped()-pos.getX(),dy=eye.getYMapped()-pos.getY(),dz=eye.getZMapped()-pos.getZ();if(dx*dx+dy*dy+dz*dz>64*64)return;
         long now=System.currentTimeMillis();Panel panel=PANELS.computeIfAbsent(entity,key->new Panel());
-        if(now-panel.sampled>=1000||panel.config!=entity.pixelRevision()||panel.revision!=ArrivalsCacheClient.INSTANCE.revision()||panel.network!=MinecraftClientData.getInstance().networkRevision)sample(entity,pos,panel,now);
+        if(now-panel.sampled>=1000||panel.config!=entity.pixelRevision()||panel.revision!=ArrivalsCacheClient.INSTANCE.revision()||panel.network!=MinecraftClientData.getInstance().networkRevision||panel.newsRevision!=PanamNewsClient.revision())sample(entity,pos,panel,now);
         if(panel.spec==null)return;
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.notices.size(),now);
@@ -98,16 +100,22 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             long at=a.getArrival()-ArrivalsCacheClient.INSTANCE.getMillisOffset();if(now-at>120000)continue;
             String id=a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();if(!ids.add(id))continue;
             String dest=firstLanguage(a.getDestination());
-            if(trains.isEmpty()){panel.line=firstLanguage(a.getRouteNumber());if(panel.line.isEmpty())panel.line=firstLanguage(a.getRouteName()).replaceFirst("(?i)^ligne\\s+","");if(panel.line.isEmpty())panel.line="?";panel.destination=dest;panel.color=a.getRouteColor();}
+            if(trains.isEmpty()){panel.line=firstLanguage(a.getRouteNumber());if(panel.line.isEmpty())panel.line=firstLanguage(a.getRouteName()).replaceFirst("(?i)^ligne\\s+","");if(panel.line.isEmpty())panel.line="?";panel.destination=dest;panel.color=a.getRouteColor();panel.activeRouteId=a.getRouteId();}
             trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));destinations.add(dest);planned|=!a.getRealtime();
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
-        List<String> notices=panel.notices;
-        if(notices.isEmpty())notices=List.of(planned?"Horaires prévisionnels MTR.\nInformations voyageurs indisponibles.":"Informations en temps réel indisponibles");
+        ArrayList<String> notices = new ArrayList<>(panel.notices);
+        String routeNotice = PanamNewsClient.forRoute(panel.activeRouteId);
+        String globalNotice = PanamNewsClient.global();
+        if (!routeNotice.isEmpty() && !notices.contains(routeNotice)) notices.add(routeNotice);
+        if (!globalNotice.isEmpty() && !notices.contains(globalNotice)) notices.add(globalNotice);
+        if (notices.isEmpty()) notices.add(planned
+                ? "Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
+                : "Informations en temps réel indisponibles");
         ArrayList<String> previous=new ArrayList<>();for(PanamFrame.Departure train:panel.timeline.previous)previous.add(train.destination);
         PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous);
         if(!next.equals(panel.spec))panel.spec=next;
-        panel.config=entity.pixelRevision();panel.revision=ArrivalsCacheClient.INSTANCE.revision();panel.network=network;
+        panel.config=entity.pixelRevision();panel.revision=ArrivalsCacheClient.INSTANCE.revision();panel.network=network;panel.newsRevision=PanamNewsClient.revision();
     }
     private static String firstLanguage(String value){return value==null?"":value.split("\\|",2)[0].split("\\(",2)[0].trim();}
     @Override public boolean rendersOutsideBoundingBox2(BlockPANAMPIDS.BlockEntity entity){return true;}
