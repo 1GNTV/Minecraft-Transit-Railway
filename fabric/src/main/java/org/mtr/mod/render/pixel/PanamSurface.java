@@ -51,7 +51,7 @@ public final class PanamSurface {
     public final Sprite dot, strikeFirst, strikeSecond;
     private final Font regular, bold;
     private int sx, sy, shelf;
-    private final BufferedImage canvas = new BufferedImage(1024, 2048, BufferedImage.TYPE_INT_ARGB);
+    private final BufferedImage canvas = new BufferedImage(1024, 4096, BufferedImage.TYPE_INT_ARGB);
 
     public PanamSurface(Spec spec, Font regular, Font bold) {
         this.spec = spec; this.regular = regular; this.bold = bold;
@@ -143,7 +143,7 @@ public final class PanamSurface {
     private Sprite pack(BufferedImage img) {
         int w=img.getWidth(),h=img.getHeight();
         if(sx+w+2>1024){sx=0;sy+=shelf+2;shelf=0;}
-        if(sy+h+2>2048)throw new IllegalArgumentException("PANAM atlas overflow");
+        if(sy+h+2>4096)throw new IllegalArgumentException("PANAM atlas overflow");
         Graphics2D g=canvas.createGraphics();g.setComposite(AlphaComposite.Src);g.drawImage(img,sx,sy,null);g.dispose();
         Sprite sprite=new Sprite(sx,sy,w,h);sx+=w+2;shelf=Math.max(shelf,h);img.flush();return sprite;
     }
