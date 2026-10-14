@@ -16,7 +16,7 @@ assert "REGIONS.replay(piece.ticket,clientWorld.data,currentModel,light)" in rai
 assert "if(piece.cachedLight==light" in rails
 assert "REGIONS.queue(resource,prepared.transform(),location" in rails
 assert "piece.ticket=REGIONS.capture" in rails
-assert "if(!PERSISTENT_QUEUE || ticket==null || currentWorld!=world" in scene
+assert "if(!PERSISTENT_QUEUE || !HELIX_DENSE_RAILS || ticket==null || currentWorld!=world" in scene
 assert "ticket.generation!=generation || ticket.model!=model" in scene
 assert "ticket.instance.light()!=light" in scene
 assert "generation++;" in scene and "public void invalidateColumns" in scene
