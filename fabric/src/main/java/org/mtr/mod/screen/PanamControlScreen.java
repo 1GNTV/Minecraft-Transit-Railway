@@ -22,7 +22,7 @@ public final class PanamControlScreen extends ScreenExtension implements IGui {
     private int scopeIndex,bulletinIndex,type;
     private long seenRevision=-1;
     private boolean filling;
-    private int x, contentWidth;
+    private int x, contentWidth, top;
 
     public PanamControlScreen(){
         super();
@@ -84,16 +84,17 @@ public final class PanamControlScreen extends ScreenExtension implements IGui {
     @Override protected void init2(){
         super.init2();
         x=Math.max(14,width/6);contentWidth=Math.max(220,width-x*2);
-        IDrawing.setPositionAndWidth(previousScope,x,50,contentWidth/3);
-        IDrawing.setPositionAndWidth(nextScope,x+contentWidth*2/3,50,contentWidth/3);
-        IDrawing.setPositionAndWidth(previousBulletin,x,113,contentWidth/3);
-        IDrawing.setPositionAndWidth(nextBulletin,x+contentWidth*2/3,113,contentWidth/3);
-        IDrawing.setPositionAndWidth(previousType,x,174,contentWidth/3);
-        IDrawing.setPositionAndWidth(nextType,x+contentWidth*2/3,174,contentWidth/3);
-        IDrawing.setPositionAndWidth(text,x,220,contentWidth);
-        IDrawing.setPositionAndWidth(add,x,267,contentWidth/3);
-        IDrawing.setPositionAndWidth(save,x+contentWidth/3,267,contentWidth/3);
-        IDrawing.setPositionAndWidth(remove,x+contentWidth*2/3,267,contentWidth/3);
+        top=Math.max(4,(height-233)/2);
+        IDrawing.setPositionAndWidth(previousScope,x,top+28,contentWidth/3);
+        IDrawing.setPositionAndWidth(nextScope,x+contentWidth*2/3,top+28,contentWidth/3);
+        IDrawing.setPositionAndWidth(previousBulletin,x,top+65,contentWidth/3);
+        IDrawing.setPositionAndWidth(nextBulletin,x+contentWidth*2/3,top+65,contentWidth/3);
+        IDrawing.setPositionAndWidth(previousType,x,top+102,contentWidth/3);
+        IDrawing.setPositionAndWidth(nextType,x+contentWidth*2/3,top+102,contentWidth/3);
+        IDrawing.setPositionAndWidth(text,x,top+139,contentWidth);
+        IDrawing.setPositionAndWidth(add,x,top+176,contentWidth/3);
+        IDrawing.setPositionAndWidth(save,x+contentWidth/3,top+176,contentWidth/3);
+        IDrawing.setPositionAndWidth(remove,x+contentWidth*2/3,top+176,contentWidth/3);
         addChild(new ClickableWidget(previousScope));addChild(new ClickableWidget(nextScope));
         addChild(new ClickableWidget(previousBulletin));addChild(new ClickableWidget(nextBulletin));
         addChild(new ClickableWidget(previousType));addChild(new ClickableWidget(nextType));
@@ -107,19 +108,19 @@ public final class PanamControlScreen extends ScreenExtension implements IGui {
     }
     @Override public void render(GraphicsHolder g,int mouseX,int mouseY,float delta){
         renderBackground(g);
-        g.drawText("SILLON PANAM — Centre d'information voyageurs",x,16,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("SILLON PANAM — Centre d'information voyageurs",x,top,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
         String scopeName="Tout le réseau";
         if(scope()!=-1){
             SimplifiedRoute route=MinecraftClientData.getInstance().simplifiedRouteIdMap.get(scope());
             scopeName=route==null?"Ligne "+scope() : route.getName();
         }
-        g.drawText("Diffusion : "+scopeName,x+contentWidth/3+4,57,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Diffusion : "+scopeName,x+contentWidth/3+4,top+35,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
         List<PanamBulletins.Bulletin> list=current();
-        g.drawText("Annonce : "+(list.isEmpty()?"aucune":(bulletinIndex+1)+"/"+list.size()),x+contentWidth/3+4,121,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-        g.drawText("Icône : "+kinds[type],x+contentWidth/3+4,181,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-        g.drawText("Message (jusqu'à 512 caractères)",x,202,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-        g.drawText("Les PANAM concernés alternent automatiquement les annonces toutes les 10 secondes.",x,319,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-        g.drawText("Gestion réservée aux opérateurs du serveur. Les messages restent sauvegardés.",x,334,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Annonce : "+(list.isEmpty()?"aucune":(bulletinIndex+1)+"/"+list.size()),x+contentWidth/3+4,top+72,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Icône : "+kinds[type],x+contentWidth/3+4,top+109,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Message (jusqu'à 512 caractères)",x,top+126,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Les PANAM concernés alternent automatiquement les annonces toutes les 10 secondes.",x,top+205,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        g.drawText("Gestion réservée aux opérateurs du serveur. Les messages restent sauvegardés.",x,top+219,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
         super.render(g,mouseX,mouseY,delta);
     }
     @Override public boolean isPauseScreen2(){return false;}
