@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "mtr:block/panam_pids"
+    },
+    "facing=east": {
+      "model": "mtr:block/panam_pids",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "mtr:block/panam_pids",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mtr:block/panam_pids",
+      "y": 270
+    }
+  }
+}
