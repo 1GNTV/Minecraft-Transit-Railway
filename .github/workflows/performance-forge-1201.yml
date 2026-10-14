@@ -1,7 +1,7 @@
 name: Sillon Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix", "work/sillon-panam-pids" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -127,7 +127,7 @@ jobs:
       - name: Compile optimized MTR Forge
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Repair actual JCM synthetic lambda ABI in STRATA final JAR
-        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-helix'
+        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || github.ref == 'refs/heads/work/sillon-panam-pids')
         run: |
           python3 tools/patch_sillon_jcm_abi.py
           python3 tools/patch_sillon_jcm_rail_stats.py
@@ -142,7 +142,7 @@ jobs:
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
       - name: Verify STRATA engine exists in the released shaded artifact
-        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-helix'
+        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || github.ref == 'refs/heads/work/sillon-panam-pids')
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -155,7 +155,7 @@ jobs:
           print("PASS STRATA Forge single-JAR engine boundary")
           PY
       - name: Publish Sillon GLACIER Final or AURORA research JAR
-        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-helix'
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || github.ref == 'refs/heads/work/sillon-panam-pids')
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -238,3 +238,11 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "$title" --notes-file RELEASE_NOTES.md "${extra[@]}"
+
+      - name: Upload PANAM experimental Forge JAR
+        if: github.ref == 'refs/heads/work/sillon-panam-pids'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SILLON-PANAM-Forge-1.20.1
+          path: forge/build/libs/*-all.jar
+          if-no-files-found: error
