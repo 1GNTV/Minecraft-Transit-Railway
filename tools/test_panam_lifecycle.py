@@ -43,5 +43,6 @@ with tempfile.TemporaryDirectory(prefix='pixel-life-') as tmp:
     dest=Path(tmp)
     for name,text in STUBS.items():p=dest/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text,encoding='utf-8')
     sources=list((ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel').glob('*.java'))
+    sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(dest),*map(str,sources),*map(str,dest.rglob('*.java'))],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(dest),'AtlasLifecycle',str(ROOT)],check=True)

@@ -31,8 +31,8 @@ public class PixelOracle {
   PanamSurface.Spec spec=new PanamSurface.Spec("14","Aéroport d’Orly",0x650080,List.of(a.destination,b.destination),List.of("Informations en temps réel indisponibles"),false,false);
   PanamSurface s=new PanamSurface(spec,regular,bold);
   BufferedImage steady=render(s,t,now+3000);ImageIO.write(steady,"png",new File(out,"panam-normal.png"));
-  check((steady.getRGB(500,10)&0xFFFFFF)==0xFFFFFF,"white header");check((steady.getRGB(515,460)&0xFFFFFF)==0xFFFFFF,"single white notice panel");
-  check((steady.getRGB(500,450)&0xFFFFFF)==0,"departure zone black");
+  check((steady.getRGB(500,10)&0xFFFFFF)==0xFFFFFF,"white header");check((steady.getRGB(515,460)&0xFFFFFF)==0x650080,"line colour footer under notice panel");
+  check((steady.getRGB(500,450)&0xFFFFFF)==0x650080,"line colour footer under departure zone");
   long z=t.zoomAt[0];t.update(new PanamFrame.Departure[]{new PanamFrame.Departure("a",a.destination,now+32000,true),b},now+4000);check(t.changedAt==now,"ETA corrections keep train identity");check(t.zoomAt[0]==z,"unchanged minute never restarts zoom");
   t.update(new PanamFrame.Departure[]{b,new PanamFrame.Departure("c",a.destination,now+300000,true)},now+5000);
   check(t.previous[0].id.equals("a")&&t.current[0].id.equals("b"),"departure state retained");
@@ -59,11 +59,14 @@ public class PixelOracle {
 with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
     target=Path(tmp);(target/'PixelOracle.java').write_text(HARNESS,encoding='utf-8')
     sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java')]
+    sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(target),*map(str,sources),str(target/'PixelOracle.java')],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(target),'PixelOracle',str(ROOT/'fabric/src/main/resources/assets/mtr/font/panam/noto-sans-regular.ttf'),str(ROOT/'fabric/src/main/resources/assets/mtr/font/noto-sans-semibold.ttf'),str(OUT)],check=True)
 model=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/models/block/panam_pids.json').read_text())
 states=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/blockstates/panam_pids.json').read_text())['variants']
 assert len(states)==4
+assert len(model['elements'])==6, 'two compact support rods plus casing'
+assert all(0<=e['from'][1]<e['to'][1]<=16 for e in model['elements'])
 assert all(e['to'][1]<=16 and e['from'][1]>=0 for e in model['elements'])
 # Evaluate the renderer's actual rotation/translation convention against the baked casing.
 for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
@@ -71,9 +74,9 @@ for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
         yaw=math.radians(90-angle+side*180);center=(.5+step[0]/2,.5+step[1]/2)
         points=[]
         for x,y in [(0,0),(1024,0),(1024,466),(0,466)]:
-            lx=-(-1.95/2+x*1.95/1024);ly=-(-15.35/16+y*.8875/466);lz=-.14
+            lx=-(-1.95/2+x*1.95/1024);ly=-( -12.45/16+y*(11.30/16)/466 );lz=-.14
             points.append((center[0]+math.cos(yaw)*lx+math.sin(yaw)*lz,ly,center[1]-math.sin(yaw)*lx+math.cos(yaw)*lz))
-        assert abs(max(p[1] for p in points)-15.35/16)<1e-6
+        assert abs(max(p[1] for p in points)-12.45/16)<1e-6
         assert abs(min(p[1] for p in points)-1.15/16)<1e-6
         flat=[p[0] if facing=='north' else p[2] for p in points]
         assert max(flat)-min(flat)<1e-6

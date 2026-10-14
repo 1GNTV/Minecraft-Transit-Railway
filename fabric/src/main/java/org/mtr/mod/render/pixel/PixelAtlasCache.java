@@ -76,13 +76,15 @@ public final class PixelAtlasCache {
     private void loadFonts(){
         if(regular!=null)return;
         Font[] loaded=new Font[2];
-        // A resource pack may supply fonts its owner is licensed to use. None are downloaded at runtime.
-        ResourceManagerHelper.readDirectory("font",(id,input)->{
-            String name=id.toString();int slot=name.endsWith("panam/parisine-regular.otf")?0:name.endsWith("panam/parisine-bold.otf")?1:-1;
-            if(slot>=0&&name.startsWith("mtr:"))try{loaded[slot]=Font.createFont(Font.TRUETYPE_FONT,input);}catch(Exception e){Init.LOGGER.warn("Invalid personal PANAM font {}",id);}
-        });
-        for(int i=0;i<2;i++){final int index=i;if(loaded[i]==null)ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID,i==0?"font/panam/noto-sans-regular.ttf":"font/noto-sans-semibold.ttf"),input->{try{loaded[index]=Font.createFont(Font.TRUETYPE_FONT,input);}catch(Exception e){Init.LOGGER.error("PIXEL fallback font",e);}});}
-        regular=loaded[0]==null?new Font(Font.SANS_SERIF,Font.PLAIN,16):loaded[0];bold=loaded[1]==null?regular.deriveFont(Font.BOLD):loaded[1];
+        for(int i=0;i<2;i++){
+            final int index=i;
+            ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID,
+                    i==0?"font/panam/noto-sans-regular.ttf":"font/noto-sans-semibold.ttf"),
+                input->{try{loaded[index]=Font.createFont(Font.TRUETYPE_FONT,input);}
+                        catch(Exception e){Init.LOGGER.error("PANAM bundled font loading failed",e);}});
+        }
+        regular=loaded[0]==null?new Font(Font.SANS_SERIF,Font.PLAIN,16):loaded[0];
+        bold=loaded[1]==null?regular.deriveFont(Font.BOLD):loaded[1];
     }
     public void quad(){quads++;}
     public String diagnostics(){return "PIXEL builds="+builds.get()+" compositorNs="+buildNanos.get()+" uploads="+uploaded+" hits="+cacheHits+" quads="+quads+" residentBytes="+bytes+" pending="+pending.size();}
