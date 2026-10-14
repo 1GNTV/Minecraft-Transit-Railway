@@ -38,10 +38,19 @@ public class PixelOracle {
   check(t.previous[0].id.equals("a")&&t.current[0].id.equals("b"),"departure state retained");
   for(int i=0;i<4;i++)ImageIO.write(render(s,t,now+5000+i*500),"png",new File(out,"panam-transition-"+i+".png"));
   t.notices(3,now+28000);check(t.noticeIndex==0&&t.noticeAt==now+28000,"10s info rotation catches up");
-  String[] modes={"unavailable","mixed","last","suspended","eight-notices"};
+  String[] modes={"unavailable","mixed","last","suspended","eight-notices","eight-disruptions"};
   for(String mode:modes){
    java.util.List<String> ds=mode.equals("unavailable")?List.of():mode.equals("mixed")?List.of("Saint-Denis Pleyel","Aéroport d’Orly","Saint-Denis Pleyel"):mode.equals("last")?List.of("Aéroport d’Orly"):List.of(a.destination,b.destination);
-   java.util.List<String> ns=mode.equals("eight-notices")?List.of("Un","Deux","Trois","Quatre","Cinq","Six","Sept","Huit"):List.of("Informations en temps réel indisponibles");
+   java.util.List<String> ns=mode.equals("eight-disruptions")?List.of(
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(1,"Travaux un")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(2,"Danger deux")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(1,"Travaux trois")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(2,"Danger quatre")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(1,"Travaux cinq")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(2,"Danger six")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(1,"Travaux sept")),
+     org.mtr.mod.data.PanamBulletins.marked(new org.mtr.mod.data.PanamBulletins.Bulletin(2,"Danger huit")))
+   :mode.equals("eight-notices")?List.of("Un","Deux","Trois","Quatre","Cinq","Six","Sept","Huit"):List.of("Informations en temps réel indisponibles");
    PanamSurface surface=new PanamSurface(new PanamSurface.Spec("14","Aéroport d’Orly",0x650080,ds,ns,mode.equals("suspended"),mode.equals("last")),regular,bold);
    PanamFrame.Timeline mt=new PanamFrame.Timeline();PanamFrame.Departure[] dep=new PanamFrame.Departure[ds.size()];for(int i=0;i<dep.length;i++)dep[i]=new PanamFrame.Departure("x"+i,ds.get(i),now+i*120000+50000,true);mt.update(dep,now);mt.noticeAt=now-2000;
    ImageIO.write(render(surface,mt,now+3000),"png",new File(out,"panam-"+mode+".png"));surface.image.flush();
