@@ -71,7 +71,7 @@ public final class PersistentStateData extends PersistenceStateExtension {
     private static String sanitize(String notice) {
         if (notice == null) return "";
         notice = notice.trim();
-        return notice.length() > 512 ? notice.substring(0, 512) : notice;
+        return notice.length() > 16384 ? notice.substring(0, 16384) : notice;
     }
 
 	public boolean getRouteIdHasDisabledAnnouncements(long routeId) {
