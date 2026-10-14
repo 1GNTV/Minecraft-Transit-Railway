@@ -4,6 +4,7 @@ import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.ResourceManagerHelper;
 import org.mtr.mod.Init;
 import org.mtr.mod.render.MoreRenderLayers;
+import org.mtr.mod.render.MainRenderer;
 import java.awt.Font;
 import java.util.*;
 import java.util.concurrent.*;
@@ -70,7 +71,7 @@ public final class PixelAtlasCache {
         }catch(Exception error){Init.LOGGER.error("PIXEL atlas upload failed",error);}
         finally{if(!registered){if(texture==null)image.close();else texture.close();}}
     }
-    private void release(Entry e){MinecraftClient.getInstance().getTextureManager().destroyTexture(e.texture);MoreRenderLayers.removeFromCache(e.texture);bytes-=(long)e.surface.atlasWidth*(long)e.surface.atlasHeight*4;}
+    private void release(Entry e){MainRenderer.cancelRender(e.texture);MinecraftClient.getInstance().getTextureManager().destroyTexture(e.texture);MoreRenderLayers.removeFromCache(e.texture);bytes-=(long)e.surface.atlasWidth*(long)e.surface.atlasHeight*4;}
     public void reset(){generation++;worker.getQueue().clear();for(Entry e:ready.values())release(e);ready.clear();pending.clear();Result r;while((r=uploads.poll())!=null)if(r.image!=null)r.image.close();regular=null;bold=null;}
     private void loadFonts(){
         if(regular!=null)return;
