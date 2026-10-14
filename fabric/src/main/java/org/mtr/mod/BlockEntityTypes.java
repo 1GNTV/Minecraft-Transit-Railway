@@ -25,6 +25,7 @@ public final class BlockEntityTypes {
 		LIFT_TRACK_FLOOR_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "lift_track_floor_1"), BlockLiftTrackFloor.BlockEntity::new, Blocks.LIFT_TRACK_FLOOR_1::get);
 		PIDS_HORIZONTAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_1"), BlockPIDSHorizontal1.BlockEntity::new, Blocks.PIDS_1::get);
 		PIDS_HORIZONTAL_2 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_2"), BlockPIDSHorizontal2.BlockEntity::new, Blocks.PIDS_2::get);
+		PANAM_PIDS = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "panam_pids"), BlockPANAMPIDS.BlockEntity::new, Blocks.PANAM_PIDS::get);
 		PIDS_HORIZONTAL_3 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_3"), BlockPIDSHorizontal3.BlockEntity::new, Blocks.PIDS_3::get);
 		PIDS_VERTICAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_4"), BlockPIDSVertical1.BlockEntity::new, Blocks.PIDS_4::get);
 		PIDS_VERTICAL_SINGLE_ARRIVAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_single_arrival_1"), BlockPIDSVerticalSingleArrival1.BlockEntity::new, Blocks.PIDS_SINGLE_ARRIVAL_1::get);
