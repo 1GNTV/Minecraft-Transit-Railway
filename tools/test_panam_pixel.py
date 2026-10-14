@@ -31,8 +31,8 @@ public class PixelOracle {
   PanamSurface.Spec spec=new PanamSurface.Spec("14","Aéroport d’Orly",0x650080,List.of(a.destination,b.destination),List.of("Informations en temps réel indisponibles"),false,false);
   PanamSurface s=new PanamSurface(spec,regular,bold);
   BufferedImage steady=render(s,t,now+3000);ImageIO.write(steady,"png",new File(out,"panam-normal.png"));
-  check((steady.getRGB(500,10)&0xFFFFFF)==0xFFFFFF,"white header");check((steady.getRGB(515,460)&0xFFFFFF)==0xFFFFFF,"single white notice panel");
-  check((steady.getRGB(500,450)&0xFFFFFF)==0,"departure zone black");
+  check((steady.getRGB(500,10)&0xFFFFFF)==0xFFFFFF,"white header");check((steady.getRGB(515,460)&0xFFFFFF)==0x650080,"line colour footer under notice panel");
+  check((steady.getRGB(500,450)&0xFFFFFF)==0x650080,"line colour footer under departure zone");
   long z=t.zoomAt[0];t.update(new PanamFrame.Departure[]{new PanamFrame.Departure("a",a.destination,now+32000,true),b},now+4000);check(t.changedAt==now,"ETA corrections keep train identity");check(t.zoomAt[0]==z,"unchanged minute never restarts zoom");
   t.update(new PanamFrame.Departure[]{b,new PanamFrame.Departure("c",a.destination,now+300000,true)},now+5000);
   check(t.previous[0].id.equals("a")&&t.current[0].id.equals("b"),"departure state retained");
@@ -59,6 +59,7 @@ public class PixelOracle {
 with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
     target=Path(tmp);(target/'PixelOracle.java').write_text(HARNESS,encoding='utf-8')
     sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java')]
+    sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(target),*map(str,sources),str(target/'PixelOracle.java')],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(target),'PixelOracle',str(ROOT/'fabric/src/main/resources/assets/mtr/font/panam/noto-sans-regular.ttf'),str(ROOT/'fabric/src/main/resources/assets/mtr/font/noto-sans-semibold.ttf'),str(OUT)],check=True)
 model=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/models/block/panam_pids.json').read_text())

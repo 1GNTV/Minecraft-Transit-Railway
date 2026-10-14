@@ -1,6 +1,7 @@
 package org.mtr.mod.render;
 
 import org.mtr.core.operation.ArrivalResponse;
+import org.mtr.core.data.SimplifiedRoute;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.*;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.BlockEntityRenderer;
@@ -24,11 +25,12 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
+        final HashSet<Long> servedRoutes=new HashSet<>();
         PanamSurface.Spec spec;
         long revision=-1,config=-1,network=-1,newsRevision=-1,sampled,platformAt,clockMinute=-1;
         long activeRouteId=-1;
         String line="?",destination="En attente";int color=0x808080,hour,minute;
-        List<String> notices=List.of(); boolean suspended,last;
+        List<String> notices=List.of(); boolean suspended,localSuspended,last;
     }
     public RenderPANAMPIDS(Argument dispatcher){super(dispatcher);}
     public static void reset(){PANELS.clear();PixelAtlasCache.INSTANCE.reset();PanamNewsClient.reset();}
@@ -80,12 +82,18 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             if(!entity.getPlatformIds().isEmpty())panel.platforms.addAll(entity.getPlatformIds());
             else InitClient.findClosePlatform(pos.down(4),5,platform->panel.platforms.add(platform.getId()));
             panel.platformAt=now;
+            panel.servedRoutes.clear();
+            for(SimplifiedRoute route: MinecraftClientData.getInstance().simplifiedRouteIdMap.values()){
+                for(var stop:route.getPlatforms())if(panel.platforms.contains(stop.getPlatformId())){
+                    panel.servedRoutes.add(route.getId());break;
+                }
+            }
         }
         if(configured){
-            ArrayList<String> notices=new ArrayList<>();panel.suspended=false;panel.last=false;
+            ArrayList<String> notices=new ArrayList<>();panel.localSuspended=false;panel.last=false;
             for(int i=0;i<entity.maxArrivals;i++)for(String value:entity.getMessage(i).split("\\|")){
                 String message=value.trim();
-                if(message.equalsIgnoreCase("[panam:suspended]")){panel.suspended=true;continue;}
+                if(message.equalsIgnoreCase("[panam:suspended]")){panel.localSuspended=true;continue;}
                 if(message.equalsIgnoreCase("[panam:last]")){panel.last=true;continue;}
                 if(!message.isEmpty()&&!notices.contains(message)&&notices.size()<8)notices.add(message.substring(0,Math.min(512,message.length())));
             }
@@ -105,17 +113,23 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));destinations.add(dest);planned|=!a.getRealtime();
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
-        ArrayList<String> notices = new ArrayList<>(panel.notices);
-        for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.forRoute(panel.activeRouteId))) {
-            if(item.type==PanamBulletins.STOP)panel.suspended=true;
-            String marked=PanamBulletins.marked(item);
-            if(!notices.contains(marked))notices.add(marked);
-        }
+        panel.suspended=panel.localSuspended;
+        // Global notices are never suppressed by a full local bulletin list.
+        ArrayList<String> notices = new ArrayList<>();
         for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.global())) {
             if(item.type==PanamBulletins.STOP)panel.suspended=true;
             String marked=PanamBulletins.marked(item);
-            if(!notices.contains(marked))notices.add(marked);
+            if(!notices.contains(marked)&&notices.size()<8)notices.add(marked);
         }
+        if(panel.activeRouteId>=0)panel.servedRoutes.add(panel.activeRouteId);
+        for(long routeId:panel.servedRoutes) {
+            for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.forRoute(routeId))) {
+                if(item.type==PanamBulletins.STOP)panel.suspended=true;
+                String marked=PanamBulletins.marked(item);
+                if(!notices.contains(marked)&&notices.size()<8)notices.add(marked);
+            }
+        }
+        for(String local:panel.notices)if(!notices.contains(local)&&notices.size()<8)notices.add(local);
         if (notices.isEmpty()) notices.add(planned
                 ? "Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
                 : "Informations en temps réel indisponibles");

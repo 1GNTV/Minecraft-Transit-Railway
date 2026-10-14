@@ -33,6 +33,11 @@ jobs:
           python3 tools/test_strata_contract.py
           python3 tools/test_strata_vehicle_positions.py
 
+      - name: Verify PANAM pixel appearance, line-colour footer and atlas lifecycle
+        run: |
+          python3 tools/test_panam_pixel.py
+          python3 tools/test_panam_lifecycle.py
+
       - name: Cache generated web resources
         id: assets
         uses: actions/cache@v4

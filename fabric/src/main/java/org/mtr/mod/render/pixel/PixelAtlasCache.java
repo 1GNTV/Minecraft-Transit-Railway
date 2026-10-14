@@ -84,7 +84,7 @@ public final class PixelAtlasCache {
             Path file=personalFonts.resolve(i==0?"Parisine-Regular.otf":"Parisine-Bold.otf");
             if(Files.isRegularFile(file))try(InputStream input=Files.newInputStream(file)){
                 loaded[i]=Font.createFont(Font.TRUETYPE_FONT,input);
-            }catch(Exception error){Init.LOGGER.warn("PANAM Parisine local loading failed: {}",file,error);}
+            }catch(Exception error){Init.LOGGER.warn("PANAM Parisine local loading failed: " + file,error);}
         }
         // A resource pack may supply fonts its owner is licensed to use. None are downloaded at runtime.
         ResourceManagerHelper.readDirectory("font",(id,input)->{
