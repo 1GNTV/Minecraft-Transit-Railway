@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "mtr:block/metal",
+    "back": "mtr:block/black"
+  },
+  "elements": [
+    {
+      "from": [
+        6.3,
+        1,
+        0
+      ],
+      "to": [
+        9.7,
+        15.8,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#particle"
+        },
+        "down": {
+          "texture": "#particle"
+        },
+        "north": {
+          "texture": "#particle"
+        },
+        "south": {
+          "texture": "#particle"
+        },
+        "east": {
+          "texture": "#particle"
+        },
+        "west": {
+          "texture": "#particle"
+        }
+      }
+    }
+  ]
+}
