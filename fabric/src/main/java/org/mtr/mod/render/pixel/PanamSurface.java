@@ -55,7 +55,7 @@ public final class PanamSurface {
 
     public PanamSurface(Spec spec, Font regular, Font bold) {
         this.spec = spec; this.regular = regular; this.bold = bold;
-        canvas = new BufferedImage(1024, spec.notices.size()>5?4096:2048, BufferedImage.TYPE_INT_ARGB);
+        canvas = new BufferedImage(1024, spec.notices.size()>3?4096:2048, BufferedImage.TYPE_INT_ARGB);
         base = pack(drawBase());
         for (int i=0; i<10; i++) digits[i] = panamDigit(i);
         for (int i=0; i<10; i++) clock[i] = glyph(Integer.toString(i), regular, 43.008f, YELLOW, clockAdvance, i);
