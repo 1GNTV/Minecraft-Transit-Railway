@@ -163,7 +163,20 @@ jobs:
           set -euo pipefail
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
-          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-helix" ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-panam-pids" ]]; then
+            tag="v1.2.0-PANAM-${build}"
+            jar="Sillon-PANAM-${build}-Forge-1.20.1.jar"
+            title="SILLON PANAM — ${build} (Forge 1.20.1 experimental)"
+            extra+=(--prerelease)
+            cat > RELEASE_NOTES.md <<'EOF'
+          Experimental SILLON PANAM two-block display for Forge 1.20.1.
+          New mtr:panam_pids block with a slim modeled housing, screen,
+          platform selection using the existing MTR brush interface,
+          cached arrival times and dynamic route color.
+          This is a first test build, not yet validated in-game.
+          Keep the stable STRATA release as a backup.
+          EOF
+          elif [[ "$GITHUB_REF" == "refs/heads/work/sillon-helix" ]]; then
             tag="v1.1.0-HELIX-${build}"
             jar="Sillon-HELIX-${build}-Forge-1.20.1.jar"
             title="SILLON HELIX — ${build} (Forge 1.20.1, experimental)"
