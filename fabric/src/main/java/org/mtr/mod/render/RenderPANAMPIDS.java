@@ -64,7 +64,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         final ArrivalResponse first = arrivals.isEmpty() ? null : arrivals.get(0);
         final SimplifiedRoute route = first == null ? null : MinecraftClientData.getInstance().simplifiedRouteIdMap.get(first.getRouteId());
         final int color = route == null ? 0xFFE1D000 : 0xFF000000 | (route.getColor() & 0xFFFFFF);
-        final String routeNumber = first == null ? "M" : first.getRouteNumber().split("\\|")[0];
+        final String routeNumber = route == null ? "M" : route.getName().split("\\|")[0];
         final String direction = first == null ? "En attente" : first.getDestination().split("\\|")[0];
         final long now = System.currentTimeMillis() + ArrivalsCacheClient.INSTANCE.getMillisOffset();
         final String firstTime = arrivals.size() > 0 ? minutes(arrivals.get(0), now) : "--";
@@ -128,7 +128,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         g.translate(pos.getX() - offset.getXMapped() + 0.5, pos.getY() - offset.getYMapped() + 0.5, pos.getZ() - offset.getZMapped() + 0.5);
         g.rotateYDegrees(90 - facing.asRotation());
         g.rotateZDegrees(180);
-        g.translate(-0.5, SCREEN_HEIGHT / 2, 0.185);
+        g.translate(-0.5, SCREEN_HEIGHT / 2, -0.26);
         g.scale(SCREEN_WIDTH / 771F, SCREEN_HEIGHT / 356F, 1);
     }
 
