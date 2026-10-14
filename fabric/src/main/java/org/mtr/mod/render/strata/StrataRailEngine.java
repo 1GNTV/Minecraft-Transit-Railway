@@ -6,6 +6,7 @@ import org.mtr.mapping.mapper.MinecraftClientHelper;
 import org.mtr.mod.Init;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.render.TrainVisibility;
+import java.util.ArrayList;
 
 /**
  * STRATA engine boundary for the legacy rail renderer.
@@ -29,6 +30,12 @@ public final class StrataRailEngine {
 	private static int visibleRailCount;
 	private static int totalRailCount;
 	private static MinecraftClientData currentData;
+	private static final boolean PASS_CANDIDATES = !"false".equalsIgnoreCase(System.getProperty("mtr.helix.passCandidates", "true"));
+	private static MinecraftClientData candidateData;
+	private static long candidateRevision, candidateX, candidateZ;
+	private static int candidateDistance;
+	private static ArrayList<MinecraftClientData.RailWrapper> candidateSnapshot;
+	private static long candidateHits, candidateBuilds;
 
 	private StrataRailEngine() {}
 
@@ -40,9 +47,28 @@ public final class StrataRailEngine {
 			railCandidateCount = 0;
 			visibleRailCount = 0;
 		}
-		return USE_RAIL_SPATIAL_INDEX
-				? currentData.railSpatialIndex.query(cameraPosition.getXMapped(), cameraPosition.getZMapped(), MinecraftClientHelper.getRenderDistance() * 16 + 32)
-				: currentData.railWrapperList.values();
+		if (!USE_RAIL_SPATIAL_INDEX) return currentData.railWrapperList.values();
+		if (!PASS_CANDIDATES) return currentData.railSpatialIndex.query(cameraPosition.getXMapped(), cameraPosition.getZMapped(), MinecraftClientHelper.getRenderDistance() * 16 + 32);
+		final long x = Double.doubleToLongBits(cameraPosition.getXMapped());
+		final long z = Double.doubleToLongBits(cameraPosition.getZMapped());
+		final int distance = MinecraftClientHelper.getRenderDistance() * 16 + 32;
+		if (candidateSnapshot != null && candidateData == currentData
+				&& candidateRevision == currentData.networkRevision
+				&& candidateX == x && candidateZ == z && candidateDistance == distance) {
+			candidateHits++;
+			return candidateSnapshot;
+		}
+		ArrayList<MinecraftClientData.RailWrapper> snapshot = new ArrayList<>();
+		for (var rail : currentData.railSpatialIndex.query(cameraPosition.getXMapped(), cameraPosition.getZMapped(), distance))
+			snapshot.add(rail);
+		candidateData = currentData;
+		candidateRevision = currentData.networkRevision;
+		candidateX = x;
+		candidateZ = z;
+		candidateDistance = distance;
+		candidateSnapshot = snapshot;
+		candidateBuilds++;
+		return snapshot;
 	}
 
 	public static boolean visible(final MinecraftClientData.RailWrapper railWrapper, final boolean shadowPass) {
@@ -64,6 +90,9 @@ public final class StrataRailEngine {
 			Init.LOGGER.info("STRATA rail prefilter: total={}, candidates={}, visible={}, selection-us={}, index={}",
 					totalRailCount, railCandidateCount, visibleRailCount,
 					(System.nanoTime() - scanStartNanos) / 1000, USE_RAIL_SPATIAL_INDEX);
+			Init.LOGGER.info("HELIX shared rail candidates: cache-hits={}, index-queries={}, size={}",
+					candidateHits, candidateBuilds, candidateSnapshot == null ? 0 : candidateSnapshot.size());
+			candidateHits = candidateBuilds = 0;
 			Init.LOGGER.info("STRATA rail visibility: hits={}, misses={}, oversize={}",
 					currentData.railVisibilityCache.hits(),
 					currentData.railVisibilityCache.misses(),

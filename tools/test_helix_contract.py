@@ -43,14 +43,18 @@ assert "REGIONS.replay(piece.ticket,clientWorld.data,currentModel,light)" in r
 assert "private LinkedHashMap<Object,Instance> groupFor(Sector sector)" in s
 assert "sector.equals(hotSector)" in s
 assert "freeGroups.size()<128" in s
-assert "groupFor(ticket.sector).put(ticket.location,ticket.instance)" in s
-assert "groupFor(sector).put(location,new Instance" in s
+assert "groupFor(ticket.sector).put(ticket.denseId,ticket.instance)" in s
+assert "groupFor(sector).put(idFor(location),new Instance" in s
 assert "releaseGroups();" in s
 assert "mtr.helix.stagedGroups" in s
 assert "groups.clear();" in s
 
 # P1: each GPU page captures one reusable render callback; no pre-captured camera.
 assert "BiConsumer<GraphicsHolder,Vector3d> drawCommand;" in s
+assert "Int2ObjectLinkedOpenHashMap<Instance>" in s
+assert "ticket.denseId" in s
+assert "mtr.helix.denseRails" in s
+assert "groupFor(ticket.sector).put(ticket.denseId,ticket.instance)" in s
 assert "page.drawCommand==null" in s
 assert "MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,page.drawCommand);" in s
 assert "holder.translate(sector.x()*16D-offset.getXMapped()" in s
@@ -95,4 +99,19 @@ with tempfile.TemporaryDirectory(prefix="helix-smoothing-") as tmp:
     subprocess.run([shutil.which("java"),"-cp",tmp,"HelixSmootherContract"],check=True)
     subprocess.run([shutil.which("java"),"-Dmtr.helix.stableSmoothing=false","-cp",tmp,
                     "HelixSmootherContract","disabled"],check=True)
-print("PASS HELIX prioritized rendering, lighting fallback, ABI source contracts")
+# New large opportunities are isolated by flags and tested for source wiring.
+vpos=read("fabric/src/main/java/org/mtr/mod/data/VehicleExtension.java")
+packed=read("fabric/src/main/java/org/mtr/mod/render/helix/HelixPositionSnapshot.java")
+candidates=read("fabric/src/main/java/org/mtr/mod/render/strata/StrataRailEngine.java")
+gpu=read("fabric/src/main/java/org/mtr/mod/render/RegionVertexRanges.java")
+instances=read("fabric/src/main/java/org/mtr/mod/render/InstancedModelRenderer.java")
+assert "HelixPositionSnapshot.capture(fresh)" in vpos
+assert "saved instanceof HelixPositionSnapshot packed" in vpos
+assert "mtr.helix.packedPositions" in vpos and "return packed.copy()" in vpos
+assert "new Vector(values[j], values[j+1], values[j+2])" in packed
+assert "candidateRevision == currentData.networkRevision" in candidates
+assert "mtr.helix.passCandidates" in candidates
+assert "spans = compact(spans)" in gpu and "mtr.helix.coalesceSpans" in gpu
+assert "mtr.helix.shadowInstances" in instances
+assert "mtr.helix.shadowIndirect" in gpu
+print("PASS HELIX large upgrades: dense IDs, shadow-query reuse, packed addon snapshots and GPU batching")

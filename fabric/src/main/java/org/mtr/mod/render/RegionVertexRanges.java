@@ -30,6 +30,35 @@ public final class RegionVertexRanges {
     private static final boolean SHADER_INDIRECT=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shaderIndirect","true"));
     // GPU buffer bindings/uploads do not amortize over tiny 2-3 span pages.
     private static final int MIN_INDIRECT_SPANS = Math.max(2, Integer.getInteger("mtr.engine.indirectMinSpans", 8));
+    private static final boolean HELIX_COALESCE = !"false".equalsIgnoreCase(System.getProperty("mtr.helix.coalesceSpans","true"));
+    // GL indirect drawing under shader shadow cascades is a separate opt-in.
+    // The normal proven glMultiDrawElements fallback remains the default.
+    private static final boolean HELIX_SHADOW_INDIRECT = Boolean.getBoolean("mtr.helix.shadowIndirect");
+    private static List<Span> compact(List<Span> spans) {
+        if (!HELIX_COALESCE || spans.size() < 2) return spans;
+        List<Span> compacted = null;
+        int cursor = 0;
+        while (cursor < spans.size()) {
+            Span start = spans.get(cursor);
+            if (start.first() < 0 || start.count() < 0) throw new IllegalArgumentException("Invalid region span");
+            int first = start.first(), count = start.count();
+            int next = cursor + 1;
+            // Only merge adjacent and ordered index ranges; never change draw order.
+            while (next < spans.size()) {
+                Span part = spans.get(next);
+                if (part.first() != (long) first + count || part.count() < 0 || (long) count + part.count() > Integer.MAX_VALUE) break;
+                count += part.count();
+                next++;
+            }
+            if (next > cursor + 1 && compacted == null) {
+                compacted = new ArrayList<>(spans.size());
+                compacted.addAll(spans.subList(0, cursor));
+            }
+            if (compacted != null) compacted.add(new Span(first,count));
+            cursor = next;
+        }
+        return compacted == null ? spans : compacted;
+    }
     private static final Map<VertexArray, Ranges> ACTIVE = Collections.synchronizedMap(new WeakHashMap<>());
     private static boolean indirectFailed;
 
@@ -59,6 +88,7 @@ public final class RegionVertexRanges {
     private RegionVertexRanges() {}
 
     public static void select(VertexArray array, List<Span> spans) {
+        spans = compact(spans);
         Ranges ranges = ACTIVE.get(array);
         if (ranges == null || ranges.counts.capacity() < spans.size()) {
             if (ranges != null) ranges.release();
@@ -84,7 +114,8 @@ public final class RegionVertexRanges {
     }
 
     private static boolean eligibleForIndirect() {
-        if (!INDIRECT || indirectFailed || GlStateTracker.isGl4ES() || OptimizedRenderer.renderingShadows()
+        if (!INDIRECT || indirectFailed || GlStateTracker.isGl4ES()
+                || (OptimizedRenderer.renderingShadows() && !HELIX_SHADOW_INDIRECT)
                 || (!Utilities.canUseCustomShader() && !SHADER_INDIRECT)) return false;
         return GL.getCapabilities().OpenGL43;
     }

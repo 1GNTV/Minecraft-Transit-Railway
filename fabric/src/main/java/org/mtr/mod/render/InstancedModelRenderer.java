@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 /** Shaderless GL 3.3 instances. Original VAOs and shader setup remain untouched. */
 public final class InstancedModelRenderer {
     private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.instances", "true"));
+    // Experimental Oculus shadow instancing; unpatched programs fall back.
+    private static final boolean HELIX_SHADOW_INSTANCES = Boolean.getBoolean("mtr.helix.shadowInstances");
     private static final int MAX_INSTANCES = 1024, MAX_SLOTS = 64, PAGES = 3, MATRIX_BYTES = 76, WORDS = 19;
     private static final Map<VertexArray, Slot> SLOTS = new LinkedHashMap<>(64, 0.75F, true);
     private static final ByteBuffer SCRATCH = ByteBuffer.allocateDirect(MAX_INSTANCES * MATRIX_BYTES).order(ByteOrder.nativeOrder());
@@ -69,7 +71,7 @@ public final class InstancedModelRenderer {
     private InstancedModelRenderer() {}
 
     public static void draw(List<?> calls, Consumer<Object> ordinary) {
-        if (!ENABLED || failed || (Utilities.canUseCustomShader() && OptimizedRenderer.renderingShadows()) || GlStateTracker.isGl4ES()) {
+        if (!ENABLED || failed || (Utilities.canUseCustomShader() && OptimizedRenderer.renderingShadows() && !HELIX_SHADOW_INSTANCES) || GlStateTracker.isGl4ES()) {
             calls.forEach(ordinary); return;
         }
         if (!GL.getCapabilities().OpenGL33) { calls.forEach(ordinary); return; }

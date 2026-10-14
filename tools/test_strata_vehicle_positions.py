@@ -15,7 +15,7 @@ for expected in (
     "getVehicleCarsAndPositions()",
     "super.getVehicleCarsAndPositions()",
     "positionCache.find(revision, progress, backwards, path, cars, network)",
-    "positionCache.store(revision, progress, backwards, path, cars, network, copyPositions(fresh))",
+    "PACKED_JCM_POSITIONS ? HelixPositionSnapshot.capture(fresh) : copyPositions(fresh)",
     "new Vector(a.x, a.y, a.z)",
     "new Vector(b.x, b.y, b.z)",
     "finally { railProgress = oldRailProgress; }",

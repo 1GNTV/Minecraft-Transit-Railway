@@ -1,9 +1,10 @@
 package org.mtr.mod.render;
 import org.mtr.mapping.holder.Matrix4f;
 import org.mtr.mapping.holder.MinecraftClient;
-import org.mtr.mapping.holder.GraphicsHolder;
+import org.mtr.mapping.mapper.GraphicsHolder;
 import org.mtr.mapping.holder.Vector3d;
 import java.util.function.BiConsumer;
+import org.mtr.libraries.it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import org.mtr.mapping.mapper.OptimizedModel;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mapping.render.batch.MaterialProperties;
@@ -117,12 +118,12 @@ public final class StaticRegionRenderer {
      */
     public static final class ReplayToken {
         private final Sector sector;
-        private final Object location;
+        private final int denseId;
         private final Instance instance;
         private final OptimizedModelWrapper model;
         private final long generation;
-        private ReplayToken(Sector sector,Object location,Instance instance,OptimizedModelWrapper model,long generation){
-            this.sector=sector;this.location=location;this.instance=instance;
+        private ReplayToken(Sector sector,int denseId,Instance instance,OptimizedModelWrapper model,long generation){
+            this.sector=sector;this.denseId=denseId;this.instance=instance;
             this.model=model;this.generation=generation;
         }
     }
@@ -158,28 +159,46 @@ public final class StaticRegionRenderer {
     private static final int MAX_REGION_VERTICES=Math.max(256_000,Math.min(4_000_000,Integer.getInteger("mtr.engine.regionVertices",1_000_000)));
     private static final int MAX_SCENE_LOCATIONS=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.sceneLocations",32768)));
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(MAX_REGION_PAGES,MAX_REGION_VERTICES,16_000);
-    private final Map<Sector,LinkedHashMap<Object,Instance>> groups=new LinkedHashMap<>();
+    private final Map<Sector,Int2ObjectLinkedOpenHashMap<Instance>> groups=new LinkedHashMap<>();
+    // Dense location IDs are assigned on cache-miss/queue only. A replay
+    // uses the immutable int carried by its token, never Location.hashCode().
+    // All equal Location objects map to the same ID (legacy dedup semantics).
+    private static final boolean HELIX_DENSE_RAILS =
+        !"false".equalsIgnoreCase(System.getProperty("mtr.helix.denseRails","true"));
+    private final HashMap<Object,Integer> denseIds=new HashMap<>();
+    private int nextDenseId=1;
+    private int idFor(Object location){
+        Integer existing=denseIds.get(location);
+        if(existing!=null)return existing;
+        int id=nextDenseId++;
+        denseIds.put(location,id);
+        return id;
+    }
+    private int cachedId(Object location){
+        Integer id = denseIds.get(location);
+        return id == null ? 0 : id;
+    }
     // Reuse sector membership maps across the main + shadow passes.
     // Only the most recent sector bypasses group-map lookups. Ordered
     // location semantics and the original addon fallback remain unchanged.
     private static final boolean HELIX_STAGED_GROUPS =
         !"false".equalsIgnoreCase(System.getProperty("mtr.helix.stagedGroups","true"));
-    private final ArrayDeque<LinkedHashMap<Object,Instance>> freeGroups = new ArrayDeque<>();
+    private final ArrayDeque<Int2ObjectLinkedOpenHashMap<Instance>> freeGroups = new ArrayDeque<>();
     private Sector hotSector;
-    private LinkedHashMap<Object,Instance> hotGroup;
-    private LinkedHashMap<Object,Instance> groupFor(Sector sector) {
+    private Int2ObjectLinkedOpenHashMap<Instance> hotGroup;
+    private Int2ObjectLinkedOpenHashMap<Instance> groupFor(Sector sector) {
         if(HELIX_STAGED_GROUPS && hotGroup != null && sector.equals(hotSector)) return hotGroup;
-        LinkedHashMap<Object,Instance> result=groups.get(sector);
+        Int2ObjectLinkedOpenHashMap<Instance> result=groups.get(sector);
         if(result==null) {
             result=HELIX_STAGED_GROUPS ? freeGroups.pollFirst() : null;
-            if(result==null) result=new LinkedHashMap<>();
+            if(result==null) result=new Int2ObjectLinkedOpenHashMap<>();
             groups.put(sector,result);
         }
         hotSector=sector;hotGroup=result;
         return result;
     }
     private void releaseGroups(){
-        for(LinkedHashMap<Object,Instance> map : groups.values()) {
+        for(Int2ObjectLinkedOpenHashMap<Instance> map : groups.values()) {
             map.clear();
             if(HELIX_STAGED_GROUPS && freeGroups.size()<128) freeGroups.addLast(map);
         }
@@ -247,12 +266,13 @@ public final class StaticRegionRenderer {
     public ReplayToken capture(Object location,double x,double y,double z){
         if(!PERSISTENT_QUEUE)return null;
         Sector sector=new Sector((int)Math.floor(x/16),(int)Math.floor(y/16),(int)Math.floor(z/16));
-        Map<Object,Instance> slot=groups.get(sector);
-        Instance instance=slot==null?null:slot.get(location);
+        Int2ObjectLinkedOpenHashMap<Instance> slot=groups.get(sector);
+        int denseId = cachedId(location);
+        Instance instance=slot==null?null:slot.get(denseId);
         if(instance==null)return null;
         ResourceSnapshot snapshot=FRAME_RESOURCES.get(instance.resource());
         if(snapshot==null || snapshot.snapshot()!=instance.snapshot())return null;
-        return new ReplayToken(sector,location,instance,snapshot.model(),generation);
+        return new ReplayToken(sector,denseId,instance,snapshot.model(),generation);
     }
 
     /**
@@ -261,14 +281,14 @@ public final class StaticRegionRenderer {
      * swaps and unsupported rendering modes force queue() fallback.
      */
     public boolean replay(ReplayToken ticket,Object currentWorld,OptimizedModelWrapper model,int light){
-        if(!PERSISTENT_QUEUE || ticket==null || currentWorld!=world
+        if(!PERSISTENT_QUEUE || !HELIX_DENSE_RAILS || ticket==null || currentWorld!=world
                 || ticket.generation!=generation || ticket.model!=model
                 || ticket.instance.light()!=light
                 || !RailGeometrySnapshots.ENABLED || !OptimizedRenderer.hasOptimizedRendering()
                 || GlStateTracker.isGl4ES())return false;
         // The instance and scene plan are immutable. Only the per-pass group
         // membership is registered; queue(), hashes and scene resolution vanish.
-        groupFor(ticket.sector).put(ticket.location,ticket.instance);
+        groupFor(ticket.sector).put(ticket.denseId,ticket.instance);
         replayCalls++;
         return true;
     }
@@ -314,7 +334,7 @@ public final class StaticRegionRenderer {
                 ()->new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light),
                 buildPlan)
             : buildPlan.apply(new PlanRevision(model,snapshot,new MatrixKey(localMatrix(matrix,localX,localY,localZ)),light));
-        groupFor(sector).put(location,new Instance(plan,snapshot,resource,fallback,light));return true;
+        groupFor(sector).put(idFor(location),new Instance(plan,snapshot,resource,fallback,light));return true;
     }
     private static org.joml.Matrix4f localMatrix(org.joml.Matrix4f source,float x,float y,float z){
         // Called on plan cache misses only; never on a stable queue hit.
@@ -329,7 +349,7 @@ public final class StaticRegionRenderer {
                 // Plans already queued this pass still refer to old page IDs.
                 // Never reuse them after resetting the page layout: render the
                 // complete original models for this one pass instead.
-                generation++;cache.close();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();layoutLocations=0;
+                generation++;cache.close();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();denseIds.clear();layoutLocations=0;
                 for(var region:groups.values())for(Instance instance:region.values())
                     instance.resource().render(instance.fallback(),instance.light());
                 return;
@@ -503,6 +523,7 @@ public final class StaticRegionRenderer {
         RegionPageLayout<Fragment> discarded=layouts.remove(sector);
         if(discarded!=null)layoutLocations=Math.max(0,layoutLocations-discarded.locations());
         groups.remove(sector);
+        denseIds.clear(); // generation invalidated all prior tokens
         hotSector=null;hotGroup=null;
     }
 
@@ -528,7 +549,8 @@ public final class StaticRegionRenderer {
             }
         }
         groups.keySet().removeIf(dirty);
+        denseIds.clear(); // generation invalidated all prior tokens
         hotSector=null;hotGroup=null;
     }
-    public void clear(){generation++;FRAME_RESOURCES.clear();cache.close();releaseGroups();freeGroups.clear();layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
+    public void clear(){generation++;FRAME_RESOURCES.clear();cache.close();releaseGroups();freeGroups.clear();denseIds.clear();nextDenseId=1;layouts.clear();scenePlans.clear();sectorLists.clear();railPlanKeys.clear();if(CACHE_SECTOR_LISTS)wantedScratch.clear();else recycle(wantedScratch);recycle(drawingScratch);readyScratch.clear();listPool.clear();layoutLocations=0;world=null;previousHits=previousMisses=0;}
 }

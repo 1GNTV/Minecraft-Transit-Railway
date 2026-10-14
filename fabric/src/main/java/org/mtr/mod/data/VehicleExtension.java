@@ -31,12 +31,14 @@ import org.mtr.mod.render.DrivingGuiRenderer;
 import org.mtr.mod.resource.VehicleResource;
 import org.mtr.mod.render.strata.StrataVehiclePositionCache;
 import org.mtr.mod.render.helix.HelixMotionSmoother;
+import org.mtr.mod.render.helix.HelixPositionSnapshot;
 
 import javax.annotation.Nullable;
 
 public class VehicleExtension extends Vehicle implements Utilities {
 	private long renderRevision;
-	private final StrataVehiclePositionCache<ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>>> positionCache = new StrataVehiclePositionCache<>();
+	private static final boolean PACKED_JCM_POSITIONS = !"false".equalsIgnoreCase(System.getProperty("mtr.helix.packedPositions", "true"));
+	private final StrataVehiclePositionCache<Object> positionCache = new StrataVehiclePositionCache<>();
 	public long getRenderRevision() { return renderRevision; }
 
 	private double oldSpeed;
@@ -323,13 +325,19 @@ public class VehicleExtension extends Vehicle implements Utilities {
 		final Object path = vehicleExtraData.immutablePath;
 		final Object cars = vehicleExtraData.immutableVehicleCars;
 		final long network = MinecraftClientData.getInstance().networkRevision;
-		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> saved =
-				positionCache.find(revision, progress, backwards, path, cars, network);
-		if (saved != null) return copyPositions(saved);
+		final Object saved = positionCache.find(revision, progress, backwards, path, cars, network);
+		if (saved instanceof HelixPositionSnapshot packed) return packed.copy();
+		if (saved != null) {
+			@SuppressWarnings("unchecked")
+			final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> original =
+				(ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>>) saved;
+			return copyPositions(original);
+		}
 
 		final ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectArrayList<ObjectObjectImmutablePair<Vector, Vector>>>> fresh = super.getVehicleCarsAndPositions();
-		// Never retain a collection that is exposed to another addon.
-		positionCache.store(revision, progress, backwards, path, cars, network, copyPositions(fresh));
+		// All addon-visible Vectors are newly allocated. Packed cache never exposes its raw doubles.
+		positionCache.store(revision, progress, backwards, path, cars, network,
+				PACKED_JCM_POSITIONS ? HelixPositionSnapshot.capture(fresh) : copyPositions(fresh));
 		return fresh;
 	}
 
