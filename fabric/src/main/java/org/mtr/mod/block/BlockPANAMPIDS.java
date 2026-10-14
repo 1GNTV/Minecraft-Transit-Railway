@@ -18,7 +18,7 @@ public class BlockPANAMPIDS extends BlockPIDSHorizontalBase {
     @Nonnull
     @Override
     public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return IBlock.getVoxelShapeByDirection(6.5, 1, 0, 9.5, 16, 16, IBlock.getStatePropertySafe(state, FACING));
+        return IBlock.getVoxelShapeByDirection(5.9, .75, 0, 10.1, 16, 16, IBlock.getStatePropertySafe(state, FACING));
     }
 
     @Nonnull
@@ -28,6 +28,12 @@ public class BlockPANAMPIDS extends BlockPIDSHorizontalBase {
     }
 
     public static class BlockEntity extends BlockEntityHorizontalBase {
+        private long pixelRevision;
+        public long pixelRevision() { return pixelRevision; }
+        @Override public void readCompoundTag(CompoundTag tag) { super.readCompoundTag(tag); pixelRevision++; }
+        @Override public void setData(String[] messages, boolean[] hidden, org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongAVLTreeSet platforms, int page) {
+            super.setData(messages, hidden, platforms, page); pixelRevision++;
+        }
         public BlockEntity(BlockPos pos, BlockState state) {
             super(3, BlockEntityTypes.PANAM_PIDS.get(), pos, state);
         }

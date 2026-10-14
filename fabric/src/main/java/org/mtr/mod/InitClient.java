@@ -403,6 +403,7 @@ public final class InitClient {
 		});
 
 		REGISTRY_CLIENT.eventRegistryClient.registerStartClientTick(() -> {
+			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
 			final long millisElapsed = currentMillis - lastMillis;
 			lastMillis = currentMillis;
@@ -427,6 +428,8 @@ public final class InitClient {
 				if (lastClientWorld == null || !lastClientWorld.equals(clientWorld)) {
 					lastClientWorld = clientWorld;
 					MinecraftClientData.reset();
+					RenderPANAMPIDS.reset();
+					org.mtr.mod.data.ArrivalsCacheClient.INSTANCE.invalidate();
 				}
 			}
 
@@ -458,6 +461,7 @@ public final class InitClient {
 		});
 
 		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(CustomResourceLoader::reload);
+		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(() -> MinecraftClient.getInstance().execute(RenderPANAMPIDS::reset));
 
 		REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(DrivingGuiRenderer::render);
 
