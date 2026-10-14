@@ -27,7 +27,7 @@ public final class PacketPanamBulletinEdit extends PacketHandler {
         buffer.writeLong(routeId);buffer.writeInt(action);buffer.writeInt(index);buffer.writeInt(type);buffer.writeString(message);
     }
     @Override public void runServer(MinecraftServer server,ServerPlayerEntity player){
-        if(player==null||!player.data.hasPermissionLevel(2))return;
+        if(player==null||!player.data.hasPermissions(2))return;
         if(routeId < -1 || action<0 || action>2 || type<0 || type>3 || index<0 || index>PanamBulletins.LIMIT || message.length()>512)return;
         PersistentStateData state=(PersistentStateData) PersistenceStateExtension.register(
                 server.getOverworld(),PersistentStateData::new,Init.MOD_ID);
