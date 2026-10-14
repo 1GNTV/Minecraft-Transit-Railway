@@ -92,6 +92,7 @@ public final class BlockEntityTypes {
 	public static final BlockEntityTypeRegistryObject<BlockLiftTrackFloor.BlockEntity> LIFT_TRACK_FLOOR_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal1.BlockEntity> PIDS_HORIZONTAL_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal2.BlockEntity> PIDS_HORIZONTAL_2;
+	public static final BlockEntityTypeRegistryObject<BlockPANAMPIDS.BlockEntity> PANAM_PIDS;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal3.BlockEntity> PIDS_HORIZONTAL_3;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVertical1.BlockEntity> PIDS_VERTICAL_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVerticalSingleArrival1.BlockEntity> PIDS_VERTICAL_SINGLE_ARRIVAL_1;
