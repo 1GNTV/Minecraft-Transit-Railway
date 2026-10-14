@@ -40,7 +40,7 @@ assert "StrataVehicleVisibility.push(visualCar)" in vehicles
 assert "REGIONS.replay(piece.ticket,clientWorld.data,currentModel,light)" in r
 
 # P1: persistent group-map reuse, ordered equality-based keys, plus rollback.
-assert "private LinkedHashMap<Object,Instance> groupFor(Sector sector)" in s
+assert "private Int2ObjectLinkedOpenHashMap<Instance> groupFor(Sector sector)" in s
 assert "sector.equals(hotSector)" in s
 assert "freeGroups.size()<128" in s
 assert "groupFor(ticket.sector).put(ticket.denseId,ticket.instance)" in s
