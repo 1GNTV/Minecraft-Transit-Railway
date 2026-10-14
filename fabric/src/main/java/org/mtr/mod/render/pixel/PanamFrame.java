@@ -78,8 +78,8 @@ public final class PanamFrame {
     private static float numberY(){return PanamSurface.HEADER+(PanamSurface.BODY-235)/2+38;}
     private static int find(Departure[] trains,String id){for(int i=0;i<trains.length;i++)if(trains[i].id.equals(id))return i;return -1;}
     private static void waiting(PanamSurface s,int minutes,float cx,float y,float scale,float alpha,long now,long at,Emitter out,float clipX,float clipY,float clipW,float clipH){
-        if(minutes<0){for(int i=0;i<3;i++)emit(out,s.dot,cx-66*scale+i*55*scale,y+150*scale,37*scale,37*scale,alpha*PanamAnimation.dot(now,i),clipX,clipY,clipW,clipH);return;}
-        String value=MINUTES[Math.min(999,minutes)];float advance=0;for(int i=0;i<value.length();i++)advance+=s.digitAdvance[value.charAt(i)-'0'];
+        if(minutes<0 || minutes>99){for(int i=0;i<3;i++)emit(out,s.dot,cx-66*scale+i*55*scale,y+150*scale,37*scale,37*scale,alpha*PanamAnimation.dot(now,i),clipX,clipY,clipW,clipH);return;}
+        String value=MINUTES[minutes];float advance=0;for(int i=0;i<value.length();i++)advance+=s.digitAdvance[value.charAt(i)-'0'];
         scale=Math.min(scale, (clipW-10)/Math.max(1,advance));float x=cx-advance*scale/2;
         float pivotY=y+100;float top=scale<.5f?y:pivotY-100*scale;
         for(int i=0;i<value.length();i++){int c=value.charAt(i)-'0';PanamSurface.Sprite glyph=s.digits[c];emit(out,glyph,x-4*scale,top,glyph.w*scale,glyph.h*scale,alpha*(at<now?PanamAnimation.number(now):1),clipX,clipY,clipW,clipH);x+=s.digitAdvance[c]*scale;}

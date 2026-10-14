@@ -2,7 +2,7 @@ name: SILLON PANAM PIXEL Fabric 1.20.4 experimental build
 
 on:
   push:
-    branches: [ "work/sillon-panam-fabric-visual-news-v2" ]
+    branches: [ "work/sillon-panam-hanging-fabric-1204" ]
   workflow_dispatch:
 
 concurrency:
@@ -82,8 +82,8 @@ jobs:
         run: |
           set -euo pipefail
           version="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
-          tag="v1.4.0-PANAM-PIXEL-FABRIC-1204-${version}"
-          artifact="Sillon-PANAM-V2-${version}-Fabric-1.20.4.jar"
+          tag="v1.5.0-PANAM-HANGING-FABRIC-1204-${version}"
+          artifact="Sillon-PANAM-HANGING-${version}-Fabric-1.20.4.jar"
           cp "$SILLON_JAR_PATH" "$artifact"
           sha256sum "$artifact" > "$artifact.sha256"
           gh release create "$tag" "$artifact" "$artifact.sha256" \

@@ -65,6 +65,8 @@ with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
 model=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/models/block/panam_pids.json').read_text())
 states=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/blockstates/panam_pids.json').read_text())['variants']
 assert len(states)==4
+assert len(model['elements'])==6, 'two compact support rods plus casing'
+assert all(0<=e['from'][1]<e['to'][1]<=16 for e in model['elements'])
 assert all(e['to'][1]<=16 and e['from'][1]>=0 for e in model['elements'])
 # Evaluate the renderer's actual rotation/translation convention against the baked casing.
 for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
@@ -72,9 +74,9 @@ for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
         yaw=math.radians(90-angle+side*180);center=(.5+step[0]/2,.5+step[1]/2)
         points=[]
         for x,y in [(0,0),(1024,0),(1024,466),(0,466)]:
-            lx=-(-1.95/2+x*1.95/1024);ly=-(-15.35/16+y*.8875/466);lz=-.14
+            lx=-(-1.95/2+x*1.95/1024);ly=-( -12.45/16+y*(11.30/16)/466 );lz=-.14
             points.append((center[0]+math.cos(yaw)*lx+math.sin(yaw)*lz,ly,center[1]-math.sin(yaw)*lx+math.cos(yaw)*lz))
-        assert abs(max(p[1] for p in points)-15.35/16)<1e-6
+        assert abs(max(p[1] for p in points)-12.45/16)<1e-6
         assert abs(min(p[1] for p in points)-1.15/16)<1e-6
         flat=[p[0] if facing=='north' else p[2] for p in points]
         assert max(flat)-min(flat)<1e-6

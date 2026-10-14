@@ -22,6 +22,7 @@ import java.util.*;
 /** PIXEL: shared retained surfaces, event-driven scene compilation, clipped sprite animation. */
 public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.BlockEntity> {
     private static final WeakHashMap<BlockPANAMPIDS.BlockEntity,Panel> PANELS=new WeakHashMap<>();
+    private static final long MAX_PANAM_WAIT_MS=90L*60*1000;
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
@@ -104,9 +105,15 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         ArrayList<PanamFrame.Departure> trains=new ArrayList<>();ArrayList<String> destinations=new ArrayList<>();HashSet<String> ids=new HashSet<>();boolean planned=false;
         int skip=Math.max(0,entity.getDisplayPage())*3;
         boolean fresh=now-ArrivalsCacheClient.INSTANCE.receivedAt()<15000;
-        if(fresh&&!panel.suspended)for(int i=skip;i<arrivals.size()&&i<skip+3;i++){
-            ArrivalResponse a=arrivals.get(i);int slot=i-skip;if(entity.getHideArrival(slot))continue;
-            long at=a.getArrival()-ArrivalsCacheClient.INSTANCE.getMillisOffset();if(now-at>120000)continue;
+        int eligible=0;
+        if(fresh&&!panel.suspended)for(ArrivalResponse a:arrivals){
+            long at=a.getArrival()-ArrivalsCacheClient.INSTANCE.getMillisOffset();
+            // Reject invalid/stale or far-future simulator ETA data before paging.
+            // Never show 256+ minute numbers or absurd unsynchronised timestamps.
+            if(at<now-30000 || at-now>MAX_PANAM_WAIT_MS)continue;
+            if(eligible++<skip)continue;
+            int slot=trains.size();if(slot>=3)break;
+            if(entity.getHideArrival(slot))continue;
             String id=a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();if(!ids.add(id))continue;
             String dest=firstLanguage(a.getDestination());
             if(trains.isEmpty()){panel.line=firstLanguage(a.getRouteNumber());if(panel.line.isEmpty())panel.line=firstLanguage(a.getRouteName()).replaceFirst("(?i)^ligne\\s+","");if(panel.line.isEmpty())panel.line="?";panel.destination=dest;panel.color=a.getRouteColor();panel.activeRouteId=a.getRouteId();}

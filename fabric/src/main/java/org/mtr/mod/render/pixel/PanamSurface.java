@@ -12,7 +12,8 @@ public final class PanamSurface {
     public static final int WIDTH = 1024, HEIGHT = 466;
     public static final int NAVY = 0x0E0184, YELLOW = 0xFFBE00, WHITE = 0xFFFFFF;
     public static final float HEADER = 130f, FOOTER = 30f, BODY = HEIGHT - HEADER - FOOTER;
-    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = .8875f, TOP = 15.35f / 16;
+    // Entire display and suspension rods fit inside one block of height.
+    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.30f / 16, TOP = 12.45f / 16;
     public static final class Spec {
         public final String line, destination;
         public final int color, count;
@@ -55,7 +56,7 @@ public final class PanamSurface {
     public PanamSurface(Spec spec, Font regular, Font bold) {
         this.spec = spec; this.regular = regular; this.bold = bold;
         base = pack(drawBase());
-        for (int i=0; i<10; i++) digits[i] = glyph(Integer.toString(i), bold, 184.32f, YELLOW, digitAdvance, i);
+        for (int i=0; i<10; i++) digits[i] = panamDigit(i);
         for (int i=0; i<10; i++) clock[i] = glyph(Integer.toString(i), regular, 43.008f, YELLOW, clockAdvance, i);
         clock[10] = glyph(":", regular, 43.008f, YELLOW, clockAdvance, 10);
         BufferedImage d = blank(38,38); Graphics2D dg = graphics(d); dg.setColor(new Color(YELLOW)); dg.fill(new Ellipse2D.Float(0,0,37,37)); dg.dispose(); dot = pack(d);
@@ -104,6 +105,26 @@ public final class PanamSurface {
         atlasWidth=1024;atlasHeight=height;
         image = new BufferedImage(1024,height,BufferedImage.TYPE_INT_ARGB);
         Graphics2D out=image.createGraphics(); out.setComposite(AlphaComposite.Src); out.drawImage(canvas,0,0,null); out.dispose(); canvas.flush();
+    }
+    /** Dedicated bolder numerals, independently antialiased and tightly measured.
+     * The time sprites are not stretched from small Minecraft font glyphs. */
+    private Sprite panamDigit(int number) {
+        Font font=bold.deriveFont(Font.BOLD,194f);
+        BufferedImage image=blank(232,232);
+        Graphics2D g=graphics(image);
+        java.awt.font.GlyphVector gv=font.createGlyphVector(g.getFontRenderContext(),Integer.toString(number));
+        Shape shape=gv.getOutline();
+        java.awt.geom.Rectangle2D bounds=shape.getBounds2D();
+        g.translate(10-bounds.getX(),10-bounds.getY());
+        g.setColor(new Color(YELLOW));g.fill(shape);
+        g.setStroke(new BasicStroke(2.7f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));g.draw(shape);
+        g.dispose();
+        int w=Math.min(232,(int)Math.ceil(bounds.getWidth())+23);
+        int h=Math.min(232,(int)Math.ceil(bounds.getHeight())+23);
+        digitAdvance[number]=w-5;
+        Sprite result=pack(image.getSubimage(0,0,w,h));
+        image.flush();
+        return result;
     }
     private Sprite departureRow(String destination){
         BufferedImage row=blank(496,76);Graphics2D g=graphics(row);g.setColor(Color.WHITE);g.fillRoundRect(0,0,496,76,5,5);

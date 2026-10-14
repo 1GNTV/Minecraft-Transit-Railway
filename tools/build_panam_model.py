@@ -7,11 +7,13 @@ faces=('north','south','east','west','up','down')
 def box(lo,hi,material='#metal',omit=()):
     return {'from':lo,'to':hi,'faces':{side:{'texture':material} for side in faces if side not in omit}}
 model={'ambientocclusion':False,'textures':{'particle':'mtr:block/metal','metal':'mtr:block/metal','black':'mtr:block/black'},'elements':[
-    box([6.1,.75,0],[9.9,15.75,16], '#black', ('north','south','up','down')),
+    box([6.1,.75,0],[9.9,12.85,16], '#black', ('north','south','up','down')),
     box([5.9,.75,0],[10.1,1.15,16],omit=('north',)),
-    box([5.9,15.35,0],[10.1,15.75,16],omit=('north',)),
-    box([5.9,1.15,15.6],[10.1,15.35,16],omit=('up','down')),
-    box([7.4,15.75,8],[8.6,16,9]),
+    box([5.9,12.45,0],[10.1,12.85,16],omit=('north',)),
+    box([5.9,1.15,15.6],[10.1,12.45,16],omit=('up','down')),
+    # Each half contributes one vertical rod: two rods for the two-block screen.
+    box([7.65,12.85,10.2],[8.35,15.65,10.9]),
+    box([7.2,15.6,9.6],[8.8,16,11.5]),
 ]}
 dest.write_text(json.dumps(model,indent=2)+'\n')
 # FACING is the direction towards the other half, inherited from horizontal MTR PIDS.
