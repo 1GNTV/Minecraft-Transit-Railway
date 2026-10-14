@@ -429,6 +429,7 @@ public final class InitClient {
 					lastClientWorld = clientWorld;
 					MinecraftClientData.reset();
 					RenderPANAMPIDS.reset();
+					REGISTRY_CLIENT.sendPacketToServer(new org.mtr.mod.packet.PacketPanamNewsRequest());
 					org.mtr.mod.data.ArrivalsCacheClient.INSTANCE.invalidate();
 				}
 			}
