@@ -56,7 +56,7 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
             hidden[i] = entity.getHideArrival(i);
             localMessages[i] = new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,MAX_MESSAGE_LENGTH,TextCase.DEFAULT,null,"");
             hideBoxes[i] = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
-            hideBoxes[i].setMessage2(TextHelper.literal("Masquer le départ " + (i+1)));
+            hideBoxes[i].setMessage2(new Text(TextHelper.literal("Masquer le départ " + (i+1)).data));
         }
         boolean initialLast = false, initialSuspended = false;
         for (int i=0;i<3;i++) for(String s : entity.getMessage(i).split("\\|")) {
@@ -65,18 +65,18 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         }
         final boolean last = initialLast, stopped = initialSuspended;
         autoPlatforms = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
-        autoPlatforms.setMessage2(TextHelper.literal("Détecter automatiquement les quais"));
+        autoPlatforms.setMessage2(new Text(TextHelper.literal("Détecter automatiquement les quais").data));
         filterButton = PIDSConfigScreen.getPlatformFilterButton(pos,autoPlatforms,platforms,this);
         filterButton.setMessage2(new Text(TextHelper.translatable("selectWorld.edit").data));
         pageInput = new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,3,TextCase.DEFAULT,"\\D","1");
         lastTrain = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
-        lastTrain.setMessage2(TextHelper.literal("Dernier métro confirmé"));
+        lastTrain.setMessage2(new Text(TextHelper.literal("Dernier métro confirmé").data));
         suspended = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
-        suspended.setMessage2(TextHelper.literal("Circulation interrompue"));
+        suspended.setMessage2(new Text(TextHelper.literal("Circulation interrompue").data));
         tabArrivals = new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setTab(0));
-        tabArrivals.setMessage2(TextHelper.literal("Départs et quais"));
+        tabArrivals.setMessage2(new Text(TextHelper.literal("Départs et quais").data));
         tabNews = new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setTab(1));
-        tabNews.setMessage2(TextHelper.literal("Infos voyageurs"));
+        tabNews.setMessage2(new Text(TextHelper.literal("Infos voyageurs").data));
         ObjectArrayList<ArrivalResponse> arrivals = ArrivalsCacheClient.INSTANCE.requestArrivals(platforms);
         detectedRouteId = arrivals.isEmpty() ? -1 : arrivals.get(0).getRouteId();
         // The GUI is reconstructed on reopen, not every frame.
