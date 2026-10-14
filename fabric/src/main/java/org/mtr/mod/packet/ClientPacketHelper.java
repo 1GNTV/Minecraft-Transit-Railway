@@ -68,6 +68,9 @@ public final class ClientPacketHelper {
 		}
 	}
 
+	public static void openPanamControlScreen(){
+        MinecraftClient.getInstance().openScreen(new Screen(new PanamControlScreen()));
+    }
 	public static void openPIDSConfigScreen(BlockPos blockPos, int maxArrivals) {
 		getBlockEntity(blockPos, blockEntity -> {
 			if (blockEntity.data instanceof BlockPANAMPIDS.BlockEntity) {
