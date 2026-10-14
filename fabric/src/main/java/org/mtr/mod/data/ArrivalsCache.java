@@ -12,6 +12,10 @@ import java.util.function.Consumer;
 public abstract class ArrivalsCache {
 
 	private long nextRequest;
+	private long revision, receivedAt, generation;
+	public final long revision() { return revision; }
+	public final long receivedAt() { return receivedAt; }
+	public final void invalidate() { generation++; revision++; receivedAt = 0; nextRequest = 0; queuedPlatformIdsWithAge.clear(); arrivalResponseCache.clear(); }
 	private final Long2IntAVLTreeMap queuedPlatformIdsWithAge = new Long2IntAVLTreeMap();
 	private final ObjectArrayList<ArrivalResponse> arrivalResponseCache = new ObjectArrayList<>();
 	private final int cachedMillis;
@@ -42,9 +46,13 @@ public abstract class ArrivalsCache {
 		if (!queuedPlatformIdsWithAge.isEmpty() && canSendRequest()) {
 			final LongAVLTreeSet platformIds = new LongAVLTreeSet(queuedPlatformIdsWithAge.keySet());
 
+			final long requestGeneration = generation;
 			requestArrivalsFromServer(platformIds, arrivalResponseList -> {
+				if (requestGeneration != generation) return;
 				arrivalResponseCache.clear();
 				arrivalResponseCache.addAll(arrivalResponseList);
+				revision++;
+				receivedAt = System.currentTimeMillis();
 			});
 
 			platformIds.forEach(platformId -> queuedPlatformIdsWithAge.compute(platformId, (key, age) -> age > PERSISTENT_AGE ? null : age + 1));
