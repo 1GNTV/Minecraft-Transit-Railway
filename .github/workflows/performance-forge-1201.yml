@@ -1,7 +1,7 @@
 name: Sillon Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix", "work/sillon-panam-pids", "work/sillon-panam-pixel", "work/sillon-panam-notices" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix", "work/sillon-panam-pids", "work/sillon-panam-pixel", "work/sillon-panam-notices", "work/sillon-panam-hanging-forge-1201" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -173,16 +173,16 @@ jobs:
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
           if [[ "$GITHUB_REF" == refs/heads/work/sillon-panam-* ]]; then
-            tag="v1.3.0-PANAM-PIXEL-${build}"
-            jar="Sillon-PANAM-PIXEL-${build}-Forge-1.20.1.jar"
-            title="SILLON PANAM — ${build} (Forge 1.20.1 experimental)"
+            tag="v1.5.0-PANAM-HANGING-${build}"
+            jar="Sillon-PANAM-HANGING-${build}-Forge-1.20.1.jar"
+            title="SILLON PANAM HANGING — ${build} (Forge 1.20.1 experimental)"
             extra+=(--prerelease)
             cat > RELEASE_NOTES.md <<'EOF'
-          SILLON PANAM PIXEL for Forge 1.20.1: seamless two-block casing,
+          SILLON PANAM HANGING for Forge 1.20.1: compact 2x1 suspended screen with two rods,
           one coherent surface on each side, retained shared atlases and
           clipped PANAM sprite animations. Live game departures come from MTR;
-          operator notices remain local and external traffic has an honest
-          unavailable state. Noto fallback, optional personal licensed Parisine.
+          global and per-line operator notices now use a searchable MTR GUI, with server sync.
+          Dedicated clock digits and invalid ETA filtering; bundled Noto Sans.
           HELIX, STRATA and the JCM ABI repairs remain included in mod id mtr.
           See docs/PANAM-PIXEL.md for measurements and remaining game tests.
           EOF
