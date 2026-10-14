@@ -66,6 +66,7 @@ public final class Blocks {
 		// PIDS projectors
 		PIDS_1 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_1"), () -> new Block(new BlockPIDSHorizontal1()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_2 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_2"), () -> new Block(new BlockPIDSHorizontal2()), CreativeModeTabs.RAILWAY_FACILITIES);
+		PANAM_PIDS = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "panam_pids"), () -> new Block(new BlockPANAMPIDS()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_3 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_3"), () -> new Block(new BlockPIDSHorizontal3()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_4 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_4"), () -> new Block(new BlockPIDSVertical1()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_POLE = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_pole"), () -> new Block(new BlockPIDSPole(createDefaultBlockSettings(false))), CreativeModeTabs.RAILWAY_FACILITIES);
@@ -304,6 +305,7 @@ public final class Blocks {
 	public static final BlockRegistryObject MOSAIC_TILE_SLAB;
 	public static final BlockRegistryObject PIDS_1;
 	public static final BlockRegistryObject PIDS_2;
+	public static final BlockRegistryObject PANAM_PIDS;
 	public static final BlockRegistryObject PIDS_3;
 	public static final BlockRegistryObject PIDS_4;
 	public static final BlockRegistryObject PIDS_POLE;
