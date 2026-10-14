@@ -68,7 +68,7 @@ def rewrite_cp(data, names):
     return bytes(out)
 
 def main():
-    jars = list(Path("forge/build/libs").glob("*-all.jar"))
+    jars = [Path(os.environ["SILLON_JAR_PATH"])] if os.getenv("SILLON_JAR_PATH") else list(Path("forge/build/libs").glob("*-all.jar"))
     if len(jars) != 1:
         raise SystemExit(f"Expected exactly one Forge shaded JAR, found {jars}")
     target = jars[0]

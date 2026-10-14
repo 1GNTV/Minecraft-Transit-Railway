@@ -30,7 +30,7 @@ def get_callbacks(jar):
     return result
 
 def main():
-    jars=list(Path("forge/build/libs").glob("*-all.jar"))
+    jars=[Path(os.environ["SILLON_JAR_PATH"])] if os.getenv("SILLON_JAR_PATH") else list(Path("forge/build/libs").glob("*-all.jar"))
     if len(jars)!=1:
         raise SystemExit(f"Expected exactly one shaded Forge JAR, got {jars}")
     jar=jars[0]
