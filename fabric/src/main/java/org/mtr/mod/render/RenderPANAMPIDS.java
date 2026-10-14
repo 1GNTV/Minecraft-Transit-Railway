@@ -112,7 +112,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             // Never show 256+ minute numbers or absurd unsynchronised timestamps.
             if(at<now-30000 || at-now>MAX_PANAM_WAIT_MS)continue;
             if(eligible++<skip)continue;
-            int slot=trains.size();if(slot>=3)break;
+            int slot=eligible-skip-1;if(slot>=3)break;
             if(entity.getHideArrival(slot))continue;
             String id=a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();if(!ids.add(id))continue;
             String dest=firstLanguage(a.getDestination());
