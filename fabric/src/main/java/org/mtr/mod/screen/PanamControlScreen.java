@@ -27,7 +27,7 @@ public final class PanamControlScreen extends ScreenExtension implements IGui {
     public PanamControlScreen(){
         super();
         routes.add(-1L);
-        MinecraftClientData.getInstance().simplifiedRouteIdMap.keySet().forEach((long route)->routes.add(route));
+        for(long route : MinecraftClientData.getInstance().simplifiedRouteIdMap.keySet()) routes.add(route);
         Collections.sort(routes.subList(1,routes.size()));
         previousScope=button("< Ligne",()->changeScope(-1));
         nextScope=button("Ligne >",()->changeScope(1));

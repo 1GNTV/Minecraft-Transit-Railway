@@ -71,7 +71,7 @@ public final class PanamFrame {
         }
         int index=state.noticeIndex%Math.max(1,surface.notices.length);
         float iconProgress=PanamAnimation.noticeIcon(now-state.noticeAt),textProgress=PanamAnimation.noticeText(now-state.noticeAt);
-        emit(out,surface.infoIcon,532.48f+(1-iconProgress)*148,PanamSurface.HEADER+20,154,59,1,512,PanamSurface.HEADER+10,156,59);
+        emit(out,surface.notices.length>0?surface.noticeIcons[index]:surface.infoIcon,532.48f+(1-iconProgress)*148,PanamSurface.HEADER+20,154,59,1,512,PanamSurface.HEADER+10,156,59);
         if(surface.notices.length>0){PanamSurface.Sprite s=surface.notices[index];emit(out,s,532.48f+(1-textProgress)*40.96f,PanamSurface.HEADER+84,s.w,s.h,.5f+.5f*textProgress,512,PanamSurface.HEADER+69,512,PanamSurface.BODY-70);}
     }
     private static float HEADER(){return PanamSurface.HEADER;}

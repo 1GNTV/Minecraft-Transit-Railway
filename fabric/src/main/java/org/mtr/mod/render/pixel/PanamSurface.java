@@ -5,6 +5,7 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import org.mtr.mod.data.PanamBulletins;
 
 /** Independent raster compositor. No Minecraft or OpenGL dependencies: the visual oracle uses this exact code. */
 public final class PanamSurface {
@@ -43,6 +44,7 @@ public final class PanamSurface {
     public BufferedImage image;
     public final float atlasWidth, atlasHeight;
     public final Sprite base, infoIcon;
+    public final Sprite[] noticeIcons;
     public final Sprite[] digits = new Sprite[10], clock = new Sprite[11], rows, notices, leavingRows;
     public final float[] digitAdvance = new float[10], clockAdvance = new float[11];
     public final Sprite dot, strikeFirst, strikeSecond;
@@ -70,9 +72,33 @@ public final class PanamSurface {
         leavingRows=new Sprite[spec.previousDestinations.stream().distinct().count()>1?spec.previousDestinations.size():0];
         for(int i=0;i<leavingRows.length;i++)leavingRows[i]=rowCache.computeIfAbsent(spec.previousDestinations.get(i),this::departureRow);
         notices = new Sprite[spec.notices.size()];
+        noticeIcons = new Sprite[spec.notices.size()];
         for (int i=0;i<notices.length;i++) {
             BufferedImage notice = blank(471,191); Graphics2D g = graphics(notice);
-            wrapped(g,spec.notices.get(i),0,0,32.768f,regular,0,471,5); g.dispose(); notices[i]=pack(notice);
+            String message = spec.notices.get(i);
+            wrapped(g,PanamBulletins.strip(message),0,0,32.768f,regular,0,471,5); g.dispose(); notices[i]=pack(notice);
+            int kind=PanamBulletins.markedType(message);
+            if(kind==PanamBulletins.INFO){noticeIcons[i]=infoIcon;}
+            else {
+                BufferedImage indicator=blank(154,59);
+                Graphics2D noteG=graphics(indicator);
+                badges(noteG,0,0,49.15f);
+                int fill=kind==PanamBulletins.WORKS?0xF5A623:kind==PanamBulletins.DANGER?0xE44632:0xC92130;
+                noteG.setColor(new Color(fill));
+                noteG.fillRoundRect(106,15,31,31,6,6);
+                noteG.setColor(Color.WHITE);
+                if(kind==PanamBulletins.WORKS){
+                    noteG.setStroke(new BasicStroke(3.5f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                    noteG.draw(new Line2D.Float(116,23,128,36));noteG.draw(new Line2D.Float(128,23,116,36));
+                }else if(kind==PanamBulletins.DANGER){
+                    noteG.setStroke(new BasicStroke(3f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                    noteG.draw(new Line2D.Float(122,21,122,32));noteG.fillOval(120,36,4,4);
+                }else{
+                    noteG.setStroke(new BasicStroke(3.8f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                    noteG.draw(new Line2D.Float(115,24,129,38));noteG.draw(new Line2D.Float(129,24,115,38));
+                }
+                noteG.dispose();noticeIcons[i]=pack(indicator);
+            }
         }
         int height=512; while(height<sy+shelf)height*=2;
         atlasWidth=1024;atlasHeight=height;

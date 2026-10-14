@@ -114,6 +114,8 @@ public final class Init implements Utilities {
 		REGISTRY.registerPacket(PacketUpdatePIDSConfig.class, PacketUpdatePIDSConfig::new);
 		REGISTRY.registerPacket(PacketPanamNewsSync.class, PacketPanamNewsSync::new);
 		REGISTRY.registerPacket(PacketPanamNewsRequest.class, PacketPanamNewsRequest::new);
+		REGISTRY.registerPacket(PacketPanamBulletinEdit.class, PacketPanamBulletinEdit::new);
+		REGISTRY.registerPacket(PacketOpenPanamControlScreen.class, PacketOpenPanamControlScreen::new);
 		REGISTRY.registerPacket(PacketUpdateRailwaySignConfig.class, PacketUpdateRailwaySignConfig::new);
 		REGISTRY.registerPacket(PacketUpdateSignalConfig.class, PacketUpdateSignalConfig::new);
 		REGISTRY.registerPacket(PacketUpdateTrainAnnouncerConfig.class, PacketUpdateTrainAnnouncerConfig::new);
@@ -136,6 +138,13 @@ public final class Init implements Utilities {
             // and broadcast as snapshots; a dash clears an existing bulletin.
             commandBuilderMtr.then("panam", panam -> {
                 panam.permissionLevel(2);
+                panam.executes(ctx -> {
+                    ServerPlayerEntity player=ctx.getServerPlayer();
+                    if(player==null){ctx.sendFailure("Le centre PANAM doit être ouvert en jeu.");return -1;}
+                    REGISTRY.sendPacketToClient(player,new PacketOpenPanamControlScreen());
+                    PacketPanamNewsSync.send(player);
+                    return 1;
+                });
                 panam.then("global", global -> global.then("message", StringArgumentType.greedyString(), arg -> arg.executes(ctx -> {
                     final org.mtr.mod.data.PersistentStateData store =
                             (org.mtr.mod.data.PersistentStateData) org.mtr.mapping.mapper.PersistenceStateExtension.register(

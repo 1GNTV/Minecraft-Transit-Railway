@@ -13,6 +13,7 @@ import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.data.ArrivalsCacheClient;
 import org.mtr.mod.data.PanamNewsClient;
+import org.mtr.mod.data.PanamBulletins;
 import org.mtr.mod.render.pixel.*;
 import java.time.LocalTime;
 import java.util.*;
@@ -105,10 +106,16 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
         ArrayList<String> notices = new ArrayList<>(panel.notices);
-        String routeNotice = PanamNewsClient.forRoute(panel.activeRouteId);
-        String globalNotice = PanamNewsClient.global();
-        if (!routeNotice.isEmpty() && !notices.contains(routeNotice)) notices.add(routeNotice);
-        if (!globalNotice.isEmpty() && !notices.contains(globalNotice)) notices.add(globalNotice);
+        for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.forRoute(panel.activeRouteId))) {
+            if(item.type==PanamBulletins.STOP)panel.suspended=true;
+            String marked=PanamBulletins.marked(item);
+            if(!notices.contains(marked))notices.add(marked);
+        }
+        for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.global())) {
+            if(item.type==PanamBulletins.STOP)panel.suspended=true;
+            String marked=PanamBulletins.marked(item);
+            if(!notices.contains(marked))notices.add(marked);
+        }
         if (notices.isEmpty()) notices.add(planned
                 ? "Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
                 : "Informations en temps réel indisponibles");

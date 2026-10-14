@@ -49,7 +49,7 @@ public final class PanamBulletins {
     }
     public static String marked(Bulletin b){return "\u0001PN"+b.type+":"+b.message;}
     public static int markedType(String text){
-        return text!=null&&text.length()>5&&text.startsWith("\u0001PN")&&text.charAt(4)>='0'&&text.charAt(4)<='3'&&text.charAt(5)==':'?text.charAt(4)-'0':INFO;
+        return text!=null&&text.length()>4&&text.startsWith("\u0001PN")&&text.charAt(3)>='0'&&text.charAt(3)<='3'&&text.charAt(4)==':'?text.charAt(3)-'0':INFO;
     }
-    public static String strip(String text){return text!=null&&text.length()>5&&text.startsWith("\u0001PN")&&text.charAt(5)==':'?text.substring(6):text;}
+    public static String strip(String text){return text!=null&&text.length()>4&&text.startsWith("\u0001PN")&&text.charAt(4)==':'?text.substring(5):text;}
 }
