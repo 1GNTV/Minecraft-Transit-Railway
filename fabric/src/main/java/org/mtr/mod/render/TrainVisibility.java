@@ -11,7 +11,7 @@ import org.mtr.mod.data.VehicleExtension;
 
 /** Actual Minecraft pass frustum. Missing/stale captures fail open; nearby cars keep sound/boarding. */
 public final class TrainVisibility {
-    private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.visibility", "true"));
+    private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.visibility", "false"));
     private static Frustum frustum;
     private static boolean shadows;
     private TrainVisibility() {}
