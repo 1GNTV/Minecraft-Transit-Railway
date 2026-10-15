@@ -23,13 +23,14 @@ import java.util.*;
 public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.BlockEntity> {
     private static final WeakHashMap<BlockPANAMPIDS.BlockEntity,Panel> PANELS=new WeakHashMap<>();
     private static final long MAX_PANAM_WAIT_MS=90L*60*1000;
+    private static final boolean DEBUG_ARRIVALS=Boolean.getBoolean("mtr.panam.debugArrivals");
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
         final HashSet<Long> servedRoutes=new HashSet<>();
         PanamSurface.Spec spec;
         long revision=-1,config=-1,network=-1,newsRevision=-1,sampled,platformAt,clockMinute=-1;
-        long activeRouteId=-1;
+        long activeRouteId=-1,lastDiagnostic;
         String line="?",destination="En attente";int color=0x808080,hour,minute;
         List<String> notices=List.of(); boolean suspended,localSuspended,last;
     }
@@ -49,14 +50,11 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.notices.size(),now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
-        // Do NOT use beaconBeam(translucent) here: Minecraft sorts every quad
-        // in that RenderLayer back-to-front from the camera. These sprites are
-        // a painter-ordered, layered UI; depth sorting makes half the screen
-        // disappear when approaching it from the left or right.
-        // Entity cutout has a stable (non-sorting) upload order on both Fabric
-        // and vanilla shader paths. Keep the entire panel in one material batch.
-        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.EXTERIOR,(g,offset)->{
-            g.createVertexConsumer(MoreRenderLayers.getExterior(entry.texture));
+        // Use the full-bright text layer, not world-lit EntityCutout or a
+        // camera-sorted translucent beacon layer. The UI needs alpha blending
+        // with a stable draw order, independent of player view angle.
+        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_2,(g,offset)->{
+            g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
             for(int side=0;side<2;side++){
                 transform(g,pos,facing,offset,side);
                 final int[] layer={0};
@@ -65,11 +63,9 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
                     if(right<=left||bottom<=top||alpha<=0)return;
                     float u1=(s.x+(left-x)*s.w/w)/entry.surface.atlasWidth,u2=(s.x+(right-x)*s.w/w)/entry.surface.atlasWidth;
                     float v1=(s.y+(top-y)*s.h/h)/entry.surface.atlasHeight,v2=(s.y+(bottom-y)*s.h/h)/entry.surface.atlasHeight;
-                    // The cutout pass writes depth: separate consecutive
-                    // overlays enough to prevent precision fighting at a
-                    // distance. In local coordinates -Z points to the viewer
-                    // on each of the two individually rotated panel faces.
-                    float z=-.004f*layer[0]++;
+                    // Keep overlays close to the casing: the previous .004f
+                    // step visibly pushed characters off the front face.
+                    float z=-.0006f*layer[0]++;
                     IDrawing.drawTexture(g,left,top,z,right,bottom,z,u1,v1,u2,v2,Direction.NORTH,((int)(alpha*255)<<24)|0xFFFFFF,GraphicsHolder.getDefaultLight());
                     PixelAtlasCache.INSTANCE.quad();
                 });
@@ -81,7 +77,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         BlockPos next=pos.offset(facing);
         g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
         g.rotateYDegrees(90-facing.asRotation()+side*180);g.rotateZDegrees(180);
-        g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.14);
+        g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.1345);
         g.scale(PanamSurface.WORLD_WIDTH/PanamSurface.WIDTH,PanamSurface.WORLD_HEIGHT/PanamSurface.HEIGHT,1);
     }
     private static void sample(BlockPANAMPIDS.BlockEntity entity,BlockPos pos,Panel panel,long now){
@@ -111,7 +107,8 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             panel.notices=List.copyOf(notices);panel.timeline.noticeAt=now;panel.timeline.noticeIndex=0;
         }
         ArrayList<ArrivalResponse> arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(panel.platforms));
-        arrivals.sort(Comparator.comparingLong(ArrivalResponse::getArrival));
+        // Match the base MTR PIDS: preserve the server's arrival order.
+        // A local resort can reorder a shared platform's departures.
         ArrayList<PanamFrame.Departure> trains=new ArrayList<>();ArrayList<String> destinations=new ArrayList<>();HashSet<String> ids=new HashSet<>();boolean planned=false;
         int skip=Math.max(0,entity.getDisplayPage())*3;
         boolean fresh=now-ArrivalsCacheClient.INSTANCE.receivedAt()<15000;
@@ -130,6 +127,13 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));destinations.add(dest);planned|=!a.getRealtime();
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
+        if(DEBUG_ARRIVALS && now-panel.lastDiagnostic>30000) {
+            panel.lastDiagnostic=now;
+            org.mtr.mod.Init.LOGGER.info("PANAM arrivals pos={} platforms={} page={} sourceCount={} shown={} offsetMs={}",
+                    pos,panel.platforms,entity.getDisplayPage(),arrivals.size(),
+                    trains.stream().map(t->t.id+"="+((t.at-now)/1000)+"s").toList(),
+                    ArrivalsCacheClient.INSTANCE.getMillisOffset());
+        }
         panel.suspended=panel.localSuspended;
         // Global notices are never suppressed by a full local bulletin list.
         ArrayList<String> notices = new ArrayList<>();
