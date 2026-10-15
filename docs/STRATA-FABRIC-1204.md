@@ -24,3 +24,5 @@ Use `/mtr panam` as a server operator to manage multiple global or per-line anno
 **Parisine licensing:** this experimental JAR deliberately does not redistribute the font files from the PANAM reference repository, whose reuse licence could not be verified. To enable actual Parisine on your own installation, put lawfully obtained `Parisine-Regular.otf` and `Parisine-Bold.otf` in `~/.sillon/fonts/` (e.g. `C:\\Users\\<your-user>\\.sillon\\fonts\\`), then restart Minecraft. PIXEL loads those files first, then checks a local Minecraft resource pack at `assets/mtr/font/panam/parisine-regular.otf` and `parisine-bold.otf`, then falls back to Noto Sans. Without locally supplied Parisine the JAR will still use its fallback.
 
 <!-- CI trigger: rebuild PANAM hanging Fabric 1.20.4 without modifying runtime behavior. -->
+
+<!-- Rebuild request 2026-10-15: PANAM HANGING Fabric 1.20.4. No runtime changes. -->
