@@ -36,6 +36,7 @@ public final class InstancedModelRenderer {
     static { for (int i = 0; i < MAX_INSTANCES; i++) MATRIX_VIEWS[i] = FLOATS.slice(i * WORDS, 16); }
     private static final int[] VALUES = new int[MAX_INSTANCES * WORDS];
     private static final VertexAttributeType[] TYPES = VertexAttributeType.values();
+    private static final VertexAttributeType[] INSTANCE_ATTRIBUTES = {VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY};
     private static boolean failed;
     private static long submittedGroups, submittedInstances, uploads, reused, busy;
 
@@ -71,22 +72,24 @@ public final class InstancedModelRenderer {
     private InstancedModelRenderer() {}
 
     public static void draw(List<?> calls, Consumer<Object> ordinary) {
-        if (!ENABLED || failed || (Utilities.canUseCustomShader() && OptimizedRenderer.renderingShadows() && !HELIX_SHADOW_INSTANCES) || GlStateTracker.isGl4ES()) {
+        // Decide shader capability only once per batch, not for every run.
+        final boolean shaderless = Utilities.canUseCustomShader();
+        if (!ENABLED || failed || (shaderless && OptimizedRenderer.renderingShadows() && !HELIX_SHADOW_INSTANCES) || GlStateTracker.isGl4ES()) {
             calls.forEach(ordinary); return;
         }
         if (!GL.getCapabilities().OpenGL33) { calls.forEach(ordinary); return; }
         // On Forge the unsafe @ModifyArgs Oculus bridge is not installed.
         // Without patched shader programs, grouping models only reorders and
         // checks thousands of calls before falling back to individual draws.
-        if (!Utilities.canUseCustomShader() && !OculusInstanceRenderer.shaderBridgeReady()) {
+        if (!shaderless && !OculusInstanceRenderer.shaderBridgeReady()) {
             calls.forEach(ordinary);
             return;
         }
-        List<?> ordered=Utilities.canUseCustomShader() && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true")) ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,call->call instanceof RenderCallData data?data.mtr$screenBounds():null,24) : calls;
-        ConsecutiveRuns.visit(ordered, Utilities.canUseCustomShader() ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
+        List<?> ordered=shaderless && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true")) ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,call->call instanceof RenderCallData data?data.mtr$screenBounds():null,24) : calls;
+        ConsecutiveRuns.visit(ordered, shaderless ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
             boolean drawn = false;
             if (end - start >= 4 && ordered.get(start) instanceof RenderCallData) {
-                try { drawn = Utilities.canUseCustomShader() ? drawRun(ordered, start, end) : OculusInstanceRenderer.draw(ordered, start, end); }
+                try { drawn = shaderless ? drawRun(ordered, start, end) : OculusInstanceRenderer.draw(ordered, start, end); }
                 catch (RuntimeException error) {
                     failed = true;
                     Init.LOGGER.error("MTR Next instances disabled for this resource generation; ordinary draws restored", error);
@@ -108,7 +111,7 @@ public final class InstancedModelRenderer {
             if (type == VertexAttributeType.MATRIX_MODEL && source != VertexAttributeSource.GLOBAL) return false;
             if (source != VertexAttributeSource.GLOBAL && source != VertexAttributeSource.VERTEX_BUFFER) return false;
         }
-        for (VertexAttributeType type : new VertexAttributeType[]{VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY})
+        for (VertexAttributeType type : INSTANCE_ATTRIBUTES)
             if(InstanceValues.varying(array,type) && InstanceValues.value(call,type)==null)return false;
         return array.materialProperties.vertexAttributeState.matrix4f == null;
     }
@@ -210,7 +213,7 @@ public final class InstancedModelRenderer {
             VertexAttributeType.MATRIX_MODEL.toggleAttributeArray(true);
             VertexAttributeType.MATRIX_MODEL.setupAttributePointer(MATRIX_BYTES, 0);
             for (int n = 0; n < 4; n++) GL33.glVertexAttribDivisor(VertexAttributeType.MATRIX_MODEL.location + n, 1);
-            VertexAttributeType[] attributes={VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY};
+            VertexAttributeType[] attributes=INSTANCE_ATTRIBUTES;
             int[] offsets={64,68,72};
             for(int i=0;i<attributes.length;i++)if(InstanceValues.varying(source,attributes[i])){attributes[i].toggleAttributeArray(true);attributes[i].setupAttributePointer(MATRIX_BYTES,offsets[i]);GL33.glVertexAttribDivisor(attributes[i].location,1);}
             return page;

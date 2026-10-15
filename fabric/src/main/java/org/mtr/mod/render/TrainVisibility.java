@@ -7,11 +7,12 @@ import org.mtr.mapping.holder.Box;
 import org.mtr.mapping.holder.Frustum;
 import org.mtr.mapping.holder.Vector3d;
 import org.mtr.mapping.mapper.OptimizedRenderer;
+import org.mtr.mapping.mapper.MinecraftClientHelper;
 import org.mtr.mod.data.VehicleExtension;
 
 /** Actual Minecraft pass frustum. Missing/stale captures fail open; nearby cars keep sound/boarding. */
 public final class TrainVisibility {
-    private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.visibility", "false"));
+    private static final boolean ENABLED = !"false".equalsIgnoreCase(System.getProperty("mtr.next.visibility", "true"));
     private static Frustum frustum;
     private static boolean shadows;
     private TrainVisibility() {}
@@ -24,6 +25,11 @@ public final class TrainVisibility {
     // verify shadow quality across the user's shader-pack configurations.
     private static final boolean SHADOW_RAIL_CULL=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shadowRailCull","true"));
     private static final double SHADOW_MARGIN=Math.max(96,Integer.getInteger("mtr.engine.shadowRailMargin",128));
+    // Avoid submitting distant rolling stock to every expensive Iris/Oculus
+    // shadow cascade. Never affect the main pass or trains overlapping
+    // the render-distance range. Can be disabled for shader comparisons.
+    private static final boolean SHADOW_DISTANCE_CULL =
+            !"false".equalsIgnoreCase(System.getProperty("mtr.next.shadowDistanceCull", "true"));
     public static boolean railShadowVisible(double minX,double minY,double minZ,
                                             double maxX,double maxY,double maxZ) {
         if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;
@@ -58,6 +64,14 @@ public final class TrainVisibility {
             x1=Math.max(x1,p.position.x+r);y1=Math.max(y1,p.position.y+r);z1=Math.max(z1,p.position.z+r);
         }
         if (camera.getXMapped()>=x0-48 && camera.getXMapped()<=x1+48 && camera.getYMapped()>=y0-48 && camera.getYMapped()<=y1+48 && camera.getZMapped()>=z0-48 && camera.getZMapped()<=z1+48) return true;
+        if (SHADOW_DISTANCE_CULL && OptimizedRenderer.renderingShadows()) {
+            // Keep a generous 64-block margin for offscreen shadow casters.
+            // Use the current view-distance setting; never cap closer trains.
+            double distance = Math.max(192D, MinecraftClientHelper.getRenderDistance() * 16D + 64D);
+            double cx = camera.getXMapped(), cz = camera.getZMapped();
+            if (x0 > cx + distance || x1 < cx - distance ||
+                    z0 > cz + distance || z1 < cz - distance) return false;
+        }
         return frustum.isVisible(new Box(x0,y0,z0,x1,y1,z1));
     }
 }
