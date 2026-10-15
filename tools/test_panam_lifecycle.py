@@ -1,6 +1,6 @@
 """Exercise the real PIXEL cache against recording texture ownership boundaries, without a GL context."""
 from pathlib import Path
-import tempfile,subprocess
+import tempfile,subprocess,shutil
 ROOT=Path(__file__).resolve().parents[1]
 STUBS={
 'org/mtr/mapping/holder/Identifier.java':'''package org.mtr.mapping.holder;public class Identifier { final String s;public Identifier(String a,String b){s=a+":"+b;}public String toString(){return s;}}''',
@@ -37,6 +37,21 @@ public class AtlasLifecycle {
   c.reset();check(manager.registered.isEmpty()&&NativeImage.closes.get()==NativeImage.allocations.get(),"all queued pages released");check(NativeImage.writes.get()>0,"production conversion was executed on compositor thread");
   System.out.println("PASS PIXEL: shared pages, bounded queue, worker conversion, render-thread upload, failed upload, reload race, and exact native ownership");
  }
+}''',
+'FontSourceCheck.java':'''import org.mtr.mod.render.pixel.*;import org.mtr.mapping.mapper.ResourceManagerHelper;import java.awt.Font;import java.io.File;
+public class FontSourceCheck {
+ public static void main(String[] args)throws Exception {
+  ResourceManagerHelper.root=args[0];
+  PixelAtlasCache cache=PixelAtlasCache.INSTANCE;
+  cache.get(new PanamSurface.Spec("14","Orly",0x650080,java.util.List.of("Orly"),java.util.List.of("Information"),false,false),System.currentTimeMillis());
+  java.lang.reflect.Field regular=PixelAtlasCache.class.getDeclaredField("regular"),bold=PixelAtlasCache.class.getDeclaredField("bold");
+  regular.setAccessible(true);bold.setAccessible(true);
+  Font actualRegular=(Font)regular.get(cache),actualBold=(Font)bold.get(cache);
+  Font expectedRegular=Font.createFont(Font.TRUETYPE_FONT,new File(args[1])),expectedBold=Font.createFont(Font.TRUETYPE_FONT,new File(args[2]));
+  if(!actualRegular.getFontName().equals(expectedRegular.getFontName()))throw new AssertionError("regular source font was not preferred");
+  if(!actualBold.getFontName().equals(expectedBold.getFontName()))throw new AssertionError("bold source font was not preferred");
+  System.out.println("PASS PIXEL: optional source fonts take priority over bundled Noto fallback");
+ }
 }'''
 }
 with tempfile.TemporaryDirectory(prefix='pixel-life-') as tmp:
@@ -46,3 +61,11 @@ with tempfile.TemporaryDirectory(prefix='pixel-life-') as tmp:
     sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(dest),*map(str,sources),*map(str,dest.rglob('*.java'))],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(dest),'AtlasLifecycle',str(ROOT)],check=True)
+    # Simulate user-supplied fonts using temporary copies of the project's OFL Noto fonts.
+    font_folder=dest/'assets/mtr/font/panam'
+    font_folder.mkdir(parents=True,exist_ok=True)
+    regular=font_folder/'Parisine-Regular.otf'
+    bold=font_folder/'Parisine-Bold.otf'
+    shutil.copyfile(ROOT/'fabric/src/main/resources/assets/mtr/font/noto-sans-semibold.ttf',regular)
+    shutil.copyfile(ROOT/'fabric/src/main/resources/assets/mtr/font/panam/noto-sans-regular.ttf',bold)
+    subprocess.run(['java','-Djava.awt.headless=true','-cp',str(dest),'FontSourceCheck',str(ROOT),str(regular),str(bold)],check=True)

@@ -18,18 +18,18 @@ Un seul départ dans la fenêtre MTR ne prouve pas que c'est le dernier train du
 
 Les zooms utilisent 2 s et cubic-bezier(.21,.92,.49,.97). Les entrées, sorties et déplacements utilisent 1,5 s et cubic-bezier(.38,-.17,.15,.92). Le panneau d'information utilise la rotation 10 s, les pictogrammes 1,6 s et le texte 1 s de la référence. Les clignotements des chiffres, points et deux-points sont distincts ; l'illustration d'interruption possède les deux traits progressifs sur 5 s.
 
-## Police personnelle
+## Parisine optionnelle depuis les sources
 
-Le JAR contient Noto Sans Regular (SIL OFL, licence embarquée), avec la Noto Sans Semibold déjà présente dans MTR. Cela change les métriques par rapport à Parisine : le rendu par défaut ne peut pas être qualifié de copie pixel pour pixel de la référence.
+Les polices Parisine ne sont **ni incluses ni téléchargées** par Sillon. Si vous possédez les fichiers et que leur licence permet cet usage, placez-les avant le build dans le dossier source partagé :
 
-Un pack de ressources personnel peut fournir, si sa licence autorise cet usage :
-
-```
-assets/mtr/font/panam/parisine-regular.otf
-assets/mtr/font/panam/parisine-bold.otf
+```text
+fabric/src/main/resources/assets/mtr/font/panam/Parisine-Regular.otf
+fabric/src/main/resources/assets/mtr/font/panam/Parisine-Bold.otf
 ```
 
-Les deux fichiers sont chargés au rechargement des ressources (F3+T). Le mod ne les télécharge jamais. Ne distribuez pas ce pack sans les droits nécessaires.
+Respectez la casse. Le chargeur PIXEL préfère ces ressources lorsqu'elles sont embarquées dans le JAR compilé et conserve Noto Sans Regular/Semibold (SIL OFL) comme police de secours, indépendamment pour chaque graisse. Forge copie les ressources Fabric dans son propre build : un seul dossier source suffit aux deux chargeurs.
+
+**Une recompilation est nécessaire après l'ajout de fichiers** : les JARs déjà publiés ne sont pas modifiés. Publier un JAR avec les fichiers Parisine inclus constitue une redistribution qui demande les droits correspondants.
 
 ## Architecture PIXEL
 
