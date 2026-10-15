@@ -46,6 +46,8 @@ jobs:
         run: python3 tools/test_panam_pixel.py
       - name: Verify PIXEL worker and GPU ownership lifecycle
         run: python3 tools/test_panam_lifecycle.py
+      - name: Check optional JCM built-in PIDS preset recovery
+        run: python3 tools/test_jcm_preset_recovery.py
       - name: Save PANAM visual verification and measured CPU profile
         uses: actions/upload-artifact@v4
         with:

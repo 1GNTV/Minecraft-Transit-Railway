@@ -22,6 +22,7 @@ import org.mtr.mod.block.BlockTrainAnnouncer;
 import org.mtr.mod.client.CustomResourceLoader;
 import org.mtr.mod.client.DynamicTextureCache;
 import org.mtr.mod.client.IDrawing;
+import org.mtr.mod.client.JcmPresetRecovery;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.config.Config;
 import org.mtr.mod.data.IGui;
@@ -403,6 +404,7 @@ public final class InitClient {
 		});
 
 		REGISTRY_CLIENT.eventRegistryClient.registerStartClientTick(() -> {
+			JcmPresetRecovery.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
 			final long millisElapsed = currentMillis - lastMillis;
@@ -462,6 +464,7 @@ public final class InitClient {
 		});
 
 		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(CustomResourceLoader::reload);
+		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(JcmPresetRecovery::invalidate);
 		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(() -> MinecraftClient.getInstance().execute(RenderPANAMPIDS::reset));
 
 		REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(DrivingGuiRenderer::render);
