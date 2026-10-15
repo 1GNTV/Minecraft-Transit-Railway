@@ -35,6 +35,8 @@ jobs:
 
       - name: Verify PANAM pixel appearance, line-colour footer and atlas lifecycle
         run: |
+      - name: Check optional JCM built-in PIDS preset recovery
+        run: python3 tools/test_jcm_preset_recovery.py
           python3 tools/test_panam_pixel.py
           python3 tools/test_panam_lifecycle.py
 
