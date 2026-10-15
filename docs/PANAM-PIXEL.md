@@ -52,3 +52,5 @@ Les tests HELIX/STRATA, les vingt tests de géométrie existants, les contrats J
 Un client officiel Forge 47.4.28 / Minecraft 1.20.1 a également chargé le JAR local et un monde superflat isolé avec les quatre moitiés PANAM. Les captures du framebuffer réel vérifient le boîtier continu, les deux faces, le texte et l’horloge, en vue frontale et oblique, sans panneau détaché ni stries constatées. Cette vérification ne comprend pas le pack complet ni une ligne réelle. Les scripts `prepare_pixel_lab.py` et `prepare_pixel_runtime.py` préparent uniquement ce laboratoire temporaire.
 
 Restent à vérifier dans le jeu avec le JAR distribué : pose/casse sur limites de chunks, vues obliques et profondeur réelle, F3+T, chargement/déchargement, arrivées d'une vraie ligne, Oculus 1.8/shaders, JCM 2.1.2 et MTR France 1.2.0 dans le pack complet. La compilation et les contrats binaires ne prouvent pas cette compatibilité en exécution. Aucun gain FPS n'est annoncé.
+
+<!-- Rebuild request 2026-10-15: PANAM HANGING Forge 1.20.1. No runtime changes. -->
