@@ -73,10 +73,22 @@ public final class PixelAtlasCache {
     }
     private void release(Entry e){MainRenderer.cancelRender(e.texture);MinecraftClient.getInstance().getTextureManager().destroyTexture(e.texture);MoreRenderLayers.removeFromCache(e.texture);bytes-=(long)e.surface.atlasWidth*(long)e.surface.atlasHeight*4;}
     public void reset(){generation++;worker.getQueue().clear();for(Entry e:ready.values())release(e);ready.clear();pending.clear();Result r;while((r=uploads.poll())!=null)if(r.image!=null)r.image.close();regular=null;bold=null;}
+    /** Optional owner-supplied fonts shipped as resources when rebuilding from source.
+     * The project does not include or download the Parisine font files. */
+    private static Font sourceParisine(String fileName){
+        String resource="assets/"+Init.MOD_ID+"/font/panam/"+fileName;
+        try(java.io.InputStream input=PixelAtlasCache.class.getClassLoader().getResourceAsStream(resource)){
+            return input==null?null:Font.createFont(Font.TRUETYPE_FONT,input);
+        }catch(Exception e){
+            Init.LOGGER.error("PANAM supplied font could not be loaded: "+fileName,e);
+            return null;
+        }
+    }
     private void loadFonts(){
         if(regular!=null)return;
-        Font[] loaded=new Font[2];
+        Font[] loaded={sourceParisine("Parisine-Regular.otf"),sourceParisine("Parisine-Bold.otf")};
         for(int i=0;i<2;i++){
+            if(loaded[i]!=null)continue;
             final int index=i;
             ResourceManagerHelper.readResource(new Identifier(Init.MOD_ID,
                     i==0?"font/panam/noto-sans-regular.ttf":"font/noto-sans-semibold.ttf"),
