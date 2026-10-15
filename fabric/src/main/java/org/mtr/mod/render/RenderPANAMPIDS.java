@@ -49,10 +49,14 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.notices.size(),now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
-        // The vanilla text layer can drop non-text quad sprites without shaders.
-        // The existing translucent light layer supports both shader and vanilla passes.
-        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_TRANSLUCENT,(g,offset)->{
-            g.createVertexConsumer(MoreRenderLayers.getLight(entry.texture,true));
+        // Do NOT use beaconBeam(translucent) here: Minecraft sorts every quad
+        // in that RenderLayer back-to-front from the camera. These sprites are
+        // a painter-ordered, layered UI; depth sorting makes half the screen
+        // disappear when approaching it from the left or right.
+        // Entity cutout has a stable (non-sorting) upload order on both Fabric
+        // and vanilla shader paths. Keep the entire panel in one material batch.
+        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.EXTERIOR,(g,offset)->{
+            g.createVertexConsumer(MoreRenderLayers.getExterior(entry.texture));
             for(int side=0;side<2;side++){
                 transform(g,pos,facing,offset,side);
                 final int[] layer={0};
@@ -61,7 +65,11 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
                     if(right<=left||bottom<=top||alpha<=0)return;
                     float u1=(s.x+(left-x)*s.w/w)/entry.surface.atlasWidth,u2=(s.x+(right-x)*s.w/w)/entry.surface.atlasWidth;
                     float v1=(s.y+(top-y)*s.h/h)/entry.surface.atlasHeight,v2=(s.y+(bottom-y)*s.h/h)/entry.surface.atlasHeight;
-                    float z=-.0003f*layer[0]++;
+                    // The cutout pass writes depth: separate consecutive
+                    // overlays enough to prevent precision fighting at a
+                    // distance. In local coordinates -Z points to the viewer
+                    // on each of the two individually rotated panel faces.
+                    float z=-.004f*layer[0]++;
                     IDrawing.drawTexture(g,left,top,z,right,bottom,z,u1,v1,u2,v2,Direction.NORTH,((int)(alpha*255)<<24)|0xFFFFFF,GraphicsHolder.getDefaultLight());
                     PixelAtlasCache.INSTANCE.quad();
                 });

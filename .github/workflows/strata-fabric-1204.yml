@@ -38,6 +38,9 @@ jobs:
           python3 tools/test_panam_pixel.py
           python3 tools/test_panam_lifecycle.py
 
+      - name: Check PANAM camera-invariant sprite layer order
+        run: python3 tools/test_panam_camera_order.py
+
       - name: Check optional JCM built-in PIDS preset recovery
         run: python3 tools/test_jcm_preset_recovery.py
       - name: Check initial MTR custom-resource reload fallback
