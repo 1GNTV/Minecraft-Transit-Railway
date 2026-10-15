@@ -12,8 +12,10 @@ public final class PanamSurface {
     public static final int WIDTH = 1024, HEIGHT = 466;
     public static final int NAVY = 0x0E0184, YELLOW = 0xFFBE00, WHITE = 0xFFFFFF;
     public static final float HEADER = 130f, FOOTER = 30f, BODY = HEIGHT - HEADER - FOOTER;
-    // Entire display and suspension rods fit inside one block of height.
-    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.30f / 16, TOP = 12.45f / 16;
+    // A slightly taller screen (+0.45 model px, about 4%) extends downward;
+    // the casing's bottom lip moves with it so the image stays flush.
+    // Everything, including the suspension rods, fits inside one block.
+    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.75f / 16, TOP = 12.45f / 16;
     public static final class Spec {
         public final String line, destination;
         public final int color, count;
