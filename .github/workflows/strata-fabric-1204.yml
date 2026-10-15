@@ -40,6 +40,8 @@ jobs:
 
       - name: Check optional JCM built-in PIDS preset recovery
         run: python3 tools/test_jcm_preset_recovery.py
+      - name: Check initial MTR custom-resource reload fallback
+        run: python3 tools/test_initial_resource_reload.py
 
       - name: Cache generated web resources
         id: assets

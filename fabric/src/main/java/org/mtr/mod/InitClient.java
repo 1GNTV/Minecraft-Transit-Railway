@@ -56,6 +56,8 @@ public final class InitClient {
 	private static long lastUpdatePacketMillis = 0;
 	private static Runnable movePlayer;
 	private static ClientWorld lastClientWorld;
+	private static int initialResourceRecoveryTicks;
+	private static boolean initialResourceRecoveryAttempted;
 
 	public static final RegistryClient REGISTRY_CLIENT = new RegistryClient(Init.REGISTRY);
 	public static final int MILLIS_PER_SPEED_SOUND = 200;
@@ -404,6 +406,7 @@ public final class InitClient {
 		});
 
 		REGISTRY_CLIENT.eventRegistryClient.registerStartClientTick(() -> {
+			ensureInitialCustomResources();
 			JcmPresetRecovery.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
@@ -482,6 +485,25 @@ public final class InitClient {
 
 		// Finish registration
 		REGISTRY_CLIENT.init();
+	}
+
+	/**
+	 * Forge sometimes misses the initial client resource-reload callback. That
+	 * leaves the MTR custom-resource registry empty (trains, rails, addon PIDS).
+	 * When a world has been present for 40 client ticks, retry through the same
+	 * CustomResourceLoader method used by the registered reload listener.
+	 * The JCM mixin on that method can also refresh its addon preset packs.
+	 */
+	private static void ensureInitialCustomResources() {
+		if (initialResourceRecoveryAttempted || CustomResourceLoader.hasLoadedInitialResources()) return;
+		if (MinecraftClient.getInstance().getWorldMapped() == null) {
+			initialResourceRecoveryTicks = 0;
+			return;
+		}
+		if (++initialResourceRecoveryTicks < 40) return;
+		initialResourceRecoveryAttempted = true;
+		Init.LOGGER.warn("Sillon: missing initial resource reload; recovering models, rails and addon resources");
+		CustomResourceLoader.reload();
 	}
 
 	public static int getStationColor(@Nullable BlockPos blockPos) {
