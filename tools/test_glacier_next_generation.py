@@ -80,7 +80,7 @@ with TemporaryDirectory(prefix="glacier-next-") as d:
     p=root/n;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(s,encoding="utf-8")
  subprocess.run(["javac","-d",d,str(ROOT/"org/mtr/mod/render/TrainVisibility.java"),*map(str,root.rglob("*.java"))],check=True)
  for setting in [None,"false","true"]:
-    cmd=["java"] + ([f"-Dmtr.engine.shadowRailCull={setting}"] if setting else []) + ["-cp",d,"ShadowRailTest"]
+    cmd=["java","-Dmtr.next.visibility=true"] + ([f"-Dmtr.engine.shadowRailCull={setting}"] if setting else []) + ["-cp",d,"ShadowRailTest"]
     subprocess.run(cmd,check=True)
 
 # Screen-error budget is the actual LOD selection algorithm, not a fake formula.
