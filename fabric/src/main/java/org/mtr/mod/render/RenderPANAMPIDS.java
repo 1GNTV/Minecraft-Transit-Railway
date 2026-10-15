@@ -49,8 +49,10 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.notices.size(),now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
-        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_2,(g,offset)->{
-            g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
+        // The vanilla text layer can drop non-text quad sprites without shaders.
+        // The existing translucent light layer supports both shader and vanilla passes.
+        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_TRANSLUCENT,(g,offset)->{
+            g.createVertexConsumer(MoreRenderLayers.getLight(entry.texture,true));
             for(int side=0;side<2;side++){
                 transform(g,pos,facing,offset,side);
                 final int[] layer={0};
