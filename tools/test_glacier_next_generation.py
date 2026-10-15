@@ -52,6 +52,7 @@ STUBS={
 "org/mtr/mapping/holder/Frustum.java":"""package org.mtr.mapping.holder;public class Frustum{public boolean isVisible(Box b){return b.X>=-100&&b.x<=100;}}""",
 "org/mtr/mapping/holder/Vector3d.java":"""package org.mtr.mapping.holder;public class Vector3d{public double getXMapped(){return 0;}public double getYMapped(){return 0;}public double getZMapped(){return 0;}}""",
 "org/mtr/mapping/mapper/OptimizedRenderer.java":"""package org.mtr.mapping.mapper;public class OptimizedRenderer{public static boolean shadows;public static boolean renderingShadows(){return shadows;}}""",
+"org/mtr/mapping/mapper/MinecraftClientHelper.java":"""package org.mtr.mapping.mapper;public class MinecraftClientHelper{public static int getRenderDistance(){return 12;}}""",
 "org/mtr/mod/data/VehicleExtension.java":"""package org.mtr.mod.data;public class VehicleExtension{public Persistent persistentVehicleData=new Persistent();public static class Persistent{public double[] longestDimensions={4};}}""",
 "org/mtr/mod/render/PositionAndRotation.java":"""package org.mtr.mod.render;public class PositionAndRotation{public final Pos position=new Pos();public static class Pos{public double x,y,z;}}""",
 "ShadowRailTest.java":"""
