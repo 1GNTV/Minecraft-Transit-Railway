@@ -25,6 +25,11 @@ import java.util.stream.Collectors;
 public class CustomResourceLoader {
 
 	private static long TEST_DURATION;
+	private static volatile boolean INITIAL_RESOURCES_LOADED;
+
+	public static boolean hasLoadedInitialResources() {
+		return INITIAL_RESOURCES_LOADED;
+	}
 
 	private static final ResourceProvider RESOURCE_PROVIDER = new ResourceProvider() {
 		@Override
@@ -70,6 +75,7 @@ public class CustomResourceLoader {
 	}
 
 	public static void reload() {
+		INITIAL_RESOURCES_LOADED = false;
 		org.mtr.mod.render.ShaderReloadPolicy.invalidate();
 		org.mtr.mod.resource.ModelPreparation.clear();
 		org.mtr.mod.render.PredictiveVehiclePreloader.clear();
@@ -201,6 +207,7 @@ public class CustomResourceLoader {
 		if (preloadedObjectCount[0] > 0) {
 			Init.LOGGER.info("Preloaded {} objects in {} ms", preloadedObjectCount[0], time4 - time3);
 		}
+		INITIAL_RESOURCES_LOADED = true;
 	}
 
 	public static void iterateVehicles(TransportMode transportMode, Consumer<VehicleResource> consumer) {
