@@ -43,6 +43,9 @@ jobs:
       - name: Check initial MTR custom-resource reload fallback
         run: python3 tools/test_initial_resource_reload.py
 
+      - name: Verify Fabric performance recovery defaults and preserved addon loaders
+        run: python3 tools/test_fabric_performance_recovery.py
+
       - name: Cache generated web resources
         id: assets
         uses: actions/cache@v4
