@@ -107,6 +107,8 @@ jobs:
       - name: Prepare Fabric 1.20.4 sources
         run: |
           ./gradlew fabric:setupFiles -PminecraftVersion=1.20.4
+      - name: Check GPU backend wiring
+        run: python3 tools/test_solis_gpu_wiring.py
       - name: Build SOLIS Fabric
         run: ./gradlew fabric:build -PminecraftVersion=1.20.4 --stacktrace
       - name: Preserve JCM compatibility
