@@ -41,20 +41,20 @@ public class PixelOracle {
   // Important line danger repeats between network bulletins, holds for 12s,
   // and ordinary bulletins keep their own short dwell and fair cycling.
   PanamFrame.Timeline prioritized=new PanamFrame.Timeline();
-  prioritized.notices(java.util.List.of(0,3,0),now);
+  prioritized.notices(List.of(0,3,0),now);
   check(prioritized.noticeIndex==1,"critical line bulletin displayed first");
-  prioritized.notices(java.util.List.of(0,3,0),now+11999);
+  prioritized.notices(List.of(0,3,0),now+11999);
   check(prioritized.noticeIndex==1,"12-second critical dwell");
-  prioritized.notices(java.util.List.of(0,3,0),now+12000);
+  prioritized.notices(List.of(0,3,0),now+12000);
   check(prioritized.noticeIndex==0,"network bulletin is never starved");
-  prioritized.notices(java.util.List.of(0,3,0),now+16500);
+  prioritized.notices(List.of(0,3,0),now+16500);
   check(prioritized.noticeIndex==1,"return to critical incident between network bulletins");
-  prioritized.notices(java.util.List.of(0,3,0),now+28500);
+  prioritized.notices(List.of(0,3,0),now+28500);
   check(prioritized.noticeIndex==2,"network bulletin round-robin progresses");
   PanamFrame.Timeline works=new PanamFrame.Timeline();
-  works.notices(java.util.List.of(0,1,0),now);
+  works.notices(List.of(0,1,0),now);
   check(works.noticeIndex==0,"scheduled works must not override network as major danger");
-  works.notices(java.util.List.of(0,1,0),now+4500);
+  works.notices(List.of(0,1,0),now+4500);
   check(works.noticeIndex==1,"works still cycles normally");
   String[] modes={"unavailable","mixed","last","suspended","eight-notices","eight-disruptions"};
   for(String mode:modes){
