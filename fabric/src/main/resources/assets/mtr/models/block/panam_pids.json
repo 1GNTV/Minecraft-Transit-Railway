@@ -7,15 +7,97 @@
   },
   "elements": [
     {
+      "comment": "Central dark housing: physically separate from the two tilted LCD cartridges",
       "from": [
-        6.1,
-        0.3,
+        6.65,
+        -0.23,
         0
       ],
       "to": [
-        9.9,
-        12.85,
+        9.35,
+        13.08,
         16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Inner spine and cable channel seen from below",
+      "from": [
+        7.15,
+        -0.48,
+        0.2
+      ],
+      "to": [
+        8.85,
+        13.35,
+        15.8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Near-screen front: top-third inset",
+      "from": [
+        5.45,
+        8.4,
+        0.04
+      ],
+      "to": [
+        6.45,
+        12.9,
+        15.96
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Near-screen front: middle-third",
+      "from": [
+        5.24,
+        4,
+        0.04
+      ],
+      "to": [
+        6.45,
+        8.4,
+        15.96
       ],
       "faces": {
         "east": {
@@ -27,20 +109,111 @@
       }
     },
     {
+      "comment": "Near-screen front: bottom-third outward tilt",
       "from": [
-        5.9,
-        0.3,
+        5.02,
+        -0.4,
+        0.04
+      ],
+      "to": [
+        6.45,
+        4,
+        15.96
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Far-screen rear: top-third inset",
+      "from": [
+        9.55,
+        8.4,
+        0.04
+      ],
+      "to": [
+        10.55,
+        12.9,
+        15.96
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Far-screen rear: middle-third",
+      "from": [
+        9.55,
+        4,
+        0.04
+      ],
+      "to": [
+        10.76,
+        8.4,
+        15.96
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Far-screen rear: bottom-third outward tilt",
+      "from": [
+        9.55,
+        -0.4,
+        0.04
+      ],
+      "to": [
+        10.98,
+        4,
+        15.96
+      ],
+      "faces": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Upper silver separator above front LCD",
+      "from": [
+        5.43,
+        12.85,
         0
       ],
       "to": [
-        10.1,
-        0.7,
+        6.47,
+        13.23,
         16
       ],
       "faces": {
-        "south": {
-          "texture": "#metal"
-        },
         "east": {
           "texture": "#metal"
         },
@@ -56,20 +229,18 @@
       }
     },
     {
+      "comment": "Upper silver separator above rear LCD",
       "from": [
-        5.9,
-        12.45,
+        9.53,
+        12.85,
         0
       ],
       "to": [
-        10.1,
-        12.85,
+        10.57,
+        13.23,
         16
       ],
       "faces": {
-        "south": {
-          "texture": "#metal"
-        },
         "east": {
           "texture": "#metal"
         },
@@ -85,15 +256,115 @@
       }
     },
     {
+      "comment": "Front coloured lip carrier, 0.5 px thick",
       "from": [
-        5.9,
-        1.15,
-        15.6
+        4.66,
+        -0.77,
+        0
       ],
       "to": [
-        10.1,
-        12.45,
+        6.5,
+        -0.35,
         16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "up": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Rear coloured lip carrier, 0.5 px thick",
+      "from": [
+        9.5,
+        -0.77,
+        0
+      ],
+      "to": [
+        11.34,
+        -0.35,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "up": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Dark recessed underside between the detached display faces",
+      "from": [
+        6.5,
+        -0.43,
+        0
+      ],
+      "to": [
+        9.5,
+        -0.06,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Light metal end wall on one side of each half",
+      "from": [
+        5.1,
+        -0.3,
+        0.04
+      ],
+      "to": [
+        10.9,
+        12.9,
+        0.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Ceiling suspension stem: one per half, two rods across the 2-block panel",
+      "from": [
+        7.64,
+        13.23,
+        7.55
+      ],
+      "to": [
+        8.36,
+        15.67,
+        8.27
       ],
       "faces": {
         "north": {
@@ -107,32 +378,6 @@
         },
         "west": {
           "texture": "#metal"
-        }
-      }
-    },
-    {
-      "from": [
-        7.65,
-        12.85,
-        10.2
-      ],
-      "to": [
-        8.35,
-        15.65,
-        10.9
-      ],
-      "faces": {
-        "north": {
-          "texture": "#metal"
-        },
-        "south": {
-          "texture": "#metal"
-        },
-        "east": {
-          "texture": "#metal"
-        },
-        "west": {
-          "texture": "#metal"
         },
         "up": {
           "texture": "#metal"
@@ -143,15 +388,16 @@
       }
     },
     {
+      "comment": "Small rectangular ceiling anchor, not a central bulky clock support",
       "from": [
-        7.2,
-        15.6,
-        9.6
+        7.25,
+        15.64,
+        7.19
       ],
       "to": [
-        8.8,
+        8.75,
         16,
-        11.5
+        8.64
       ],
       "faces": {
         "north": {

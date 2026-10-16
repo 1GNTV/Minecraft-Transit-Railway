@@ -18,7 +18,9 @@ public class BlockPANAMPIDS extends BlockPIDSHorizontalBase {
     @Nonnull
     @Override
     public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return IBlock.getVoxelShapeByDirection(5.9, .75, 0, 10.1, 16, 16, IBlock.getStatePropertySafe(state, FACING));
+        // Encloses the twin screens, projecting lip and ceiling suspension, while
+        // retaining the existing two-block horizontal placement and state.
+        return IBlock.getVoxelShapeByDirection(4.65, -.8, 0, 11.35, 16, 16, IBlock.getStatePropertySafe(state, FACING));
     }
 
     @Nonnull

@@ -47,7 +47,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         if(now-panel.sampled>=1000||panel.config!=entity.pixelRevision()||panel.revision!=ArrivalsCacheClient.INSTANCE.revision()||panel.network!=MinecraftClientData.getInstance().networkRevision||panel.newsRevision!=PanamNewsClient.revision())sample(entity,pos,panel,now);
         if(panel.spec==null)return;
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
-        panel.timeline.notices(panel.spec.notices.size(),now);
+        panel.timeline.notices(panel.spec.noticePriorities,now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
         // Use the full-bright text layer, not world-lit EntityCutout or a
         // camera-sorted translucent beacon layer. The UI needs alpha blending
@@ -76,7 +76,11 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         BlockPos next=pos.offset(facing);
         g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
         g.rotateYDegrees(90-facing.asRotation()+side*180);g.rotateZDegrees(180);
-        g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.1345);
+        // Rotate just 2.6 degrees around the top edge. Both display faces
+        // lean outward at the bottom towards their respective platform.
+        g.translate(0,-PanamSurface.TOP,0);
+        g.rotateXDegrees(-2.6f);
+        g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f);
         g.scale(PanamSurface.WORLD_WIDTH/PanamSurface.WIDTH,PanamSurface.WORLD_HEIGHT/PanamSurface.HEIGHT,1);
     }
     private static void sample(BlockPANAMPIDS.BlockEntity entity,BlockPos pos,Panel panel,long now){
@@ -136,27 +140,58 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         panel.suspended=panel.localSuspended;
         // Global notices are never suppressed by a full local bulletin list.
         ArrayList<String> notices = new ArrayList<>();
+        ArrayList<Integer> priorities = new ArrayList<>();
         for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.global())) {
             if(item.type==PanamBulletins.STOP)panel.suspended=true;
-            String marked=PanamBulletins.marked(item);
-            if(!notices.contains(marked)&&notices.size()<8)notices.add(marked);
+            appendNotice(notices,priorities,PanamBulletins.marked(item),
+                item.type==PanamBulletins.STOP?3:0);
         }
         if(panel.activeRouteId>=0)panel.servedRoutes.add(panel.activeRouteId);
         for(long routeId:panel.servedRoutes) {
             for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.forRoute(routeId))) {
                 if(item.type==PanamBulletins.STOP)panel.suspended=true;
                 String marked=PanamBulletins.marked(item);
-                if(!notices.contains(marked)&&notices.size()<8)notices.add(marked);
+                // Route-specific danger/stop is urgent, but scheduled works is
+                // never treated as a safety alert. Other lines still rotate.
+                int importance=routeId==panel.activeRouteId
+                    ? ((item.type==PanamBulletins.DANGER || item.type==PanamBulletins.STOP)?3:1)
+                    : 0;
+                appendNotice(notices,priorities,marked,importance);
             }
         }
-        for(String local:panel.notices)if(!notices.contains(local)&&notices.size()<8)notices.add(local);
-        if (notices.isEmpty()) notices.add(planned
+        for(String local:panel.notices)
+            appendNotice(notices,priorities,local,0);
+        if (notices.isEmpty()) appendNotice(notices,priorities,planned
                 ? "Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
-                : "Informations en temps réel indisponibles");
+                : "Informations en temps réel indisponibles",0);
         ArrayList<String> previous=new ArrayList<>();for(PanamFrame.Departure train:panel.timeline.previous)previous.add(train.destination);
-        PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous);
-        if(!next.equals(panel.spec))panel.spec=next;
+        PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous,priorities);
+        if(!next.equals(panel.spec)) {
+            // Only restart the ticker when the actual bulletin sequence or its
+            // priorities changes, not whenever departures update.
+            if(panel.spec==null || !panel.spec.notices.equals(next.notices)
+                    || !panel.spec.noticePriorities.equals(next.noticePriorities))
+                panel.timeline.restartNotices(now);
+            panel.spec=next;
+        }
         panel.config=entity.pixelRevision();panel.revision=ArrivalsCacheClient.INSTANCE.revision();panel.network=network;panel.newsRevision=PanamNewsClient.revision();
+    }
+    private static void appendNotice(List<String> notices,List<Integer> priorities,String message,int priority) {
+        int index=notices.indexOf(message);
+        if(index>=0) {
+            priorities.set(index,Math.max(priorities.get(index),priority));
+        } else if(notices.size()<8) {
+            notices.add(message);
+            priorities.add(priority);
+        } else if(priority>=3) {
+            // A full network bulletin list must not hide an urgent alert on
+            // the currently served line. Keep the other seven messages alive.
+            for(int i=notices.size()-1;i>=0;i--)if(priorities.get(i)<3) {
+                notices.set(i,message);
+                priorities.set(i,priority);
+                break;
+            }
+        }
     }
     private static String firstLanguage(String value){return value==null?"":value.split("\\|",2)[0].split("\\(",2)[0].trim();}
     @Override public boolean rendersOutsideBoundingBox2(BlockPANAMPIDS.BlockEntity entity){return true;}
