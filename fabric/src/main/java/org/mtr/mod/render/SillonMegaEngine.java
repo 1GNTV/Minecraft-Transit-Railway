@@ -6,6 +6,8 @@ public final class SillonMegaEngine {
     public static final boolean ENABLED=on("mtr.mega");
     public static final boolean SCENE=ENABLED&&on("mtr.mega.scene");
     public static final boolean RAILS=ENABLED&&on("mtr.mega.rails");
+    public static final boolean CLASSIC=ENABLED&&on("mtr.mega.classic");
+    public static final boolean GPU_DRIVEN=ENABLED&&on("mtr.mega.gpuDriven");
     public static final boolean INSTANCES=ENABLED&&on("mtr.mega.instances");
     public static final boolean SHADER_REORDER=INSTANCES&&on("mtr.mega.shaderReorder");
     public static final int WINDOW=INSTANCES?Math.max(8,Math.min(64,Integer.getInteger("mtr.mega.instanceWindow",32))):24;

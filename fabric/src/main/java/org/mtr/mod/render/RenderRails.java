@@ -364,7 +364,7 @@ public class RenderRails implements IGui {
 			final ClassicRailQuadBatch classicBatch = ClassicRailQuadBatch.ENABLED && !renderState.hasColor
 					? new ClassicRailQuadBatch(rail, texture, color, yOffset, SMALL_OFFSET, u1, v1, u2, v2)
 					: null;
-			renderWithinRenderDistance(rail, (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
+			final RenderRailWithBlockPos classicVisitor = (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
 				final int light = renderState == RenderState.FLASHING || renderState == RenderState.COLORED ? GraphicsHolder.getDefaultLight() : RailLightFrameCache.get(clientWorld, blockPos);
 				if (classicBatch != null) {
 					classicBatch.add(x1, z1, x2, z2, x3, z3, x4, z4, y1, y2, light);
@@ -375,7 +375,9 @@ public class RenderRails implements IGui {
 					IDrawing.drawTexture(graphicsHolder, x1, y1 + yOffset, z1, x2, y1 + yOffset + SMALL_OFFSET, z2, x3, y2 + yOffset, z3, x4, y2 + yOffset + SMALL_OFFSET, z4, offset, u1 < 0 ? 0 : u1, v1 < 0 ? 0.1875F + textureOffset : v1, u2 < 0 ? 1 : u2, v2 < 0 ? 0.3125F + textureOffset : v2, Direction.UP, color, light);
 					IDrawing.drawTexture(graphicsHolder, x2, y1 + yOffset + SMALL_OFFSET, z2, x1, y1 + yOffset, z1, x4, y2 + yOffset + SMALL_OFFSET, z4, x3, y2 + yOffset, z3, offset, u1 < 0 ? 0 : u1, v1 < 0 ? 0.1875F + textureOffset : v1, u2 < 0 ? 1 : u2, v2 < 0 ? 0.3125F + textureOffset : v2, Direction.UP, color, light);
 				});
-			}, 0.5, -railWidth, railWidth);
+			};
+			if (renderState.hasColor || !renderClassicRetained(rail, railWidth, classicVisitor))
+				renderWithinRenderDistance(rail, classicVisitor, 0.5, -railWidth, railWidth);
 			if (classicBatch != null) classicBatch.flush();
 		}
 	}
@@ -411,6 +413,29 @@ public class RenderRails implements IGui {
      * renderWithinRenderDistance. Return the identity-stable sample array that
      * the retained submission plan uses as its visibility revision.
      */
+    /**
+     * Use the same camera and forward-vector test as the legacy rail renderer,
+     * with camera-independent sector geometry prepared only on scene misses.
+     */
+    private static boolean renderClassicRetained(Rail rail, float width, RenderRailWithBlockPos draw) {
+        if (!SillonMegaEngine.CLASSIC || !USE_RAIL_FRUSTUM_BASIS) return false;
+        final Camera camera = MinecraftClient.getInstance().getGameRendererMapped().getCamera();
+        final Vector3d pos = camera.getPos();
+        final float yaw = (float)Math.toRadians(camera.getYaw());
+        final float pitch = (float)Math.toRadians(camera.getPitch());
+        if (projectionYaw != yaw || projectionPitch != pitch) {
+            projectionYaw=yaw; projectionPitch=pitch;
+            projectionZFromX=new Vector3d(1,0,0).rotateY(yaw).rotateX(pitch).getZMapped();
+            projectionZFromY=new Vector3d(0,1,0).rotateY(yaw).rotateX(pitch).getZMapped();
+            projectionZFromZ=new Vector3d(0,0,1).rotateY(yaw).rotateX(pitch).getZMapped();
+        }
+        return ClassicRailSceneCache.submit(rail,width,
+            pos.getXMapped(),pos.getYMapped(),pos.getZMapped(),
+            MinecraftClientHelper.getRenderDistance()*16,
+            projectionZFromX,projectionZFromY,projectionZFromZ,
+            draw::renderRail) >= 0;
+    }
+
     private static int submitStaticModelRail(Rail rail,RailResource resource,boolean flip,ClientWorld world){
         if(!SillonMegaEngine.RAILS || !USE_RAIL_FRUSTUM_BASIS)return -1;
         final Camera cam=MinecraftClient.getInstance().getGameRendererMapped().getCamera();
