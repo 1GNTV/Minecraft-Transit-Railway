@@ -37,6 +37,12 @@ public class MinecraftClientData {
  public final RailSpatialIndex railSpatialIndex=new RailSpatialIndex();
  public final java.util.Map<String,RailWrapper> railWrapperList=new java.util.LinkedHashMap<>();
  public long networkRevision=1;
+ public final RailVisibilityCache railVisibilityCache=new RailVisibilityCache();
+ public static class RailVisibilityCache {
+  public long hits(){return 0;}
+  public long misses(){return 0;}
+  public long uncached(){return 0;}
+ }
  public static class RailWrapper {
   public boolean shouldRender=true;
   public final Vec startVector,endVector;
