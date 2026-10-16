@@ -1,5 +1,7 @@
 package org.mtr.mod.render.pixel;
 
+import java.util.List;
+
 /** Small retained quad plan. The same emitter drives Minecraft and the offline pixel oracle. */
 public final class PanamFrame {
     private static final String[] MINUTES=new String[1000];
@@ -27,9 +29,56 @@ public final class PanamFrame {
                 sampledAt=now;
             }
         }
-        public void notices(int count,long now){
-            if(noticeIndex>=count){noticeIndex=0;noticeAt=now;}
-            if(count>1&&now-noticeAt>=10000){long steps=(now-noticeAt)/10000;noticeIndex=(int)((noticeIndex+steps)%count);noticeAt+=steps*10000;}
+        private List<Integer> lastNoticePriorities=java.util.List.of();
+        private int nextNormal, nextCritical;
+        private static int first(List<Integer> levels,int minimum,int from) {
+            for(int i=0;i<levels.size();i++){
+                int index=(from+i)%levels.size();
+                if((levels.get(index)>=3)==(minimum>=3))return index;
+            }
+            return -1;
+        }
+        public void restartNotices(long now) {
+            noticeAt=now;noticeIndex=0;nextNormal=0;nextCritical=0;
+            lastNoticePriorities=java.util.List.of();
+        }
+        // Legacy/test helper retains standard even rotation.
+        public void notices(int count,long now) {
+            notices(java.util.Collections.nCopies(Math.max(0,count),0),now);
+        }
+        /** Critical *on this line* gets 12 seconds but must not starve network notices.
+         * Interleave urgent / network / urgent / network, cycling every nonurgent
+         * bulletin fairly; works notices never count as a major safety incident.
+         */
+        public void notices(java.util.List<Integer> levels,long now) {
+            int count=levels.size();
+            if(count==0){noticeIndex=0;noticeAt=now;lastNoticePriorities=java.util.List.of();return;}
+            if(!levels.equals(lastNoticePriorities)||noticeIndex>=count) {
+                lastNoticePriorities=java.util.List.copyOf(levels);
+                int urgent=first(levels,3,0);
+                noticeIndex=urgent>=0?urgent:0;
+                nextNormal=0;nextCritical=urgent>=0?(urgent+1)%count:0;
+                noticeAt=now;
+                return;
+            }
+            int urgent=first(levels,3,0),regular=first(levels,0,0);
+            int limit=0;
+            while(limit++<64) {
+                int priority=levels.get(noticeIndex);
+                long duration=priority>=3?12000:priority>=1?6500:4500;
+                if(now-noticeAt<duration)break;
+                noticeAt+=duration;
+                if(urgent>=0&&regular>=0) {
+                    if(priority>=3) {
+                        int next=first(levels,0,nextNormal);
+                        noticeIndex=next;nextNormal=(next+1)%count;
+                    } else {
+                        int next=first(levels,3,nextCritical);
+                        noticeIndex=next;nextCritical=(next+1)%count;
+                    }
+                } else noticeIndex=(noticeIndex+1)%count;
+            }
+            if(limit>=64)noticeAt=now; // paused world / long clock jump
         }
     }
     private PanamFrame(){}

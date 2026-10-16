@@ -24,7 +24,9 @@ assert 'class Panel' in src
 # sprites. Their local Z order remains strictly toward the face's viewer.
 depths=[-.0006*step for step in range(32)]
 assert depths[0]==0 and all(b<a for a,b in zip(depths,depths[1:]))
-assert 'g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.1345);' in src
+assert 'g.translate(0,-PanamSurface.TOP,0);' in src
+assert 'g.rotateXDegrees(-2.6f);' in src
+assert 'g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f);' in src
 assert 'arrivals.sort(' not in src
 assert 'DEBUG_ARRIVALS' in src
 assert abs(depths[-1])<.02

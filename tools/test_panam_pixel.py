@@ -37,7 +37,25 @@ public class PixelOracle {
   t.update(new PanamFrame.Departure[]{b,new PanamFrame.Departure("c",a.destination,now+300000,true)},now+5000);
   check(t.previous[0].id.equals("a")&&t.current[0].id.equals("b"),"departure state retained");
   for(int i=0;i<4;i++)ImageIO.write(render(s,t,now+5000+i*500),"png",new File(out,"panam-transition-"+i+".png"));
-  t.notices(3,now+28000);check(t.noticeIndex==0&&t.noticeAt==now+28000,"10s info rotation catches up");
+  t.notices(3,now+28000);check(t.noticeIndex==0&&t.noticeAt==now+28000,"ticker initialises without skipping");
+  // Important line danger repeats between network bulletins, holds for 12s,
+  // and ordinary bulletins keep their own short dwell and fair cycling.
+  PanamFrame.Timeline prioritized=new PanamFrame.Timeline();
+  prioritized.notices(java.util.List.of(0,3,0),now);
+  check(prioritized.noticeIndex==1,"critical line bulletin displayed first");
+  prioritized.notices(java.util.List.of(0,3,0),now+11999);
+  check(prioritized.noticeIndex==1,"12-second critical dwell");
+  prioritized.notices(java.util.List.of(0,3,0),now+12000);
+  check(prioritized.noticeIndex==0,"network bulletin is never starved");
+  prioritized.notices(java.util.List.of(0,3,0),now+16500);
+  check(prioritized.noticeIndex==1,"return to critical incident between network bulletins");
+  prioritized.notices(java.util.List.of(0,3,0),now+28500);
+  check(prioritized.noticeIndex==2,"network bulletin round-robin progresses");
+  PanamFrame.Timeline works=new PanamFrame.Timeline();
+  works.notices(java.util.List.of(0,1,0),now);
+  check(works.noticeIndex==0,"scheduled works must not override network as major danger");
+  works.notices(java.util.List.of(0,1,0),now+4500);
+  check(works.noticeIndex==1,"works still cycles normally");
   String[] modes={"unavailable","mixed","last","suspended","eight-notices","eight-disruptions"};
   for(String mode:modes){
    java.util.List<String> ds=mode.equals("unavailable")?List.of():mode.equals("mixed")?List.of("Saint-Denis Pleyel","Aéroport d’Orly","Saint-Denis Pleyel"):mode.equals("last")?List.of("Aéroport d’Orly"):List.of(a.destination,b.destination);
@@ -71,31 +89,27 @@ with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
     sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(target),*map(str,sources),str(target/'PixelOracle.java')],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(target),'PixelOracle',str(ROOT/'fabric/src/main/resources/assets/mtr/font/panam/noto-sans-regular.ttf'),str(ROOT/'fabric/src/main/resources/assets/mtr/font/noto-sans-semibold.ttf'),str(OUT)],check=True)
+# Validate the SOLIS casing against the actual photographed silhouette.
 model=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/models/block/panam_pids.json').read_text())
 states=json.loads((ROOT/'fabric/src/main/resources/assets/mtr/blockstates/panam_pids.json').read_text())['variants']
-assert len(states)==4
-assert len(model['elements'])==6, 'two compact support rods plus casing'
-assert all(0<=e['from'][1]<e['to'][1]<=16 for e in model['elements'])
-assert all(e['to'][1]<=16 and e['from'][1]>=0 for e in model['elements'])
-# Evaluate the renderer's actual rotation/translation convention against the baked casing.
-for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
-    for side in (0,1):
-        yaw=math.radians(90-angle+side*180);center=(.5+step[0]/2,.5+step[1]/2)
-        points=[]
-        for x,y in [(0,0),(1024,0),(1024,466),(0,466)]:
-            lx=-(-1.95/2+x*1.95/1024);ly=-( -12.45/16+y*(11.75/16)/466 );lz=-.1345
-            points.append((center[0]+math.cos(yaw)*lx+math.sin(yaw)*lz,ly,center[1]-math.sin(yaw)*lx+math.cos(yaw)*lz))
-        assert abs(max(p[1] for p in points)-12.45/16)<1e-6
-        assert abs(min(p[1] for p in points)-.70/16)<1e-6
-        flat=[p[0] if facing=='north' else p[2] for p in points]
-        assert max(flat)-min(flat)<1e-6
-        assert all(abs(v-.5)>.13125 for v in flat),'screen must be in front of the casing'
-# Both the body and bottom metal lip must extend with the artwork.
-assert abs(model['elements'][0]['from'][1]-.30)<1e-6
-assert abs(model['elements'][1]['from'][1]-.30)<1e-6
-assert abs(model['elements'][1]['to'][1]-.70)<1e-6
-assert abs(model['elements'][2]['from'][1]-12.45)<1e-6
-assert 0 < .30 < .70 < 12.45 < 12.85 < 16
-assert abs((12.45-.70)-11.75)<1e-6
-assert abs((11.75/11.30)-1)>.03 and abs((11.75/11.30)-1)<.05
-print('PASS: both faces fitted to the 4% taller casing; bottom lip and screen flush; all within one block')
+renderer=(ROOT/'fabric/src/main/java/org/mtr/mod/render/RenderPANAMPIDS.java').read_text()
+surface=(ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel/PanamSurface.java').read_text()
+assert len(states)==4, 'two facing directions on a two-block horizontal panel'
+assert len(model['elements'])>=14, 'distinct spine, double display, bottom lip and rods'
+assert model['ambientocclusion'] is False
+assert all(0<=e['from'][0]<e['to'][0]<=16 and 0<=e['from'][2]<e['to'][2]<=16 for e in model['elements'])
+assert all(-1<=e['from'][1]<e['to'][1]<=16 for e in model['elements']), 'projecting chin stays within model bake limits'
+# The actual LCD raster remains exactly two blocks wide and ~12% taller,
+# lowered 0.4 model pixels beneath the original panel origin.
+assert 'WORLD_WIDTH = 1.95f' in surface
+assert 'WORLD_HEIGHT = 13.15f / 16' in surface
+assert 'TOP = 12.75f / 16' in surface
+assert abs(12.75-13.15+.4)<1e-6
+assert 'g.rotateXDegrees(-2.6f)' in renderer
+assert 'g.translate(0,-PanamSurface.TOP,0)' in renderer
+assert 'g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f)' in renderer
+assert sum('suspension' in x.get('comment','').lower() or 'ceiling anchor' in x.get('comment','').lower() for x in model['elements'])>=2
+assert sum('lower lip' in x.get('comment','').lower() or 'lip carrier' in x.get('comment','').lower() for x in model['elements'])>=2
+assert any(x['from'][1]<0 for x in model['elements']), 'lower lip hangs below baseline'
+assert 'noticePriorities' in renderer and 'appendNotice(' in renderer
+print('PASS: SOLIS 2-block PANAM, stepped tilt shell, 2.6-degree actual screen tilt, suspension and critical-cycle timing')

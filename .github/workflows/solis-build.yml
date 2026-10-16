@@ -97,6 +97,13 @@ jobs:
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.4
           npm ci --prefix website
           npm run build --prefix website
+      - name: Validate SOLIS PANAM model and bulletin timeline
+        run: |
+          python3 tools/test_panam_pixel.py
+          python3 tools/test_panam_camera_order.py
+          python3 tools/test_panam_eta_contrast.py
+          python3 tools/test_panam_arrival_parity.py
+          python3 tools/test_panam_lifecycle.py
       - name: Prepare Fabric 1.20.4 sources
         run: |
           ./gradlew fabric:setupFiles -PminecraftVersion=1.20.4

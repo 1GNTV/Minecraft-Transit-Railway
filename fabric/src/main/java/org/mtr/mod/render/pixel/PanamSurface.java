@@ -12,31 +12,39 @@ public final class PanamSurface {
     public static final int WIDTH = 1024, HEIGHT = 466;
     public static final int NAVY = 0x0E0184, YELLOW = 0xFFBE00, WHITE = 0xFFFFFF;
     public static final float HEADER = 130f, FOOTER = 30f, BODY = HEIGHT - HEADER - FOOTER;
-    // A slightly taller screen (+0.45 model px, about 4%) extends downward;
-    // the casing's bottom lip moves with it so the image stays flush.
-    // Everything, including the suspension rods, fits inside one block.
-    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.75f / 16, TOP = 12.45f / 16;
+    // SOLIS: 2-block-wide PIDS, 12% taller, suspended slightly below
+    // the original Clock level. The slightly lowered chin matches the
+    // photographed RATP housing; the twin ceiling rods remain separate.
+    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 13.15f / 16, TOP = 12.75f / 16;
     public static final class Spec {
         public final String line, destination;
         public final int color, count;
         public final boolean mixed, suspended, last;
         public final List<String> destinations, notices, previousDestinations;
+        /** 0=network, 1=line notice, 3=important incident on this line. */
+        public final List<Integer> noticePriorities;
         public Spec(String line, String destination, int color, List<String> destinations, List<String> notices, boolean suspended, boolean last) {
             this(line,destination,color,destinations,notices,suspended,last,List.of());
         }
         public Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations){
+            this(line,destination,color,destinations,notices,suspended,last,previousDestinations,
+                java.util.Collections.nCopies(notices.size(),0));
+        }
+        public Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities){
+            if(notices.size()!=noticePriorities.size())throw new IllegalArgumentException("PANAM notice priorities out of sync");
             this.line = line; this.destination = destination; this.color = color & 0xFFFFFF;
             this.destinations = List.copyOf(destinations); this.notices = List.copyOf(notices);
             this.previousDestinations=List.copyOf(previousDestinations);
+            this.noticePriorities=List.copyOf(noticePriorities);
             count = destinations.size(); mixed = destinations.stream().distinct().count() > 1;
             this.suspended = suspended; this.last = last && count == 1;
         }
         @Override public boolean equals(Object other) {
             if (!(other instanceof Spec)) return false;
             Spec s = (Spec) other;
-            return color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations);
+            return color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations)&&noticePriorities.equals(s.noticePriorities);
         }
-        @Override public int hashCode() { return Objects.hash(line, destination, color, destinations, notices, suspended, last,previousDestinations); }
+        @Override public int hashCode() { return Objects.hash(line, destination, color, destinations, notices, suspended, last,previousDestinations,noticePriorities); }
     }
     public static final class Sprite {
         public final int x, y, w, h, originX, originY;
