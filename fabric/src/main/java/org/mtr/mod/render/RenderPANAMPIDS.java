@@ -22,7 +22,6 @@ import java.util.*;
 /** PIXEL: shared retained surfaces, event-driven scene compilation, clipped sprite animation. */
 public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.BlockEntity> {
     private static final WeakHashMap<BlockPANAMPIDS.BlockEntity,Panel> PANELS=new WeakHashMap<>();
-    private static final long MAX_PANAM_WAIT_MS=90L*60*1000;
     private static final boolean DEBUG_ARRIVALS=Boolean.getBoolean("mtr.panam.debugArrivals");
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
@@ -109,22 +108,22 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         ArrayList<ArrivalResponse> arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(panel.platforms));
         // Match the base MTR PIDS: preserve the server's arrival order.
         // A local resort can reorder a shared platform's departures.
-        ArrayList<PanamFrame.Departure> trains=new ArrayList<>();ArrayList<String> destinations=new ArrayList<>();HashSet<String> ids=new HashSet<>();boolean planned=false;
-        int skip=Math.max(0,entity.getDisplayPage())*3;
-        boolean fresh=now-ArrivalsCacheClient.INSTANCE.receivedAt()<15000;
-        int eligible=0;
-        if(fresh&&!panel.suspended)for(ArrivalResponse a:arrivals){
-            long at=a.getArrival()-ArrivalsCacheClient.INSTANCE.getMillisOffset();
-            // Reject invalid/stale or far-future simulator ETA data before paging.
-            // Never show 256+ minute numbers or absurd unsynchronised timestamps.
-            if(at<now-30000 || at-now>MAX_PANAM_WAIT_MS)continue;
-            if(eligible++<skip)continue;
-            int slot=eligible-skip-1;if(slot>=3)break;
-            if(entity.getHideArrival(slot))continue;
-            String id=a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();if(!ids.add(id))continue;
+        ArrayList<PanamFrame.Departure> trains=new ArrayList<>();
+        ArrayList<String> destinations=new ArrayList<>();boolean planned=false;
+        // Match RenderPIDS paging and hidden-row semantics. Do not drop valid
+        // server arrivals via extra freshness, distance or de-duplication filters.
+        List<ArrivalResponse> selected=PanamArrivalSelection.select(
+                arrivals,entity.maxArrivals,entity.getDisplayPage(),entity::getHideArrival);
+        int slot=0;
+        for(ArrivalResponse a:selected){
+            long at=PanamArrivalSelection.clientArrivalMillis(
+                    a.getArrival(),ArrivalsCacheClient.INSTANCE.getMillisOffset());
             String dest=firstLanguage(a.getDestination());
             if(trains.isEmpty()){panel.line=firstLanguage(a.getRouteNumber());if(panel.line.isEmpty())panel.line=firstLanguage(a.getRouteName()).replaceFirst("(?i)^ligne\\s+","");if(panel.line.isEmpty())panel.line="?";panel.destination=dest;panel.color=a.getRouteColor();panel.activeRouteId=a.getRouteId();}
-            trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));destinations.add(dest);planned|=!a.getRealtime();
+            // Two distinct server rows can share a departure index.
+            String id=(slot++)+":"+a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();
+            trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));
+            destinations.add(dest);planned|=!a.getRealtime();
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
         if(DEBUG_ARRIVALS && now-panel.lastDiagnostic>30000) {

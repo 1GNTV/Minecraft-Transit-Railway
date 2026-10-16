@@ -44,6 +44,9 @@ jobs:
       - name: Check PANAM contrast and MTR arrival source order
         run: python3 tools/test_panam_eta_contrast.py
 
+      - name: Verify PANAM arrival selection matches vanilla MTR
+        run: python3 tools/test_panam_arrival_parity.py
+
       - name: Check optional JCM built-in PIDS preset recovery
         run: python3 tools/test_jcm_preset_recovery.py
       - name: Check initial MTR custom-resource reload fallback
