@@ -3,7 +3,7 @@ package org.mtr.mod.render;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL43;
 import org.mtr.mapping.holder.MinecraftClient;
-import org.mtr.mapping.holder.MinecraftClientHelper;
+import org.mtr.mapping.mapper.MinecraftClientHelper;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mapping.render.tool.GlStateTracker;
 import org.mtr.mapping.render.tool.Utilities;
