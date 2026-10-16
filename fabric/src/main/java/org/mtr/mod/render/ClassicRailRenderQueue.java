@@ -3,6 +3,7 @@ package org.mtr.mod.render;
 import org.mtr.mapping.holder.Direction;
 import org.mtr.mapping.holder.Identifier;
 import org.mtr.mod.client.IDrawing;
+import org.mtr.mapping.render.tool.Utilities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,8 @@ public final class ClassicRailRenderQueue {
                                  double yOffset, double smallOffset,
                                  float u1, float v1, float u2, float v2,
                                  double[] coords, int[] lights, float[] stripes) {
-        if (!ENABLED || ClassicRailGpuCache.ENABLED || lights.length == 0 ||
+        if (!ENABLED || (ClassicRailGpuCache.ENABLED && Utilities.canUseCustomShader())
+            || lights.length == 0 ||
             pieces + lights.length > MAX_PIECES_PER_PASS) return false;
         Key key = new Key(texture,color,yOffset,smallOffset,u1,v1,u2,v2);
         QUEUED.computeIfAbsent(key, unused -> new ArrayList<>())

@@ -87,6 +87,13 @@ public final class InstancedModelRenderer {
             calls.forEach(ordinary);
             return;
         }
+        // GPU-built cross-model material atlas: one multi-draw for compatible
+        // heterogeneous train / 3D-rail meshes instead of source-by-source
+        // instancing. Opt-in until validated on real GL4.3 hardware.
+        if (shaderless && GpuDrivenMaterialAtlas.draw(calls)) {
+            GlVertexAttributeCache.invalidate();
+            return;
+        }
         // Conservative disjoint opaque screen rectangles only; unknown bounds do not move.
         boolean allowReorder=shaderless || (SillonMegaEngine.SHADER_REORDER
             && OculusInstanceRenderer.shaderBridgeReady());
@@ -199,11 +206,12 @@ public final class InstancedModelRenderer {
             if(page.indirectBuffer==0)page.indirectBuffer=GL33.glGenBuffers();
             // The compute pass writes a compacted instance VBO and updates
             // DrawElementsIndirectCommand.instanceCount without CPU readback.
+            // Compute replaces the VBO storage. Reset the CPU-upload
+            // metadata even on a failed dispatch, before ordinary fallback.
+            page.values=null;page.count=0;page.capacity=0;
             if(!GpuDrivenInstanceRenderer.draw(page.vao,page.inputBuffer,page.buffer,
                 page.indirectBuffer,SCRATCH,count,source.indexBuffer.getVertexCount(),
                 source.indexBuffer.indexType,gpuBounds))return false;
-            // The compacted VBO must not be mistaken for a reusable CPU upload.
-            page.values=null;page.count=0;page.capacity=0;
         } else {
             GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES, source.indexBuffer.getVertexCount(),
                 source.indexBuffer.indexType, 0L, count);
@@ -255,12 +263,13 @@ public final class InstancedModelRenderer {
 
     public static void clear() {
         if (!RenderSystem.isOnRenderThread()) { RenderSystem.recordRenderCall(InstancedModelRenderer::clear); return; }
-        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false; OculusInstanceRenderer.clear(); GpuDrivenInstanceRenderer.clear();
+        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false; OculusInstanceRenderer.clear(); GpuDrivenInstanceRenderer.clear(); GpuDrivenMaterialAtlas.clear();
         submittedGroups = submittedInstances = uploads = reused = busy = 0;
     }
     public static void report() {
         if (submittedGroups != 0 || busy != 0) Init.LOGGER.info("MTR Next instances: groups={}, instances={}, uploads={}, reused={}, busy-fallbacks={}, resident-slots={}", submittedGroups, submittedInstances, uploads, reused, busy, SLOTS.size());
         GpuDrivenInstanceRenderer.report();
+        GpuDrivenMaterialAtlas.report();
         submittedGroups = submittedInstances = uploads = reused = busy = 0;
     }
 }

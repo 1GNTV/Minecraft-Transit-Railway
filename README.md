@@ -1,7 +1,8 @@
-# Sillon
+# Sillon — SOLIS ☀️
 
-**Sillon** is an optimized Minecraft Transit Railway 4 fork for **Forge 1.20.1**. The performance-engine generations are **GLACIER Final** (release) and **AURORA** (experimental, targeting the observed 170 FPS reference).
+**Sillon** is an optimized Minecraft Transit Railway 4 fork. **SOLIS** is the experimental GPU-driven renderer generation for **Forge 1.20.1** and **Fabric 1.20.4**. SOLIS is source-integrated but not compiled or benchmarked; earlier GLACIER, STRATA, and PANAM branches remain available as baselines.
 
+- [SOLIS source architecture and JVM switches](docs/SILLON-SOLIS.md). SOLIS release JARs have **not** been built or validated.
 - [Sillon GLACIER Final releases](https://github.com/1GNTV/Minecraft-Transit-Railway/releases)
 - JCM / Joban Client Mod compatibility is a mandatory goal for AURORA; it requires verifying Mixin injection descriptors against compiled game classes, not only unit tests.
 - **Compatibility requirement:** retain MTR's `mtr` mod ID, `org.mtr.*` packages and upstream credits/licenses. The Sillon name applies to the fork and distributed artifact, *not* the embedded mod ID.

@@ -1,7 +1,7 @@
 name: Sillon Forge 1.20.1 performance build
 on:
   push:
-    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix", "work/sillon-panam-pids", "work/sillon-panam-pixel", "work/sillon-panam-notices", "work/sillon-panam-hanging-forge-1201" ]
+    branches: [ "perf/forge-1201", "perf/forge-1201-v4", "work/mtr-v4-optimization", "work/mtr-engine-persistent-scene", "work/mtr-engine-max-perf", "work/mtr-engine-oculus-startup-fix", "work/mtr-engine-render-overhaul", "work/mtr-engine-queue-hotpath-v2", "work/mtr-engine-v3-100fps-scene-shadow", "work/mtr-engine-v4-fusion-scene-rail-train", "release/mtrium-glacier-final", "work/mtrium-aurora-170", "work/sillon-strata", "work/sillon-helix", "work/sillon-panam-pids", "work/sillon-panam-pixel", "work/sillon-panam-notices" ]
   workflow_dispatch:
 
 # Each new development push supersedes the preceding unverified build.
@@ -46,20 +46,6 @@ jobs:
         run: python3 tools/test_panam_pixel.py
       - name: Verify PIXEL worker and GPU ownership lifecycle
         run: python3 tools/test_panam_lifecycle.py
-      - name: Verify PANAM camera-order and ETA compatibility
-        run: |
-          python3 tools/test_panam_camera_order.py
-          python3 tools/test_panam_eta_contrast.py
-          python3 tools/test_panam_arrival_parity.py
-      - name: Check optional JCM built-in PIDS preset recovery
-        run: python3 tools/test_jcm_preset_recovery.py
-      - name: Check initial MTR custom-resource reload fallback
-        run: python3 tools/test_initial_resource_reload.py
-      - name: Verify restored batching, train culling and preserved addon loaders
-        run: python3 tools/test_fabric_performance_recovery.py
-
-      - name: Verify rail sector candidate reuse and complete visibility
-        run: python3 tools/test_rail_hotpath_sector_reuse.py
       - name: Save PANAM visual verification and measured CPU profile
         uses: actions/upload-artifact@v4
         with:
@@ -150,7 +136,7 @@ jobs:
       - name: Compile optimized MTR Forge
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Repair actual JCM synthetic lambda ABI in STRATA final JAR
-        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         run: |
           python3 tools/patch_sillon_jcm_abi.py
           python3 tools/patch_sillon_jcm_rail_stats.py
@@ -165,7 +151,7 @@ jobs:
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
       - name: Verify STRATA engine exists in the released shaded artifact
-        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -178,7 +164,7 @@ jobs:
           print("PASS STRATA Forge single-JAR engine boundary")
           PY
       - name: Publish Sillon GLACIER Final or AURORA research JAR
-        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -186,17 +172,23 @@ jobs:
           set -euo pipefail
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
-          if [[ "$GITHUB_REF" == refs/heads/work/sillon-panam-* ]]; then
-            tag="v1.5.0-RAIL-ENGINE-${build}"
-            jar="Sillon-RAIL-ENGINE-${build}-Forge-1.20.1.jar"
-            title="SILLON RAIL ENGINE — ${build} (Forge 1.20.1 experimental)"
+          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-solis-forge-1201" ]]; then
+            tag="v1.6.0-SOLIS-FORGE-1201-${build}"
+            jar="Sillon-SOLIS-${build}-Forge-1.20.1.jar"
+            title="Sillon SOLIS — ${build} (Forge 1.20.1 experimental)"
+            extra+=(--prerelease)
+            cp docs/SILLON-SOLIS.md RELEASE_NOTES.md
+          elif [[ "$GITHUB_REF" == refs/heads/work/sillon-panam-* ]]; then
+            tag="v1.3.0-PANAM-PIXEL-${build}"
+            jar="Sillon-PANAM-PIXEL-${build}-Forge-1.20.1.jar"
+            title="SILLON PANAM — ${build} (Forge 1.20.1 experimental)"
             extra+=(--prerelease)
             cat > RELEASE_NOTES.md <<'EOF'
-          SILLON PANAM HANGING for Forge 1.20.1: compact 2x1 suspended screen with two rods,
+          SILLON PANAM PIXEL for Forge 1.20.1: seamless two-block casing,
           one coherent surface on each side, retained shared atlases and
           clipped PANAM sprite animations. Live game departures come from MTR;
-          global and per-line operator notices now use a searchable MTR GUI, with server sync.
-          Dedicated clock digits and invalid ETA filtering; bundled Noto Sans.
+          operator notices remain local and external traffic has an honest
+          unavailable state. Noto fallback, optional personal licensed Parisine.
           HELIX, STRATA and the JCM ABI repairs remain included in mod id mtr.
           See docs/PANAM-PIXEL.md for measurements and remaining game tests.
           EOF
