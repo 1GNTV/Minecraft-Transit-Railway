@@ -17,7 +17,7 @@ Status: source integrated on **both branches**; references are the user's real p
 - If a critical event exists alongside ordinary bulletins, the order is **critical / next network bulletin / critical / next network bulletin**, advancing the ordinary-bulletin cursor fairly.
 - With no critical event, rotate all messages in order. Display clocks advance independently. Changing arrivals alone does not reset the bulletin cycle.
 - Every event is still drawn by the existing independent right-hand column while the left-side train ETAs continue to update.
-- Current-route critical alerts can displace one lower-priority bulletin if the list is full, avoiding lost hazard reports. Global network notices are still included.
+- Current-route critical alerts interleave with network bulletins. The atlas holds at most eight at once; successive windows rotate all announcements, so a busy current line or a full global list cannot permanently hide other lines.
 - Only actual MTR/PN2 operator data is shown; **do not fabricate real-world alerts**.
 
 ## Validation and rollback
@@ -68,3 +68,45 @@ Vérification de cette révision : ressources JSON, géométrie, contrats de ré
 et syntaxe Java inspectés sans compilation du mod ni lancement du jeu.
 Le rendu en jeu et la compatibilité finale avec d’autres mods restent à vérifier
 lors d’une future session de test autorisée.
+
+## PANAM noir sous shaders — chemin de rendu
+
+L’interface est soumise directement au `GraphicsHolder` fourni par le renderer du
+bloc, au lieu d’être différée dans la file de l’entité globale MTR. Le buffer et
+la matrice restent ainsi dans le contexte de bloc qu’Iris/Oculus leur attribue.
+La file globale pouvait être consommée par une passe d’ombres avant la passe couleur,
+notamment si le shader ne dessinait pas les block entities dans les ombres.
+
+Le contenu LCD est ignoré pendant les passes d’ombres, avant toute mise à jour des
+timelines/atlas. Le boîtier reste une géométrie de bloc et conserve ses ombres.
+Les transformations sont relatives à l’origine native du bloc : les coordonnées
+monde/caméra ne sont plus ajoutées une deuxième fois. Les deux faces suspendues et
+l’écran seul conservent leur position, leurs réglages et leur couche texte full-bright.
+Le renderer global MTR, ses optimisations et les écrans d’addons sont inchangés.
+
+Référence de contexte : [dispatcher de block entities Iris 1.20.1](https://github.com/IrisShaders/Iris/blob/f8d7bea2ab82d21737e7aa8e4b2fb3a429078106/src/main/java/net/irisshaders/iris/mixin/entity_render_context/MixinBlockEntityRenderDispatcher.java)
+et sélection `TEXT_BE` dans le `MixinGameRenderer` de cette même révision.
+Vérifications sans build : syntaxe Java, ordre de rendu et parité des coordonnées.
+Le résultat visuel avec Complementary doit encore être testé dans Minecraft.
+
+## Informations de toutes les lignes et pastilles
+
+Le panneau de droite lit la totalité du snapshot d’annonces envoyé par le serveur,
+y compris les lignes qui ne desservent pas le quai. Chaque annonce garde le code
+et la couleur de sa propre ligne MTR : une annonce de ligne 10 montre sa pastille 10,
+même sur un écran dont les départs concernent la 12. Les messages réseau généraux
+utilisent un symbole métro sans leur attribuer artificiellement la ligne du quai.
+Les messages locaux gardent la pastille de la ligne affichée. Il s’agit des annonces
+configurées sur ce serveur ; aucun flux RATP externe n’est ajouté.
+
+Les annonces de formulations identiques restent distinctes lorsqu’elles concernent
+des lignes différentes. Le cache inclut ces métadonnées afin de remplacer la pastille
+si sa ligne ou sa couleur change. Les écrans suspendus et « écran seul » partagent ce
+comportement, sans modifier le bandeau de destination ni la couleur du boîtier.
+
+Les fenêtres de huit annonces tournent après un cycle complet : tous les messages
+réseau peuvent passer sans agrandir indéfiniment les atlas. Les alertes critiques de
+la ligne actuelle conservent leurs 12 secondes, intercalées avec les autres messages.
+Un arrêt sur une autre ligne ne suspend plus les départs de celle de l’écran.
+Vérifications isolées (sans build du mod) : rotation réelle de plus de huit annonces,
+priorités, non-confusion des lignes, invalidation du cache et pixels des pastilles.

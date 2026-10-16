@@ -24,6 +24,7 @@ public final class PanamSurface {
         public final List<String> destinations, notices, previousDestinations;
         /** 0=network, 1=line notice, 3=important incident on this line. */
         public final List<Integer> noticePriorities;
+        public final List<PanamNotice> noticeSources;
         public Spec(String line, String destination, int color, List<String> destinations, List<String> notices, boolean suspended, boolean last) {
             this(line,destination,color,destinations,notices,suspended,last,List.of());
         }
@@ -32,25 +33,35 @@ public final class PanamSurface {
                 java.util.Collections.nCopies(notices.size(),0));
         }
         public Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities){
-            this(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,null);
+            this(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,null,null);
         }
-        private Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities,PanamViewport viewport){
+        private Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities,PanamViewport viewport,List<PanamNotice> noticeSources){
             this.viewport=viewport;
             if(notices.size()!=noticePriorities.size())throw new IllegalArgumentException("PANAM notice priorities out of sync");
             this.line = line; this.destination = destination; this.color = color & 0xFFFFFF;
             this.destinations = List.copyOf(destinations); this.notices = List.copyOf(notices);
             this.previousDestinations=List.copyOf(previousDestinations);
             this.noticePriorities=List.copyOf(noticePriorities);
+            if(noticeSources==null){
+                ArrayList<PanamNotice> defaults=new ArrayList<>();
+                for(int i=0;i<notices.size();i++)defaults.add(new PanamNotice(line,color,notices.get(i),noticePriorities.get(i)));
+                this.noticeSources=List.copyOf(defaults);
+            }else{
+                if(noticeSources.size()!=notices.size())throw new IllegalArgumentException("PANAM notice badges out of sync");
+                for(int i=0;i<notices.size();i++)if(!noticeSources.get(i).message.equals(notices.get(i)))throw new IllegalArgumentException("PANAM notice badge/message mismatch");
+                this.noticeSources=List.copyOf(noticeSources);
+            }
             count = destinations.size(); mixed = destinations.stream().distinct().count() > 1;
             this.suspended = suspended; this.last = last && count == 1;
         }
-        public Spec withViewport(PanamViewport viewport){return new Spec(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,viewport);}
+        public Spec withViewport(PanamViewport viewport){return new Spec(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,viewport,noticeSources);}
+        public Spec withNoticeSources(List<PanamNotice> sources){return new Spec(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,viewport,sources);}
         @Override public boolean equals(Object other) {
             if (!(other instanceof Spec)) return false;
             Spec s = (Spec) other;
-            return Objects.equals(viewport,s.viewport) && color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations)&&noticePriorities.equals(s.noticePriorities);
+            return Objects.equals(viewport,s.viewport) && color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations)&&noticePriorities.equals(s.noticePriorities)&&noticeSources.equals(s.noticeSources);
         }
-        @Override public int hashCode() { return Objects.hash(viewport,line, destination, color, destinations, notices, suspended, last,previousDestinations,noticePriorities); }
+        @Override public int hashCode() { return Objects.hash(viewport,line, destination, color, destinations, notices, suspended, last,previousDestinations,noticePriorities,noticeSources); }
     }
     public static final class Sprite {
         public final int x, y, w, h, originX, originY;
@@ -84,7 +95,7 @@ public final class PanamSurface {
             for(int i=0;i<2;i++){Graphics2D sg=graphics(i==0?first:second);sg.setColor(new Color(0xFF1400));sg.setStroke(new BasicStroke(24,BasicStroke.CAP_BUTT,BasicStroke.JOIN_MITER));sg.draw(new Line2D.Float(i==0?171:15,15,i==0?15:171,171));sg.dispose();}
             strikeFirst=pack(first);strikeSecond=pack(second);
         }else{strikeFirst=dot;strikeSecond=dot;}
-        BufferedImage icon = blank(154,59); Graphics2D ig = graphics(icon); badges(ig,0,0,49.15f); ig.setColor(new Color(0x9EA9CF)); ig.setStroke(new BasicStroke(1.5f)); ig.drawRoundRect(111,15,30,30,4,4); text(ig,"i",122,17,20,regular,0x9EA9CF,20); ig.dispose(); infoIcon = pack(icon);
+        infoIcon=noticeIcon(PanamBulletins.INFO,spec.line,spec.color);
         rows = new Sprite[spec.mixed ? spec.count : 0];
         Map<String,Sprite> rowCache=new HashMap<>();
         for (int i=0;i<rows.length;i++) {
@@ -101,28 +112,11 @@ public final class PanamSurface {
             float fs=layout==null?32.768f:layout.font;
             wrapped(g,PanamBulletins.strip(message),0,0,fs,regular,0,nw,Math.max(1,(int)(nh/(fs*1.13f)))); g.dispose(); notices[i]=pack(notice);
             int kind=PanamBulletins.markedType(message);
-            if(kind==PanamBulletins.INFO){noticeIcons[i]=infoIcon;}
-            else {
-                BufferedImage indicator=blank(154,59);
-                Graphics2D noteG=graphics(indicator);
-                badges(noteG,0,0,49.15f);
-                int fill=kind==PanamBulletins.WORKS?0xF5A623:kind==PanamBulletins.DANGER?0xE44632:0xC92130;
-                noteG.setColor(new Color(fill));
-                noteG.fillRoundRect(106,15,31,31,6,6);
-                noteG.setColor(Color.WHITE);
-                if(kind==PanamBulletins.WORKS){
-                    noteG.setStroke(new BasicStroke(3.5f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
-                    noteG.draw(new Line2D.Float(116,23,128,36));noteG.draw(new Line2D.Float(128,23,116,36));
-                }else if(kind==PanamBulletins.DANGER){
-                    noteG.setStroke(new BasicStroke(3f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
-                    noteG.draw(new Line2D.Float(122,21,122,32));noteG.fillOval(120,36,4,4);
-                }else{
-                    noteG.setStroke(new BasicStroke(3.8f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
-                    noteG.draw(new Line2D.Float(115,24,129,38));noteG.draw(new Line2D.Float(129,24,115,38));
-                }
-                noteG.dispose();noticeIcons[i]=pack(indicator);
-            }
+            PanamNotice source=spec.noticeSources.get(i);
+            noticeIcons[i]=kind==PanamBulletins.INFO&&source.line.equals(spec.line)&&source.color==spec.color
+                    ?infoIcon:noticeIcon(kind,source.line,source.color);
         }
+
         int height=512; while(height<sy+shelf)height*=2;
         atlasWidth=canvas.getWidth();atlasHeight=height;
         // Keep logical atlas coordinates for UVs; raster density is independent.
@@ -234,16 +228,44 @@ public final class PanamSurface {
         if(!l.compact){g.setColor(Color.WHITE);g.fillRect((int)l.newsX,(int)l.newsY,(int)Math.ceil(l.newsW),(int)Math.ceil(l.newsH));}
         g.dispose();return img;
     }
-    private void badges(Graphics2D g,float x,float y,float size) {
+    private Sprite noticeIcon(int kind,String line,int color){
+        BufferedImage indicator=blank(154,59);Graphics2D g=graphics(indicator);
+        badges(g,0,0,49.15f,line,color);
+        if(kind==PanamBulletins.INFO){
+            g.setColor(new Color(0x9EA9CF));g.setStroke(new BasicStroke(1.5f));g.drawRoundRect(111,15,30,30,4,4);
+            text(g,"i",122,17,20,regular,0x9EA9CF,20);
+        }else{
+            int fill=kind==PanamBulletins.WORKS?0xF5A623:kind==PanamBulletins.DANGER?0xE44632:0xC92130;
+            g.setColor(new Color(fill));g.fillRoundRect(106,15,31,31,6,6);g.setColor(Color.WHITE);
+            if(kind==PanamBulletins.WORKS){
+                g.setStroke(new BasicStroke(3.5f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                g.draw(new Line2D.Float(116,23,128,36));g.draw(new Line2D.Float(128,23,116,36));
+            }else if(kind==PanamBulletins.DANGER){
+                g.setStroke(new BasicStroke(3f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                g.draw(new Line2D.Float(122,21,122,32));g.fillOval(120,36,4,4);
+            }else{
+                g.setStroke(new BasicStroke(3.8f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
+                g.draw(new Line2D.Float(115,24,129,38));g.draw(new Line2D.Float(129,24,115,38));
+            }
+        }
+        g.dispose();return pack(indicator);
+    }
+    private void badges(Graphics2D g,float x,float y,float size){badges(g,x,y,size,spec.line,spec.color);}
+    private void badges(Graphics2D g,float x,float y,float size,String line,int color) {
         g.setColor(new Color(0x25313B));g.fill(new Ellipse2D.Float(x,y,size,size));g.setColor(Color.WHITE);g.fill(new Ellipse2D.Float(x+size*.06f,y+size*.06f,size*.88f,size*.88f));
         g.setColor(new Color(0x25313B));g.setStroke(new BasicStroke(size*.085f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
         Path2D.Float m=new Path2D.Float();m.moveTo(x+size*.29,y+size*.71);m.lineTo(x+size*.29,y+size*.27);m.lineTo(x+size*.5,y+size*.56);m.lineTo(x+size*.71,y+size*.27);m.lineTo(x+size*.71,y+size*.71);g.draw(m);
-        float bx=x+size+3;g.setColor(new Color(spec.color));g.fill(new Ellipse2D.Float(bx,y,size,size));
-        int foreground=luminance(spec.color)>.6 ? 0 : WHITE;
-        g.setFont(bold.deriveFont(size*.64f));FontMetrics fm=g.getFontMetrics();float tw=fm.stringWidth(spec.line);
+        if(line.isEmpty())return;
+        float bx=x+size+3;g.setColor(new Color(color));g.fill(new Ellipse2D.Float(bx,y,size,size));
+        int foreground=luminance(color)>.6 ? 0 : WHITE;
+        g.setFont(bold.deriveFont(size*.64f));FontMetrics fm=g.getFontMetrics();float tw=fm.stringWidth(line);
         Font glyphFont = bold.deriveFont(size*.67f);
-        java.awt.font.GlyphVector gv = glyphFont.createGlyphVector(g.getFontRenderContext(), spec.line);
+        java.awt.font.GlyphVector gv = glyphFont.createGlyphVector(g.getFontRenderContext(), line);
         java.awt.geom.Rectangle2D visual = gv.getVisualBounds();
+        if(visual.getWidth()>size*.86f){
+            glyphFont=glyphFont.deriveFont((float)(glyphFont.getSize2D()*size*.86f/visual.getWidth()));
+            gv=glyphFont.createGlyphVector(g.getFontRenderContext(),line);visual=gv.getVisualBounds();
+        }
         g.setColor(new Color(foreground));
         g.drawGlyphVector(gv, bx + size/2f - (float)visual.getCenterX(),
                 y + size/2f - (float)visual.getCenterY());

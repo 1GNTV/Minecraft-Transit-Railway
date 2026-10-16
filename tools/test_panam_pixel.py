@@ -103,7 +103,7 @@ public class PixelOracle {
 '''.replace('List.of','java.util.List.of')
 with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
     target=Path(tmp);(target/'PixelOracle.java').write_text(HARNESS,encoding='utf-8')
-    sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java','PanamAdaptiveFrame.java','PanamLayout.java','PanamViewport.java')]
+    sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java','PanamAdaptiveFrame.java','PanamLayout.java','PanamViewport.java','PanamNotice.java','PanamNoticeFeed.java')]
     sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
     sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamScreenSettings.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(target),*map(str,sources),str(target/'PixelOracle.java')],check=True)
@@ -130,5 +130,5 @@ assert 'g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f)' in renderer
 assert sum('suspension' in x.get('comment','').lower() or 'ceiling anchor' in x.get('comment','').lower() for x in model['elements'])>=2
 assert sum('lower lip' in x.get('comment','').lower() or 'lip carrier' in x.get('comment','').lower() for x in model['elements'])>=2
 assert any(x['from'][1]<0 for x in model['elements']), 'lower lip hangs below baseline'
-assert 'noticePriorities' in renderer and 'appendNotice(' in renderer
+assert 'noticePriorities' in renderer and 'panel.noticeFeed.window(candidates,now)' in renderer
 print('PASS: SOLIS 2-block PANAM, stepped tilt shell, 2.6-degree actual screen tilt, suspension and critical-cycle timing')

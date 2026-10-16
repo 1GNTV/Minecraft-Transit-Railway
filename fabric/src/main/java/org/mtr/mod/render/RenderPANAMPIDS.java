@@ -7,6 +7,7 @@ import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.BlockEntityRenderer;
 import org.mtr.mapping.mapper.DirectionHelper;
 import org.mtr.mapping.mapper.GraphicsHolder;
+import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mod.InitClient;
 import org.mtr.mod.block.BlockPanamDisplayEntity;
 import org.mtr.mod.block.BlockPANAMPIDS;
@@ -28,6 +29,7 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
     private static final boolean DEBUG_ARRIVALS=Boolean.getBoolean("mtr.panam.debugArrivals");
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
+        final PanamNoticeFeed noticeFeed=new PanamNoticeFeed();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
         final HashSet<Long> servedRoutes=new HashSet<>();
         PanamSurface.Spec spec;
@@ -38,7 +40,10 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
     }
     public RenderPANAMPIDS(Argument dispatcher){super(dispatcher);}
     public static void reset(){PANELS.clear();PixelAtlasCache.INSTANCE.reset();PanamNewsClient.reset();}
-    @Override public void render(T entity,float tickDelta,GraphicsHolder ignored,int light,int overlay){
+    @Override public void render(T entity,float tickDelta,GraphicsHolder g,int light,int overlay){
+        // The housing is world geometry; emissive LCD pixels do not belong in the shadow map.
+        // Return before sampling/config/atlas work in an Iris/Oculus shadow invocation.
+        if(OptimizedRenderer.renderingShadows())return;
         World world=entity.getWorld2();if(world==null)return;BlockPos pos=entity.getPos2();
         if(!entity.canStoreData.test(world,pos))return;
         Direction facing=IBlock.getStatePropertySafe(world,pos,DirectionHelper.FACING);
@@ -68,39 +73,41 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.noticePriorities,now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
-        // Use the full-bright text layer, not world-lit EntityCutout or a
-        // camera-sorted translucent beacon layer. The UI needs alpha blending
-        // with a stable draw order, independent of player view angle.
-        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_2,(g,offset)->{
-            g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
-            for(int side=0;side<(screenOnly?1:2);side++){
-                if(screenOnly)transformScreen(g,pos,facing,offset,settings,entry.surface);else transform(g,pos,facing,offset,side);
+        // Draw while the vanilla block-entity dispatcher still owns the supplied
+        // matrix/buffer. Iris/Oculus wraps that buffer with block-entity context
+        // and selects TEXT_BE. Deferring to MainRenderer loses this context and
+        // lets a shadow pass consume the pending screen callbacks.
+        g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
+        for(int side=0;side<(screenOnly?1:2);side++){
+            if(screenOnly)transformScreen(g,facing,settings,entry.surface);else transform(g,pos,facing,side);
+            try {
                 final int[] layer={0};
                 PanamFrame.draw(entry.surface,panel.timeline,now,panel.hour,panel.minute,(s,x,y,w,h,alpha,cx,cy,cw,ch)->{
                     float left=Math.max(x,cx),top=Math.max(y,cy),right=Math.min(x+w,cx+cw),bottom=Math.min(y+h,cy+ch);
                     if(right<=left||bottom<=top||alpha<=0)return;
                     float u1=(s.x+(left-x)*s.w/w)/entry.surface.atlasWidth,u2=(s.x+(right-x)*s.w/w)/entry.surface.atlasWidth;
                     float v1=(s.y+(top-y)*s.h/h)/entry.surface.atlasHeight,v2=(s.y+(bottom-y)*s.h/h)/entry.surface.atlasHeight;
-                    // Keep overlays close to the casing: the previous .004f
-                    // step visibly pushed characters off the front face.
+                    // Ordered alpha sprites with the existing full-bright text layer.
                     float z=-.0006f*layer[0]++;
                     IDrawing.drawTexture(g,left,top,z,right,bottom,z,u1,v1,u2,v2,Direction.NORTH,((int)(alpha*255)<<24)|0xFFFFFF,GraphicsHolder.getDefaultLight());
                     PixelAtlasCache.INSTANCE.quad();
                 });
+            } finally {
                 g.pop();
             }
-        });
+        }
     }
-    private static void transformScreen(GraphicsHolder g,BlockPos pos,Direction facing,Vector3d offset,PanamScreenSettings s,PanamSurface surface){
-        g.push();g.translate(pos.getX()+.5+s.x-offset.getXMapped(),pos.getY()+.5+s.y-offset.getYMapped(),pos.getZ()+.5+s.z-offset.getZMapped());
+    private static void transformScreen(GraphicsHolder g,Direction facing,PanamScreenSettings s,PanamSurface surface){
+        g.push();g.translate(.5+s.x,.5+s.y,.5+s.z);
         g.rotateYDegrees(-facing.asRotation()+s.yaw);g.rotateXDegrees(s.pitch);g.rotateZDegrees(s.roll);
         g.rotateZDegrees(180);g.translate(-s.width/2,-s.height/2,0);
         g.scale(s.width/surface.spec.viewport.width,s.height/surface.spec.viewport.height,1);
     }
     @Override public boolean isInRenderDistance(T entity,Vector3d position){return true;}
-    private static void transform(GraphicsHolder g,BlockPos pos,Direction facing,Vector3d offset,int side){
+    private static void transform(GraphicsHolder g,BlockPos pos,Direction facing,int side){
         BlockPos next=pos.offset(facing);
-        g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
+        // The incoming block-entity matrix already contains pos - camera.
+        g.push();g.translate((next.getX()-pos.getX())*.5+.5,0,(next.getZ()-pos.getZ())*.5+.5);
         g.rotateYDegrees(90-facing.asRotation()+side*180);g.rotateZDegrees(180);
         // Positive local pitch becomes DOWNWARD-facing after rotateZ(180).
         // The upper edges are farther apart than the lower edges, as photographed.
@@ -164,61 +171,48 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
                     ArrivalsCacheClient.INSTANCE.getMillisOffset());
         }
         panel.suspended=panel.localSuspended;
-        // Global notices are never suppressed by a full local bulletin list.
-        ArrayList<String> notices = new ArrayList<>();
-        ArrayList<Integer> priorities = new ArrayList<>();
-        for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.global())) {
+        // All synchronized line bulletins belong to the network information feed,
+        // including routes that do not serve this platform. Each retains its badge.
+        ArrayList<PanamNotice> candidates=new ArrayList<>();
+        for(PanamBulletins.Bulletin item:PanamBulletins.decode(PanamNewsClient.global())){
             if(item.type==PanamBulletins.STOP)panel.suspended=true;
-            appendNotice(notices,priorities,PanamBulletins.marked(item),
-                item.type==PanamBulletins.STOP?3:0);
+            candidates.add(new PanamNotice("",0x808080,PanamBulletins.marked(item),item.type==PanamBulletins.STOP?3:0));
         }
-        if(panel.activeRouteId>=0)panel.servedRoutes.add(panel.activeRouteId);
-        for(long routeId:panel.servedRoutes) {
-            for (PanamBulletins.Bulletin item: PanamBulletins.decode(PanamNewsClient.forRoute(routeId))) {
-                if(item.type==PanamBulletins.STOP)panel.suspended=true;
-                String marked=PanamBulletins.marked(item);
-                // Route-specific danger/stop is urgent, but scheduled works is
-                // never treated as a safety alert. Other lines still rotate.
-                int importance=routeId==panel.activeRouteId
-                    ? ((item.type==PanamBulletins.DANGER || item.type==PanamBulletins.STOP)?3:1)
-                    : 0;
-                appendNotice(notices,priorities,marked,importance);
+        for(Map.Entry<Long,String> routeNews:new TreeMap<>(PanamNewsClient.routes()).entrySet()){
+            long routeId=routeNews.getKey();
+            SimplifiedRoute route=MinecraftClientData.getInstance().simplifiedRouteIdMap.get(routeId);
+            String badge=route==null?"?":firstLanguage(route.getName()).replaceFirst("(?i)^(ligne|line)\\s+","");
+            if(badge.isEmpty())badge="?";
+            int color=route==null?0x808080:route.getColor();
+            boolean sameLine=!badge.equals("?")&&badge.equals(panel.line)&&color==panel.color;
+            boolean current=routeId==panel.activeRouteId||sameLine||(panel.activeRouteId<0&&panel.servedRoutes.contains(routeId));
+            for(PanamBulletins.Bulletin item:PanamBulletins.decode(routeNews.getValue())){
+                // A shutdown on another line must never cancel this line's departures.
+                if(current&&item.type==PanamBulletins.STOP)panel.suspended=true;
+                int importance=current?((item.type==PanamBulletins.DANGER||item.type==PanamBulletins.STOP)?3:1):0;
+                candidates.add(new PanamNotice(badge,color,PanamBulletins.marked(item),importance));
             }
         }
-        for(String local:panel.notices)
-            appendNotice(notices,priorities,local,0);
-        if (notices.isEmpty()) appendNotice(notices,priorities,planned
-                ? "Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
-                : "Informations en temps réel indisponibles",0);
+        for(String local:panel.notices)candidates.add(new PanamNotice(panel.line,panel.color,local,0));
+        if(candidates.isEmpty())candidates.add(new PanamNotice("",0x808080,planned
+                ?"Horaires prévisionnels MTR.\nInformations voyageurs indisponibles."
+                :"Informations en temps réel indisponibles",0));
+        List<PanamNotice> visible=panel.noticeFeed.window(candidates,now);
+        ArrayList<String> notices=new ArrayList<>();ArrayList<Integer> priorities=new ArrayList<>();
+        for(PanamNotice notice:visible){notices.add(notice.message);priorities.add(notice.priority);}
         ArrayList<String> previous=new ArrayList<>();for(PanamFrame.Departure train:panel.timeline.previous)previous.add(train.destination);
-        PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous,priorities);
+        PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous,priorities).withNoticeSources(visible);
         if(entity instanceof BlockPANAMScreen.BlockEntity)next=next.withViewport(new PanamViewport(((BlockPANAMScreen.BlockEntity)entity).settings()));
         if(!next.equals(panel.spec)) {
             // Only restart the ticker when the actual bulletin sequence or its
             // priorities changes, not whenever departures update.
             if(panel.spec==null || !panel.spec.notices.equals(next.notices)
-                    || !panel.spec.noticePriorities.equals(next.noticePriorities))
+                    || !panel.spec.noticePriorities.equals(next.noticePriorities)
+                    || !panel.spec.noticeSources.equals(next.noticeSources))
                 panel.timeline.restartNotices(now);
             panel.spec=next;
         }
         panel.config=entity.pixelRevision();panel.revision=ArrivalsCacheClient.INSTANCE.revision();panel.network=network;panel.newsRevision=PanamNewsClient.revision();
-    }
-    private static void appendNotice(List<String> notices,List<Integer> priorities,String message,int priority) {
-        int index=notices.indexOf(message);
-        if(index>=0) {
-            priorities.set(index,Math.max(priorities.get(index),priority));
-        } else if(notices.size()<8) {
-            notices.add(message);
-            priorities.add(priority);
-        } else if(priority>=3) {
-            // A full network bulletin list must not hide an urgent alert on
-            // the currently served line. Keep the other seven messages alive.
-            for(int i=notices.size()-1;i>=0;i--)if(priorities.get(i)<3) {
-                notices.set(i,message);
-                priorities.set(i,priority);
-                break;
-            }
-        }
     }
     private static String firstLanguage(String value){return value==null?"":value.split("\\|",2)[0].split("\\(",2)[0].trim();}
     @Override public boolean rendersOutsideBoundingBox2(T entity){return true;}
