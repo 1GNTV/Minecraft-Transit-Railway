@@ -136,7 +136,7 @@ jobs:
       - name: Compile optimized MTR Forge
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Repair actual JCM synthetic lambda ABI in STRATA final JAR
-        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         run: |
           python3 tools/patch_sillon_jcm_abi.py
           python3 tools/patch_sillon_jcm_rail_stats.py
@@ -151,7 +151,7 @@ jobs:
           path: forge/build/reports/tests/test/
           if-no-files-found: ignore
       - name: Verify STRATA engine exists in the released shaded artifact
-        if: github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -164,7 +164,7 @@ jobs:
           print("PASS STRATA Forge single-JAR engine boundary")
           PY
       - name: Publish Sillon GLACIER Final or AURORA research JAR
-        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
+        if: github.ref == 'refs/heads/release/mtrium-glacier-final' || github.ref == 'refs/heads/work/mtrium-aurora-170' || github.ref == 'refs/heads/work/sillon-strata' || github.ref == 'refs/heads/work/sillon-solis-forge-1201' || (github.ref == 'refs/heads/work/sillon-helix' || startsWith(github.ref, 'refs/heads/work/sillon-panam-'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -172,7 +172,13 @@ jobs:
           set -euo pipefail
           build="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
           extra=()
-          if [[ "$GITHUB_REF" == refs/heads/work/sillon-panam-* ]]; then
+          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-solis-forge-1201" ]]; then
+            tag="v1.6.0-SOLIS-FORGE-1201-${build}"
+            jar="Sillon-SOLIS-${build}-Forge-1.20.1.jar"
+            title="Sillon SOLIS — ${build} (Forge 1.20.1 experimental)"
+            extra+=(--prerelease)
+            cp docs/SILLON-SOLIS.md RELEASE_NOTES.md
+          elif [[ "$GITHUB_REF" == refs/heads/work/sillon-panam-* ]]; then
             tag="v1.3.0-PANAM-PIXEL-${build}"
             jar="Sillon-PANAM-PIXEL-${build}-Forge-1.20.1.jar"
             title="SILLON PANAM — ${build} (Forge 1.20.1 experimental)"

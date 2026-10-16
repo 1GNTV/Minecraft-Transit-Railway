@@ -34,8 +34,8 @@ public final class GpuDrivenInstanceRenderer {
     private static final String SHADER="""
         #version 430 core
         layout(local_size_x=64) in;
-        layout(std430,binding=0) readonly buffer Incoming { float inputData[]; };
-        layout(std430,binding=1) writeonly buffer Outgoing { float outputData[]; };
+        layout(std430,binding=0) readonly buffer Incoming { uint inputData[]; };
+        layout(std430,binding=1) writeonly buffer Outgoing { uint outputData[]; };
         layout(std430,binding=2) buffer Indirect { uint command[]; };
         uniform uint mtr_Count;
         uniform mat4 mtr_ViewProjection;
@@ -45,10 +45,10 @@ public final class GpuDrivenInstanceRenderer {
             if(id>=mtr_Count) return;
             uint base=id*19u;
             mat4 model=mat4(
-                vec4(inputData[base],inputData[base+1u],inputData[base+2u],inputData[base+3u]),
-                vec4(inputData[base+4u],inputData[base+5u],inputData[base+6u],inputData[base+7u]),
-                vec4(inputData[base+8u],inputData[base+9u],inputData[base+10u],inputData[base+11u]),
-                vec4(inputData[base+12u],inputData[base+13u],inputData[base+14u],inputData[base+15u])
+                vec4(uintBitsToFloat(inputData[base]),uintBitsToFloat(inputData[base+1u]),uintBitsToFloat(inputData[base+2u]),uintBitsToFloat(inputData[base+3u])),
+                vec4(uintBitsToFloat(inputData[base+4u]),uintBitsToFloat(inputData[base+5u]),uintBitsToFloat(inputData[base+6u]),uintBitsToFloat(inputData[base+7u])),
+                vec4(uintBitsToFloat(inputData[base+8u]),uintBitsToFloat(inputData[base+9u]),uintBitsToFloat(inputData[base+10u]),uintBitsToFloat(inputData[base+11u])),
+                vec4(uintBitsToFloat(inputData[base+12u]),uintBitsToFloat(inputData[base+13u]),uintBitsToFloat(inputData[base+14u]),uintBitsToFloat(inputData[base+15u]))
             );
             mat4 clip=mtr_ViewProjection*model;
             uint common=63u;
@@ -74,7 +74,7 @@ public final class GpuDrivenInstanceRenderer {
 
     public static boolean potential(RenderCallData call) {
         return SillonMegaEngine.GPU_DRIVEN && SillonMegaEngine.INSTANCES
-            && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.computeCull","false"))
+            && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.computeCull","true"))
             && (call.mtr$family()==RenderPipelineMetrics.Family.TRAIN
              || call.mtr$family()==RenderPipelineMetrics.Family.RAIL)
             && Utilities.canUseCustomShader() && !OptimizedRenderer.renderingShadows()

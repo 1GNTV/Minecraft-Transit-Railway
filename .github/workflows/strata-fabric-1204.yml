@@ -102,11 +102,20 @@ jobs:
         run: |
           set -euo pipefail
           version="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
-          tag="v1.5.0-RAIL-ENGINE-FABRIC-1204-${version}"
-          artifact="Sillon-RAIL-ENGINE-${version}-Fabric-1.20.4.jar"
+          if [[ "$GITHUB_REF" == "refs/heads/work/sillon-solis-fabric-1204" ]]; then
+            tag="v1.6.0-SOLIS-FABRIC-1204-${version}"
+            artifact="Sillon-SOLIS-${version}-Fabric-1.20.4.jar"
+            title="Sillon SOLIS ${version} — Fabric 1.20.4 (experimental)"
+            notes="docs/SILLON-SOLIS.md"
+          else
+            tag="v1.5.0-RAIL-ENGINE-FABRIC-1204-${version}"
+            artifact="Sillon-RAIL-ENGINE-${version}-Fabric-1.20.4.jar"
+            title="SILLON RAIL ENGINE ${version} — Fabric 1.20.4 (experimental)"
+            notes="docs/STRATA-FABRIC-1204.md"
+          fi
           cp "$SILLON_JAR_PATH" "$artifact"
           sha256sum "$artifact" > "$artifact.sha256"
           gh release create "$tag" "$artifact" "$artifact.sha256" \
             --target "$GITHUB_SHA" --prerelease \
-            --title "SILLON RAIL ENGINE ${version} — Fabric 1.20.4 (experimental)" \
-            --notes-file docs/STRATA-FABRIC-1204.md
+            --title "$title" \
+            --notes-file "$notes"

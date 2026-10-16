@@ -82,13 +82,17 @@ public final class OculusInstanceRenderer {
             if(locations.overlays>=0)GL33.glUniform2iv(locations.overlays,OVERLAYS);
             GL33.glUniform1i(locations.mode,1);
             RenderPipelineMetrics.drawing(first.mtr$family());
-            GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES,first.mtr$array().indexBuffer.getVertexCount(),first.mtr$array().indexBuffer.indexType,0L,count);
+            if(!OculusGpuIndirectCommand.draw(calls,start,end,
+                first.mtr$array().indexBuffer.getVertexCount(),first.mtr$array().indexBuffer.indexType))
+                GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES,
+                    first.mtr$array().indexBuffer.getVertexCount(),
+                    first.mtr$array().indexBuffer.indexType,0L,count);
             submitted=true;
             RenderPipelineMetrics.instancedDraw(first.mtr$array().indexBuffer.getVertexCount(),count);
         }catch(RuntimeException error){failed=true;Init.LOGGER.error("MTR Oculus instances reverted to ordinary draws",error);}
         finally{GL33.glUniform1i(locations.mode,0);}
         return submitted;
     }
-    public static void clear(){PROGRAMS.clear();failed=false;shaderSourcesPatched=false;}
+    public static void clear(){PROGRAMS.clear();failed=false;shaderSourcesPatched=false;OculusGpuIndirectCommand.clear();}
     public static void invalidatePrograms(){PROGRAMS.clear();failed=false;}
 }

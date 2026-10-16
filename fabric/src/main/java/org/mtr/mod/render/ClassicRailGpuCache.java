@@ -34,7 +34,12 @@ import java.util.*;
  * pending. CPU-side rail geometry/light sampling is still performed each pass.
  */
 public final class ClassicRailGpuCache {
-    public static final boolean ENABLED=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.classicGpu","false"));
+    private static final boolean LEGACY_GPU=Boolean.getBoolean("mtr.engine.classicGpu");
+    // The new GPU-driven path is opt-in until shaderless visual parity is
+    // confirmed. Explicit legacy opt-in keeps its former behavior.
+    public static final boolean ENABLED=LEGACY_GPU ||
+        (SillonMegaEngine.GPU_DRIVEN && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.classicGpu","true")));
+    private static final Map<Identifier,MaterialProperties> MATERIALS=new HashMap<>();
     private static final int MAX_PAGES=Math.max(16,Math.min(512,Integer.getInteger("mtr.engine.classicGpuPages",192)));
     private static final int MAX_VERTICES=Math.max(131_072,Math.min(2_097_152,Integer.getInteger("mtr.engine.classicGpuVertices",786_432)));
     private static final LinkedHashMap<Key,Page> PAGES=new LinkedHashMap<>(64,.75f,true);
@@ -101,7 +106,8 @@ public final class ClassicRailGpuCache {
                                 double[] coordinates,int[] lights,float[] stripes,
                                 float u1,float v1,float u2,float v2,
                                 double yOffset,double smallOffset,int color) {
-        if(!ENABLED||failed||rail==null||coordinates.length!=lights.length*10
+        if(!ENABLED||(!LEGACY_GPU && !Utilities.canUseCustomShader())||failed
+                ||rail==null||coordinates.length!=lights.length*10
                 ||lights.length==0||lights.length>256||stripes.length!=lights.length
                 ||!OptimizedRenderer.hasOptimizedRendering()||GlStateTracker.isGl4ES())return false;
         final Key key=new Key(rail,texture,pageIndex);
@@ -165,7 +171,10 @@ public final class ClassicRailGpuCache {
         double ox=Math.floor(positions[0]/16D)*16D;
         double oy=Math.floor((positions[8]+yOffset)/16D)*16D;
         double oz=Math.floor(positions[1]/16D)*16D;
-        MaterialProperties material=new MaterialProperties(OptimizedModel.ShaderType.CUTOUT,texture,null);
+        // Keep identical default-rail textures bound to exactly one material
+        // identity, so the cross-model GPU atlas can merge several rail pages.
+        MaterialProperties material=MATERIALS.computeIfAbsent(texture,
+            key->new MaterialProperties(OptimizedModel.ShaderType.CUTOUT,key,null));
         RawMesh raw=new RawMesh(material);
         HashSet<Long> columns=new HashSet<>();
         float uu1=u1<0?0:u1,uu2=u2<0?1:u2;
@@ -199,6 +208,7 @@ public final class ClassicRailGpuCache {
         try{
             mesh=FastRegionMeshUploader.upload(raw,mapping);
             array=new VertexArray(mesh,mapping);
+            ModelPartVisibility.retain(array,raw);
             OptimizedModelWrapper model=OptimizedModelWrapper.fromUploadedModel(
                 new OptimizedModel(List.of(array)));
             return new Page(array,mesh,model,coordinatesCopy(positions),lights.clone(),stripes.clone(),
@@ -250,6 +260,6 @@ public final class ClassicRailGpuCache {
     }
     public static void clear(){
         PAGES.values().forEach(ClassicRailGpuCache::release);
-        PAGES.clear();residentVertices=0;failed=false;
+        PAGES.clear();MATERIALS.clear();residentVertices=0;failed=false;
     }
 }
