@@ -323,5 +323,5 @@ public final class RailSectorBatcher {
         }
     }
     public static void clear(){RAIL_PLANS.clear();clearStaticScenes();ClassicRailSceneCache.clear();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
-    public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
+    public static void reload(){clear();GpuDrivenRailCommands.clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }

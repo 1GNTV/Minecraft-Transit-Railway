@@ -41,7 +41,7 @@ public final class InstancedModelRenderer {
     private static long submittedGroups, submittedInstances, uploads, reused, busy;
 
     private static final class Page {
-        int vao, buffer, capacity, count;
+        int vao, buffer, inputBuffer, indirectBuffer, capacity, count;
         long fence;
         int[] values;
         boolean available() {
@@ -60,7 +60,9 @@ public final class InstancedModelRenderer {
             if (fence != 0) GL33.glDeleteSync(fence);
             if (vao != 0) GL33.glDeleteVertexArrays(vao);
             if (buffer != 0) GL33.glDeleteBuffers(buffer);
-            fence = 0; vao = buffer = 0; values = null;
+            if (inputBuffer != 0) GL33.glDeleteBuffers(inputBuffer);
+            if (indirectBuffer != 0) GL33.glDeleteBuffers(indirectBuffer);
+            fence = 0; vao = buffer = inputBuffer = indirectBuffer = 0; values = null;
         }
     }
     private static final class Slot {
@@ -150,6 +152,11 @@ public final class InstancedModelRenderer {
             SCRATCH.putShort(base+72,(short)(overlay==null?0:overlay>>>16));SCRATCH.putShort(base+74,(short)(overlay==null?0:(int)overlay));
         }
         SCRATCH.asIntBuffer().get(0, VALUES, 0, count * WORDS);
+        // Real GPU culling only operates on sufficiently large opaque,
+        // shaderless train/rail model groups. A missing mesh bound, GL4.3 or
+        // failed shader always returns to the original instanced renderer.
+        final boolean gpuCandidate=GpuDrivenInstanceRenderer.supported(count,first);
+        final float[] gpuBounds=gpuCandidate?ModelPartVisibility.gpuBounds(source):null;
         Slot slot = SLOTS.get(source);
         if (slot == null) {
             if (SLOTS.size() == MAX_SLOTS) {
@@ -158,29 +165,49 @@ public final class InstancedModelRenderer {
             slot = new Slot(source); SLOTS.put(source, slot);
         }
         Page page = null;
-        for (Page candidate : slot.pages) if (candidate != null && candidate.same(count)) { page = candidate; reused++; break; }
+        // GPU output depends on camera orientation and compute compaction.
+        // A previous CPU/VBO cache hit may never substitute for that output.
+        if (!gpuCandidate)
+            for (Page candidate : slot.pages) if (candidate != null && candidate.same(count)) {
+                page = candidate; reused++; break;
+            }
         if (page == null) {
             for (int i = 0; i < PAGES; i++) {
                 if (slot.pages[i] == null) slot.pages[i] = createPage(source);
                 if (slot.pages[i].available()) { page = slot.pages[i]; break; }
             }
             if (page == null) { busy++; return false; }
-            GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, page.buffer);
-            int bytes = count * MATRIX_BYTES;
-            if (page.capacity < bytes) {
-                page.capacity = Integer.highestOneBit(bytes - 1) << 1;
-                GL33.glBufferData(GL33.GL_ARRAY_BUFFER, page.capacity, GL33.GL_STREAM_DRAW);
+            if (!gpuCandidate) {
+                GL33.glBindBuffer(GL33.GL_ARRAY_BUFFER, page.buffer);
+                int bytes = count * MATRIX_BYTES;
+                if (page.capacity < bytes) {
+                    page.capacity = Integer.highestOneBit(bytes - 1) << 1;
+                    GL33.glBufferData(GL33.GL_ARRAY_BUFFER, page.capacity, GL33.GL_STREAM_DRAW);
+                }
+                SCRATCH.position(0).limit(bytes);
+                GL33.glBufferSubData(GL33.GL_ARRAY_BUFFER, 0, SCRATCH);
+                if (page.values == null || page.values.length < count * WORDS) page.values = new int[page.capacity / Integer.BYTES];
+                System.arraycopy(VALUES, 0, page.values, 0, count * WORDS); page.count = count; uploads++;
             }
-            SCRATCH.position(0).limit(bytes);
-            GL33.glBufferSubData(GL33.GL_ARRAY_BUFFER, 0, SCRATCH);
-            if (page.values == null || page.values.length < count * WORDS) page.values = new int[page.capacity / Integer.BYTES];
-            System.arraycopy(VALUES, 0, page.values, 0, count * WORDS); page.count = count; uploads++;
         }
         GL33.glBindVertexArray(page.vao);
         first.mtr$attributes().apply();
         source.materialProperties.vertexAttributeState.apply();
         RenderPipelineMetrics.drawing(first.mtr$family());
-        GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES, source.indexBuffer.getVertexCount(), source.indexBuffer.indexType, 0L, count);
+        if (gpuCandidate) {
+            if(page.inputBuffer==0)page.inputBuffer=GL33.glGenBuffers();
+            if(page.indirectBuffer==0)page.indirectBuffer=GL33.glGenBuffers();
+            // The compute pass writes a compacted instance VBO and updates
+            // DrawElementsIndirectCommand.instanceCount without CPU readback.
+            if(!GpuDrivenInstanceRenderer.draw(page.vao,page.inputBuffer,page.buffer,
+                page.indirectBuffer,SCRATCH,count,source.indexBuffer.getVertexCount(),
+                source.indexBuffer.indexType,gpuBounds))return false;
+            // The compacted VBO must not be mistaken for a reusable CPU upload.
+            page.values=null;page.count=0;page.capacity=0;
+        } else {
+            GL33.glDrawElementsInstanced(GL33.GL_TRIANGLES, source.indexBuffer.getVertexCount(),
+                source.indexBuffer.indexType, 0L, count);
+        }
         // A submitted draw must never be replayed if diagnostics/fence bookkeeping fails.
         try {
             RenderPipelineMetrics.instancedDraw(source.indexBuffer.getVertexCount(), count);
@@ -228,11 +255,12 @@ public final class InstancedModelRenderer {
 
     public static void clear() {
         if (!RenderSystem.isOnRenderThread()) { RenderSystem.recordRenderCall(InstancedModelRenderer::clear); return; }
-        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false; OculusInstanceRenderer.clear();
+        SLOTS.values().forEach(Slot::close); SLOTS.clear(); failed = false; OculusInstanceRenderer.clear(); GpuDrivenInstanceRenderer.clear();
         submittedGroups = submittedInstances = uploads = reused = busy = 0;
     }
     public static void report() {
         if (submittedGroups != 0 || busy != 0) Init.LOGGER.info("MTR Next instances: groups={}, instances={}, uploads={}, reused={}, busy-fallbacks={}, resident-slots={}", submittedGroups, submittedInstances, uploads, reused, busy, SLOTS.size());
+        GpuDrivenInstanceRenderer.report();
         submittedGroups = submittedInstances = uploads = reused = busy = 0;
     }
 }
