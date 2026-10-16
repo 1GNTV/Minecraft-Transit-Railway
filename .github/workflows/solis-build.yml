@@ -29,7 +29,14 @@ jobs:
         with:
           node-version: '20'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Cache website resources
+        id: solis-website-cache
+        uses: actions/cache@v4
+        with:
+          path: website/dist
+          key: solis-website-1.20.1-${{ runner.os }}-${{ hashFiles('website/package-lock.json', 'website/src/**', 'fabric/src/main/java/org/mtr/core/**') }}
       - name: Website resources
+        if: steps.solis-website-cache.outputs.cache-hit != 'true'
         run: |
           chmod +x gradlew
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.1
@@ -77,7 +84,14 @@ jobs:
         with:
           node-version: '20'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Cache website resources
+        id: solis-website-cache
+        uses: actions/cache@v4
+        with:
+          path: website/dist
+          key: solis-website-1.20.4-${{ runner.os }}-${{ hashFiles('website/package-lock.json', 'website/src/**', 'fabric/src/main/java/org/mtr/core/**') }}
       - name: Website resources
+        if: steps.solis-website-cache.outputs.cache-hit != 'true'
         run: |
           chmod +x gradlew
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.4

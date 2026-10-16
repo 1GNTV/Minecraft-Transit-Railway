@@ -106,7 +106,8 @@ public final class ClassicRailSceneCache {
                 double nearZ = Math.max(minZ, Math.min(ez, minZ + (1 << SECTOR_SHIFT)));
                 if ((nearX-ex)*(nearX-ex)+(nearZ-ez)*(nearZ-ez) > radius2) continue;
                 for (Piece piece : sector.pieces) {
-                    double[] p = piece.p, dx = p[0]-ex, dz = p[1]-ez;
+                    double[] p = piece.p;
+                    double dx = p[0] - ex, dz = p[1] - ez;
                     double squared = dx*dx+dz*dz;
                     if (squared <= radius2 && (squared < 1024 ||
                         dx*nx+(p[8]-ey)*ny+dz*nz > -0.00001)) {
