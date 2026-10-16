@@ -9,7 +9,7 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 src=(root/"fabric/src/main/java/org/mtr/mod/render/RenderPANAMPIDS.java").read_text()
 layers=(root/"fabric/src/main/java/org/mtr/mod/render/MoreRenderLayers.java").read_text()
-assert 'QueuedRenderLayer.LIGHT_2' in src
+assert 'GraphicsHolder g,int light,int overlay)' in src
 assert 'g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));' in src
 assert 'RenderLayer.getText(texture)' in layers
 assert 'QueuedRenderLayer.LIGHT_TRANSLUCENT' not in src
@@ -19,7 +19,8 @@ assert 'for(int side=0;side<(screenOnly?1:2);side++)' in src
 assert 'if(front<=0)return;' in src, 'text layers must never expose the screen back'
 assert 'PanamFrame.draw(entry.surface,panel.timeline' in src
 assert 'PixelAtlasCache.INSTANCE.get(panel.spec,now)' in src
-assert 'renderingShadows()' not in src
+assert 'if(OptimizedRenderer.renderingShadows())return;' in src
+assert 'MainRenderer.scheduleRender(' not in src, 'PANAM must retain the block-entity shader buffer/context'
 assert 'class Panel' in src
 # With an ordered, unsorted cutout pass, looking left/right doesn't reorder
 # sprites. Their local Z order remains strictly toward the face's viewer.

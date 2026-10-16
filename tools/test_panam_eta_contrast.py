@@ -11,7 +11,7 @@ assert 'arrivals.sort(' not in panam
 assert 'getMillisOffset()' in panam and 'getMillisOffset()' in mtr
 assert 'if(!entity.getPlatformIds().isEmpty())panel.platforms.addAll(entity.getPlatformIds());' in panam
 assert 'GraphicsHolder.getDefaultLight()' in panam
-assert 'QueuedRenderLayer.LIGHT_2' in panam
+assert 'MainRenderer.scheduleRender(' not in panam
 assert 'MoreRenderLayers.getLight2(entry.texture)' in panam
 assert 'RenderLayer.getText(texture)' in layers
 assert 'mtr.panam.debugArrivals' in panam

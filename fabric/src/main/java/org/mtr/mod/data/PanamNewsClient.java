@@ -39,4 +39,9 @@ public final class PanamNewsClient {
     public static String forRoute(long route) {
         return byRoute.getOrDefault(route, "");
     }
+
+    /** Immutable full-network snapshot, including lines not serving this station. */
+    public static Map<Long,String> routes() {
+        return byRoute;
+    }
 }
