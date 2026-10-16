@@ -17,12 +17,27 @@ public final class RailGeometrySnapshots {
     // One bounded strong hot entry avoids repeating WeakHashMap hashing.
     private static OptimizedModel hotModel;
     private static Snapshot hotSnapshot;
+    // Cache the total retained vertex budget. WeakHashMap expunges reclaimed
+    // keys on size(), so only a GC size change requires recounting values.
+    // The former values().stream().sum() rescanned EVERY model on each upload.
+    private static int retainedVertices, retainedEntries;
+    private static int currentRetainedVertices() {
+        int size=SNAPSHOTS.size();
+        if(size!=retainedEntries) {
+            int total=0;
+            for(Snapshot existing:SNAPSHOTS.values())total+=existing.vertices();
+            retainedVertices=total;
+            retainedEntries=size;
+        }
+        return retainedVertices;
+    }
     public record Chunk(List<RawMesh> meshes, int vertices) {}
     public record Snapshot(List<Chunk> chunks, int vertices, OptimizedModelWrapper remainder) {}
     private RailGeometrySnapshots() {}
     public static void retain(OptimizedModel model, List<RawMesh> meshes, List<VertexArray> arrays) {
         if (!ENABLED || meshes.size()!=arrays.size()) return;
-        int retained=SNAPSHOTS.values().stream().mapToInt(Snapshot::vertices).sum();
+        Snapshot replacing=SNAPSHOTS.get(model);
+        int retained=currentRetainedVertices()-(replacing==null?0:replacing.vertices());
         List<Chunk> chunks=new ArrayList<>(); List<VertexArray> residual=new ArrayList<>(); int count=0;
         for(int i=0;i<meshes.size();i++) {
             RawMesh mesh=meshes.get(i);
@@ -36,6 +51,8 @@ public final class RailGeometrySnapshots {
         if(chunks.isEmpty())return;
         Snapshot value=new Snapshot(List.copyOf(chunks),count,residual.isEmpty()?null:OptimizedModelWrapper.fromUploadedModel(new OptimizedModel(residual)));
         SNAPSHOTS.put(model,value);hotModel=model;hotSnapshot=value;
+        retainedVertices=retained+count;
+        retainedEntries=SNAPSHOTS.size();
     }
     static List<Chunk> split(RawMesh mesh) {
         List<Chunk> result=new ArrayList<>(); RawMesh page=new RawMesh(mesh.materialProperties);Map<Integer,Integer> remap=new HashMap<>();
@@ -54,5 +71,5 @@ public final class RailGeometrySnapshots {
         if(model==hotModel)return hotSnapshot;
         hotModel=model;hotSnapshot=SNAPSHOTS.get(model);return hotSnapshot;
     }
-    public static void clear() { SNAPSHOTS.clear(); hotModel=null;hotSnapshot=null; }
+    public static void clear() { SNAPSHOTS.clear(); hotModel=null;hotSnapshot=null; retainedVertices=retainedEntries=0; }
 }
