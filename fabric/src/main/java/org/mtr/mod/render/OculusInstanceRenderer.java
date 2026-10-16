@@ -11,9 +11,9 @@ import java.util.*;
 public final class OculusInstanceRenderer {
     private record Locations(int mode,int model,int inverse,int normal,int mask,int colors,int lights,int overlays) {}
     private static final Map<Integer,Locations> PROGRAMS=new HashMap<>();
-    private static final FloatBuffer MODELS=buffer(8*16),INVERSES=buffer(8*16),NORMALS=buffer(8*9),ONE=buffer(16);
-    private static final FloatBuffer COLORS=buffer(8*4);
-    private static final IntBuffer LIGHTS=ByteBuffer.allocateDirect(8*8).order(ByteOrder.nativeOrder()).asIntBuffer(),OVERLAYS=ByteBuffer.allocateDirect(8*8).order(ByteOrder.nativeOrder()).asIntBuffer();
+    private static final FloatBuffer MODELS=buffer(InstanceShaderSource.CAPACITY*16),INVERSES=buffer(InstanceShaderSource.CAPACITY*16),NORMALS=buffer(InstanceShaderSource.CAPACITY*9),ONE=buffer(16);
+    private static final FloatBuffer COLORS=buffer(InstanceShaderSource.CAPACITY*4);
+    private static final IntBuffer LIGHTS=ByteBuffer.allocateDirect(InstanceShaderSource.CAPACITY*8).order(ByteOrder.nativeOrder()).asIntBuffer(),OVERLAYS=ByteBuffer.allocateDirect(InstanceShaderSource.CAPACITY*8).order(ByteOrder.nativeOrder()).asIntBuffer();
     private static final org.joml.Matrix4f MATRIX=new org.joml.Matrix4f();
     private static final org.joml.Matrix3f NORMAL=new org.joml.Matrix3f();
     private static boolean failed, shaderSourcesPatched;
@@ -41,7 +41,7 @@ public final class OculusInstanceRenderer {
      * and repeated uniform location lookups entirely. */
     public static boolean shaderBridgeReady(){return shaderSourcesPatched && !failed;}
     public static boolean draw(List<?> calls,int start,int end){
-        if(failed || end-start>8)return false;
+        if(failed || end-start>InstanceShaderSource.CAPACITY)return false;
         RenderCallData first=(RenderCallData)calls.get(start);
         int program=GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM);
         if(program==0)return false;

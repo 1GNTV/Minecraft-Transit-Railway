@@ -8,6 +8,9 @@ import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.ClientWorld;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Iterator;
 /** Persistent solid rail regions, including Oculus; per-segment selection remains unchanged. */
 public final class RailSectorBatcher {
     private static final StaticRegionRenderer REGIONS=new StaticRegionRenderer(RenderPipelineMetrics.Family.RAIL);
@@ -63,13 +66,34 @@ public final class RailSectorBatcher {
     private static final boolean RETAIN_RAIL_PLANS=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.railPlans","true"));
     private static final RailRenderPlanCache<RailPiece[]> RAIL_PLANS=new RailRenderPlanCache<>();
     private static Object planWorld;
+    // Camera-independent scene plan: retain prepared rail pieces across views.
+    private static final int SCENE_MAX=512, PIECE_MAX=65536, TRACK_MAX=4096;
+    private static int scenePieces;
+    private static final Map<SceneKey,RailPiece[]> STATIC_SCENES=new LinkedHashMap<>(64,.75f,true);
+    private static final class SceneKey {
+        final RailMath rail;final RailResource resource;final boolean flip;final int hash;
+        SceneKey(RailMath rail,RailResource resource,boolean flip){
+            this.rail=rail;this.resource=resource;this.flip=flip;
+            hash=31*(31*System.identityHashCode(rail)+System.identityHashCode(resource))+Boolean.hashCode(flip);
+        }
+        @Override public int hashCode(){return hash;}
+        @Override public boolean equals(Object other){
+            return other instanceof SceneKey k && rail==k.rail && resource==k.resource && flip==k.flip;
+        }
+    }
+    private static void clearStaticScenes(){STATIC_SCENES.clear();scenePieces=0;}
     private static final class RailPiece {
         private final Prepared prepared;
         private final BlockPos lightPosition;
         private StaticRegionRenderer.ReplayToken ticket;
         private int cachedLight=Integer.MIN_VALUE;
+        final double sampleX,sampleY,sampleZ;
         RailPiece(Prepared prepared,BlockPos lightPosition){
+            this(prepared,lightPosition,Double.NaN,Double.NaN,Double.NaN);
+        }
+        RailPiece(Prepared prepared,BlockPos lightPosition,double x,double y,double z){
             this.prepared=prepared;this.lightPosition=lightPosition;
+            sampleX=x;sampleY=y;sampleZ=z;
         }
         Prepared prepared(){return prepared;}
         BlockPos lightPosition(){return lightPosition;}
@@ -134,6 +158,7 @@ public final class RailSectorBatcher {
             networkPartialInvalidations++;
         }
         RAIL_PLANS.clear();
+        clearStaticScenes();
         appliedNetworkRevision=revision;
     }
     public static boolean queue(RailResource resource,StoredMatrixTransformations fallback,double x,double y,double z,float yaw,float pitch,float roll,int light){
@@ -187,26 +212,60 @@ public final class RailSectorBatcher {
         // One model validation per rail, not per segment. Replay tickets own
         // immutable ScenePlan instances; dynamic light still samples each pass.
         var currentModel=REGIONS.modelForReplay(resource);
-        for(RailPiece piece:pieces){
-            Prepared prepared=piece.prepared();
-            Location location=prepared.location();
-            int light=RailLightFrameCache.get(clientWorld,piece.lightPosition());
-            if(piece.cachedLight==light
-                    && REGIONS.replay(piece.ticket,clientWorld.data,currentModel,light))
-                continue;
-            // First occurrence, changed light/model or invalidated network:
-            // resolve the normal production path and capture a new ticket.
-            if(REGIONS.queue(resource,prepared.transform(),location,
-                    location.x,location.y,location.z,prepared.matrix(),light)){
-                piece.ticket=REGIONS.capture(location,location.x,location.y,location.z);
-                piece.cachedLight=light;
-            }else{
-                piece.ticket=null;
-                piece.cachedLight=Integer.MIN_VALUE;
-                resource.render(prepared.transform(),light);
+        for(RailPiece piece:pieces)submitPiece(piece,resource,clientWorld,currentModel);
+        return true;
+    }
+
+    /** Shared submission: original region GPU page, live lighting, safe fallback. */
+    private static void submitPiece(RailPiece piece,RailResource resource,ClientWorld world,
+            org.mtr.mod.resource.OptimizedModelWrapper model){
+        Prepared prep=piece.prepared();Location loc=prep.location();
+        int light=RailLightFrameCache.get(world,piece.lightPosition());
+        if(piece.cachedLight==light && REGIONS.replay(piece.ticket,world.data,model,light))return;
+        if(REGIONS.queue(resource,prep.transform(),loc,
+                loc.x,loc.y,loc.z,prep.matrix(),light)){
+            piece.ticket=REGIONS.capture(loc,loc.x,loc.y,loc.z);piece.cachedLight=light;
+        }else{
+            piece.ticket=null;piece.cachedLight=Integer.MIN_VALUE;
+            resource.render(prep.transform(),light);
+        }
+    }
+
+    /** Immutable full-track plan survives camera movement; -1 means old path. */
+    public static int submitStaticScene(RailMath rail,RailResource resource,boolean flip,ClientWorld world,
+            double ex,double ey,double ez,int radius,double nx,double ny,double nz){
+        if(!SillonMegaEngine.RAILS || !Double.isFinite(ex+ey+ez+nx+ny+nz))return -1;
+        if(planWorld!=world.data){RAIL_PLANS.clear();clearStaticScenes();planWorld=world.data;}
+        SceneKey key=new SceneKey(rail,resource,flip);
+        RailPiece[] pieces=STATIC_SCENES.get(key);
+        if(pieces==null){
+            ArrayList<RailPiece> full=new ArrayList<>();
+            final boolean[] overflow={false};
+            MinecraftClientData.getInstance().railGeometryCache.render(rail,
+                (x1,z1,x2,z2,x3,z3,x4,z4,y1,y2)->{
+                    if(full.size()>=TRACK_MAX){overflow[0]=true;return;}
+                    Prepared p=prepare(resource,x1,z1,x3,z3,y1,y2,flip);
+                    full.add(new RailPiece(p,Init.newBlockPos(x1,y1+0.1,z1),x1,y1,z1));
+                },resource.getRepeatInterval(),0,0);
+            if(overflow[0])return -1;
+            pieces=full.toArray(new RailPiece[0]);
+            STATIC_SCENES.put(key,pieces);scenePieces+=pieces.length;
+            Iterator<Map.Entry<SceneKey,RailPiece[]>> it=STATIC_SCENES.entrySet().iterator();
+            while(STATIC_SCENES.size()>SCENE_MAX || scenePieces>PIECE_MAX){
+                Map.Entry<SceneKey,RailPiece[]> old=it.next();
+                scenePieces-=old.getValue().length;it.remove();
             }
         }
-        return true;
+        final double radius2=(double)radius*radius;int visible=0;
+        final var model=REGIONS.modelForReplay(resource);
+        for(RailPiece piece:pieces){
+            double dx=piece.sampleX-ex,dz=piece.sampleZ-ez,squared=dx*dx+dz*dz;
+            if(squared<=radius2 && (squared<1024
+                    || dx*nx+(piece.sampleY-ey)*ny+dz*nz>-0.00001)){
+                submitPiece(piece,resource,world,model);visible++;
+            }
+        }
+        return visible;
     }
 
     /** Original compatibility path: addon/editors/oversized rail caches. */
@@ -233,6 +292,6 @@ public final class RailSectorBatcher {
             }
         }
     }
-    public static void clear(){RAIL_PLANS.clear();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
+    public static void clear(){RAIL_PLANS.clear();clearStaticScenes();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }

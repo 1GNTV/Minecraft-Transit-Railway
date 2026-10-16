@@ -137,6 +137,7 @@ public final class StaticRegionRenderer {
         BiConsumer<GraphicsHolder,Vector3d> drawCommand;
         private List<Selection> lastVisible=List.of();
         private Map<MaterialProperties,List<RegionVertexRanges.Span>> lastRanges=Map.of();
+        private Map<MaterialProperties,List<RegionVertexRanges.Span>> submittedRanges;
         // Only visibility changes require regrouping index spans; camera-stable pages reuse
         // the immutable material mask instead of allocating new hash maps each frame.
         Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges(List<Selection> visible){
@@ -151,12 +152,18 @@ public final class StaticRegionRenderer {
             lastRanges=result;
             return result;
         }
-        @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);lastVisible=List.of();lastRanges=Map.of();}
+        void activate(List<Selection> visible){
+            Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=ranges(visible);
+            if(SillonMegaEngine.SCENE && submittedRanges==ranges)return;
+            arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
+            submittedRanges=ranges;
+        }
+        @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);lastVisible=List.of();lastRanges=Map.of();submittedRanges=null;}
     }
     // Dense stations can retain many region pages; the previous 64-page /
     // 256k-vertex cap evicted visible geometry repeatedly, causing fresh uploads.
-    private static final int MAX_REGION_PAGES=Math.max(64,Math.min(512,Integer.getInteger("mtr.engine.regionPages",256)));
-    private static final int MAX_REGION_VERTICES=Math.max(256_000,Math.min(4_000_000,Integer.getInteger("mtr.engine.regionVertices",1_000_000)));
+    private static final int MAX_REGION_PAGES=Math.max(64,Math.min(512,Integer.getInteger("mtr.engine.regionPages",SillonMegaEngine.SCENE?384:256)));
+    private static final int MAX_REGION_VERTICES=Math.max(256_000,Math.min(4_000_000,Integer.getInteger("mtr.engine.regionVertices",SillonMegaEngine.SCENE?1_500_000:1_000_000)));
     private static final int MAX_SCENE_LOCATIONS=Math.max(8192,Math.min(131072,Integer.getInteger("mtr.engine.sceneLocations",32768)));
     private final PersistentRegionCache<PageKey,Selection,Object,Page> cache=new PersistentRegionCache<>(MAX_REGION_PAGES,MAX_REGION_VERTICES,16_000);
     private final Map<Sector,Int2ObjectLinkedOpenHashMap<Instance>> groups=new LinkedHashMap<>();
@@ -416,8 +423,7 @@ public final class StaticRegionRenderer {
             }
             drawing.forEach((key,selected)->{
                 Page page=ready.get(key);
-                Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=page.ranges(selected);
-                page.arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
+                page.activate(selected);
                 if(page.drawCommand==null) page.drawCommand=pageDrawCommand(page,key.sector());
                 MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,page.drawCommand);
             });

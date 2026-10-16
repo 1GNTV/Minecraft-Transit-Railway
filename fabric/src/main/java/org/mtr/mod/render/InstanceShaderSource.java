@@ -4,7 +4,7 @@ import java.util.regex.*;
 
 /** Token-aware transformation of Oculus' already transformed two-stage GLSL. */
 public final class InstanceShaderSource {
-    public static final int CAPACITY=8;
+    public static final int CAPACITY=SillonMegaEngine.CAPACITY;
     public record Pair(String vertex,String fragment) {}
     private static final Map<String,String> MATRICES=Map.of("iris_ModelViewMat","mtr_ModelViews","iris_ModelViewMatInverse","mtr_ModelViewInverses","iris_NormalMat","mtr_NormalMatrices");
     private static final Map<String,String> ATTRIBUTES=Map.of("Color","mtr_Colors","iris_Color","mtr_Colors","UV2","mtr_Lights","iris_UV2","mtr_Lights","UV1","mtr_Overlays","iris_UV1","mtr_Overlays");
@@ -53,6 +53,7 @@ public final class InstanceShaderSource {
         String rewritten=result.toString();main=MAIN.matcher(mask(rewritten));if(!main.find())return null;
         String declarationsText="\nuniform bool mtr_Instanced;\nuniform mat4 mtr_ModelViews[8];\nuniform mat4 mtr_ModelViewInverses[8];\nuniform mat3 mtr_NormalMatrices[8];\nflat "+(vertex?"out":"in")+" int mtr_InstanceId;\n";
         if(vertex)declarationsText+="uniform int mtr_AttributeMask;\nuniform vec4 mtr_Colors[8];\nuniform ivec2 mtr_Lights[8];\nuniform ivec2 mtr_Overlays[8];\n";
+        declarationsText=declarationsText.replace("[8]","["+CAPACITY+"]");
         String body=vertex?"\n mtr_InstanceId = mtr_Instanced ? gl_InstanceID : 0;\n":"";
         int declarationsAt=firstCode(mask(rewritten));
         if(declarationsAt<0)return null;
