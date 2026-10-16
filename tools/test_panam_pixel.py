@@ -124,7 +124,7 @@ assert 'WORLD_WIDTH = 1.95f' in surface
 assert 'WORLD_HEIGHT = 13.15f / 16' in surface
 assert 'TOP = 12.75f / 16' in surface
 assert abs(12.75-13.15+.4)<1e-6
-assert 'g.rotateXDegrees(-2.6f)' in renderer
+assert 'g.rotateXDegrees(2.6f)' in renderer
 assert 'g.translate(0,-PanamSurface.TOP,0)' in renderer
 assert 'g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f)' in renderer
 assert sum('suspension' in x.get('comment','').lower() or 'ceiling anchor' in x.get('comment','').lower() for x in model['elements'])>=2

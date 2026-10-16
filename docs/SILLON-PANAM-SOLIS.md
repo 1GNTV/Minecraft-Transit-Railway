@@ -4,10 +4,10 @@ Status: source integrated on **both branches**; references are the user's real p
 
 ## 3D geometry
 - Exactly **two blocks wide**, preserving MTR's existing horizontal twin-block state and platform/arrival configuration.
-- The screen is **13.15 model pixels high** (was 11.75), with its upper edge at 12.75 model pixels. Its lower edge extends 0.40 px below block baseline. Pixel layout stays 1024 x 466, preserving the 2 ETA slots, central separator, upper white destination strip and information panel.
-- The render transform applies a **2.6° outward-facing lean around the screen's upper edge**. Both player-facing display surfaces lean toward their respective platform.
-- The block-model silhouette now contains an independent central black housing/spine, paired stepped-profile thin display cartridges, metal separation strips, a projecting lower lip with underside and **one narrow ceiling suspension rod per block**. The repeated two-block placement creates two rods spread over the full width, not one fat centre pole. Three subtle casing tiers approximate the screen tilt without introducing invalid non-22.5° Minecraft JSON model element rotations.
-- The line-coloured horizontal strip is still drawn from the actual MTR route colour by the existing PanamSurface GPU texture. The static mechanical underside uses the metal texture, because line tint is dynamic and must not be hardcoded to the line 12 green.
+- The screen is **13.15 model pixels high** (was 11.75), with its upper edge at 12.75 model pixels. After the signed pitch/depth transform its lower edge is about 0.51 px below block baseline. Pixel layout stays 1024 x 466, preserving the 2 ETA slots, central separator, upper white destination strip and information panel.
+- The render transform applies a **2.6° downward-facing pitch**. Both upper edges are farther apart than the corresponding lower edges.
+- The block-model silhouette now contains an independent central black housing/spine, paired stepped-profile thin display cartridges, pale upper caps, dark middle cheeks and a route-colored projecting lower lip and **one narrow ceiling suspension rod per block**. The repeated two-block placement creates two rods spread over the full width, not one fat centre pole. Fine recessed casing slices approximate the screen tilt without introducing invalid non-22.5° Minecraft JSON model element rotations.
+- The line-coloured horizontal strip is still drawn from the actual MTR route colour by the existing PanamSurface GPU texture. The physical lip and lower side returns use the same route color through a block-color provider. Both half-block meshes refresh only when this color changes; no fixed line 12 green remains.
 - Existing line/mixed-departure/clock/pictogram visuals remain; the panel is not globally scaled arbitrarily and the old MTR block ID remains unchanged.
 
 ## Traffic bulletin timeline
@@ -56,8 +56,12 @@ Status: source integrated on **both branches**; references are the user's real p
 
 Les deux demi-boîtiers restent ouverts à leur jonction : les joues métalliques
 sont aux extrémités extérieures, plus au milieu du titre. Les dos des LCD sont
-reculés derrière les plans inclinés à 2,6°, avec profils fins, lèvre basse verte,
-canal inférieur en retrait, deux tiges de suspension et petites platines.
+reculés derrière les plans inclinés à 2,6° vers le bas (haut plus écarté que bas).
+Les deux cartouches dépassent en haut et en bas du corps central graphite.
+Les joues ont des parties supérieures ivoire, une zone centrale noire et des
+retours inférieurs à la couleur de la ligne. La lèvre basse suit cette même couleur,
+avec mise à jour des deux demi-blocs uniquement lorsque la couleur change.
+Le canal inférieur est en retrait, avec deux tiges de suspension et petites platines.
 Le générateur `tools/build_panam_model.py` ne produit que le JSON de ce boîtier.
 
 Vérification de cette révision : ressources JSON, géométrie, contrats de réglages
