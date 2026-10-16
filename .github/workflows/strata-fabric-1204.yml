@@ -1,4 +1,4 @@
-name: SILLON PANAM PIXEL Fabric 1.20.4 experimental build
+name: SILLON RAIL ENGINE Fabric 1.20.4 experimental build
 
 on:
   push:
@@ -55,6 +55,9 @@ jobs:
       - name: Verify Fabric performance recovery defaults and preserved addon loaders
         run: python3 tools/test_fabric_performance_recovery.py
 
+      - name: Verify rail sector candidate reuse and complete visibility
+        run: python3 tools/test_rail_hotpath_sector_reuse.py
+
       - name: Cache generated web resources
         id: assets
         uses: actions/cache@v4
@@ -99,11 +102,11 @@ jobs:
         run: |
           set -euo pipefail
           version="b${GITHUB_RUN_NUMBER}-r${GITHUB_RUN_ATTEMPT}"
-          tag="v1.5.0-PANAM-HANGING-FABRIC-1204-${version}"
-          artifact="Sillon-PANAM-HANGING-${version}-Fabric-1.20.4.jar"
+          tag="v1.5.0-RAIL-ENGINE-FABRIC-1204-${version}"
+          artifact="Sillon-RAIL-ENGINE-${version}-Fabric-1.20.4.jar"
           cp "$SILLON_JAR_PATH" "$artifact"
           sha256sum "$artifact" > "$artifact.sha256"
           gh release create "$tag" "$artifact" "$artifact.sha256" \
             --target "$GITHUB_SHA" --prerelease \
-            --title "SILLON PANAM PIXEL ${version} — Fabric 1.20.4 (experimental)" \
+            --title "SILLON RAIL ENGINE ${version} — Fabric 1.20.4 (experimental)" \
             --notes-file docs/STRATA-FABRIC-1204.md
