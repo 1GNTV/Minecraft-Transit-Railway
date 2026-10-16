@@ -9,6 +9,7 @@ import org.mtr.mapping.mapper.DirectionHelper;
 import org.mtr.mapping.mapper.GraphicsHolder;
 import org.mtr.mod.InitClient;
 import org.mtr.mod.block.BlockPanamDisplayEntity;
+import org.mtr.mod.block.BlockPANAMPIDS;
 import org.mtr.mod.block.BlockPANAMScreen;
 import org.mtr.mod.data.PanamScreenSettings;
 import org.mtr.mod.block.IBlock;
@@ -57,6 +58,13 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
         long now=System.currentTimeMillis();Panel panel=PANELS.computeIfAbsent(entity,key->new Panel());
         if(now-panel.sampled>=1000||panel.config!=entity.pixelRevision()||panel.revision!=ArrivalsCacheClient.INSTANCE.revision()||panel.network!=MinecraftClientData.getInstance().networkRevision||panel.newsRevision!=PanamNewsClient.revision())sample(entity,pos,panel,now);
         if(panel.spec==null)return;
+        if(entity instanceof BlockPANAMPIDS.BlockEntity && ((BlockPANAMPIDS.BlockEntity)entity).setCasingColor(panel.spec.color)){
+            // Both halves share the same owner/color. Re-bake only on an actual color change.
+            BlockState state=world.getBlockState(pos);
+            world.updateListeners(pos,state,state,3);
+            BlockPos other=pos.offset(facing);BlockState otherState=world.getBlockState(other);
+            world.updateListeners(other,otherState,otherState,3);
+        }
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.noticePriorities,now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
@@ -94,10 +102,10 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
         BlockPos next=pos.offset(facing);
         g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
         g.rotateYDegrees(90-facing.asRotation()+side*180);g.rotateZDegrees(180);
-        // Rotate just 2.6 degrees around the top edge. Both display faces
-        // lean outward at the bottom towards their respective platform.
+        // Positive local pitch becomes DOWNWARD-facing after rotateZ(180).
+        // The upper edges are farther apart than the lower edges, as photographed.
         g.translate(0,-PanamSurface.TOP,0);
-        g.rotateXDegrees(-2.6f);
+        g.rotateXDegrees(2.6f);
         g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f);
         g.scale(PanamSurface.WORLD_WIDTH/PanamSurface.WIDTH,PanamSurface.WORLD_HEIGHT/PanamSurface.HEIGHT,1);
     }
