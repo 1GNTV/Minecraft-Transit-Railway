@@ -85,10 +85,16 @@ public final class InstancedModelRenderer {
             calls.forEach(ordinary);
             return;
         }
-        List<?> ordered=shaderless && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true")) ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,call->call instanceof RenderCallData data?data.mtr$screenBounds():null,24) : calls;
+        // Conservative disjoint opaque screen rectangles only; unknown bounds do not move.
+        boolean allowReorder=shaderless || (SillonMegaEngine.SHADER_REORDER
+            && OculusInstanceRenderer.shaderBridgeReady());
+        List<?> ordered=allowReorder && !"false".equalsIgnoreCase(System.getProperty("mtr.next.grouping","true"))
+            ? BoundedDrawGrouping.reorder(calls,InstancedModelRenderer::compatible,
+                call->call instanceof RenderCallData data?data.mtr$screenBounds():null,
+                SillonMegaEngine.WINDOW) : calls;
         ConsecutiveRuns.visit(ordered, shaderless ? MAX_INSTANCES : InstanceShaderSource.CAPACITY, InstancedModelRenderer::compatible, (start, end) -> {
             boolean drawn = false;
-            if (end - start >= 4 && ordered.get(start) instanceof RenderCallData) {
+            if (end - start >= SillonMegaEngine.GROUP_MIN && ordered.get(start) instanceof RenderCallData) {
                 try { drawn = shaderless ? drawRun(ordered, start, end) : OculusInstanceRenderer.draw(ordered, start, end); }
                 catch (RuntimeException error) {
                     failed = true;

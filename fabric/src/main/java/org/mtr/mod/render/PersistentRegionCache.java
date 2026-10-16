@@ -21,7 +21,7 @@ public final class PersistentRegionCache<K,V,L,R extends AutoCloseable> implemen
     private long compiledHits,pageBuilds,pageEvictions,immutableHits;
     private long frame;
     public PersistentRegionCache(int entries,int vertices,int build){maxEntries=entries;maxVertices=vertices;maxBuildVertices=build;}
-    public void beginFrame(){frame++;builds=1;}
+    public void beginFrame(){frame++;builds=SillonMegaEngine.SCENE_BUILDS;}
     public R get(K key,List<V> visible,Function<V,L> location,ToIntFunction<V> size,Function<List<V>,R> builder){
         return get(key,visible,location,size,builder,false);
     }
