@@ -10,13 +10,14 @@ import java.awt.*;import java.awt.image.*;import java.io.*;import java.util.*;im
 public class PixelOracle {
  static void check(boolean b,String m){if(!b)throw new AssertionError(m);}
  static BufferedImage render(PanamSurface s,PanamFrame.Timeline t,long at) {
-  BufferedImage img=PanamSurface.blank(1024,466);Graphics2D g=PanamSurface.graphics(img);
+  BufferedImage img=PanamSurface.blank(s.layout==null?1024:s.layout.width,s.layout==null?466:s.layout.height);Graphics2D g=PanamSurface.graphics(img);
   PanamFrame.draw(s,t,at,20,19,(p,x,y,w,h,alpha,cx,cy,cw,ch)->{
    check(p.x>=0&&p.y>=0&&p.x+p.w<=s.atlasWidth&&p.y+p.h<=s.atlasHeight,"atlas bounds");
    Shape old=g.getClip();g.clip(new java.awt.geom.Rectangle2D.Float(cx,cy,cw,ch));
    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,alpha));
    java.awt.geom.AffineTransform tr=new java.awt.geom.AffineTransform();tr.translate(x,y);tr.scale(w/p.w,h/p.h);
-   g.drawImage(s.image.getSubimage(p.x,p.y,p.w,p.h),tr,null);g.setClip(old);
+   g.clip(new java.awt.geom.Rectangle2D.Float(x,y,w,h));tr.translate(-p.x,-p.y);tr.scale(s.atlasWidth/s.rasterWidth,s.atlasHeight/s.rasterHeight);
+   g.drawImage(s.image,tr,null);g.setClip(old);
   });g.dispose();return img;
  }
  public static void main(String[] args)throws Exception {
@@ -73,6 +74,23 @@ public class PixelOracle {
    PanamFrame.Timeline mt=new PanamFrame.Timeline();PanamFrame.Departure[] dep=new PanamFrame.Departure[ds.size()];for(int i=0;i<dep.length;i++)dep[i]=new PanamFrame.Departure("x"+i,ds.get(i),now+i*120000+50000,true);mt.update(dep,now);mt.noticeAt=now-2000;
    ImageIO.write(render(surface,mt,now+3000),"png",new File(out,"panam-"+mode+".png"));surface.image.flush();
   }
+  // Exercise actual adaptive packing, raster density and clipped quad output.
+  float[][] viewports={{1.95f,.821875f,1,1024,512},{1,2,1,512,1024},{1,1,.5f,2048,2048},{8,.25f,3,2048,128},{.25f,8,3,128,2048},{3,1,2,128,128}};
+  for(int v=0;v<viewports.length;v++){
+   float[] q=viewports[v];
+   var settings=new org.mtr.mod.data.PanamScreenSettings(0,0,0,0,0,0,q[0],q[1],(int)q[3],(int)q[4],q[2]);
+   var viewport=new PanamViewport(settings);
+   var adaptive=new PanamSurface(new PanamSurface.Spec("14",a.destination,0x650080,List.of(a.destination,b.destination),java.util.Collections.nCopies(8,"Information voyageurs. ".repeat(20)),false,false).withViewport(viewport),regular,bold);
+   check(adaptive.rasterWidth<=4096&&adaptive.rasterHeight<=4096,"bounded raster axes");
+   check((long)adaptive.rasterWidth*adaptive.rasterHeight<=4200000,"bounded raster area");
+   check(adaptive.layout.columns==(viewport.height<viewport.width*.6f),"responsive columns breakpoint");
+   check(adaptive.layout.header==0||viewport.height>=viewport.width*.4f,"responsive header breakpoint");
+   PanamFrame.draw(adaptive,t,now+20000,20,19,(p,x,y,w,h,alpha,cx,cy,cw,ch)->{
+    check(Float.isFinite(x+y+w+h+alpha+cx+cy+cw+ch)&&w>0&&h>0,"finite positive adaptive quads");
+    check(p.x>=0&&p.y>=0&&p.x+p.w<=adaptive.atlasWidth&&p.y+p.h<=adaptive.atlasHeight,"adaptive atlas bounds");
+   });
+   ImageIO.write(render(adaptive,t,now+20000),"png",new File(out,"panam-adaptive-"+v+".png"));adaptive.image.flush();
+  }
   // Warm up the actual quad planner; no AWT rasterization inside the measured loop.
   final long[] quads={0};PanamFrame.Emitter count=(p,x,y,w,h,alpha,cx,cy,cw,ch)->{if(w>0&&h>0)quads[0]++;};
   for(int i=0;i<20000;i++)PanamFrame.draw(s,t,now+10000+i,20,19,count);
@@ -85,8 +103,9 @@ public class PixelOracle {
 '''.replace('List.of','java.util.List.of')
 with tempfile.TemporaryDirectory(prefix='pixel-test-') as tmp:
     target=Path(tmp);(target/'PixelOracle.java').write_text(HARNESS,encoding='utf-8')
-    sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java')]
+    sources=[ROOT/'fabric/src/main/java/org/mtr/mod/render/pixel'/f for f in ('PanamAnimation.java','PanamSurface.java','PanamFrame.java','PanamAdaptiveFrame.java','PanamLayout.java','PanamViewport.java')]
     sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamBulletins.java')
+    sources.append(ROOT/'fabric/src/main/java/org/mtr/mod/data/PanamScreenSettings.java')
     subprocess.run(['javac','-encoding','UTF-8','-d',str(target),*map(str,sources),str(target/'PixelOracle.java')],check=True)
     subprocess.run(['java','-Djava.awt.headless=true','-cp',str(target),'PixelOracle',str(ROOT/'fabric/src/main/resources/assets/mtr/font/panam/noto-sans-regular.ttf'),str(ROOT/'fabric/src/main/resources/assets/mtr/font/noto-sans-semibold.ttf'),str(OUT)],check=True)
 # Validate the SOLIS casing against the actual photographed silhouette.

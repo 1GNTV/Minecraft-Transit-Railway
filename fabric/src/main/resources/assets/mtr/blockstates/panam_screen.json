@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "mtr:block/panam_screen"
+    },
+    "facing=east": {
+      "model": "mtr:block/panam_screen"
+    },
+    "facing=south": {
+      "model": "mtr:block/panam_screen"
+    },
+    "facing=west": {
+      "model": "mtr:block/panam_screen"
+    }
+  }
+}

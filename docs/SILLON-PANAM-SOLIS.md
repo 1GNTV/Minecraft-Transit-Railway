@@ -25,3 +25,42 @@ Status: source integrated on **both branches**; references are the user's real p
 - Compile and validate a fresh **Fabric 1.20.4** jar. Forge 1.20.1 receives exactly the same changes in its shared `fabric/src/main/java` and assets tree, but is not compiled unless requested.
 - Check in-game front and underside screenshots, line 10/12 colour strip, Oculus, JCM/MTR France, shader placement, billboard overlay depth, and actual rendering at all four facing directions.
 - Preserve prior SOLIS commits as rollback points. This pass changes no core MTR/JCM ABI.
+
+## PANAM écran seul (Fabric 1.20.4 / Forge 1.20.1)
+
+- Nouvel item `mtr:panam_screen`, dans les installations ferroviaires MTR.
+  Un seul bloc d’ancrage sélectionnable, sans boîtier, avec une seule face visible.
+  La face regarde le joueur à la pose. L’arrière n’affiche rien, même sur une
+  couche de rendu sans culling. L’ancrage reste à sa place après un décalage.
+- Brush MTR sur l’ancrage → **Affichage**. Échap enregistre côté serveur :
+  position XYZ en blocs (−16 à +16), rotation Y/X/Z en degrés, largeur/hauteur
+  (0,25 à 16 blocs), résolution L/H (128 à 2048 pixels), zoom (0,5 à 3).
+  **Réinitialiser** restaure uniquement les réglages d’affichage.
+- Les réglages sont persistés en NBT, synchronisés par MTR et bornés côté serveur.
+  Les modifications exigent le brush en main et un ancrage chargé à moins de
+  8 blocs. Les quais, pages et annonces utilisent le protocole PIDS existant.
+- La taille physique, la densité raster et le zoom sont indépendants. La résolution
+  représente une enveloppe maximale : le ratio physique est conservé, sans étirer
+  le contenu. Le cache limite aussi les atlas à environ 4 mégapixels / 4096 pixels
+  par axe ; les grandes listes d’annonces peuvent donc réduire la densité effective.
+- Adaptation inspirée des seuils de `arnoclr/panam/src/components/Screen.vue` :
+  deux colonnes sous un ratio hauteur/largeur de 0,6, sinon départs au-dessus des
+  annonces ; bandeau masqué sous 0,4. Les chiffres gardent leurs proportions,
+  les annonces reviennent à la ligne. Sur une surface très étroite/basse, priorité
+  au premier départ. Un message est limité à 12 lignes ; les annonces tournent
+  avec les mêmes priorités et durées que le PANAM suspendu.
+- Le zoom réduit le viewport logique comme dans un navigateur : le texte grossit,
+  les espaces et retours à la ligne s’adaptent, sans agrandir le rectangle dans le monde.
+
+## Boîtier photographié
+
+Les deux demi-boîtiers restent ouverts à leur jonction : les joues métalliques
+sont aux extrémités extérieures, plus au milieu du titre. Les dos des LCD sont
+reculés derrière les plans inclinés à 2,6°, avec profils fins, lèvre basse verte,
+canal inférieur en retrait, deux tiges de suspension et petites platines.
+Le générateur `tools/build_panam_model.py` ne produit que le JSON de ce boîtier.
+
+Vérification de cette révision : ressources JSON, géométrie, contrats de réglages
+et syntaxe Java inspectés sans compilation du mod ni lancement du jeu.
+Le rendu en jeu et la compatibilité finale avec d’autres mods restent à vérifier
+lors d’une future session de test autorisée.

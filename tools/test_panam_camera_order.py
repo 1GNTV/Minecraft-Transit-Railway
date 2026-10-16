@@ -15,7 +15,8 @@ assert 'RenderLayer.getText(texture)' in layers
 assert 'QueuedRenderLayer.LIGHT_TRANSLUCENT' not in src
 assert 'MoreRenderLayers.getLight(entry.texture,true)' not in src
 assert 'float z=-.0006f*layer[0]++;' in src
-assert 'for(int side=0;side<2;side++)' in src
+assert 'for(int side=0;side<(screenOnly?1:2);side++)' in src
+assert 'if(front<=0)return;' in src, 'text layers must never expose the screen back'
 assert 'PanamFrame.draw(entry.surface,panel.timeline' in src
 assert 'PixelAtlasCache.INSTANCE.get(panel.spec,now)' in src
 assert 'renderingShadows()' not in src
