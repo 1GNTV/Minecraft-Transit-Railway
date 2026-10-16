@@ -17,6 +17,7 @@ public final class PanamSurface {
     // photographed RATP housing; the twin ceiling rods remain separate.
     public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 13.15f / 16, TOP = 12.75f / 16;
     public static final class Spec {
+        public final PanamViewport viewport;
         public final String line, destination;
         public final int color, count;
         public final boolean mixed, suspended, last;
@@ -31,6 +32,10 @@ public final class PanamSurface {
                 java.util.Collections.nCopies(notices.size(),0));
         }
         public Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities){
+            this(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,null);
+        }
+        private Spec(String line,String destination,int color,List<String> destinations,List<String> notices,boolean suspended,boolean last,List<String> previousDestinations,List<Integer> noticePriorities,PanamViewport viewport){
+            this.viewport=viewport;
             if(notices.size()!=noticePriorities.size())throw new IllegalArgumentException("PANAM notice priorities out of sync");
             this.line = line; this.destination = destination; this.color = color & 0xFFFFFF;
             this.destinations = List.copyOf(destinations); this.notices = List.copyOf(notices);
@@ -39,12 +44,13 @@ public final class PanamSurface {
             count = destinations.size(); mixed = destinations.stream().distinct().count() > 1;
             this.suspended = suspended; this.last = last && count == 1;
         }
+        public Spec withViewport(PanamViewport viewport){return new Spec(line,destination,color,destinations,notices,suspended,last,previousDestinations,noticePriorities,viewport);}
         @Override public boolean equals(Object other) {
             if (!(other instanceof Spec)) return false;
             Spec s = (Spec) other;
-            return color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations)&&noticePriorities.equals(s.noticePriorities);
+            return Objects.equals(viewport,s.viewport) && color == s.color && suspended == s.suspended && last == s.last && line.equals(s.line) && destination.equals(s.destination) && destinations.equals(s.destinations) && notices.equals(s.notices)&&previousDestinations.equals(s.previousDestinations)&&noticePriorities.equals(s.noticePriorities);
         }
-        @Override public int hashCode() { return Objects.hash(line, destination, color, destinations, notices, suspended, last,previousDestinations,noticePriorities); }
+        @Override public int hashCode() { return Objects.hash(viewport,line, destination, color, destinations, notices, suspended, last,previousDestinations,noticePriorities); }
     }
     public static final class Sprite {
         public final int x, y, w, h, originX, originY;
@@ -52,6 +58,8 @@ public final class PanamSurface {
         public Sprite(int x,int y,int w,int h,int originX,int originY){this.x=x;this.y=y;this.w=w;this.h=h;this.originX=originX;this.originY=originY;}
     }
     public final Spec spec;
+    public final PanamLayout layout;
+    public final int rasterWidth,rasterHeight;
     public BufferedImage image;
     public final float atlasWidth, atlasHeight;
     public final Sprite base, infoIcon;
@@ -61,12 +69,13 @@ public final class PanamSurface {
     public final Sprite dot, strikeFirst, strikeSecond;
     private final Font regular, bold;
     private int sx, sy, shelf;
-    private final BufferedImage canvas;
+    private BufferedImage canvas;
 
     public PanamSurface(Spec spec, Font regular, Font bold) {
         this.spec = spec; this.regular = regular; this.bold = bold;
-        canvas = new BufferedImage(1024, spec.notices.size()>3?4096:2048, BufferedImage.TYPE_INT_ARGB);
-        base = pack(drawBase());
+        layout=spec.viewport==null?null:new PanamLayout(spec.viewport);
+        canvas = new BufferedImage(layout==null?1024:Math.max(1024,layout.width+32), layout==null?(spec.notices.size()>3?4096:2048):8192, BufferedImage.TYPE_INT_ARGB);
+        base = pack(layout==null?drawBase():drawAdaptiveBase());
         for (int i=0; i<10; i++) digits[i] = panamDigit(i);
         for (int i=0; i<10; i++) clock[i] = glyph(Integer.toString(i), regular, 43.008f, YELLOW, clockAdvance, i);
         clock[10] = glyph(":", regular, 43.008f, YELLOW, clockAdvance, 10);
@@ -86,9 +95,11 @@ public final class PanamSurface {
         notices = new Sprite[spec.notices.size()];
         noticeIcons = new Sprite[spec.notices.size()];
         for (int i=0;i<notices.length;i++) {
-            BufferedImage notice = blank(471,191); Graphics2D g = graphics(notice);
+            int nw=layout==null?471:Math.max(1,(int)layout.newsTextWidth()),nh=layout==null?191:Math.max(1,(int)Math.min(layout.newsTextHeight(),layout.font*1.13f*12));
+            BufferedImage notice = blank(nw,nh); Graphics2D g = graphics(notice);
             String message = spec.notices.get(i);
-            wrapped(g,PanamBulletins.strip(message),0,0,32.768f,regular,0,471,5); g.dispose(); notices[i]=pack(notice);
+            float fs=layout==null?32.768f:layout.font;
+            wrapped(g,PanamBulletins.strip(message),0,0,fs,regular,0,nw,Math.max(1,(int)(nh/(fs*1.13f)))); g.dispose(); notices[i]=pack(notice);
             int kind=PanamBulletins.markedType(message);
             if(kind==PanamBulletins.INFO){noticeIcons[i]=infoIcon;}
             else {
@@ -113,9 +124,15 @@ public final class PanamSurface {
             }
         }
         int height=512; while(height<sy+shelf)height*=2;
-        atlasWidth=1024;atlasHeight=height;
-        image = new BufferedImage(1024,height,BufferedImage.TYPE_INT_ARGB);
-        Graphics2D out=image.createGraphics(); out.setComposite(AlphaComposite.Src); out.drawImage(canvas,0,0,null); out.dispose(); canvas.flush();
+        atlasWidth=canvas.getWidth();atlasHeight=height;
+        // Keep logical atlas coordinates for UVs; raster density is independent.
+        double density=layout==null?1:Math.min(spec.viewport.resolutionWidth/(double)layout.width,spec.viewport.resolutionHeight/(double)layout.height);
+        density=Math.min(density,Math.min(4096.0/atlasWidth,4096.0/atlasHeight));
+        density=Math.min(density,Math.sqrt(4194304.0/(atlasWidth*atlasHeight)));
+        rasterWidth=Math.max(1,(int)Math.round(atlasWidth*density));rasterHeight=Math.max(1,(int)Math.round(atlasHeight*density));
+        image = new BufferedImage(rasterWidth,rasterHeight,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D out=image.createGraphics();out.setComposite(AlphaComposite.Src);out.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        out.scale(rasterWidth/(double)atlasWidth,rasterHeight/(double)atlasHeight);out.drawImage(canvas,0,0,null);out.dispose();canvas.flush();canvas=null;
     }
     /** Dedicated bolder numerals, independently antialiased and tightly measured.
      * The time sprites are not stretched from small Minecraft font glyphs. */
@@ -153,10 +170,12 @@ public final class PanamSurface {
     }
     private Sprite pack(BufferedImage img) {
         int w=img.getWidth(),h=img.getHeight();
-        if(sx+w+2>1024){sx=0;sy+=shelf+2;shelf=0;}
-        if(sy+h+2>canvas.getHeight())throw new IllegalArgumentException("PANAM atlas overflow");
+        // A 32-logical-pixel gutter still covers two texels at the lowest density.
+        int padding=layout==null?2:32;
+        if(sx+w+padding>canvas.getWidth()){sx=0;sy+=shelf+padding;shelf=0;}
+        if(sy+h+padding>canvas.getHeight())throw new IllegalArgumentException("PANAM atlas overflow");
         Graphics2D g=canvas.createGraphics();g.setComposite(AlphaComposite.Src);g.drawImage(img,sx,sy,null);g.dispose();
-        Sprite sprite=new Sprite(sx,sy,w,h);sx+=w+2;shelf=Math.max(shelf,h);img.flush();return sprite;
+        Sprite sprite=new Sprite(sx,sy,w,h);sx+=w+padding;shelf=Math.max(shelf,h);img.flush();return sprite;
     }
     private BufferedImage drawBase() {
         BufferedImage img=blank(WIDTH,HEIGHT);Graphics2D g=graphics(img);g.setColor(Color.BLACK);g.fillRect(0,0,WIDTH,HEIGHT);
@@ -183,6 +202,36 @@ public final class PanamSurface {
         // A local MTR information panel, including the honest missing-source state.
         g.setColor(Color.WHITE);g.fillRoundRect(512,(int)HEADER+10,512,(int)BODY-15,5,5);
         g.setColor(new Color(0xF7F7F7));g.fillRect(512,(int)HEADER+10,512,59);g.setColor(Color.WHITE);g.fillRect(512,(int)HEADER+10,156,59);
+        g.dispose();return img;
+    }
+    private BufferedImage drawAdaptiveBase(){
+        PanamLayout l=layout;
+        BufferedImage img=blank(l.width,l.height);Graphics2D g=graphics(img);
+        g.setColor(Color.BLACK);g.fillRect(0,0,l.width,l.height);
+        g.setColor(new Color(spec.color));g.fillRect(0,(int)(l.height-l.footer),l.width,(int)Math.ceil(l.footer));
+        if(l.header>0){
+            g.setColor(Color.WHITE);g.fillRect(0,0,l.width,(int)l.header);
+            float size=Math.min(82,l.header-l.pad*2),badgeWidth=size*2+3;
+            badges(g,l.pad,l.pad,size);
+            float clockReserve=Math.min(140,l.width*.24f);
+            text(g,spec.destination,l.pad*2+badgeWidth,l.pad,Math.min(60,size*.76f),bold,NAVY,Math.max(1,l.width-badgeWidth-l.pad*4-clockReserve));
+        }
+        float clockScale=Math.min(1,Math.min(l.width/400f,l.height/260f));
+        if(!l.compact){g.setColor(Color.BLACK);g.fillRoundRect((int)(l.width-l.pad-137*clockScale),0,(int)(137*clockScale+l.pad),(int)(64*clockScale+l.pad),5,5);}
+        if(spec.suspended){
+            wrapped(g,"Interruption temporaire\nde circulation",l.pad,l.bodyY+l.pad+50*clockScale,
+                Math.max(8,Math.min(52,Math.min(l.width/14f,l.bodyH/5))),bold,YELLOW,Math.max(1,(int)(l.width-2*l.pad)),3);
+            g.dispose();return img;
+        }
+        float top=l.bodyY+l.pad+(l.header==0&&!l.compact?48*clockScale:0);
+        if(spec.count==0)wrapped(g,"Temps d’attente indisponibles.",l.pad,top,Math.max(8,Math.min(25,l.departW/14)),regular,YELLOW,Math.max(1,(int)(l.departW-2*l.pad)),3);
+        else if(!spec.mixed&&!l.compact){
+            int count=Math.min(2,spec.count);
+            for(int n=0;n<count;n++)text(g,(n==0?"1er":"2e")+" métro",l.pad+n*l.departW/count,top,Math.min(22,l.departW/count/7),regular,WHITE,l.departW/count-l.pad*2);
+            if(count==2){g.setColor(Color.WHITE);g.fillRoundRect((int)(l.departW/2-2),(int)(top+40),4,Math.max(1,(int)(l.departH-(top-l.bodyY)-60)),4,4);}
+            if(spec.last)text(g,"Dernier métro",l.pad,l.bodyY+l.departH-30,20,bold,WHITE,l.departW-l.pad*2);
+        }
+        if(!l.compact){g.setColor(Color.WHITE);g.fillRect((int)l.newsX,(int)l.newsY,(int)Math.ceil(l.newsW),(int)Math.ceil(l.newsH));}
         g.dispose();return img;
     }
     private void badges(Graphics2D g,float x,float y,float size) {

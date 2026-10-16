@@ -26,6 +26,7 @@ public final class BlockEntityTypes {
 		PIDS_HORIZONTAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_1"), BlockPIDSHorizontal1.BlockEntity::new, Blocks.PIDS_1::get);
 		PIDS_HORIZONTAL_2 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_2"), BlockPIDSHorizontal2.BlockEntity::new, Blocks.PIDS_2::get);
 		PANAM_PIDS = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "panam_pids"), BlockPANAMPIDS.BlockEntity::new, Blocks.PANAM_PIDS::get);
+		PANAM_SCREEN = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "panam_screen"), BlockPANAMScreen.BlockEntity::new, Blocks.PANAM_SCREEN::get);
 		PIDS_HORIZONTAL_3 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_3"), BlockPIDSHorizontal3.BlockEntity::new, Blocks.PIDS_3::get);
 		PIDS_VERTICAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_4"), BlockPIDSVertical1.BlockEntity::new, Blocks.PIDS_4::get);
 		PIDS_VERTICAL_SINGLE_ARRIVAL_1 = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "pids_single_arrival_1"), BlockPIDSVerticalSingleArrival1.BlockEntity::new, Blocks.PIDS_SINGLE_ARRIVAL_1::get);
@@ -93,6 +94,7 @@ public final class BlockEntityTypes {
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal1.BlockEntity> PIDS_HORIZONTAL_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal2.BlockEntity> PIDS_HORIZONTAL_2;
 	public static final BlockEntityTypeRegistryObject<BlockPANAMPIDS.BlockEntity> PANAM_PIDS;
+	public static final BlockEntityTypeRegistryObject<BlockPANAMScreen.BlockEntity> PANAM_SCREEN;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal3.BlockEntity> PIDS_HORIZONTAL_3;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVertical1.BlockEntity> PIDS_VERTICAL_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVerticalSingleArrival1.BlockEntity> PIDS_VERTICAL_SINGLE_ARRIVAL_1;

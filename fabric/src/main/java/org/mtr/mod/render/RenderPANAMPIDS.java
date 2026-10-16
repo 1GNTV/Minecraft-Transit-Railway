@@ -8,7 +8,9 @@ import org.mtr.mapping.mapper.BlockEntityRenderer;
 import org.mtr.mapping.mapper.DirectionHelper;
 import org.mtr.mapping.mapper.GraphicsHolder;
 import org.mtr.mod.InitClient;
-import org.mtr.mod.block.BlockPANAMPIDS;
+import org.mtr.mod.block.BlockPanamDisplayEntity;
+import org.mtr.mod.block.BlockPANAMScreen;
+import org.mtr.mod.data.PanamScreenSettings;
 import org.mtr.mod.block.IBlock;
 import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.MinecraftClientData;
@@ -20,8 +22,8 @@ import java.time.LocalTime;
 import java.util.*;
 
 /** PIXEL: shared retained surfaces, event-driven scene compilation, clipped sprite animation. */
-public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.BlockEntity> {
-    private static final WeakHashMap<BlockPANAMPIDS.BlockEntity,Panel> PANELS=new WeakHashMap<>();
+public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends BlockEntityRenderer<T> {
+    private static final WeakHashMap<BlockPanamDisplayEntity,Panel> PANELS=new WeakHashMap<>();
     private static final boolean DEBUG_ARRIVALS=Boolean.getBoolean("mtr.panam.debugArrivals");
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
@@ -35,14 +37,23 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
     }
     public RenderPANAMPIDS(Argument dispatcher){super(dispatcher);}
     public static void reset(){PANELS.clear();PixelAtlasCache.INSTANCE.reset();PanamNewsClient.reset();}
-    @Override public void render(BlockPANAMPIDS.BlockEntity entity,float tickDelta,GraphicsHolder ignored,int light,int overlay){
+    @Override public void render(T entity,float tickDelta,GraphicsHolder ignored,int light,int overlay){
         World world=entity.getWorld2();if(world==null)return;BlockPos pos=entity.getPos2();
         if(!entity.canStoreData.test(world,pos))return;
         Direction facing=IBlock.getStatePropertySafe(world,pos,DirectionHelper.FACING);
+        boolean screenOnly=entity instanceof BlockPANAMScreen.BlockEntity;
+        PanamScreenSettings settings=screenOnly?((BlockPANAMScreen.BlockEntity)entity).settings():PanamScreenSettings.DEFAULT;
         BlockState partner=world.getBlockState(pos.offset(facing));
-        if(!partner.isOf(world.getBlockState(pos).getBlock())||IBlock.getStatePropertySafe(partner,DirectionHelper.FACING)!=facing.getOpposite())return;
+        if(!screenOnly&&(!partner.isOf(world.getBlockState(pos).getBlock())||IBlock.getStatePropertySafe(partner,DirectionHelper.FACING)!=facing.getOpposite()))return;
         Vector3d eye=MinecraftClient.getInstance().getGameRendererMapped().getCamera().getPos();
-        double dx=eye.getXMapped()-pos.getX(),dy=eye.getYMapped()-pos.getY(),dz=eye.getZMapped()-pos.getZ();if(dx*dx+dy*dy+dz*dz>64*64)return;
+        double dx=eye.getXMapped()-pos.getX()-(screenOnly?settings.x:0),dy=eye.getYMapped()-pos.getY()-(screenOnly?settings.y:0),dz=eye.getZMapped()-pos.getZ()-(screenOnly?settings.z:0);
+        double radius=64+(screenOnly?Math.hypot(settings.width,settings.height)/2:0);if(dx*dx+dy*dy+dz*dz>radius*radius)return;
+        if(screenOnly){
+            // Text layers can disable GPU culling. Cull explicitly to keep ONE face.
+            double yaw=Math.toRadians(-facing.asRotation()+settings.yaw),pitch=Math.toRadians(settings.pitch);
+            double front=(dx-.5)*(-Math.cos(pitch)*Math.sin(yaw))+(dy-.5)*Math.sin(pitch)+(dz-.5)*(-Math.cos(pitch)*Math.cos(yaw));
+            if(front<=0)return;
+        }
         long now=System.currentTimeMillis();Panel panel=PANELS.computeIfAbsent(entity,key->new Panel());
         if(now-panel.sampled>=1000||panel.config!=entity.pixelRevision()||panel.revision!=ArrivalsCacheClient.INSTANCE.revision()||panel.network!=MinecraftClientData.getInstance().networkRevision||panel.newsRevision!=PanamNewsClient.revision())sample(entity,pos,panel,now);
         if(panel.spec==null)return;
@@ -54,8 +65,8 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         // with a stable draw order, independent of player view angle.
         MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_2,(g,offset)->{
             g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
-            for(int side=0;side<2;side++){
-                transform(g,pos,facing,offset,side);
+            for(int side=0;side<(screenOnly?1:2);side++){
+                if(screenOnly)transformScreen(g,pos,facing,offset,settings,entry.surface);else transform(g,pos,facing,offset,side);
                 final int[] layer={0};
                 PanamFrame.draw(entry.surface,panel.timeline,now,panel.hour,panel.minute,(s,x,y,w,h,alpha,cx,cy,cw,ch)->{
                     float left=Math.max(x,cx),top=Math.max(y,cy),right=Math.min(x+w,cx+cw),bottom=Math.min(y+h,cy+ch);
@@ -72,6 +83,13 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             }
         });
     }
+    private static void transformScreen(GraphicsHolder g,BlockPos pos,Direction facing,Vector3d offset,PanamScreenSettings s,PanamSurface surface){
+        g.push();g.translate(pos.getX()+.5+s.x-offset.getXMapped(),pos.getY()+.5+s.y-offset.getYMapped(),pos.getZ()+.5+s.z-offset.getZMapped());
+        g.rotateYDegrees(-facing.asRotation()+s.yaw);g.rotateXDegrees(s.pitch);g.rotateZDegrees(s.roll);
+        g.rotateZDegrees(180);g.translate(-s.width/2,-s.height/2,0);
+        g.scale(s.width/surface.spec.viewport.width,s.height/surface.spec.viewport.height,1);
+    }
+    @Override public boolean isInRenderDistance(T entity,Vector3d position){return true;}
     private static void transform(GraphicsHolder g,BlockPos pos,Direction facing,Vector3d offset,int side){
         BlockPos next=pos.offset(facing);
         g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
@@ -83,7 +101,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         g.translate(-PanamSurface.WORLD_WIDTH/2,0,-.164f);
         g.scale(PanamSurface.WORLD_WIDTH/PanamSurface.WIDTH,PanamSurface.WORLD_HEIGHT/PanamSurface.HEIGHT,1);
     }
-    private static void sample(BlockPANAMPIDS.BlockEntity entity,BlockPos pos,Panel panel,long now){
+    private static void sample(BlockPanamDisplayEntity entity,BlockPos pos,Panel panel,long now){
         panel.sampled=now;
         long network=MinecraftClientData.getInstance().networkRevision;
         boolean configured=panel.config!=entity.pixelRevision();
@@ -166,6 +184,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
                 : "Informations en temps réel indisponibles",0);
         ArrayList<String> previous=new ArrayList<>();for(PanamFrame.Departure train:panel.timeline.previous)previous.add(train.destination);
         PanamSurface.Spec next=new PanamSurface.Spec(panel.line,panel.destination,panel.color,destinations,notices,panel.suspended,panel.last,previous,priorities);
+        if(entity instanceof BlockPANAMScreen.BlockEntity)next=next.withViewport(new PanamViewport(((BlockPANAMScreen.BlockEntity)entity).settings()));
         if(!next.equals(panel.spec)) {
             // Only restart the ticker when the actual bulletin sequence or its
             // priorities changes, not whenever departures update.
@@ -194,5 +213,5 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         }
     }
     private static String firstLanguage(String value){return value==null?"":value.split("\\|",2)[0].split("\\(",2)[0].trim();}
-    @Override public boolean rendersOutsideBoundingBox2(BlockPANAMPIDS.BlockEntity entity){return true;}
+    @Override public boolean rendersOutsideBoundingBox2(T entity){return true;}
 }

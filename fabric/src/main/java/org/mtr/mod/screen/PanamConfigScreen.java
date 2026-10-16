@@ -7,7 +7,10 @@ import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.*;
 import org.mtr.mapping.tool.TextCase;
 import org.mtr.mod.InitClient;
-import org.mtr.mod.block.BlockPANAMPIDS;
+import org.mtr.mod.block.BlockPanamDisplayEntity;
+import org.mtr.mod.block.BlockPANAMScreen;
+import org.mtr.mod.data.PanamScreenSettings;
+import org.mtr.mod.packet.PacketUpdatePanamScreen;
 import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.data.ArrivalsCacheClient;
 import org.mtr.mod.data.IGui;
@@ -33,13 +36,27 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
     private final ButtonWidgetExtension filterButton;
     private final ButtonWidgetExtension tabArrivals;
     private final ButtonWidgetExtension tabNews;
+    private final boolean screenOnly;
+    private final PanamScreenSettings initialSettings;
+    private final TextFieldWidgetExtension[] displayFields=new TextFieldWidgetExtension[11];
+    private final ButtonWidgetExtension tabDisplay,resetDisplay;
+    private static final String[] DISPLAY_LABELS={"Position X","Position Y","Position Z","Rotation Y (°)","Rotation X (°)","Rotation Z (°)","Largeur (blocs)","Hauteur (blocs)","Zoom interface","Résol. L (px)","Résol. H (px)"};
+    private boolean initialized;
     private int tab;
     private final int initialPage;
     private final long detectedRouteId;
 
-    public PanamConfigScreen(BlockPos pos, BlockPANAMPIDS.BlockEntity entity) {
+    public PanamConfigScreen(BlockPos pos, BlockPanamDisplayEntity entity) {
         super();
         this.pos = pos;
+        screenOnly=entity instanceof BlockPANAMScreen.BlockEntity;
+        initialSettings=screenOnly?((BlockPANAMScreen.BlockEntity)entity).settings():PanamScreenSettings.DEFAULT;
+        tabDisplay=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setTab(2));
+        tabDisplay.setMessage2(new Text(TextHelper.literal("Affichage").data));
+        resetDisplay=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setDisplayValues(PanamScreenSettings.DEFAULT));
+        resetDisplay.setMessage2(new Text(TextHelper.literal("Réinitialiser").data));
+        for(int i=0;i<displayFields.length;i++)displayFields[i]=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,12,TextCase.DEFAULT,"[^\\d.-]",null);
+        setDisplayValues(initialSettings);
         this.platforms = new LongAVLTreeSet(entity.getPlatformIds());
         initialPage = entity.getDisplayPage();
         for (int i=0;i<3;i++) {
@@ -90,36 +107,48 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         super.init2();
         int start = Math.max(12, width / 10);
         int fieldWidth = Math.max(120, width - start*2);
-        IDrawing.setPositionAndWidth(tabArrivals,start,14,fieldWidth/2-2);
-        IDrawing.setPositionAndWidth(tabNews,start+fieldWidth/2+2,14,fieldWidth/2-2);
+        int tabWidth=fieldWidth/(screenOnly?3:2);
+        IDrawing.setPositionAndWidth(tabArrivals,start,14,tabWidth-2);
+        IDrawing.setPositionAndWidth(tabNews,start+tabWidth+2,14,tabWidth-2);
+        if(screenOnly){
+            IDrawing.setPositionAndWidth(tabDisplay,start+tabWidth*2+2,14,tabWidth-2);addChild(new ClickableWidget(tabDisplay));
+            for(int i=0;i<displayFields.length;i++){
+                IDrawing.setPositionAndWidth(displayFields[i],start+(i%3)*tabWidth,61+(i/3)*40,tabWidth-6);
+                addChild(new ClickableWidget(displayFields[i]));
+            }
+            IDrawing.setPositionAndWidth(resetDisplay,start+2*tabWidth,181,tabWidth-6);addChild(new ClickableWidget(resetDisplay));
+        }
         addChild(new ClickableWidget(tabArrivals));
         addChild(new ClickableWidget(tabNews));
 
         IDrawing.setPositionAndWidth(autoPlatforms,start,58,fieldWidth);
         IDrawing.setPositionAndWidth(filterButton,start,84,fieldWidth/2);
         IDrawing.setPositionAndWidth(pageInput,start+fieldWidth/2+6,84,54);
-        pageInput.setText2(Integer.toString(initialPage+1));
+        if(!initialized)pageInput.setText2(Integer.toString(initialPage+1));
         addChild(new ClickableWidget(autoPlatforms));
         addChild(new ClickableWidget(filterButton));
         addChild(new ClickableWidget(pageInput));
 
         for(int i=0;i<3;i++) {
             IDrawing.setPositionAndWidth(hideBoxes[i],start,116+i*23,fieldWidth);
-            hideBoxes[i].setChecked(hidden[i]);
+            if(!initialized)hideBoxes[i].setChecked(hidden[i]);
             addChild(new ClickableWidget(hideBoxes[i]));
             IDrawing.setPositionAndWidth(localMessages[i],start,81+i*29,fieldWidth);
-            localMessages[i].setText2(messages[i]);
+            if(!initialized)localMessages[i].setText2(messages[i]);
             addChild(new ClickableWidget(localMessages[i]));
         }
         IDrawing.setPositionAndWidth(lastTrain,start,178,fieldWidth);
         IDrawing.setPositionAndWidth(suspended,start,203,fieldWidth);
         addChild(new ClickableWidget(lastTrain));
         addChild(new ClickableWidget(suspended));
+        initialized=true;
         setTab(tab);
     }
 
     private void setTab(int value) {
         tab=value;
+        for(TextFieldWidgetExtension field:displayFields)field.visible=screenOnly&&tab==2;
+        resetDisplay.visible=screenOnly&&tab==2;
         autoPlatforms.visible=tab==0;
         filterButton.visible=tab==0;
         pageInput.visible=tab==0;
@@ -134,6 +163,7 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
     @Override
     public void tick2() {
         pageInput.tick2();
+        for(TextFieldWidgetExtension field:displayFields)field.tick2();
         for(TextFieldWidgetExtension message:localMessages)message.tick2();
     }
 
@@ -146,6 +176,11 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
             holder.drawText("Quais suivis : " + (platforms.isEmpty()?"automatique":platforms.size()),left,45,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
             holder.drawText("Page de départs",left+Math.max(120,(width-left*2)/2)+6,73,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
             holder.drawText("Les départs viennent du réseau MTR.",left,207,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        } else if(tab==2){
+            int col=Math.max(120,width-left*2)/3;
+            for(int i=0;i<DISPLAY_LABELS.length;i++)holder.drawText(DISPLAY_LABELS[i],left+(i%3)*col,49+(i/3)*40,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+            holder.drawText("Échap : enregistrer. Réglages depuis le bloc d’ancrage.",left,209,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+            holder.drawText("Zoom 0.5–3 · Taille 0.25–16 · Résolution 128–2048",left,222,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
         } else {
             holder.drawText("Annonces locales (séparateur : |)",left,46,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
             for(int i=0;i<3;i++)holder.drawText("Message "+(i+1),left,67+i*29,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
@@ -171,7 +206,18 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         int page=0;
         try{page=Math.max(0,Integer.parseInt(pageInput.getText2())-1);}catch(NumberFormatException ignored){}
         InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdatePIDSConfig(pos,messages,hidden,platforms,page));
+        if(screenOnly)InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdatePanamScreen(pos,displaySettings()));
         super.onClose2();
+    }
+
+    private void setDisplayValues(PanamScreenSettings s){
+        float[] v={s.x,s.y,s.z,s.yaw,s.pitch,s.roll,s.width,s.height,s.zoom,s.resolutionWidth,s.resolutionHeight};
+        for(int i=0;i<v.length;i++)displayFields[i].setText2(Float.toString(v[i]));
+    }
+    private float number(int i,float fallback){try{return Float.parseFloat(displayFields[i].getText2());}catch(NumberFormatException e){return fallback;}}
+    private PanamScreenSettings displaySettings(){
+        PanamScreenSettings s=initialSettings;
+        return new PanamScreenSettings(number(0,s.x),number(1,s.y),number(2,s.z),number(3,s.yaw),number(4,s.pitch),number(5,s.roll),number(6,s.width),number(7,s.height),(int)number(9,s.resolutionWidth),(int)number(10,s.resolutionHeight),number(8,s.zoom));
     }
 
     @Override

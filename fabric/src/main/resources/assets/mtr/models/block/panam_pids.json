@@ -3,22 +3,26 @@
   "textures": {
     "particle": "mtr:block/metal",
     "metal": "mtr:block/metal",
-    "black": "mtr:block/black"
+    "black": "mtr:block/black",
+    "green": "mtr:block/panam_green"
   },
   "elements": [
     {
-      "comment": "Central dark housing: physically separate from the two tilted LCD cartridges",
+      "comment": "Recessed central spine",
       "from": [
         6.65,
-        -0.23,
+        -0.12,
         0
       ],
       "to": [
         9.35,
-        13.08,
+        13.15,
         16
       ],
       "faces": {
+        "south": {
+          "texture": "#black"
+        },
         "east": {
           "texture": "#black"
         },
@@ -34,21 +38,18 @@
       }
     },
     {
-      "comment": "Inner spine and cable channel seen from below",
+      "comment": "Underside cable channel",
       "from": [
-        7.15,
-        -0.48,
-        0.2
+        6.9,
+        -0.24,
+        0
       ],
       "to": [
-        8.85,
-        13.35,
-        15.8
+        9.1,
+        0.04,
+        16
       ],
       "faces": {
-        "north": {
-          "texture": "#black"
-        },
         "south": {
           "texture": "#black"
         },
@@ -64,262 +65,64 @@
       }
     },
     {
-      "comment": "Near-screen front: top-third inset",
+      "comment": "Recessed LCD back right 00",
       "from": [
-        5.45,
-        8.4,
-        0.04
-      ],
-      "to": [
-        6.45,
-        12.9,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        },
-        "up": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Near-screen front: middle-third",
-      "from": [
-        5.24,
-        4,
-        0.04
-      ],
-      "to": [
-        6.45,
-        8.4,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Near-screen front: bottom-third outward tilt",
-      "from": [
-        5.02,
-        -0.4,
-        0.04
-      ],
-      "to": [
-        6.45,
-        4,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        },
-        "down": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Far-screen rear: top-third inset",
-      "from": [
-        9.55,
-        8.4,
-        0.04
-      ],
-      "to": [
-        10.55,
-        12.9,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        },
-        "up": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Far-screen rear: middle-third",
-      "from": [
-        9.55,
-        4,
-        0.04
-      ],
-      "to": [
-        10.76,
-        8.4,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Far-screen rear: bottom-third outward tilt",
-      "from": [
-        9.55,
-        -0.4,
-        0.04
-      ],
-      "to": [
-        10.98,
-        4,
-        15.96
-      ],
-      "faces": {
-        "east": {
-          "texture": "#black"
-        },
-        "west": {
-          "texture": "#black"
-        },
-        "down": {
-          "texture": "#black"
-        }
-      }
-    },
-    {
-      "comment": "Upper silver separator above front LCD",
-      "from": [
-        5.43,
-        12.85,
+        9.35,
+        -0.26743,
         0
       ],
       "to": [
-        6.47,
-        13.23,
-        16
+        11.14418,
+        0.14308,
+        15.72
       ],
       "faces": {
+        "south": {
+          "texture": "#black"
+        },
         "east": {
-          "texture": "#metal"
+          "texture": "#black"
         },
         "west": {
-          "texture": "#metal"
-        },
-        "up": {
-          "texture": "#metal"
-        },
-        "down": {
-          "texture": "#metal"
+          "texture": "#black"
         }
       }
     },
     {
-      "comment": "Upper silver separator above rear LCD",
+      "comment": "Recessed LCD back left 00",
       "from": [
-        9.53,
-        12.85,
+        4.85582,
+        -0.26743,
         0
       ],
       "to": [
-        10.57,
-        13.23,
-        16
+        6.65,
+        0.14308,
+        15.72
       ],
       "faces": {
+        "south": {
+          "texture": "#black"
+        },
         "east": {
-          "texture": "#metal"
+          "texture": "#black"
         },
         "west": {
-          "texture": "#metal"
-        },
-        "up": {
-          "texture": "#metal"
-        },
-        "down": {
-          "texture": "#metal"
+          "texture": "#black"
         }
       }
     },
     {
-      "comment": "Front coloured lip carrier, 0.5 px thick",
+      "comment": "Outer dark cheek right 00",
       "from": [
-        4.66,
-        -0.77,
-        0
+        9.35,
+        -0.26743,
+        15.72
       ],
       "to": [
-        6.5,
-        -0.35,
-        16
-      ],
-      "faces": {
-        "east": {
-          "texture": "#metal"
-        },
-        "west": {
-          "texture": "#metal"
-        },
-        "up": {
-          "texture": "#metal"
-        },
-        "down": {
-          "texture": "#metal"
-        }
-      }
-    },
-    {
-      "comment": "Rear coloured lip carrier, 0.5 px thick",
-      "from": [
-        9.5,
-        -0.77,
-        0
-      ],
-      "to": [
-        11.34,
-        -0.35,
-        16
-      ],
-      "faces": {
-        "east": {
-          "texture": "#metal"
-        },
-        "west": {
-          "texture": "#metal"
-        },
-        "up": {
-          "texture": "#metal"
-        },
-        "down": {
-          "texture": "#metal"
-        }
-      }
-    },
-    {
-      "comment": "Dark recessed underside between the detached display faces",
-      "from": [
-        6.5,
-        -0.43,
-        0
-      ],
-      "to": [
-        9.5,
-        -0.06,
-        16
+        11.22418,
+        0.14308,
+        15.87
       ],
       "faces": {
         "north": {
@@ -328,43 +131,52 @@
         "south": {
           "texture": "#black"
         },
-        "down": {
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
           "texture": "#black"
         }
       }
     },
     {
-      "comment": "Light metal end wall on one side of each half",
+      "comment": "Outer dark cheek left 00",
       "from": [
-        5.1,
-        -0.3,
-        0.04
+        4.77582,
+        -0.26743,
+        15.72
       ],
       "to": [
-        10.9,
-        12.9,
-        0.22
+        6.65,
+        0.14308,
+        15.87
       ],
       "faces": {
         "north": {
-          "texture": "#metal"
+          "texture": "#black"
         },
         "south": {
-          "texture": "#metal"
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
         }
       }
     },
     {
-      "comment": "Ceiling suspension stem: one per half, two rods across the 2-block panel",
+      "comment": "Thin pale end trim right 00",
       "from": [
-        7.64,
-        13.23,
-        7.55
+        9.35,
+        -0.26743,
+        15.87
       ],
       "to": [
-        8.36,
-        15.67,
-        8.27
+        11.22918,
+        0.14308,
+        16
       ],
       "faces": {
         "north": {
@@ -378,6 +190,4896 @@
         },
         "west": {
           "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 00",
+      "from": [
+        4.77082,
+        -0.26743,
+        15.87
+      ],
+      "to": [
+        6.65,
+        0.14308,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 01",
+      "from": [
+        9.35,
+        0.14308,
+        0
+      ],
+      "to": [
+        11.12554,
+        0.5536,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 01",
+      "from": [
+        4.87446,
+        0.14308,
+        0
+      ],
+      "to": [
+        6.65,
+        0.5536,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 01",
+      "from": [
+        9.35,
+        0.14308,
+        15.72
+      ],
+      "to": [
+        11.20554,
+        0.5536,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 01",
+      "from": [
+        4.79446,
+        0.14308,
+        15.72
+      ],
+      "to": [
+        6.65,
+        0.5536,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 01",
+      "from": [
+        9.35,
+        0.14308,
+        15.87
+      ],
+      "to": [
+        11.21054,
+        0.5536,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 01",
+      "from": [
+        4.78946,
+        0.14308,
+        15.87
+      ],
+      "to": [
+        6.65,
+        0.5536,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 02",
+      "from": [
+        9.35,
+        0.5536,
+        0
+      ],
+      "to": [
+        11.1069,
+        0.96411,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 02",
+      "from": [
+        4.8931,
+        0.5536,
+        0
+      ],
+      "to": [
+        6.65,
+        0.96411,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 02",
+      "from": [
+        9.35,
+        0.5536,
+        15.72
+      ],
+      "to": [
+        11.1869,
+        0.96411,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 02",
+      "from": [
+        4.8131,
+        0.5536,
+        15.72
+      ],
+      "to": [
+        6.65,
+        0.96411,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 02",
+      "from": [
+        9.35,
+        0.5536,
+        15.87
+      ],
+      "to": [
+        11.1919,
+        0.96411,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 02",
+      "from": [
+        4.8081,
+        0.5536,
+        15.87
+      ],
+      "to": [
+        6.65,
+        0.96411,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 03",
+      "from": [
+        9.35,
+        0.96411,
+        0
+      ],
+      "to": [
+        11.08826,
+        1.37463,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 03",
+      "from": [
+        4.91174,
+        0.96411,
+        0
+      ],
+      "to": [
+        6.65,
+        1.37463,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 03",
+      "from": [
+        9.35,
+        0.96411,
+        15.72
+      ],
+      "to": [
+        11.16826,
+        1.37463,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 03",
+      "from": [
+        4.83174,
+        0.96411,
+        15.72
+      ],
+      "to": [
+        6.65,
+        1.37463,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 03",
+      "from": [
+        9.35,
+        0.96411,
+        15.87
+      ],
+      "to": [
+        11.17326,
+        1.37463,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 03",
+      "from": [
+        4.82674,
+        0.96411,
+        15.87
+      ],
+      "to": [
+        6.65,
+        1.37463,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 04",
+      "from": [
+        9.35,
+        1.37463,
+        0
+      ],
+      "to": [
+        11.06962,
+        1.78514,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 04",
+      "from": [
+        4.93038,
+        1.37463,
+        0
+      ],
+      "to": [
+        6.65,
+        1.78514,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 04",
+      "from": [
+        9.35,
+        1.37463,
+        15.72
+      ],
+      "to": [
+        11.14962,
+        1.78514,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 04",
+      "from": [
+        4.85038,
+        1.37463,
+        15.72
+      ],
+      "to": [
+        6.65,
+        1.78514,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 04",
+      "from": [
+        9.35,
+        1.37463,
+        15.87
+      ],
+      "to": [
+        11.15462,
+        1.78514,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 04",
+      "from": [
+        4.84538,
+        1.37463,
+        15.87
+      ],
+      "to": [
+        6.65,
+        1.78514,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 05",
+      "from": [
+        9.35,
+        1.78514,
+        0
+      ],
+      "to": [
+        11.05097,
+        2.19566,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 05",
+      "from": [
+        4.94903,
+        1.78514,
+        0
+      ],
+      "to": [
+        6.65,
+        2.19566,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 05",
+      "from": [
+        9.35,
+        1.78514,
+        15.72
+      ],
+      "to": [
+        11.13097,
+        2.19566,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 05",
+      "from": [
+        4.86903,
+        1.78514,
+        15.72
+      ],
+      "to": [
+        6.65,
+        2.19566,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 05",
+      "from": [
+        9.35,
+        1.78514,
+        15.87
+      ],
+      "to": [
+        11.13597,
+        2.19566,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 05",
+      "from": [
+        4.86403,
+        1.78514,
+        15.87
+      ],
+      "to": [
+        6.65,
+        2.19566,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 06",
+      "from": [
+        9.35,
+        2.19566,
+        0
+      ],
+      "to": [
+        11.03233,
+        2.60617,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 06",
+      "from": [
+        4.96767,
+        2.19566,
+        0
+      ],
+      "to": [
+        6.65,
+        2.60617,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 06",
+      "from": [
+        9.35,
+        2.19566,
+        15.72
+      ],
+      "to": [
+        11.11233,
+        2.60617,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 06",
+      "from": [
+        4.88767,
+        2.19566,
+        15.72
+      ],
+      "to": [
+        6.65,
+        2.60617,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 06",
+      "from": [
+        9.35,
+        2.19566,
+        15.87
+      ],
+      "to": [
+        11.11733,
+        2.60617,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 06",
+      "from": [
+        4.88267,
+        2.19566,
+        15.87
+      ],
+      "to": [
+        6.65,
+        2.60617,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 07",
+      "from": [
+        9.35,
+        2.60617,
+        0
+      ],
+      "to": [
+        11.01369,
+        3.01669,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 07",
+      "from": [
+        4.98631,
+        2.60617,
+        0
+      ],
+      "to": [
+        6.65,
+        3.01669,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 07",
+      "from": [
+        9.35,
+        2.60617,
+        15.72
+      ],
+      "to": [
+        11.09369,
+        3.01669,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 07",
+      "from": [
+        4.90631,
+        2.60617,
+        15.72
+      ],
+      "to": [
+        6.65,
+        3.01669,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 07",
+      "from": [
+        9.35,
+        2.60617,
+        15.87
+      ],
+      "to": [
+        11.09869,
+        3.01669,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 07",
+      "from": [
+        4.90131,
+        2.60617,
+        15.87
+      ],
+      "to": [
+        6.65,
+        3.01669,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 08",
+      "from": [
+        9.35,
+        3.01669,
+        0
+      ],
+      "to": [
+        10.99505,
+        3.4272,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 08",
+      "from": [
+        5.00495,
+        3.01669,
+        0
+      ],
+      "to": [
+        6.65,
+        3.4272,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 08",
+      "from": [
+        9.35,
+        3.01669,
+        15.72
+      ],
+      "to": [
+        11.07505,
+        3.4272,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 08",
+      "from": [
+        4.92495,
+        3.01669,
+        15.72
+      ],
+      "to": [
+        6.65,
+        3.4272,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 08",
+      "from": [
+        9.35,
+        3.01669,
+        15.87
+      ],
+      "to": [
+        11.08005,
+        3.4272,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 08",
+      "from": [
+        4.91995,
+        3.01669,
+        15.87
+      ],
+      "to": [
+        6.65,
+        3.4272,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 09",
+      "from": [
+        9.35,
+        3.4272,
+        0
+      ],
+      "to": [
+        10.97641,
+        3.83771,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 09",
+      "from": [
+        5.02359,
+        3.4272,
+        0
+      ],
+      "to": [
+        6.65,
+        3.83771,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 09",
+      "from": [
+        9.35,
+        3.4272,
+        15.72
+      ],
+      "to": [
+        11.05641,
+        3.83771,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 09",
+      "from": [
+        4.94359,
+        3.4272,
+        15.72
+      ],
+      "to": [
+        6.65,
+        3.83771,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 09",
+      "from": [
+        9.35,
+        3.4272,
+        15.87
+      ],
+      "to": [
+        11.06141,
+        3.83771,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 09",
+      "from": [
+        4.93859,
+        3.4272,
+        15.87
+      ],
+      "to": [
+        6.65,
+        3.83771,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 10",
+      "from": [
+        9.35,
+        3.83771,
+        0
+      ],
+      "to": [
+        10.95777,
+        4.24823,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 10",
+      "from": [
+        5.04223,
+        3.83771,
+        0
+      ],
+      "to": [
+        6.65,
+        4.24823,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 10",
+      "from": [
+        9.35,
+        3.83771,
+        15.72
+      ],
+      "to": [
+        11.03777,
+        4.24823,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 10",
+      "from": [
+        4.96223,
+        3.83771,
+        15.72
+      ],
+      "to": [
+        6.65,
+        4.24823,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 10",
+      "from": [
+        9.35,
+        3.83771,
+        15.87
+      ],
+      "to": [
+        11.04277,
+        4.24823,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 10",
+      "from": [
+        4.95723,
+        3.83771,
+        15.87
+      ],
+      "to": [
+        6.65,
+        4.24823,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 11",
+      "from": [
+        9.35,
+        4.24823,
+        0
+      ],
+      "to": [
+        10.93913,
+        4.65874,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 11",
+      "from": [
+        5.06087,
+        4.24823,
+        0
+      ],
+      "to": [
+        6.65,
+        4.65874,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 11",
+      "from": [
+        9.35,
+        4.24823,
+        15.72
+      ],
+      "to": [
+        11.01913,
+        4.65874,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 11",
+      "from": [
+        4.98087,
+        4.24823,
+        15.72
+      ],
+      "to": [
+        6.65,
+        4.65874,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 11",
+      "from": [
+        9.35,
+        4.24823,
+        15.87
+      ],
+      "to": [
+        11.02413,
+        4.65874,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 11",
+      "from": [
+        4.97587,
+        4.24823,
+        15.87
+      ],
+      "to": [
+        6.65,
+        4.65874,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 12",
+      "from": [
+        9.35,
+        4.65874,
+        0
+      ],
+      "to": [
+        10.92048,
+        5.06926,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 12",
+      "from": [
+        5.07952,
+        4.65874,
+        0
+      ],
+      "to": [
+        6.65,
+        5.06926,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 12",
+      "from": [
+        9.35,
+        4.65874,
+        15.72
+      ],
+      "to": [
+        11.00048,
+        5.06926,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 12",
+      "from": [
+        4.99952,
+        4.65874,
+        15.72
+      ],
+      "to": [
+        6.65,
+        5.06926,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 12",
+      "from": [
+        9.35,
+        4.65874,
+        15.87
+      ],
+      "to": [
+        11.00548,
+        5.06926,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 12",
+      "from": [
+        4.99452,
+        4.65874,
+        15.87
+      ],
+      "to": [
+        6.65,
+        5.06926,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 13",
+      "from": [
+        9.35,
+        5.06926,
+        0
+      ],
+      "to": [
+        10.90184,
+        5.47977,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 13",
+      "from": [
+        5.09816,
+        5.06926,
+        0
+      ],
+      "to": [
+        6.65,
+        5.47977,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 13",
+      "from": [
+        9.35,
+        5.06926,
+        15.72
+      ],
+      "to": [
+        10.98184,
+        5.47977,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 13",
+      "from": [
+        5.01816,
+        5.06926,
+        15.72
+      ],
+      "to": [
+        6.65,
+        5.47977,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 13",
+      "from": [
+        9.35,
+        5.06926,
+        15.87
+      ],
+      "to": [
+        10.98684,
+        5.47977,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 13",
+      "from": [
+        5.01316,
+        5.06926,
+        15.87
+      ],
+      "to": [
+        6.65,
+        5.47977,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 14",
+      "from": [
+        9.35,
+        5.47977,
+        0
+      ],
+      "to": [
+        10.8832,
+        5.89029,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 14",
+      "from": [
+        5.1168,
+        5.47977,
+        0
+      ],
+      "to": [
+        6.65,
+        5.89029,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 14",
+      "from": [
+        9.35,
+        5.47977,
+        15.72
+      ],
+      "to": [
+        10.9632,
+        5.89029,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 14",
+      "from": [
+        5.0368,
+        5.47977,
+        15.72
+      ],
+      "to": [
+        6.65,
+        5.89029,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 14",
+      "from": [
+        9.35,
+        5.47977,
+        15.87
+      ],
+      "to": [
+        10.9682,
+        5.89029,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 14",
+      "from": [
+        5.0318,
+        5.47977,
+        15.87
+      ],
+      "to": [
+        6.65,
+        5.89029,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 15",
+      "from": [
+        9.35,
+        5.89029,
+        0
+      ],
+      "to": [
+        10.86456,
+        6.3008,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 15",
+      "from": [
+        5.13544,
+        5.89029,
+        0
+      ],
+      "to": [
+        6.65,
+        6.3008,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 15",
+      "from": [
+        9.35,
+        5.89029,
+        15.72
+      ],
+      "to": [
+        10.94456,
+        6.3008,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 15",
+      "from": [
+        5.05544,
+        5.89029,
+        15.72
+      ],
+      "to": [
+        6.65,
+        6.3008,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 15",
+      "from": [
+        9.35,
+        5.89029,
+        15.87
+      ],
+      "to": [
+        10.94956,
+        6.3008,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 15",
+      "from": [
+        5.05044,
+        5.89029,
+        15.87
+      ],
+      "to": [
+        6.65,
+        6.3008,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 16",
+      "from": [
+        9.35,
+        6.3008,
+        0
+      ],
+      "to": [
+        10.84592,
+        6.71132,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 16",
+      "from": [
+        5.15408,
+        6.3008,
+        0
+      ],
+      "to": [
+        6.65,
+        6.71132,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 16",
+      "from": [
+        9.35,
+        6.3008,
+        15.72
+      ],
+      "to": [
+        10.92592,
+        6.71132,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 16",
+      "from": [
+        5.07408,
+        6.3008,
+        15.72
+      ],
+      "to": [
+        6.65,
+        6.71132,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 16",
+      "from": [
+        9.35,
+        6.3008,
+        15.87
+      ],
+      "to": [
+        10.93092,
+        6.71132,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 16",
+      "from": [
+        5.06908,
+        6.3008,
+        15.87
+      ],
+      "to": [
+        6.65,
+        6.71132,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 17",
+      "from": [
+        9.35,
+        6.71132,
+        0
+      ],
+      "to": [
+        10.82728,
+        7.12183,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 17",
+      "from": [
+        5.17272,
+        6.71132,
+        0
+      ],
+      "to": [
+        6.65,
+        7.12183,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 17",
+      "from": [
+        9.35,
+        6.71132,
+        15.72
+      ],
+      "to": [
+        10.90728,
+        7.12183,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 17",
+      "from": [
+        5.09272,
+        6.71132,
+        15.72
+      ],
+      "to": [
+        6.65,
+        7.12183,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 17",
+      "from": [
+        9.35,
+        6.71132,
+        15.87
+      ],
+      "to": [
+        10.91228,
+        7.12183,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 17",
+      "from": [
+        5.08772,
+        6.71132,
+        15.87
+      ],
+      "to": [
+        6.65,
+        7.12183,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 18",
+      "from": [
+        9.35,
+        7.12183,
+        0
+      ],
+      "to": [
+        10.80864,
+        7.53234,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 18",
+      "from": [
+        5.19136,
+        7.12183,
+        0
+      ],
+      "to": [
+        6.65,
+        7.53234,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 18",
+      "from": [
+        9.35,
+        7.12183,
+        15.72
+      ],
+      "to": [
+        10.88864,
+        7.53234,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 18",
+      "from": [
+        5.11136,
+        7.12183,
+        15.72
+      ],
+      "to": [
+        6.65,
+        7.53234,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 18",
+      "from": [
+        9.35,
+        7.12183,
+        15.87
+      ],
+      "to": [
+        10.89364,
+        7.53234,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 18",
+      "from": [
+        5.10636,
+        7.12183,
+        15.87
+      ],
+      "to": [
+        6.65,
+        7.53234,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 19",
+      "from": [
+        9.35,
+        7.53234,
+        0
+      ],
+      "to": [
+        10.79,
+        7.94286,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 19",
+      "from": [
+        5.21,
+        7.53234,
+        0
+      ],
+      "to": [
+        6.65,
+        7.94286,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 19",
+      "from": [
+        9.35,
+        7.53234,
+        15.72
+      ],
+      "to": [
+        10.87,
+        7.94286,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 19",
+      "from": [
+        5.13,
+        7.53234,
+        15.72
+      ],
+      "to": [
+        6.65,
+        7.94286,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 19",
+      "from": [
+        9.35,
+        7.53234,
+        15.87
+      ],
+      "to": [
+        10.875,
+        7.94286,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 19",
+      "from": [
+        5.125,
+        7.53234,
+        15.87
+      ],
+      "to": [
+        6.65,
+        7.94286,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 20",
+      "from": [
+        9.35,
+        7.94286,
+        0
+      ],
+      "to": [
+        10.77135,
+        8.35337,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 20",
+      "from": [
+        5.22865,
+        7.94286,
+        0
+      ],
+      "to": [
+        6.65,
+        8.35337,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 20",
+      "from": [
+        9.35,
+        7.94286,
+        15.72
+      ],
+      "to": [
+        10.85135,
+        8.35337,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 20",
+      "from": [
+        5.14865,
+        7.94286,
+        15.72
+      ],
+      "to": [
+        6.65,
+        8.35337,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 20",
+      "from": [
+        9.35,
+        7.94286,
+        15.87
+      ],
+      "to": [
+        10.85635,
+        8.35337,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 20",
+      "from": [
+        5.14365,
+        7.94286,
+        15.87
+      ],
+      "to": [
+        6.65,
+        8.35337,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 21",
+      "from": [
+        9.35,
+        8.35337,
+        0
+      ],
+      "to": [
+        10.75271,
+        8.76389,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 21",
+      "from": [
+        5.24729,
+        8.35337,
+        0
+      ],
+      "to": [
+        6.65,
+        8.76389,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 21",
+      "from": [
+        9.35,
+        8.35337,
+        15.72
+      ],
+      "to": [
+        10.83271,
+        8.76389,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 21",
+      "from": [
+        5.16729,
+        8.35337,
+        15.72
+      ],
+      "to": [
+        6.65,
+        8.76389,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 21",
+      "from": [
+        9.35,
+        8.35337,
+        15.87
+      ],
+      "to": [
+        10.83771,
+        8.76389,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 21",
+      "from": [
+        5.16229,
+        8.35337,
+        15.87
+      ],
+      "to": [
+        6.65,
+        8.76389,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 22",
+      "from": [
+        9.35,
+        8.76389,
+        0
+      ],
+      "to": [
+        10.73407,
+        9.1744,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 22",
+      "from": [
+        5.26593,
+        8.76389,
+        0
+      ],
+      "to": [
+        6.65,
+        9.1744,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 22",
+      "from": [
+        9.35,
+        8.76389,
+        15.72
+      ],
+      "to": [
+        10.81407,
+        9.1744,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 22",
+      "from": [
+        5.18593,
+        8.76389,
+        15.72
+      ],
+      "to": [
+        6.65,
+        9.1744,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 22",
+      "from": [
+        9.35,
+        8.76389,
+        15.87
+      ],
+      "to": [
+        10.81907,
+        9.1744,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 22",
+      "from": [
+        5.18093,
+        8.76389,
+        15.87
+      ],
+      "to": [
+        6.65,
+        9.1744,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 23",
+      "from": [
+        9.35,
+        9.1744,
+        0
+      ],
+      "to": [
+        10.71543,
+        9.58492,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 23",
+      "from": [
+        5.28457,
+        9.1744,
+        0
+      ],
+      "to": [
+        6.65,
+        9.58492,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 23",
+      "from": [
+        9.35,
+        9.1744,
+        15.72
+      ],
+      "to": [
+        10.79543,
+        9.58492,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 23",
+      "from": [
+        5.20457,
+        9.1744,
+        15.72
+      ],
+      "to": [
+        6.65,
+        9.58492,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 23",
+      "from": [
+        9.35,
+        9.1744,
+        15.87
+      ],
+      "to": [
+        10.80043,
+        9.58492,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 23",
+      "from": [
+        5.19957,
+        9.1744,
+        15.87
+      ],
+      "to": [
+        6.65,
+        9.58492,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 24",
+      "from": [
+        9.35,
+        9.58492,
+        0
+      ],
+      "to": [
+        10.69679,
+        9.99543,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 24",
+      "from": [
+        5.30321,
+        9.58492,
+        0
+      ],
+      "to": [
+        6.65,
+        9.99543,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 24",
+      "from": [
+        9.35,
+        9.58492,
+        15.72
+      ],
+      "to": [
+        10.77679,
+        9.99543,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 24",
+      "from": [
+        5.22321,
+        9.58492,
+        15.72
+      ],
+      "to": [
+        6.65,
+        9.99543,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 24",
+      "from": [
+        9.35,
+        9.58492,
+        15.87
+      ],
+      "to": [
+        10.78179,
+        9.99543,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 24",
+      "from": [
+        5.21821,
+        9.58492,
+        15.87
+      ],
+      "to": [
+        6.65,
+        9.99543,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 25",
+      "from": [
+        9.35,
+        9.99543,
+        0
+      ],
+      "to": [
+        10.67815,
+        10.40595,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 25",
+      "from": [
+        5.32185,
+        9.99543,
+        0
+      ],
+      "to": [
+        6.65,
+        10.40595,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 25",
+      "from": [
+        9.35,
+        9.99543,
+        15.72
+      ],
+      "to": [
+        10.75815,
+        10.40595,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 25",
+      "from": [
+        5.24185,
+        9.99543,
+        15.72
+      ],
+      "to": [
+        6.65,
+        10.40595,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 25",
+      "from": [
+        9.35,
+        9.99543,
+        15.87
+      ],
+      "to": [
+        10.76315,
+        10.40595,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 25",
+      "from": [
+        5.23685,
+        9.99543,
+        15.87
+      ],
+      "to": [
+        6.65,
+        10.40595,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 26",
+      "from": [
+        9.35,
+        10.40595,
+        0
+      ],
+      "to": [
+        10.65951,
+        10.81646,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 26",
+      "from": [
+        5.34049,
+        10.40595,
+        0
+      ],
+      "to": [
+        6.65,
+        10.81646,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 26",
+      "from": [
+        9.35,
+        10.40595,
+        15.72
+      ],
+      "to": [
+        10.73951,
+        10.81646,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 26",
+      "from": [
+        5.26049,
+        10.40595,
+        15.72
+      ],
+      "to": [
+        6.65,
+        10.81646,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 26",
+      "from": [
+        9.35,
+        10.40595,
+        15.87
+      ],
+      "to": [
+        10.74451,
+        10.81646,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 26",
+      "from": [
+        5.25549,
+        10.40595,
+        15.87
+      ],
+      "to": [
+        6.65,
+        10.81646,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 27",
+      "from": [
+        9.35,
+        10.81646,
+        0
+      ],
+      "to": [
+        10.64086,
+        11.22697,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 27",
+      "from": [
+        5.35914,
+        10.81646,
+        0
+      ],
+      "to": [
+        6.65,
+        11.22697,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 27",
+      "from": [
+        9.35,
+        10.81646,
+        15.72
+      ],
+      "to": [
+        10.72086,
+        11.22697,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 27",
+      "from": [
+        5.27914,
+        10.81646,
+        15.72
+      ],
+      "to": [
+        6.65,
+        11.22697,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 27",
+      "from": [
+        9.35,
+        10.81646,
+        15.87
+      ],
+      "to": [
+        10.72586,
+        11.22697,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 27",
+      "from": [
+        5.27414,
+        10.81646,
+        15.87
+      ],
+      "to": [
+        6.65,
+        11.22697,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 28",
+      "from": [
+        9.35,
+        11.22697,
+        0
+      ],
+      "to": [
+        10.62222,
+        11.63749,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 28",
+      "from": [
+        5.37778,
+        11.22697,
+        0
+      ],
+      "to": [
+        6.65,
+        11.63749,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 28",
+      "from": [
+        9.35,
+        11.22697,
+        15.72
+      ],
+      "to": [
+        10.70222,
+        11.63749,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 28",
+      "from": [
+        5.29778,
+        11.22697,
+        15.72
+      ],
+      "to": [
+        6.65,
+        11.63749,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 28",
+      "from": [
+        9.35,
+        11.22697,
+        15.87
+      ],
+      "to": [
+        10.70722,
+        11.63749,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 28",
+      "from": [
+        5.29278,
+        11.22697,
+        15.87
+      ],
+      "to": [
+        6.65,
+        11.63749,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 29",
+      "from": [
+        9.35,
+        11.63749,
+        0
+      ],
+      "to": [
+        10.60358,
+        12.048,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 29",
+      "from": [
+        5.39642,
+        11.63749,
+        0
+      ],
+      "to": [
+        6.65,
+        12.048,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 29",
+      "from": [
+        9.35,
+        11.63749,
+        15.72
+      ],
+      "to": [
+        10.68358,
+        12.048,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 29",
+      "from": [
+        5.31642,
+        11.63749,
+        15.72
+      ],
+      "to": [
+        6.65,
+        12.048,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 29",
+      "from": [
+        9.35,
+        11.63749,
+        15.87
+      ],
+      "to": [
+        10.68858,
+        12.048,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 29",
+      "from": [
+        5.31142,
+        11.63749,
+        15.87
+      ],
+      "to": [
+        6.65,
+        12.048,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 30",
+      "from": [
+        9.35,
+        12.048,
+        0
+      ],
+      "to": [
+        10.58494,
+        12.45852,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 30",
+      "from": [
+        5.41506,
+        12.048,
+        0
+      ],
+      "to": [
+        6.65,
+        12.45852,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 30",
+      "from": [
+        9.35,
+        12.048,
+        15.72
+      ],
+      "to": [
+        10.66494,
+        12.45852,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 30",
+      "from": [
+        5.33506,
+        12.048,
+        15.72
+      ],
+      "to": [
+        6.65,
+        12.45852,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 30",
+      "from": [
+        9.35,
+        12.048,
+        15.87
+      ],
+      "to": [
+        10.66994,
+        12.45852,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 30",
+      "from": [
+        5.33006,
+        12.048,
+        15.87
+      ],
+      "to": [
+        6.65,
+        12.45852,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back right 31",
+      "from": [
+        9.35,
+        12.45852,
+        0
+      ],
+      "to": [
+        10.5663,
+        12.86903,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Recessed LCD back left 31",
+      "from": [
+        5.4337,
+        12.45852,
+        0
+      ],
+      "to": [
+        6.65,
+        12.86903,
+        15.72
+      ],
+      "faces": {
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek right 31",
+      "from": [
+        9.35,
+        12.45852,
+        15.72
+      ],
+      "to": [
+        10.6463,
+        12.86903,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Outer dark cheek left 31",
+      "from": [
+        5.3537,
+        12.45852,
+        15.72
+      ],
+      "to": [
+        6.65,
+        12.86903,
+        15.87
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim right 31",
+      "from": [
+        9.35,
+        12.45852,
+        15.87
+      ],
+      "to": [
+        10.6513,
+        12.86903,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin pale end trim left 31",
+      "from": [
+        5.3487,
+        12.45852,
+        15.87
+      ],
+      "to": [
+        6.65,
+        12.86903,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Outer recessed end closure",
+      "from": [
+        6.65,
+        -0.26743,
+        15.87
+      ],
+      "to": [
+        9.35,
+        13.15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
         },
         "up": {
           "texture": "#metal"
@@ -388,16 +5090,223 @@
       }
     },
     {
-      "comment": "Small rectangular ceiling anchor, not a central bulky clock support",
+      "comment": "Slim upper rail right",
       "from": [
-        7.25,
-        15.64,
-        7.19
+        9.35,
+        12.89403,
+        0
       ],
       "to": [
-        8.75,
+        10.66,
+        13.16,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "up": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Slim upper rail left",
+      "from": [
+        5.34,
+        12.89403,
+        0
+      ],
+      "to": [
+        6.65,
+        13.16,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "up": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Green projecting lip carrier right",
+      "from": [
+        9.35,
+        -0.68,
+        0
+      ],
+      "to": [
+        11.45,
+        -0.29243,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#green"
+        },
+        "east": {
+          "texture": "#green"
+        },
+        "west": {
+          "texture": "#green"
+        },
+        "up": {
+          "texture": "#green"
+        },
+        "down": {
+          "texture": "#green"
+        }
+      }
+    },
+    {
+      "comment": "Green projecting lip carrier left",
+      "from": [
+        4.55,
+        -0.68,
+        0
+      ],
+      "to": [
+        6.65,
+        -0.29243,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#green"
+        },
+        "east": {
+          "texture": "#green"
+        },
+        "west": {
+          "texture": "#green"
+        },
+        "up": {
+          "texture": "#green"
+        },
+        "down": {
+          "texture": "#green"
+        }
+      }
+    },
+    {
+      "comment": "Thin lower metal return right",
+      "from": [
+        9.35,
+        -0.74,
+        0
+      ],
+      "to": [
+        11.27,
+        -0.68,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Thin lower metal return left",
+      "from": [
+        4.73,
+        -0.74,
+        0
+      ],
+      "to": [
+        6.65,
+        -0.68,
+        16
+      ],
+      "faces": {
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Ceiling suspension rod",
+      "from": [
+        7.78,
+        13.15,
+        7.78
+      ],
+      "to": [
+        8.22,
+        15.72,
+        8.22
+      ],
+      "faces": {
+        "north": {
+          "texture": "#metal"
+        },
+        "south": {
+          "texture": "#metal"
+        },
+        "east": {
+          "texture": "#metal"
+        },
+        "west": {
+          "texture": "#metal"
+        },
+        "up": {
+          "texture": "#metal"
+        },
+        "down": {
+          "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Ceiling anchor plate",
+      "from": [
+        7.3,
+        15.7,
+        7.3
+      ],
+      "to": [
+        8.7,
         16,
-        8.64
+        8.7
       ],
       "faces": {
         "north": {
@@ -417,6 +5326,66 @@
         },
         "down": {
           "texture": "#metal"
+        }
+      }
+    },
+    {
+      "comment": "Underside screw right",
+      "from": [
+        9.95,
+        -0.755,
+        12
+      ],
+      "to": [
+        10.14,
+        -0.74,
+        12.19
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    },
+    {
+      "comment": "Underside screw left",
+      "from": [
+        5.86,
+        -0.755,
+        12
+      ],
+      "to": [
+        6.05,
+        -0.74,
+        12.19
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
         }
       }
     }

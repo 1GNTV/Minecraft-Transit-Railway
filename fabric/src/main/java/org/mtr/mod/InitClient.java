@@ -153,7 +153,8 @@ public final class InitClient {
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.APG_DOOR, dispatcher -> new RenderPSDAPGDoor<>(dispatcher, 2));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_HORIZONTAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 1, 3.25F, 6, 2.5F, 30, true, 1));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_HORIZONTAL_2, dispatcher -> new RenderPIDS<>(dispatcher, 1.5F, 7.5F, 6, 6.5F, 29, true, 1));
-		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PANAM_PIDS, RenderPANAMPIDS::new);
+		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PANAM_PIDS, argument -> new RenderPANAMPIDS<>(argument));
+		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PANAM_SCREEN, argument -> new RenderPANAMPIDS<>(argument));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_HORIZONTAL_3, dispatcher -> new RenderPIDS<>(dispatcher, 2.5F, 7.5F, 6, 6.5F, 27, true, 1.25F));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_SINGLE_ARRIVAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));

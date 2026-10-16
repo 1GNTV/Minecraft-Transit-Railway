@@ -42,8 +42,8 @@ public final class PixelAtlasCache {
             PanamSurface surface=null;NativeImage nativeImage=null;long start=System.nanoTime();
             try{
                 surface=new PanamSurface(spec,r,b);
-                nativeImage=new NativeImage(NativeImageFormat.getAbgrMapped(),(int)surface.atlasWidth,(int)surface.atlasHeight,false);
-                for(int y=0;y<surface.atlasHeight;y++)for(int x=0;x<surface.atlasWidth;x++){int c=surface.image.getRGB(x,y);nativeImage.setPixelColor(x,y,(c&0xFF00FF00)|((c>>16)&255)|((c&255)<<16));}
+                nativeImage=new NativeImage(NativeImageFormat.getAbgrMapped(),surface.rasterWidth,surface.rasterHeight,false);
+                for(int y=0;y<surface.rasterHeight;y++)for(int x=0;x<surface.rasterWidth;x++){int c=surface.image.getRGB(x,y);nativeImage.setPixelColor(x,y,(c&0xFF00FF00)|((c>>16)&255)|((c&255)<<16));}
                 builds.incrementAndGet();buildNanos.addAndGet(System.nanoTime()-start);
             }catch(Exception error){if(nativeImage!=null)nativeImage.close();nativeImage=null;Init.LOGGER.error("PIXEL surface preparation failed",error);}
             finally{if(surface!=null){surface.image.flush();surface.image=null;}}
@@ -59,7 +59,7 @@ public final class PixelAtlasCache {
         Result result=uploads.poll();if(result==null)return;
         if(result.generation!=generation){if(result.image!=null)result.image.close();return;}
         pending.remove(result.spec);PanamSurface s=result.surface;if(s==null||result.image==null)return;
-        long cost=(long)s.atlasWidth*(long)s.atlasHeight*4;
+        long cost=(long)s.rasterWidth*(long)s.rasterHeight*4;
         it=ready.values().iterator();while(bytes+cost>MAX_BYTES&&it.hasNext()){Entry e=it.next();if(now-e.touched>2000){release(e);it.remove();}}
         if(bytes+cost>MAX_BYTES){result.image.close();return;}
         NativeImage image=result.image;
@@ -71,7 +71,7 @@ public final class PixelAtlasCache {
         }catch(Exception error){Init.LOGGER.error("PIXEL atlas upload failed",error);}
         finally{if(!registered){if(texture==null)image.close();else texture.close();}}
     }
-    private void release(Entry e){MainRenderer.cancelRender(e.texture);MinecraftClient.getInstance().getTextureManager().destroyTexture(e.texture);MoreRenderLayers.removeFromCache(e.texture);bytes-=(long)e.surface.atlasWidth*(long)e.surface.atlasHeight*4;}
+    private void release(Entry e){MainRenderer.cancelRender(e.texture);MinecraftClient.getInstance().getTextureManager().destroyTexture(e.texture);MoreRenderLayers.removeFromCache(e.texture);bytes-=(long)e.surface.rasterWidth*(long)e.surface.rasterHeight*4;}
     public void reset(){generation++;worker.getQueue().clear();for(Entry e:ready.values())release(e);ready.clear();pending.clear();Result r;while((r=uploads.poll())!=null)if(r.image!=null)r.image.close();regular=null;bold=null;}
     /** Optional owner-supplied fonts shipped as resources when rebuilding from source.
      * The project does not include or download the Parisine font files. */
