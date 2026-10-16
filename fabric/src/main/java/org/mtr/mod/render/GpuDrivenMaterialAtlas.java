@@ -151,7 +151,8 @@ public final class GpuDrivenMaterialAtlas {
             && c.mtr$family()!=RenderPipelineMetrics.Family.RAIL)return false;
         var array=c.mtr$array();
         var state=c.mtr$attributes();
-        if(array==null||state==null||state.matrix4f==null||RegionVertexRanges.contains(array))return false;
+        if(array==null||state==null||state.matrix4f==null||RegionVertexRanges.contains(array)
+            ||!c.mtr$visible())return false;
         if(array.materialProperties.translucent||array.materialProperties.cutoutHack
             ||!array.materialProperties.writeDepthBuf
             ||array.materialProperties.vertexAttributeState.matrix4f!=null)return false;
@@ -171,6 +172,36 @@ public final class GpuDrivenMaterialAtlas {
             if(array.mapping.sources.get(t)==VertexAttributeSource.GLOBAL
                 && InstanceValues.value(c,t)==null)return false;
         return true;
+    }
+
+    /** One consecutive material/vertex-layout segment may contain multiple
+     *  different train or rail models. No sorting across material boundaries. */
+    public static boolean candidate(Object object) {
+        return ENABLED && !failed && object instanceof RenderCallData call && eligible(call);
+    }
+
+    public static boolean sameMaterial(Object left,Object right) {
+        if(!(left instanceof RenderCallData a) || !(right instanceof RenderCallData b)
+                || !eligible(a) || !eligible(b)) return false;
+        var one=a.mtr$array();
+        var two=b.mtr$array();
+        return a.mtr$family()==b.mtr$family()
+                && one.materialProperties==two.materialProperties
+                && one.indexBuffer.indexType==two.indexBuffer.indexType
+                && one.mapping.strideVertex==two.mapping.strideVertex
+                && one.mapping.sources.equals(two.mapping.sources)
+                && one.mapping.pointers.equals(two.mapping.pointers);
+    }
+
+    public static boolean worthwhile(List<?> calls,int start,int end) {
+        if(!ENABLED || failed || end-start<MIN_CALLS)return false;
+        var unique=new IdentityHashMap<VertexArray,Boolean>();
+        for(int i=start;i<end;i++) {
+            if(!(calls.get(i) instanceof RenderCallData call))return false;
+            unique.put(call.mtr$array(),Boolean.TRUE);
+            if(unique.size()>=2)return true;
+        }
+        return false;
     }
 
     /** Called once at the material batch boundary; no partial submissions. */

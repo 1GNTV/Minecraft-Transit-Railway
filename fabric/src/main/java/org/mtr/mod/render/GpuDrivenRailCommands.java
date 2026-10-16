@@ -64,7 +64,7 @@ public final class GpuDrivenRailCommands {
 
     public static boolean supported(int count) {
         return SillonMegaEngine.GPU_DRIVEN && count>=MIN_GROUP && !failed
-            && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.railCompute","false"))
+            && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.railCompute","true"))
             && Utilities.canUseCustomShader() && !OptimizedRenderer.renderingShadows()
             && !GlStateTracker.isGl4ES() && GL.getCapabilities().OpenGL43;
     }

@@ -77,6 +77,8 @@ public final class OculusGpuIndirectCommand {
         return ENABLED && !failed && instances>=4
             && first.mtr$family()==RenderPipelineMetrics.Family.TRAIN
             && OculusInstanceRenderer.shaderBridgeReady()
+            // Shadow passes retain exact shader-pack matrices and depth state.
+            && !org.mtr.mapping.mapper.OptimizedRenderer.renderingShadows()
             && ModelPartVisibility.gpuBounds(first.mtr$array())!=null
             && !GlStateTracker.isGl4ES()
             && GL.getCapabilities().OpenGL43;

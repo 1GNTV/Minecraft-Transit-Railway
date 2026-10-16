@@ -15,7 +15,7 @@
 
 ## Stable and experimental controls
 
-The new experimental GPU routes are enabled by default in SOLIS source, following the user's request to integrate the system. The exact flags allow A/B isolation without re-compiling; they are read at JVM start:
+The new GPU routes are enabled by default when eligible, following the user's request to integrate the system. Experimental shader/driver compatibility is not guaranteed. The exact flags allow A/B isolation without re-compiling; they are read at JVM start:
 
 - `-Dmtr.mega=false` — turn off the MEGA/SOLIS optimization toggles; use the compatible legacy rendering paths.
 - `-Dmtr.mega.gpuDriven=false` — turn off GPU-driven indirect/compute paths.
@@ -48,3 +48,38 @@ GitHub Actions release-name logic is prepared for these names, but **no build or
 - Comparable STRATA/SOLIS captures: FPS average/1% low, CPU + GPU time, submitted draw count
 
 Retain previous STRATA/Sillon source branches for rollback.
+
+
+## GPU dispatch audit (16 October 2026)
+
+This source revision repairs an important performance-integration gap: previously
+the cross-model GPU atlas was attempted only **once** for the entire incoming
+render batch, even though a real station can contain multiple material families.
+One incompatible source made the entire atlas call fail. SOLIS now discovers
+**contiguous compatible material segments**, preserves their draw order and
+submits only worthwhile heterogeneous groups to the GPU. Unmatched segments
+continue to use the preexisting homogeneous instancing path, including
+existing shader-pack fallback. A preflight prevents segmentation entirely when
+no qualifying mixed-model atlas is present.
+
+- `mtr.mega.railCompute` now defaults to **true** (was **false**): GPU-generated
+  visibility commands for opaque static rail spans are enabled where actual
+  supported GL4.3/no-shader material conditions hold.
+- The GPU model atlas refuses invisible model calls rather than drawing hidden
+  instances.
+- Instance compute restores the original OpenGL vertex-array binding.
+- Oculus GPU-indirect is disabled for shadow cascades. The Oculus shader bridge
+  still uses homogeneous shader-compatible uniform arrays rather than a
+  universal bindless/mesh-shader material pipeline.
+- GPU pipeline diagnostics include atlas, rail, instance and Oculus indirect
+  submission counters when `-Dmtr.v4.metrics=true`.
+
+**No baseline FPS values are claimed.** A successfully built JAR only validates
+compilation, not GPU driver execution, runtime shader correctness or FPS gain.
+The requested *universal*, shader-pack-compatible, all-world GPU scene pipeline
+is **not** implemented; there is still CPU-side scene selection and material
+bucketing. Claiming otherwise would be misleading.
+
+Triage if you see missing rail geometry or lighting: reproduce with
+`-Dmtr.mega.railCompute=false`, then `-Dmtr.mega.materialAtlas=false`,
+then `-Dmtr.mega.gpuDriven=false`. Attach `latest.log` and screenshots.

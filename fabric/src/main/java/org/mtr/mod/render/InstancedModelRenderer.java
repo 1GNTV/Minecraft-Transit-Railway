@@ -87,13 +87,53 @@ public final class InstancedModelRenderer {
             calls.forEach(ordinary);
             return;
         }
-        // GPU-built cross-model material atlas: one multi-draw for compatible
-        // heterogeneous train / 3D-rail meshes instead of source-by-source
-        // instancing. Opt-in until validated on real GL4.3 hardware.
-        if (shaderless && GpuDrivenMaterialAtlas.draw(calls)) {
-            GlVertexAttributeCache.invalidate();
+        // The incoming list may mix many materials. Trying to atlas the entire
+        // batch fails as soon as even one incompatible part is present. Process
+        // consecutive compatible material segments *in order*; each is either
+        // drawn once via GPU multi-draw or via the existing instanced renderer.
+        // This does not merge textures or alter transparent draw order.
+        boolean atlasPossible=false;
+        if(shaderless && SillonMegaEngine.GPU_DRIVEN
+                && GL.getCapabilities().OpenGL43) {
+            for(int begin=0;begin<calls.size();) {
+                int end=begin+1;
+                if(GpuDrivenMaterialAtlas.candidate(calls.get(begin))) {
+                    while(end<calls.size() && GpuDrivenMaterialAtlas.sameMaterial(
+                            calls.get(begin),calls.get(end)) && end-begin<1024)end++;
+                    if(GpuDrivenMaterialAtlas.worthwhile(calls,begin,end)) {
+                        atlasPossible=true;break;
+                    }
+                }
+                begin=end;
+            }
+        }
+        // Avoid fragmenting the previous instancing/reorder windows for worlds
+        // that contain no compatible, sufficiently large heterogeneous atlas.
+        if(atlasPossible) {
+            for(int start=0;start<calls.size();) {
+                int end=start+1;
+                if(GpuDrivenMaterialAtlas.candidate(calls.get(start))) {
+                    while(end<calls.size()
+                            && GpuDrivenMaterialAtlas.sameMaterial(calls.get(start),calls.get(end))
+                            && end-start<1024)end++;
+                    if(GpuDrivenMaterialAtlas.draw(calls.subList(start,end))) {
+                        GlVertexAttributeCache.invalidate();
+                        start=end;
+                        continue;
+                    }
+                } else {
+                    while(end<calls.size() && !GpuDrivenMaterialAtlas.candidate(calls.get(end)))end++;
+                }
+                drawExisting(calls.subList(start,end),ordinary,shaderless);
+                start=end;
+            }
             return;
         }
+        drawExisting(calls,ordinary,shaderless);
+    }
+
+    private static void drawExisting(List<?> calls,Consumer<Object> ordinary,boolean shaderless) {
+        if(calls.isEmpty())return;
         // Conservative disjoint opaque screen rectangles only; unknown bounds do not move.
         boolean allowReorder=shaderless || (SillonMegaEngine.SHADER_REORDER
             && OculusInstanceRenderer.shaderBridgeReady());

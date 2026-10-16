@@ -75,6 +75,7 @@ public final class RenderPipelineMetrics {
         lastReport = now;
         InstancedModelRenderer.report();
         GpuDrivenRailCommands.report();
+        OculusGpuIndirectCommand.report();
         for (int i = 0; i < stats.length; i++) {
             final Stats value = stats[i];
             if (value.passes != 0 || value.gpuSamples != 0) {

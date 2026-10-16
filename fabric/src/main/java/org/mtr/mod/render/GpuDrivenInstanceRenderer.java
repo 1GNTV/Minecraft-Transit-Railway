@@ -125,6 +125,7 @@ public final class GpuDrivenInstanceRenderer {
                                ByteBuffer raw,int count,int indices,int indexType,float[] bounds) {
         if(bounds==null || bounds.length!=6 || !initialize())return false;
         int previousProgram=GL43.glGetInteger(GL43.GL_CURRENT_PROGRAM);
+        int previousVAO=GL43.glGetInteger(GL43.GL_VERTEX_ARRAY_BINDING);
         int previousArray=GL43.glGetInteger(GL43.GL_ARRAY_BUFFER_BINDING);
         int previousSSBO=GL43.glGetInteger(GL43.GL_SHADER_STORAGE_BUFFER_BINDING);
         int previousIndirect=GL43.glGetInteger(GL43.GL_DRAW_INDIRECT_BUFFER_BINDING);
@@ -175,6 +176,7 @@ public final class GpuDrivenInstanceRenderer {
             for(int i=0;i<3;i++)GL43.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER,i,previousIndexed[i]);
             GL43.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER,previousSSBO);
             GL43.glBindBuffer(GL43.GL_DRAW_INDIRECT_BUFFER,previousIndirect);
+            GL43.glBindVertexArray(previousVAO);
             GL43.glBindBuffer(GL43.GL_ARRAY_BUFFER,previousArray);
             GL43.glUseProgram(previousProgram);
         }
