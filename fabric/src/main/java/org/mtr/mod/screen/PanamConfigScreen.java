@@ -1,8 +1,6 @@
 package org.mtr.mod.screen;
 
-import org.mtr.core.operation.ArrivalResponse;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
-import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.*;
 import org.mtr.mapping.tool.TextCase;
@@ -12,7 +10,6 @@ import org.mtr.mod.block.BlockPANAMScreen;
 import org.mtr.mod.data.PanamScreenSettings;
 import org.mtr.mod.packet.PacketUpdatePanamScreen;
 import org.mtr.mod.client.IDrawing;
-import org.mtr.mod.data.ArrivalsCacheClient;
 import org.mtr.mod.data.IGui;
 import org.mtr.mod.packet.PacketUpdatePIDSConfig;
 
@@ -39,24 +36,35 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
     private final boolean screenOnly;
     private final PanamScreenSettings initialSettings;
     private final TextFieldWidgetExtension[] displayFields=new TextFieldWidgetExtension[11];
-    private final ButtonWidgetExtension tabDisplay,resetDisplay;
-    private static final String[] DISPLAY_LABELS={"Position X","Position Y","Position Z","Rotation Y (°)","Rotation X (°)","Rotation Z (°)","Largeur (blocs)","Hauteur (blocs)","Zoom interface","Résol. L (px)","Résol. H (px)"};
+    private final ButtonWidgetExtension tabDisplay,resetDisplay,saveButton,cancelButton,sizeTab,positionTab;
+    private final ButtonWidgetExtension[] minus=new ButtonWidgetExtension[11],plus=new ButtonWidgetExtension[11];
+    private int displayGroup,left,panelWidth,column,rowSpacing;
+    private boolean cancel,saved;
     private boolean initialized;
     private int tab;
     private final int initialPage;
-    private final long detectedRouteId;
 
     public PanamConfigScreen(BlockPos pos, BlockPanamDisplayEntity entity) {
         super();
         this.pos = pos;
         screenOnly=entity instanceof BlockPANAMScreen.BlockEntity;
         initialSettings=screenOnly?((BlockPANAMScreen.BlockEntity)entity).settings():PanamScreenSettings.DEFAULT;
+        tab=screenOnly?2:0;
         tabDisplay=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setTab(2));
         tabDisplay.setMessage2(new Text(TextHelper.literal("Affichage").data));
         resetDisplay=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setDisplayValues(PanamScreenSettings.DEFAULT));
         resetDisplay.setMessage2(new Text(TextHelper.literal("Réinitialiser").data));
-        for(int i=0;i<displayFields.length;i++)displayFields[i]=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,12,TextCase.DEFAULT,"[^\\d.-]",null);
-        setDisplayValues(initialSettings);
+        sizeTab=button("Taille et image",()->setDisplayGroup(0));
+        positionTab=button("Position et angles",()->setDisplayGroup(1));
+        saveButton=button("Enregistrer",this::onClose2);
+        cancelButton=button("Annuler",()->{cancel=true;onClose2();});
+        for(int i=0;i<displayFields.length;i++) {
+            final int index=i;
+            displayFields[i]=new TextFieldWidgetExtension(0,0,120,SQUARE_SIZE,16,TextCase.DEFAULT,"[^\\d.,-]",null);
+            displayFields[i].setMessage2(new Text(TextHelper.literal(PanamDisplayForm.LABELS[i]).data));
+            minus[i]=button("−",()->adjust(index,-1));
+            plus[i]=button("+",()->adjust(index,1));
+        }
         this.platforms = new LongAVLTreeSet(entity.getPlatformIds());
         initialPage = entity.getDisplayPage();
         for (int i=0;i<3;i++) {
@@ -84,7 +92,7 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         autoPlatforms = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
         autoPlatforms.setMessage2(new Text(TextHelper.literal("Détecter automatiquement les quais").data));
         filterButton = PIDSConfigScreen.getPlatformFilterButton(pos,autoPlatforms,platforms,this);
-        filterButton.setMessage2(new Text(TextHelper.translatable("selectWorld.edit").data));
+        filterButton.setMessage2(new Text(TextHelper.literal("Choisir les quais…").data));
         pageInput = new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,3,TextCase.DEFAULT,"\\D","1");
         lastTrain = new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,checked->{});
         lastTrain.setMessage2(new Text(TextHelper.literal("Dernier métro confirmé").data));
@@ -94,70 +102,130 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         tabArrivals.setMessage2(new Text(TextHelper.literal("Départs et quais").data));
         tabNews = new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,button->setTab(1));
         tabNews.setMessage2(new Text(TextHelper.literal("Infos voyageurs").data));
-        ObjectArrayList<ArrivalResponse> arrivals = ArrivalsCacheClient.INSTANCE.requestArrivals(platforms);
-        detectedRouteId = arrivals.isEmpty() ? -1 : arrivals.get(0).getRouteId();
         // The GUI is reconstructed on reopen, not every frame.
         autoPlatforms.setChecked(platforms.isEmpty());
         lastTrain.setChecked(last);
         suspended.setChecked(stopped);
     }
 
+    private static ButtonWidgetExtension button(String label,Runnable action) {
+        ButtonWidgetExtension b=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,ignored->action.run());
+        b.setMessage2(new Text(TextHelper.literal(label).data));
+        return b;
+    }
+
     @Override
     protected void init2() {
         super.init2();
-        int start = Math.max(12, width / 10);
-        int fieldWidth = Math.max(120, width - start*2);
-        int tabWidth=fieldWidth/(screenOnly?3:2);
-        IDrawing.setPositionAndWidth(tabArrivals,start,14,tabWidth-2);
-        IDrawing.setPositionAndWidth(tabNews,start+tabWidth+2,14,tabWidth-2);
-        if(screenOnly){
-            IDrawing.setPositionAndWidth(tabDisplay,start+tabWidth*2+2,14,tabWidth-2);addChild(new ClickableWidget(tabDisplay));
-            for(int i=0;i<displayFields.length;i++){
-                IDrawing.setPositionAndWidth(displayFields[i],start+(i%3)*tabWidth,61+(i/3)*40,tabWidth-6);
-                addChild(new ClickableWidget(displayFields[i]));
+        panelWidth=Math.min(700,width-24);
+        left=(width-panelWidth)/2;
+        column=(panelWidth-12)/2;
+        rowSpacing=height>=250?36:32;
+        int tabWidth=panelWidth/(screenOnly?3:2);
+        place(tabArrivals,left,20,tabWidth-4);
+        place(tabNews,left+tabWidth,20,tabWidth-4);
+        if(screenOnly) {
+            place(tabDisplay,left+2*tabWidth,20,tabWidth-4);
+            place(sizeTab,left,46,column);
+            place(positionTab,left+column+12,46,column);
+            // Snapshot text before resizing; populate only AFTER each widget has a usable width.
+            String[] values=initialized?displayTexts():PanamDisplayForm.values(initialSettings);
+            for(int i=0;i<displayFields.length;i++) {
+                place(displayFields[i],left,97,column-48);
+                displayFields[i].setText2(values[i]);
+                revealStart(displayFields[i]);
+                place(minus[i],left,97,20);
+                place(plus[i],left,97,20);
             }
-            IDrawing.setPositionAndWidth(resetDisplay,start+2*tabWidth,181,tabWidth-6);addChild(new ClickableWidget(resetDisplay));
         }
-        addChild(new ClickableWidget(tabArrivals));
-        addChild(new ClickableWidget(tabNews));
-
-        IDrawing.setPositionAndWidth(autoPlatforms,start,58,fieldWidth);
-        IDrawing.setPositionAndWidth(filterButton,start,84,fieldWidth/2);
-        IDrawing.setPositionAndWidth(pageInput,start+fieldWidth/2+6,84,54);
+        int footerWidth=(panelWidth-12)/3;
+        place(resetDisplay,left,height-26,footerWidth);
+        place(cancelButton,left+footerWidth+6,height-26,footerWidth);
+        place(saveButton,left+2*(footerWidth+6),height-26,footerWidth);
+        IDrawing.setPositionAndWidth(autoPlatforms,left,58,panelWidth);
+        place(filterButton,left,88,column);
+        place(pageInput,left+column+12,88,column);
         if(!initialized)pageInput.setText2(Integer.toString(initialPage+1));
+        revealStart(pageInput);
         addChild(new ClickableWidget(autoPlatforms));
-        addChild(new ClickableWidget(filterButton));
-        addChild(new ClickableWidget(pageInput));
-
         for(int i=0;i<3;i++) {
-            IDrawing.setPositionAndWidth(hideBoxes[i],start,116+i*23,fieldWidth);
+            IDrawing.setPositionAndWidth(hideBoxes[i],left,120+i*24,panelWidth);
             if(!initialized)hideBoxes[i].setChecked(hidden[i]);
             addChild(new ClickableWidget(hideBoxes[i]));
-            IDrawing.setPositionAndWidth(localMessages[i],start,81+i*29,fieldWidth);
-            if(!initialized)localMessages[i].setText2(messages[i]);
-            addChild(new ClickableWidget(localMessages[i]));
+            String value=initialized?localMessages[i].getText2():messages[i];
+            place(localMessages[i],left,64+i*32,panelWidth);
+            localMessages[i].setText2(value);
+            revealStart(localMessages[i]);
         }
-        IDrawing.setPositionAndWidth(lastTrain,start,178,fieldWidth);
-        IDrawing.setPositionAndWidth(suspended,start,203,fieldWidth);
+        IDrawing.setPositionAndWidth(lastTrain,left,155,panelWidth);
+        IDrawing.setPositionAndWidth(suspended,left,177,panelWidth);
         addChild(new ClickableWidget(lastTrain));
         addChild(new ClickableWidget(suspended));
         initialized=true;
         setTab(tab);
     }
 
+    private void place(ButtonWidgetExtension widget,int x,int y,int w) {
+        widget.setX2(x);widget.setY2(y);widget.setWidth2(w);
+        addChild(new ClickableWidget(widget));
+    }
+    private void place(TextFieldWidgetExtension widget,int x,int y,int w) {
+        widget.setX2(x);widget.setY2(y);widget.setWidth2(w);
+        addChild(new ClickableWidget(widget));
+    }
+    private static void revealStart(TextFieldWidgetExtension field) {
+        // setText at width 0 leaves vanilla's horizontal scroll beyond the text.
+        field.setSelectionEnd2(0);
+        field.setSelectionStart2(0);
+    }
+    private void setDisplayGroup(int value) {
+        displayGroup=value;
+        setTab(2);
+    }
     private void setTab(int value) {
         tab=value;
-        for(TextFieldWidgetExtension field:displayFields)field.visible=screenOnly&&tab==2;
-        resetDisplay.visible=screenOnly&&tab==2;
-        autoPlatforms.visible=tab==0;
-        filterButton.visible=tab==0;
-        pageInput.visible=tab==0;
+        tabArrivals.setActiveMapped(tab!=0);
+        tabNews.setActiveMapped(tab!=1);
+        tabDisplay.setActiveMapped(tab!=2);
+        sizeTab.visible=positionTab.visible=resetDisplay.visible=screenOnly&&tab==2;
+        sizeTab.setActiveMapped(displayGroup!=0);
+        positionTab.setActiveMapped(displayGroup!=1);
+        for(int i=0;i<displayFields.length;i++) {
+            displayFields[i].visible=false;
+            displayFields[i].setTextFieldFocused2(false);
+            minus[i].visible=plus[i].visible=false;
+        }
+        if(screenOnly&&tab==2) {
+            int[] indices=PanamDisplayForm.GROUPS[displayGroup];
+            for(int slot=0;slot<indices.length;slot++) {
+                int i=indices[slot],x=left+(slot%2)*(column+12),y=97+(slot/2)*rowSpacing;
+                displayFields[i].setX2(x+24);displayFields[i].setY2(y);
+                minus[i].setX2(x);minus[i].setY2(y);
+                plus[i].setX2(x+column-20);plus[i].setY2(y);
+                displayFields[i].visible=minus[i].visible=plus[i].visible=true;
+            }
+        }
+        autoPlatforms.visible=filterButton.visible=pageInput.visible=tab==0;
+        pageInput.setTextFieldFocused2(false);
         for(int i=0;i<3;i++) {
             localMessages[i].visible=tab==1;
+            localMessages[i].setTextFieldFocused2(false);
             hideBoxes[i].visible=tab==0;
         }
-        lastTrain.visible=tab==1;
-        suspended.visible=tab==1;
+        lastTrain.visible=suspended.visible=tab==1;
+    }
+    private void adjust(int i,int direction) {
+        displayFields[i].setText2(PanamDisplayForm.adjust(i,displayFields[i].getText2(),direction));
+        revealStart(displayFields[i]);
+    }
+    private String[] displayTexts() {
+        String[] values=new String[11];
+        for(int i=0;i<values.length;i++)values[i]=displayFields[i].getText2();
+        return values;
+    }
+    private boolean validPage() {
+        try {int p=Integer.parseInt(pageInput.getText2());return p>=1&&p<=999;}
+        catch(NumberFormatException e) {return false;}
     }
 
     @Override
@@ -166,34 +234,58 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         for(TextFieldWidgetExtension field:displayFields)field.tick2();
         for(TextFieldWidgetExtension message:localMessages)message.tick2();
     }
+    private void text(GraphicsHolder holder,String value,int x,int y,int maxWidth,int colour) {
+        if(GraphicsHolder.getTextWidth(value)>maxWidth) {
+            while(!value.isEmpty()&&GraphicsHolder.getTextWidth(value+"…")>maxWidth)value=value.substring(0,value.length()-1);
+            value+="…";
+        }
+        holder.drawText(value,x,y,colour,false,GraphicsHolder.getDefaultLight());
+    }
 
     @Override
     public void render(GraphicsHolder holder,int mouseX,int mouseY,float delta) {
         renderBackground(holder);
-        int left=Math.max(12,width/10);
-        holder.drawText("SILLON PANAM — Configuration",left,4,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+        GuiDrawing drawing=new GuiDrawing(holder);
+        drawing.beginDrawingRectangle();
+        drawing.drawRectangle(left-6,2,left+panelWidth+6,height-2,0xEF171B22);
+        drawing.finishDrawingRectangle();
+        text(holder,"PANAM — Réglages de cet écran",left,6,panelWidth,ARGB_WHITE);
+        int invalid=screenOnly?PanamDisplayForm.invalid(displayTexts()):-1;
+        saveButton.setActiveMapped(invalid<0&&validPage());
+        String hint="Échap enregistre aussi. Annuler ignore les modifications.";
         if(tab==0) {
-            holder.drawText("Quais suivis : " + (platforms.isEmpty()?"automatique":platforms.size()),left,45,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Page de départs",left+Math.max(120,(width-left*2)/2)+6,73,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Les départs viennent du réseau MTR.",left,207,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-        } else if(tab==2){
-            int col=Math.max(120,width-left*2)/3;
-            for(int i=0;i<DISPLAY_LABELS.length;i++)holder.drawText(DISPLAY_LABELS[i],left+(i%3)*col,49+(i/3)*40,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Échap : enregistrer. Réglages depuis le bloc d’ancrage.",left,209,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Zoom 0.5–3 · Taille 0.25–16 · Résolution 128–2048",left,222,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+            text(holder,"Quais : "+(autoPlatforms.isChecked2()?"détection automatique":platforms.size()+" sélectionné(s)"),left,46,panelWidth,ARGB_WHITE);
+            text(holder,"Page de départs (1 à 999)",left+column+12,77,column,ARGB_WHITE);
+            hint="Choisir les quais permet de passer en sélection manuelle.";
+        } else if(tab==2) {
+            text(holder,displayGroup==0?"Taille dans le monde et contenu de l'image.":"Position relative au bloc d'ancrage et rotation.",left,72,panelWidth,0xFFBFCBDD);
+            int[] indices=PanamDisplayForm.GROUPS[displayGroup];
+            hint="− / + : ajuster. Vous pouvez aussi saisir une valeur.";
+            for(int slot=0;slot<indices.length;slot++) {
+                int i=indices[slot];
+                boolean valid=PanamDisplayForm.valid(i,displayFields[i].getText2());
+                displayFields[i].setEditableColor2(valid?ARGB_WHITE:0xFFFF8585);
+                text(holder,PanamDisplayForm.LABELS[i],left+(slot%2)*(column+12),86+(slot/2)*rowSpacing,column,ARGB_WHITE);
+                if(displayFields[i].isFocused2()||displayFields[i].isHovered()||minus[i].isHovered()||plus[i].isHovered())hint=PanamDisplayForm.HELP[i];
+            }
         } else {
-            holder.drawText("Annonces locales (séparateur : |)",left,46,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            for(int i=0;i<3;i++)holder.drawText("Message "+(i+1),left,67+i*29,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Annonces globales : /mtr panam global <texte>",left,236,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Annonces ligne : /mtr panam line <ID> <texte>",left,249,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            if(detectedRouteId>=0)holder.drawText("ID de la ligne détectée : "+detectedRouteId,left,262,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
-            holder.drawText("Utilisez - pour supprimer une annonce réseau.",left,275,ARGB_WHITE,false,GraphicsHolder.getDefaultLight());
+            for(int i=0;i<3;i++)text(holder,"Annonce locale "+(i+1)+" (facultative)",left,53+i*32,panelWidth,ARGB_WHITE);
+            hint="/mtr panam : gérer les annonces du réseau et des lignes.";
+            for(TextFieldWidgetExtension message:localMessages)if(message.isFocused2()||message.isHovered())hint="Texte libre. | sépare les messages. Vide = aucune annonce.";
         }
+        if(invalid>=0)hint="À corriger : "+PanamDisplayForm.LABELS[invalid]+". "+PanamDisplayForm.HELP[invalid];
+        if(!validPage())hint="Page de départs : saisissez un entier de 1 à 999.";
+        text(holder,hint,left,height-42,panelWidth,invalid>=0||!validPage()?0xFFFF8585:0xFFBFCBDD);
         super.render(holder,mouseX,mouseY,delta);
     }
 
     @Override
     public void onClose2() {
+        if(cancel||saved){super.onClose2();return;}
+        int invalid=screenOnly?PanamDisplayForm.invalid(displayTexts()):-1;
+        if(invalid>=0){displayGroup=invalid<6?1:0;setTab(2);displayFields[invalid].setTextFieldFocused2(true);return;}
+        if(!validPage()){setTab(0);pageInput.setTextFieldFocused2(true);return;}
+        saved=true;
         for(int i=0;i<3;i++) {
             messages[i]=localMessages[i].getText2();
             hidden[i]=hideBoxes[i].isChecked2();
@@ -206,18 +298,16 @@ public final class PanamConfigScreen extends ScreenExtension implements IGui {
         int page=0;
         try{page=Math.max(0,Integer.parseInt(pageInput.getText2())-1);}catch(NumberFormatException ignored){}
         InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdatePIDSConfig(pos,messages,hidden,platforms,page));
-        if(screenOnly)InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdatePanamScreen(pos,displaySettings()));
+        if(screenOnly)InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdatePanamScreen(pos,PanamDisplayForm.settings(displayTexts())));
         super.onClose2();
     }
 
-    private void setDisplayValues(PanamScreenSettings s){
-        float[] v={s.x,s.y,s.z,s.yaw,s.pitch,s.roll,s.width,s.height,s.zoom,s.resolutionWidth,s.resolutionHeight};
-        for(int i=0;i<v.length;i++)displayFields[i].setText2(Float.toString(v[i]));
-    }
-    private float number(int i,float fallback){try{return Float.parseFloat(displayFields[i].getText2());}catch(NumberFormatException e){return fallback;}}
-    private PanamScreenSettings displaySettings(){
-        PanamScreenSettings s=initialSettings;
-        return new PanamScreenSettings(number(0,s.x),number(1,s.y),number(2,s.z),number(3,s.yaw),number(4,s.pitch),number(5,s.roll),number(6,s.width),number(7,s.height),(int)number(9,s.resolutionWidth),(int)number(10,s.resolutionHeight),number(8,s.zoom));
+    private void setDisplayValues(PanamScreenSettings settings) {
+        String[] values=PanamDisplayForm.values(settings);
+        for(int i=0;i<values.length;i++) {
+            displayFields[i].setText2(values[i]);
+            revealStart(displayFields[i]);
+        }
     }
 
     @Override
