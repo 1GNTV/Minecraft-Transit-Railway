@@ -23,7 +23,7 @@ import java.util.*;
  */
 public final class RegionVertexRanges {
     public record Span(int first, int count) {}
-    private static final boolean INDIRECT = !"false".equalsIgnoreCase(System.getProperty("mtr.engine.indirect", "true"));
+    private static final boolean INDIRECT = SillonMegaEngine.GPU_DRIVEN && !"false".equalsIgnoreCase(System.getProperty("mtr.engine.indirect", "true"));
     // Oculus-compatible shader draws can use the same standard GL4.3
     // DrawElementsIndirectCommand as shaderless. Keep this as an EXPLICIT
     // experiment until shader-pack visuals are validated on real hardware.
@@ -31,6 +31,11 @@ public final class RegionVertexRanges {
     // GPU buffer bindings/uploads do not amortize over tiny 2-3 span pages.
     private static final int MIN_INDIRECT_SPANS = Math.max(2, Integer.getInteger("mtr.engine.indirectMinSpans", 8));
     private static final boolean HELIX_COALESCE = !"false".equalsIgnoreCase(System.getProperty("mtr.helix.coalesceSpans","true"));
+    // Opaque compiled pages are index-order independent. Sorting their visible
+    // ranges before adjacency compaction makes the GPU execute fewer commands.
+    // Translucent, no-depth and cutout-hack materials retain exact draw order.
+    private static final boolean SORT_OPAQUE = SillonMegaEngine.GPU_DRIVEN
+        && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.opaqueSpanSort", "true"));
     // GL indirect drawing under shader shadow cascades is a separate opt-in.
     // The normal proven glMultiDrawElements fallback remains the default.
     private static final boolean HELIX_SHADOW_INDIRECT = Boolean.getBoolean("mtr.helix.shadowIndirect");
@@ -88,6 +93,13 @@ public final class RegionVertexRanges {
     private RegionVertexRanges() {}
 
     public static void select(VertexArray array, List<Span> spans) {
+        if (SORT_OPAQUE && spans.size() >= 4 && !array.materialProperties.translucent
+                && !array.materialProperties.cutoutHack
+                && array.materialProperties.writeDepthBuf) {
+            var ordered = new ArrayList<>(spans);
+            ordered.sort(Comparator.comparingInt(Span::first));
+            spans = ordered;
+        }
         spans = compact(spans);
         Ranges ranges = ACTIVE.get(array);
         if (ranges == null || ranges.counts.capacity() < spans.size()) {

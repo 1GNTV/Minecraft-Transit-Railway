@@ -69,7 +69,27 @@ public final class RailSectorBatcher {
     // Camera-independent scene plan: retain prepared rail pieces across views.
     private static final int SCENE_MAX=512, PIECE_MAX=65536, TRACK_MAX=4096;
     private static int scenePieces;
-    private static final Map<SceneKey,RailPiece[]> STATIC_SCENES=new LinkedHashMap<>(64,.75f,true);
+    private static final Map<SceneKey,StaticScene> STATIC_SCENES=new LinkedHashMap<>(64,.75f,true);
+    private static final class RailSector {
+        final int x,z;
+        final ArrayList<RailPiece> pieces=new ArrayList<>();
+        RailSector(int x,int z){this.x=x;this.z=z;}
+    }
+    private static final class StaticScene {
+        final RailPiece[] pieces;
+        final java.util.List<RailSector> sectors;
+        StaticScene(RailPiece[] pieces){
+            this.pieces=pieces;
+            Map<Long,RailSector> indexed=new LinkedHashMap<>();
+            for(RailPiece piece:pieces){
+                int sx=(int)Math.floor(piece.sampleX/32D);
+                int sz=(int)Math.floor(piece.sampleZ/32D);
+                long id=((long)sx<<32)|(sz&0xffffffffL);
+                indexed.computeIfAbsent(id,unused->new RailSector(sx,sz)).pieces.add(piece);
+            }
+            sectors=java.util.List.copyOf(indexed.values());
+        }
+    }
     private static final class SceneKey {
         final RailMath rail;final RailResource resource;final boolean flip;final int hash;
         SceneKey(RailMath rail,RailResource resource,boolean flip){
@@ -159,6 +179,7 @@ public final class RailSectorBatcher {
         }
         RAIL_PLANS.clear();
         clearStaticScenes();
+        ClassicRailSceneCache.clear();
         appliedNetworkRevision=revision;
     }
     public static boolean queue(RailResource resource,StoredMatrixTransformations fallback,double x,double y,double z,float yaw,float pitch,float roll,int light){
@@ -237,8 +258,8 @@ public final class RailSectorBatcher {
         if(!SillonMegaEngine.RAILS || !Double.isFinite(ex+ey+ez+nx+ny+nz))return -1;
         if(planWorld!=world.data){RAIL_PLANS.clear();clearStaticScenes();planWorld=world.data;}
         SceneKey key=new SceneKey(rail,resource,flip);
-        RailPiece[] pieces=STATIC_SCENES.get(key);
-        if(pieces==null){
+        StaticScene scene=STATIC_SCENES.get(key);
+        if(scene==null){
             ArrayList<RailPiece> full=new ArrayList<>();
             final boolean[] overflow={false};
             MinecraftClientData.getInstance().railGeometryCache.render(rail,
@@ -248,21 +269,30 @@ public final class RailSectorBatcher {
                     full.add(new RailPiece(p,Init.newBlockPos(x1,y1+0.1,z1),x1,y1,z1));
                 },resource.getRepeatInterval(),0,0);
             if(overflow[0])return -1;
-            pieces=full.toArray(new RailPiece[0]);
-            STATIC_SCENES.put(key,pieces);scenePieces+=pieces.length;
-            Iterator<Map.Entry<SceneKey,RailPiece[]>> it=STATIC_SCENES.entrySet().iterator();
+            RailPiece[] pieces=full.toArray(new RailPiece[0]);
+            scene=new StaticScene(pieces);
+            STATIC_SCENES.put(key,scene);scenePieces+=pieces.length;
+            Iterator<Map.Entry<SceneKey,StaticScene>> it=STATIC_SCENES.entrySet().iterator();
             while(STATIC_SCENES.size()>SCENE_MAX || scenePieces>PIECE_MAX){
-                Map.Entry<SceneKey,RailPiece[]> old=it.next();
-                scenePieces-=old.getValue().length;it.remove();
+                Map.Entry<SceneKey,StaticScene> old=it.next();
+                scenePieces-=old.getValue().pieces.length;it.remove();
             }
         }
         final double radius2=(double)radius*radius;int visible=0;
         final var model=REGIONS.modelForReplay(resource);
-        for(RailPiece piece:pieces){
-            double dx=piece.sampleX-ex,dz=piece.sampleZ-ez,squared=dx*dx+dz*dz;
-            if(squared<=radius2 && (squared<1024
-                    || dx*nx+(piece.sampleY-ey)*ny+dz*nz>-0.00001)){
-                submitPiece(piece,resource,world,model);visible++;
+        // Camera motion only visits sectors intersecting the view radius.
+        // Each segment belongs to exactly one sector: no duplicate submission.
+        for(RailSector sector:scene.sectors){
+            double x=sector.x*32D,z=sector.z*32D;
+            double closestX=Math.max(x,Math.min(ex,x+32D));
+            double closestZ=Math.max(z,Math.min(ez,z+32D));
+            if((closestX-ex)*(closestX-ex)+(closestZ-ez)*(closestZ-ez)>radius2)continue;
+            for(RailPiece piece:sector.pieces){
+                double dx=piece.sampleX-ex,dz=piece.sampleZ-ez,squared=dx*dx+dz*dz;
+                if(squared<=radius2 && (squared<1024
+                        || dx*nx+(piece.sampleY-ey)*ny+dz*nz>-0.00001)){
+                    submitPiece(piece,resource,world,model);visible++;
+                }
             }
         }
         return visible;
@@ -292,6 +322,6 @@ public final class RailSectorBatcher {
             }
         }
     }
-    public static void clear(){RAIL_PLANS.clear();clearStaticScenes();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
+    public static void clear(){RAIL_PLANS.clear();clearStaticScenes();ClassicRailSceneCache.clear();planWorld=null;PREPARED.clear();REGIONS.clear();StaticDecorationRegions.clear();ClassicRailGpuCache.clear();RAIL_CHANGES.clear();appliedNetworkRevision=Long.MIN_VALUE;}
     public static void reload(){clear();ModelDetailCache.clear();RailGeometrySnapshots.clear();}
 }

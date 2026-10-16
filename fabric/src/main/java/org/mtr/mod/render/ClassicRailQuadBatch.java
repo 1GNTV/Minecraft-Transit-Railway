@@ -67,6 +67,13 @@ public final class ClassicRailQuadBatch {
         final double[] coords=Arrays.copyOf(coordinates,length*10);
         final int[] levels=Arrays.copyOf(lights,length);
         final float[] stripe=Arrays.copyOf(stripeOffsets,length);
+        // Cross-track material dispatch preserves the original shader/lighting
+        // path and is the default. Explicit GPU-resident experiments bypass it.
+        if (ClassicRailRenderQueue.append(texture,color,yOffset,smallOffset,
+                                          u1,v1,u2,v2,coords,levels,stripe)) {
+            count=0;
+            return;
+        }
         // Prefer a persistent GL page only when explicitly requested. Failed or
         // unsupported uploads revert to the exact same CPU draw path below.
         if(ClassicRailGpuCache.queue(railIdentity,texture,pageIndex++,coords,levels,stripe,

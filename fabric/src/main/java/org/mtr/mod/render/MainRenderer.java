@@ -121,7 +121,9 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 		RenderLifts.render(millisElapsed, cameraShakeOffset);
 		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.VEHICLES);
 		RailSectorBatcher.beginFrame();
+		ClassicRailRenderQueue.beginPass();
 		RenderRails.render();
+		ClassicRailRenderQueue.flush();
 		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.RAILS);
 		RailSectorBatcher.flush();
 		phaseStart=EnginePhaseProfiler.mark(phaseStart,shadowPass,EnginePhaseProfiler.Phase.REGION_FLUSH);
