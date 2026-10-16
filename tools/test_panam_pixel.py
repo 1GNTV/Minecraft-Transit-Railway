@@ -83,11 +83,19 @@ for facing,angle,step in [('north',180,(0,-1)),('east',270,(1,0))]:
         yaw=math.radians(90-angle+side*180);center=(.5+step[0]/2,.5+step[1]/2)
         points=[]
         for x,y in [(0,0),(1024,0),(1024,466),(0,466)]:
-            lx=-(-1.95/2+x*1.95/1024);ly=-( -12.45/16+y*(11.30/16)/466 );lz=-.14
+            lx=-(-1.95/2+x*1.95/1024);ly=-( -12.45/16+y*(11.75/16)/466 );lz=-.1345
             points.append((center[0]+math.cos(yaw)*lx+math.sin(yaw)*lz,ly,center[1]-math.sin(yaw)*lx+math.cos(yaw)*lz))
         assert abs(max(p[1] for p in points)-12.45/16)<1e-6
-        assert abs(min(p[1] for p in points)-1.15/16)<1e-6
+        assert abs(min(p[1] for p in points)-.70/16)<1e-6
         flat=[p[0] if facing=='north' else p[2] for p in points]
         assert max(flat)-min(flat)<1e-6
         assert all(abs(v-.5)>.13125 for v in flat),'screen must be in front of the casing'
-print('PASS: both canonical owners, both faces, all four corners inside the casing aperture, positive depth separation')
+# Both the body and bottom metal lip must extend with the artwork.
+assert abs(model['elements'][0]['from'][1]-.30)<1e-6
+assert abs(model['elements'][1]['from'][1]-.30)<1e-6
+assert abs(model['elements'][1]['to'][1]-.70)<1e-6
+assert abs(model['elements'][2]['from'][1]-12.45)<1e-6
+assert 0 < .30 < .70 < 12.45 < 12.85 < 16
+assert abs((12.45-.70)-11.75)<1e-6
+assert abs((11.75/11.30)-1)>.03 and abs((11.75/11.30)-1)<.05
+print('PASS: both faces fitted to the 4% taller casing; bottom lip and screen flush; all within one block')

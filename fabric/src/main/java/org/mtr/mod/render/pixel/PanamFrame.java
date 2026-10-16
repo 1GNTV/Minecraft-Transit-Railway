@@ -22,7 +22,7 @@ public final class PanamFrame {
             for(int i=0;!changed&&i<next.length;i++)changed=!next[i].id.equals(current[i].id);
             if(changed){previous=current;current=next;changedAt=now;sampledAt=-5000;}
             else current=next;
-            if(now-sampledAt>=5000){
+            if(now-sampledAt>=1000){
                 for(int i=0;i<next.length;i++){int value=(int)((next[i].at-now)/60000);if(value!=minutes[i]){minutes[i]=value;zoomAt[i]=now;}}
                 sampledAt=now;
             }

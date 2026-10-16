@@ -46,6 +46,11 @@ jobs:
         run: python3 tools/test_panam_pixel.py
       - name: Verify PIXEL worker and GPU ownership lifecycle
         run: python3 tools/test_panam_lifecycle.py
+      - name: Verify PANAM camera-order and ETA compatibility
+        run: |
+          python3 tools/test_panam_camera_order.py
+          python3 tools/test_panam_eta_contrast.py
+          python3 tools/test_panam_arrival_parity.py
       - name: Check optional JCM built-in PIDS preset recovery
         run: python3 tools/test_jcm_preset_recovery.py
       - name: Check initial MTR custom-resource reload fallback

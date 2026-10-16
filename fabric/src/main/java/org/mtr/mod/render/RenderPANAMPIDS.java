@@ -22,14 +22,14 @@ import java.util.*;
 /** PIXEL: shared retained surfaces, event-driven scene compilation, clipped sprite animation. */
 public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.BlockEntity> {
     private static final WeakHashMap<BlockPANAMPIDS.BlockEntity,Panel> PANELS=new WeakHashMap<>();
-    private static final long MAX_PANAM_WAIT_MS=90L*60*1000;
+    private static final boolean DEBUG_ARRIVALS=Boolean.getBoolean("mtr.panam.debugArrivals");
     private static final class Panel {
         final PanamFrame.Timeline timeline=new PanamFrame.Timeline();
         final LongAVLTreeSet platforms=new LongAVLTreeSet();
         final HashSet<Long> servedRoutes=new HashSet<>();
         PanamSurface.Spec spec;
         long revision=-1,config=-1,network=-1,newsRevision=-1,sampled,platformAt,clockMinute=-1;
-        long activeRouteId=-1;
+        long activeRouteId=-1,lastDiagnostic;
         String line="?",destination="En attente";int color=0x808080,hour,minute;
         List<String> notices=List.of(); boolean suspended,localSuspended,last;
     }
@@ -49,10 +49,11 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         long minute=now/60000;if(panel.clockMinute!=minute){LocalTime time=LocalTime.now();panel.hour=time.getHour();panel.minute=time.getMinute();panel.clockMinute=minute;}
         panel.timeline.notices(panel.spec.notices.size(),now);
         PixelAtlasCache.Entry entry=PixelAtlasCache.INSTANCE.get(panel.spec,now);if(entry==null)return;
-        // The vanilla text layer can drop non-text quad sprites without shaders.
-        // The existing translucent light layer supports both shader and vanilla passes.
-        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_TRANSLUCENT,(g,offset)->{
-            g.createVertexConsumer(MoreRenderLayers.getLight(entry.texture,true));
+        // Use the full-bright text layer, not world-lit EntityCutout or a
+        // camera-sorted translucent beacon layer. The UI needs alpha blending
+        // with a stable draw order, independent of player view angle.
+        MainRenderer.scheduleRender(entry.texture,false,QueuedRenderLayer.LIGHT_2,(g,offset)->{
+            g.createVertexConsumer(MoreRenderLayers.getLight2(entry.texture));
             for(int side=0;side<2;side++){
                 transform(g,pos,facing,offset,side);
                 final int[] layer={0};
@@ -61,7 +62,9 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
                     if(right<=left||bottom<=top||alpha<=0)return;
                     float u1=(s.x+(left-x)*s.w/w)/entry.surface.atlasWidth,u2=(s.x+(right-x)*s.w/w)/entry.surface.atlasWidth;
                     float v1=(s.y+(top-y)*s.h/h)/entry.surface.atlasHeight,v2=(s.y+(bottom-y)*s.h/h)/entry.surface.atlasHeight;
-                    float z=-.0003f*layer[0]++;
+                    // Keep overlays close to the casing: the previous .004f
+                    // step visibly pushed characters off the front face.
+                    float z=-.0006f*layer[0]++;
                     IDrawing.drawTexture(g,left,top,z,right,bottom,z,u1,v1,u2,v2,Direction.NORTH,((int)(alpha*255)<<24)|0xFFFFFF,GraphicsHolder.getDefaultLight());
                     PixelAtlasCache.INSTANCE.quad();
                 });
@@ -73,7 +76,7 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
         BlockPos next=pos.offset(facing);
         g.push();g.translate((pos.getX()+next.getX())*.5+.5-offset.getXMapped(),pos.getY()-offset.getYMapped(),(pos.getZ()+next.getZ())*.5+.5-offset.getZMapped());
         g.rotateYDegrees(90-facing.asRotation()+side*180);g.rotateZDegrees(180);
-        g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.14);
+        g.translate(-PanamSurface.WORLD_WIDTH/2,-PanamSurface.TOP,-.1345);
         g.scale(PanamSurface.WORLD_WIDTH/PanamSurface.WIDTH,PanamSurface.WORLD_HEIGHT/PanamSurface.HEIGHT,1);
     }
     private static void sample(BlockPANAMPIDS.BlockEntity entity,BlockPos pos,Panel panel,long now){
@@ -103,25 +106,33 @@ public final class RenderPANAMPIDS extends BlockEntityRenderer<BlockPANAMPIDS.Bl
             panel.notices=List.copyOf(notices);panel.timeline.noticeAt=now;panel.timeline.noticeIndex=0;
         }
         ArrayList<ArrivalResponse> arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(panel.platforms));
-        arrivals.sort(Comparator.comparingLong(ArrivalResponse::getArrival));
-        ArrayList<PanamFrame.Departure> trains=new ArrayList<>();ArrayList<String> destinations=new ArrayList<>();HashSet<String> ids=new HashSet<>();boolean planned=false;
-        int skip=Math.max(0,entity.getDisplayPage())*3;
-        boolean fresh=now-ArrivalsCacheClient.INSTANCE.receivedAt()<15000;
-        int eligible=0;
-        if(fresh&&!panel.suspended)for(ArrivalResponse a:arrivals){
-            long at=a.getArrival()-ArrivalsCacheClient.INSTANCE.getMillisOffset();
-            // Reject invalid/stale or far-future simulator ETA data before paging.
-            // Never show 256+ minute numbers or absurd unsynchronised timestamps.
-            if(at<now-30000 || at-now>MAX_PANAM_WAIT_MS)continue;
-            if(eligible++<skip)continue;
-            int slot=eligible-skip-1;if(slot>=3)break;
-            if(entity.getHideArrival(slot))continue;
-            String id=a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();if(!ids.add(id))continue;
+        // Match the base MTR PIDS: preserve the server's arrival order.
+        // A local resort can reorder a shared platform's departures.
+        ArrayList<PanamFrame.Departure> trains=new ArrayList<>();
+        ArrayList<String> destinations=new ArrayList<>();boolean planned=false;
+        // Match RenderPIDS paging and hidden-row semantics. Do not drop valid
+        // server arrivals via extra freshness, distance or de-duplication filters.
+        List<ArrivalResponse> selected=PanamArrivalSelection.select(
+                arrivals,entity.maxArrivals,entity.getDisplayPage(),entity::getHideArrival);
+        int slot=0;
+        for(ArrivalResponse a:selected){
+            long at=PanamArrivalSelection.clientArrivalMillis(
+                    a.getArrival(),ArrivalsCacheClient.INSTANCE.getMillisOffset());
             String dest=firstLanguage(a.getDestination());
             if(trains.isEmpty()){panel.line=firstLanguage(a.getRouteNumber());if(panel.line.isEmpty())panel.line=firstLanguage(a.getRouteName()).replaceFirst("(?i)^ligne\\s+","");if(panel.line.isEmpty())panel.line="?";panel.destination=dest;panel.color=a.getRouteColor();panel.activeRouteId=a.getRouteId();}
-            trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));destinations.add(dest);planned|=!a.getRealtime();
+            // Two distinct server rows can share a departure index.
+            String id=(slot++)+":"+a.getRouteId()+":"+a.getPlatformId()+":"+a.getDepartureIndex();
+            trains.add(new PanamFrame.Departure(id,dest,at,a.getRealtime()));
+            destinations.add(dest);planned|=!a.getRealtime();
         }
         panel.timeline.update(trains.toArray(new PanamFrame.Departure[0]),now);
+        if(DEBUG_ARRIVALS && now-panel.lastDiagnostic>30000) {
+            panel.lastDiagnostic=now;
+            org.mtr.mod.Init.LOGGER.info("PANAM arrivals pos={} platforms={} page={} sourceCount={} shown={} offsetMs={}",
+                    pos,panel.platforms,entity.getDisplayPage(),arrivals.size(),
+                    trains.stream().map(t->t.id+"="+((t.at-now)/1000)+"s").toList(),
+                    ArrivalsCacheClient.INSTANCE.getMillisOffset());
+        }
         panel.suspended=panel.localSuspended;
         // Global notices are never suppressed by a full local bulletin list.
         ArrayList<String> notices = new ArrayList<>();

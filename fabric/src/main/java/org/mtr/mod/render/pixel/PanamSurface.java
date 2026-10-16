@@ -12,8 +12,10 @@ public final class PanamSurface {
     public static final int WIDTH = 1024, HEIGHT = 466;
     public static final int NAVY = 0x0E0184, YELLOW = 0xFFBE00, WHITE = 0xFFFFFF;
     public static final float HEADER = 130f, FOOTER = 30f, BODY = HEIGHT - HEADER - FOOTER;
-    // Entire display and suspension rods fit inside one block of height.
-    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.30f / 16, TOP = 12.45f / 16;
+    // A slightly taller screen (+0.45 model px, about 4%) extends downward;
+    // the casing's bottom lip moves with it so the image stays flush.
+    // Everything, including the suspension rods, fits inside one block.
+    public static final float WORLD_WIDTH = 1.95f, WORLD_HEIGHT = 11.75f / 16, TOP = 12.45f / 16;
     public static final class Spec {
         public final String line, destination;
         public final int color, count;
@@ -158,8 +160,16 @@ public final class PanamSurface {
         if(spec.count==0){g.setColor(new Color(NAVY));g.fillRect(24,197,458,68);text(g,"Temps d’attente indisponibles.",35,211,25,regular,WHITE,430);}
         else if(!spec.mixed){
             float labelY=HEADER+38;
-            if(!spec.last){ordinal(g,"1","er",20.48f,labelY);if(spec.count>1)ordinal(g,"2","e",276.48f,labelY);}
-            if(spec.count>1){g.setColor(Color.WHITE);g.fillRoundRect(254,(int)(labelY+64),6,142,6,6);}
+            if(!spec.last){
+                ordinal(g,"1","er",20.48f,labelY);
+                ordinal(g,"2","e",276.48f,labelY);
+                g.setColor(Color.WHITE);g.fillRoundRect(254,(int)(labelY+64),6,142,6,6);
+                if(spec.count==1){
+                    // MTR returned a single departure: show no invented ETA.
+                    g.setColor(new Color(YELLOW));
+                    g.fillRoundRect(347,303,76,12,6,6);
+                }
+            }
             if(spec.last){g.setColor(Color.WHITE);g.fill(new Polygon(new int[]{269,300,300},new int[]{279,261,297},3));wrapped(g,"Dernier\nmétro",307,247,43,bold,WHITE,197,2);}
         }
         // A local MTR information panel, including the honest missing-source state.
