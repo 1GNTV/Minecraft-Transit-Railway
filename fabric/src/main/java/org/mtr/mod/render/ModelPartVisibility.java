@@ -41,6 +41,15 @@ public final class ModelPartVisibility {
         // Margin exceeds raster precision and retains coplanar/adjacent coverage ordering.
         return new BoundedDrawGrouping.Rect(x0-.002,y0-.002,x1+.002,y1+.002);
     }
+    /**
+     * Conservative expanded object-space bounds for the GL4.3 compute culler.
+     * Missing bounds always fall back to the ordinary CPU visibility path.
+     */
+    public static float[] gpuBounds(VertexArray array) {
+        Bounds b=BOUNDS.get(array);
+        if(b==null)return null;
+        return new float[]{b.x0-16,b.y0-16,b.z0-16,b.x1+16,b.y1+16,b.z1+16};
+    }
     public static void copy(VertexArray source,VertexArray target){Bounds bounds=BOUNDS.get(source);if(bounds!=null)BOUNDS.put(target,bounds);}
     public static void remove(VertexArray array){BOUNDS.remove(array);}
 }

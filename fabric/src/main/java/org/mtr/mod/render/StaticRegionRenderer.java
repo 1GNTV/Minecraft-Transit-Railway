@@ -152,10 +152,13 @@ public final class StaticRegionRenderer {
             lastRanges=result;
             return result;
         }
-        void activate(List<Selection> visible){
+        void activate(List<Selection> visible,Sector sector,boolean gpuCull){
             Map<MaterialProperties,List<RegionVertexRanges.Span>> ranges=ranges(visible);
             if(SillonMegaEngine.SCENE && submittedRanges==ranges)return;
-            arrays.forEach((material,array)->RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of())));
+            arrays.forEach((material,array)->{
+                RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of()));
+                if(gpuCull)RegionVertexRanges.worldOrigin(array,sector.x()*16F,sector.y()*16F,sector.z()*16F);
+            });
             submittedRanges=ranges;
         }
         @Override public void close(){arrays.values().forEach(a->{RegionVertexRanges.remove(a);a.close();});meshes.forEach(Mesh::close);lastVisible=List.of();lastRanges=Map.of();submittedRanges=null;}
@@ -423,7 +426,7 @@ public final class StaticRegionRenderer {
             }
             drawing.forEach((key,selected)->{
                 Page page=ready.get(key);
-                page.activate(selected);
+                page.activate(selected,key.sector(),family==RenderPipelineMetrics.Family.RAIL);
                 if(page.drawCommand==null) page.drawCommand=pageDrawCommand(page,key.sector());
                 MainRenderer.scheduleRender(QueuedRenderLayer.TEXT,page.drawCommand);
             });
@@ -490,7 +493,21 @@ public final class StaticRegionRenderer {
             for(RawMesh source:snapshot.chunks().get(s.chunk).meshes()){
                 RawMesh baked=RailBatchGeometry.copy(source);baked.applyMatrix(transform);int light=Utilities.exchangeLightmapUVBits(s.light);baked.vertices.forEach(v->v.light=light);
                 RawMesh target=combined.computeIfAbsent(source.materialProperties,RawMesh::new);
-                spans.add(new MaterialSpan(source.materialProperties,new RegionVertexRanges.Span(target.faces.size()*3,baked.faces.size()*3)));target.append(baked);
+                // Bounds are baked in the same sector-local space as the
+                // uploaded vertices. Compute command culling can therefore
+                // use conservative per-submesh AABBs without CPU readback.
+                float minX=Float.POSITIVE_INFINITY,minY=Float.POSITIVE_INFINITY,minZ=Float.POSITIVE_INFINITY;
+                float maxX=Float.NEGATIVE_INFINITY,maxY=Float.NEGATIVE_INFINITY,maxZ=Float.NEGATIVE_INFINITY;
+                for(var vertex:baked.vertices){
+                    if(vertex.position==null)continue;
+                    float x=vertex.position.getX(),y=vertex.position.getY(),z=vertex.position.getZ();
+                    minX=Math.min(minX,x); minY=Math.min(minY,y); minZ=Math.min(minZ,z);
+                    maxX=Math.max(maxX,x); maxY=Math.max(maxY,y); maxZ=Math.max(maxZ,z);
+                }
+                spans.add(new MaterialSpan(source.materialProperties,
+                    new RegionVertexRanges.Span(target.faces.size()*3,baked.faces.size()*3,
+                        minX,minY,minZ,maxX,maxY,maxZ)));
+                target.append(baked);
             }page.spans.put(s,spans);
         }
         var builder=new VertexAttributeMapping.Builder();OptimizedModelLayoutAccessor.mtr$getDefaultMapping().sources.forEach(builder::set);

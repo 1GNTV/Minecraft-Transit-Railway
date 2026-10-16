@@ -22,7 +22,16 @@ import java.util.*;
  * Oculus and unknown addon shaders always retain the proven multi-draw path.
  */
 public final class RegionVertexRanges {
-    public record Span(int first, int count) {}
+    /** Immutable range with optional local-space bounds for GPU command culling. */
+    public record Span(int first,int count,float x0,float y0,float z0,float x1,float y1,float z1) {
+        public Span(int first,int count) {
+            this(first,count,Float.POSITIVE_INFINITY,0,0,0,0,0);
+        }
+        public boolean bounded() {
+            return Float.isFinite(x0+y0+z0+x1+y1+z1)
+                && x0<=x1 && y0<=y1 && z0<=z1;
+        }
+    }
     private static final boolean INDIRECT = SillonMegaEngine.GPU_DRIVEN && !"false".equalsIgnoreCase(System.getProperty("mtr.engine.indirect", "true"));
     // Oculus-compatible shader draws can use the same standard GL4.3
     // DrawElementsIndirectCommand as shaderless. Keep this as an EXPLICIT
@@ -47,19 +56,25 @@ public final class RegionVertexRanges {
             Span start = spans.get(cursor);
             if (start.first() < 0 || start.count() < 0) throw new IllegalArgumentException("Invalid region span");
             int first = start.first(), count = start.count();
+            Span merged=start;
             int next = cursor + 1;
             // Only merge adjacent and ordered index ranges; never change draw order.
             while (next < spans.size()) {
                 Span part = spans.get(next);
                 if (part.first() != (long) first + count || part.count() < 0 || (long) count + part.count() > Integer.MAX_VALUE) break;
                 count += part.count();
+                merged = merged.bounded() && part.bounded()
+                    ? new Span(first,count,
+                        Math.min(merged.x0(),part.x0()),Math.min(merged.y0(),part.y0()),Math.min(merged.z0(),part.z0()),
+                        Math.max(merged.x1(),part.x1()),Math.max(merged.y1(),part.y1()),Math.max(merged.z1(),part.z1()))
+                    : new Span(first,count);
                 next++;
             }
             if (next > cursor + 1 && compacted == null) {
                 compacted = new ArrayList<>(spans.size());
                 compacted.addAll(spans.subList(0, cursor));
             }
-            if (compacted != null) compacted.add(new Span(first,count));
+            if (compacted != null) compacted.add(merged);
             cursor = next;
         }
         return compacted == null ? spans : compacted;
@@ -73,8 +88,10 @@ public final class RegionVertexRanges {
         int indices;
         List<Span> last = List.of();
         ByteBuffer commandBytes;
-        int indirectBuffer;
-        boolean indirectDirty = true;
+        int indirectBuffer, boundsBuffer;
+        float originX,originY,originZ;
+        boolean hasWorldOrigin;
+        boolean indirectDirty = true, boundsDirty=true, gpuModified;
 
         Ranges(int capacity) {
             counts = BufferUtils.createIntBuffer(capacity);
@@ -84,6 +101,10 @@ public final class RegionVertexRanges {
             if (indirectBuffer != 0) {
                 GL43.glDeleteBuffers(indirectBuffer);
                 indirectBuffer = 0;
+            }
+            if(boundsBuffer!=0) {
+                GL43.glDeleteBuffers(boundsBuffer);
+                boundsBuffer=0;
             }
             last = List.of();
             commandBytes = null;
@@ -123,6 +144,32 @@ public final class RegionVertexRanges {
         ranges.counts.flip();
         ranges.offsets.flip();
         ranges.indirectDirty = true;
+        ranges.boundsDirty = true;
+    }
+
+    /**
+     * Region meshes contain coordinates local to their 16-block sector.
+     * Only the render-thread caller that owns the baked page may register
+     * that world-space origin. Normal arrays without it never GPU-cull.
+     */
+    public static void worldOrigin(VertexArray array,float x,float y,float z) {
+        Ranges ranges=ACTIVE.get(array);
+        if(ranges!=null) {
+            ranges.originX=x; ranges.originY=y; ranges.originZ=z;
+            ranges.hasWorldOrigin=true;
+        }
+    }
+
+    private static void uploadBounds(Ranges ranges) {
+        if(!ranges.boundsDirty && ranges.boundsBuffer!=0)return;
+        int previous=GL43.glGetInteger(GL43.GL_SHADER_STORAGE_BUFFER_BINDING);
+        try {
+            if(ranges.boundsBuffer==0)ranges.boundsBuffer=GL43.glGenBuffers();
+            GL43.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER,ranges.boundsBuffer);
+            GL43.glBufferData(GL43.GL_SHADER_STORAGE_BUFFER,
+                GpuDrivenRailCommands.encode(ranges.last),GL43.GL_DYNAMIC_DRAW);
+            ranges.boundsDirty=false;
+        } finally { GL43.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER,previous); }
     }
 
     private static boolean eligibleForIndirect() {
@@ -151,6 +198,7 @@ public final class RegionVertexRanges {
         GL43.glBindBuffer(GL43.GL_DRAW_INDIRECT_BUFFER, ranges.indirectBuffer);
         GL43.glBufferData(GL43.GL_DRAW_INDIRECT_BUFFER, commands, GL43.GL_DYNAMIC_DRAW);
         ranges.indirectDirty = false;
+        ranges.gpuModified = false;
     }
 
     public static void draw(VertexArray array, int mode, int count, int type, long offset) {
@@ -170,9 +218,24 @@ public final class RegionVertexRanges {
             final int previous = GL43.glGetInteger(GL43.GL_DRAW_INDIRECT_BUFFER_BINDING);
             boolean ready = false;
             try {
-                if (ranges.indirectDirty || ranges.indirectBuffer == 0) upload(ranges);
-                else GL43.glBindBuffer(GL43.GL_DRAW_INDIRECT_BUFFER, ranges.indirectBuffer);
-                ready = true;
+                // A previous compute pass may have set instanceCount=0 on
+                // some commands. If the next pass is Oculus/shadow/non-compute,
+                // restore ALL instance counts before normal indirect drawing.
+                boolean compute=ranges.hasWorldOrigin
+                    && !array.materialProperties.translucent
+                    && !array.materialProperties.cutoutHack
+                    && array.materialProperties.writeDepthBuf
+                    && GpuDrivenRailCommands.supported(ranges.last.size());
+                if (ranges.indirectDirty || ranges.indirectBuffer == 0
+                        || (ranges.gpuModified && !compute)) upload(ranges);
+                else GL43.glBindBuffer(GL43.GL_DRAW_INDIRECT_BUFFER,ranges.indirectBuffer);
+                if (compute) {
+                    uploadBounds(ranges);
+                    ready = GpuDrivenRailCommands.cull(ranges.indirectBuffer,ranges.boundsBuffer,
+                        ranges.last.size(),ranges.originX,ranges.originY,ranges.originZ);
+                    ranges.gpuModified=ready;
+                    if(!ready)ranges.indirectDirty=true;
+                } else ready=true;
             } catch (RuntimeException ex) {
                 indirectFailed = true;
             } finally {

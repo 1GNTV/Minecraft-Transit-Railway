@@ -74,6 +74,7 @@ public final class RenderPipelineMetrics {
         if (now - lastReport < 10_000_000_000L) return;
         lastReport = now;
         InstancedModelRenderer.report();
+        GpuDrivenRailCommands.report();
         for (int i = 0; i < stats.length; i++) {
             final Stats value = stats[i];
             if (value.passes != 0 || value.gpuSamples != 0) {
