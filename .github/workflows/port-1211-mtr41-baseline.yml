@@ -37,9 +37,8 @@ jobs:
       - name: Select Fabric 1.21.1 target
         working-directory: upstream
         run: |
-          sed -i 's/stonecutter active "1.21.4-fabric"/stonecutter active "1.21.1-fabric"/' stonecutter.gradle.kts
-          # Stonecutter uses vcsVersion as the source variant; active alone is insufficient.
-          sed -i 's/vcsVersion = "1.21.4-fabric"/vcsVersion = "1.21.1-fabric"/' settings.gradle.kts
+          # Source is authored for 1.21.4. Keep vcsVersion=1.21.4; Stonecutter
+          # must actually SWITCH the source to 1.21.1, not just edit a property.
           sed -i 's/gradle-9.5.1-bin.zip/gradle-9.7.0-bin.zip/' gradle/wrapper/gradle-wrapper.properties
           # The newest Fletching Table plugin no longer exposes modrinth() in this build script.
           # Use Mod Menu's Fabric 1.21.1 Maven artifact directly for this isolated target.
@@ -50,7 +49,8 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew :1.21.1-fabric:setupFiles --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
+          ./gradlew "Set active project to 1.21.1-fabric" --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
+          ./gradlew :1.21.1-fabric:setupFiles --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
           ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
       - name: Preserve vanilla MTR 4.1 baseline, if compiled
         if: success()
