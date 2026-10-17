@@ -39,6 +39,9 @@ jobs:
         run: |
           sed -i 's/stonecutter active "1.21.4-fabric"/stonecutter active "1.21.1-fabric"/' stonecutter.gradle.kts
           sed -i 's/gradle-9.5.1-bin.zip/gradle-9.7.0-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+          # The newest Fletching Table plugin no longer exposes modrinth() in this build script.
+          # Use Mod Menu's Fabric 1.21.1 Maven artifact directly for this isolated target.
+          sed -i 's@modImplementation(fletchingTable.modrinth("modmenu", sc.current.version))@modImplementation("maven.modrinth:modmenu:11.0.3")@' build-fabric.gradle.kts
           chmod +x gradlew
       - name: Generate files and compile baseline
         working-directory: upstream
