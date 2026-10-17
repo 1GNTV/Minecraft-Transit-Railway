@@ -3,7 +3,6 @@ package org.mtr.mod.render;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL43;
 import org.mtr.mapping.holder.MinecraftClient;
-import org.mtr.mapping.mapper.MinecraftClientHelper;
 import org.mtr.mapping.mapper.OptimizedRenderer;
 import org.mtr.mapping.render.tool.GlStateTracker;
 import org.mtr.mapping.render.tool.Utilities;
@@ -38,7 +37,6 @@ public final class GpuDrivenRailCommands {
         uniform vec3 mtr_Origin;
         uniform vec3 mtr_Eye;
         uniform vec3 mtr_Forward;
-        uniform float mtr_Distance;
         void main() {
             uint id=gl_GlobalInvocationID.x;
             if(id>=mtr_Count)return;
@@ -50,14 +48,17 @@ public final class GpuDrivenRailCommands {
             float radius=length(halfExtent)+16.0;
             vec3 delta=center-mtr_Eye;
             float d2=dot(delta.xz,delta.xz);
-            bool outside=d2>(mtr_Distance+radius)*(mtr_Distance+radius);
-            // The main MTR 32-block near bubble is never camera-forward culled.
-            if(!outside && d2>1024.0)
-                outside=dot(delta,mtr_Forward)<-radius;
+            // Distance is owned by the CPU sector selection. Never use the
+            // vanilla chunk distance here: MTR may draw rails much farther.
+            // Rear-hemisphere culling is horizontal and conservative. At steep
+            // pitch the horizontal camera direction is ambiguous, so fail open.
+            float horizontalForward=length(mtr_Forward.xz);
+            bool outside=d2>1024.0 && horizontalForward>0.35
+                && dot(delta.xz,mtr_Forward.xz)<-radius*horizontalForward;
             words[id*5u+1u]=outside?0u:1u;
         }
         """;
-    private static int program=-1,countLoc,originLoc,eyeLoc,forwardLoc,distanceLoc;
+    private static int program=-1,countLoc,originLoc,eyeLoc,forwardLoc;
     private static boolean failed;
     private static long dispatches;
     private GpuDrivenRailCommands(){}
@@ -104,7 +105,6 @@ public final class GpuDrivenRailCommands {
             originLoc=GL43.glGetUniformLocation(p,"mtr_Origin");
             eyeLoc=GL43.glGetUniformLocation(p,"mtr_Eye");
             forwardLoc=GL43.glGetUniformLocation(p,"mtr_Forward");
-            distanceLoc=GL43.glGetUniformLocation(p,"mtr_Distance");
             return true;
         } catch(RuntimeException error) {
             failed=true;
@@ -144,7 +144,6 @@ public final class GpuDrivenRailCommands {
             GL43.glUniform3f(originLoc,originX,originY,originZ);
             GL43.glUniform3f(eyeLoc,(float)eye.getXMapped(),(float)eye.getYMapped(),(float)eye.getZMapped());
             GL43.glUniform3f(forwardLoc,forwardX,forwardY,forwardZ);
-            GL43.glUniform1f(distanceLoc,MinecraftClientHelper.getRenderDistance()*16F);
             GL43.glDispatchCompute((count+GROUP_SIZE-1)/GROUP_SIZE,1,1);
             GL43.glMemoryBarrier(GL43.GL_COMMAND_BARRIER_BIT|GL43.GL_SHADER_STORAGE_BARRIER_BIT);
             dispatches++;

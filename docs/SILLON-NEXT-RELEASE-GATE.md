@@ -42,6 +42,13 @@ The source already contains partial GPU implementations from SOLIS; existence of
 
 CI publishes only `Sillon-NEXT-EXPERIMENTAL-...` artifacts. `workflow_dispatch` with `release_candidate=true` runs `tools/check_next_release_gate.py`; it fails until every gate has documented evidence on both targets. A completed evidence manifest still requires human review.
 
+## Second render safety iteration
+
+- Classic **coloured** rails now sample live block light instead of being forced full-bright; only explicitly flashing editor previews remain full-bright.
+- GPU rail command culling no longer applies Minecraft's vanilla render distance to MTR's longer rail geometry. It uses a conservative horizontal rear-hemisphere test, with a 32-block near bubble and no rear-culling at steep pitch.
+- Experimental indirect draws in shader packs are opt-in (`-Dmtr.engine.shaderIndirect=true`). Shaderless MDI remains enabled. The original GL multi-draw fallback remains available for Iris/Oculus until in-game visual validation.
+- Source invariants in `tools/test_next_render_safety.py` run on both Forge and Fabric CI. **These do not constitute hardware validation.**
+
 ## First concrete fix in this branch
 
 GPU rail command culling now computes the camera forward vector using Minecraft yaw/pitch conventions instead of rotated basis-vector components. The regression test checks six cardinal/up/down camera directions and the 32-block conservative near bubble. This is a math/source test, NOT an in-game OpenGL visual test.
