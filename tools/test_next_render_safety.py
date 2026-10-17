@@ -10,6 +10,10 @@ assert "renderState == RenderState.FLASHING || renderState == RenderState.COLORE
 assert 'private static final boolean SHADER_INDIRECT=Boolean.getBoolean("mtr.engine.shaderIndirect");' in ranges
 assert "GL33.glMultiDrawElements(mode, ranges.counts, type, ranges.offsets);" in ranges
 assert "ranges.gpuModified && !compute" in ranges
+bounds=(root/"ModelPartVisibility.java").read_text(encoding="utf-8")
+assert "final float[] gpu;" in bounds
+assert "return b.gpu;" in bounds
+assert "return new float[]{" not in bounds
 assert "mtr_Distance" not in gpu
 assert "MinecraftClientHelper.getRenderDistance()" not in gpu
 assert "float horizontalForward=length(mtr_Forward.xz);" in gpu
