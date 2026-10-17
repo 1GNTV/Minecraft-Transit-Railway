@@ -1,0 +1,176 @@
+{
+  "project": "Sillon NEXT",
+  "notice": "Not a release. 'validated' must only be true after independent in-game evidence on BOTH targets.",
+  "requirements": {
+    "gpu_rail_culling": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "multi_draw_indirect": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "train_instancing": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "multi_material_atlas": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "gpu_scene_selection": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "shader_compatibility": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "rail_geometry_cache_invalidation": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "rail_lighting_and_visibility": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "train_motion_and_fps_regressions": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "panam_shader_display": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "panam_ui_item_brush": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "panam_network_line_badges": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "jcm_compatibility": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "mtr_france_compatibility": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "dense_station_benchmarks": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "forge_1201_build": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    },
+    "fabric_1204_build": {
+      "forge-1201": {
+        "validated": false,
+        "evidence": []
+      },
+      "fabric-1204": {
+        "validated": false,
+        "evidence": []
+      }
+    }
+  }
+}
