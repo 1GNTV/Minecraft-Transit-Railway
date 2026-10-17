@@ -1,0 +1,64 @@
+name: Port 1.21.1 - upstream MTR 4.1 baseline
+
+on:
+  push:
+    branches:
+      - work/sillon-trio-fabric-1211
+    paths:
+      - .github/workflows/port-1211-mtr41-baseline.yml
+      - docs/SILLON-TRIO-1211.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  baseline:
+    name: Compile MTR 4.1.0-beta.2 Fabric 1.21.1 upstream
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: sillon
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Fetch pinned upstream MTR 4.1 Stonecutter source
+        run: |
+          git clone https://github.com/Minecraft-Transit-Railway/Minecraft-Transit-Railway.git upstream
+          git -C upstream checkout f05d99efab6f27b3868913438fce2da381e5798f
+      - name: Select Fabric 1.21.1 target
+        working-directory: upstream
+        run: |
+          sed -i 's/stonecutter active "1.21.4-fabric"/stonecutter active "1.21.1-fabric"/' stonecutter.gradle.kts
+          chmod +x gradlew
+      - name: Generate files and compile baseline
+        working-directory: upstream
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :common:setupFiles --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
+          ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
+      - name: Preserve baseline build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTR41-Fabric-1211-baseline-log
+          path: upstream-mtr41-1211.log
+          if-no-files-found: ignore
+      - name: Preserve vanilla baseline JAR, if compiled
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTR41-Fabric-1211-vanilla-baseline-NOT-SILLON
+          path: |
+            upstream/versions/1.21.1-fabric/build/libs/*.jar
+            upstream/build/release/*.jar
+          if-no-files-found: error
