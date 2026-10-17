@@ -125,9 +125,13 @@ public final class GpuDrivenRailCommands {
         var eye=camera.getPos();
         float yaw=(float)Math.toRadians(camera.getYaw());
         float pitch=(float)Math.toRadians(camera.getPitch());
-        var basisX=new org.mtr.mapping.holder.Vector3d(1,0,0).rotateY(yaw).rotateX(pitch);
-        var basisY=new org.mtr.mapping.holder.Vector3d(0,1,0).rotateY(yaw).rotateX(pitch);
-        var basisZ=new org.mtr.mapping.holder.Vector3d(0,0,1).rotateY(yaw).rotateX(pitch);
+        // Minecraft camera convention: yaw 0 looks +Z, yaw 90 looks -X;
+        // positive pitch looks down. Do not rotate basis vectors in a different
+        // order: the GPU's rear-hemisphere test would hide visible rails.
+        float cosPitch=(float)Math.cos(pitch);
+        float forwardX=(float)(-Math.sin(yaw)*cosPitch);
+        float forwardY=(float)(-Math.sin(pitch));
+        float forwardZ=(float)(Math.cos(yaw)*cosPitch);
         int previousProgram=GL43.glGetInteger(GL43.GL_CURRENT_PROGRAM);
         int prevSSBO=GL43.glGetInteger(GL43.GL_SHADER_STORAGE_BUFFER_BINDING);
         int prev6=GL43.glGetIntegeri(GL43.GL_SHADER_STORAGE_BUFFER_BINDING,6);
@@ -139,7 +143,7 @@ public final class GpuDrivenRailCommands {
             GL43.glUniform1ui(countLoc,count);
             GL43.glUniform3f(originLoc,originX,originY,originZ);
             GL43.glUniform3f(eyeLoc,(float)eye.getXMapped(),(float)eye.getYMapped(),(float)eye.getZMapped());
-            GL43.glUniform3f(forwardLoc,(float)basisX.getZMapped(),(float)basisY.getZMapped(),(float)basisZ.getZMapped());
+            GL43.glUniform3f(forwardLoc,forwardX,forwardY,forwardZ);
             GL43.glUniform1f(distanceLoc,MinecraftClientHelper.getRenderDistance()*16F);
             GL43.glDispatchCompute((count+GROUP_SIZE-1)/GROUP_SIZE,1,1);
             GL43.glMemoryBarrier(GL43.GL_COMMAND_BARRIER_BIT|GL43.GL_SHADER_STORAGE_BARRIER_BIT);
