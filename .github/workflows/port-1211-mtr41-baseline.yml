@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '26'
       - uses: gradle/actions/setup-gradle@v4
       - name: Fetch pinned upstream MTR 4.1 Stonecutter source
         run: |
@@ -46,14 +46,7 @@ jobs:
           set -o pipefail
           ./gradlew :common:setupFiles --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
           ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
-      - name: Preserve baseline build logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: MTR41-Fabric-1211-baseline-log
-          path: upstream-mtr41-1211.log
-          if-no-files-found: ignore
-      - name: Preserve vanilla baseline JAR, if compiled
+      - name: Preserve vanilla MTR 4.1 baseline, if compiled
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -62,3 +55,27 @@ jobs:
             upstream/versions/1.21.1-fabric/build/libs/*.jar
             upstream/build/release/*.jar
           if-no-files-found: error
+      - name: Apply Sillon editor rail optimization to MTR 4.1
+        run: python3 sillon/tools/ports_1211/patch_mtr41_sillon.py upstream
+      - name: Compile first Sillon rail optimization on 1.21.1
+        working-directory: upstream
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
+      - name: Preserve first Sillon rail optimization prototype
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sillon-1211-EDITOR-CACHE-PROTOTYPE-NOT-SOLIS
+          path: |
+            upstream/versions/1.21.1-fabric/build/libs/*.jar
+            upstream/build/release/*.jar
+          if-no-files-found: error
+      - name: Preserve baseline build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTR41-Fabric-1211-baseline-log
+          path: upstream-mtr41-1211.log
+          if-no-files-found: ignore

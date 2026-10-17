@@ -1,9 +1,8 @@
 name: Sillon trio — Fabric 1.21.1 port diagnostics
 
+# Legacy mapping-based builds are kept as manual diagnostics only.
+# MTR 4.1 uses Stonecutter, so they cannot produce working 1.21.1 ports.
 on:
-  push:
-    branches:
-      - work/sillon-trio-fabric-1211
   workflow_dispatch:
 
 permissions:

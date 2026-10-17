@@ -41,3 +41,11 @@ Do not install diagnostic or failed builds into an existing world. Back up the w
 - Sillon: Loom/Gradle upgrade passed plugin setup; Gradle 9 removed `shadowJar.archivePath`. Fixed task input property in next attempt.
 - JCM: Loom upgrade resolved MTR 4.1 remap dependency, but ForgeGradle 6 refuses Gradle 9 even when building only Fabric. Exclude Forge subproject in next attempt.
 - MTR France: `1.21-fabric` UniversalCraft resolved, compilation proceeded, then >100 source errors, notably missing `org.mtr.mapping.*` classes under MTR 4.1. This requires actual API migration; no fake JAR should be delivered.
+
+## Critical architecture correction (2026-10-17)
+
+**MTR 4.1 removes the old Minecraft-Mappings wrapper and uses Stonecutter + Mojang mappings.** The 4.0.5 Sillon/JCM/MTR France source trees cannot be ported by changing only `minecraftVersion`. See upstream `stonecutter` branch and `docs/BUILD.md`.
+
+The new workflow `.github/workflows/port-1211-mtr41-baseline.yml` first builds the **official upstream MTR 4.1.0-beta.2 1.21.1 Fabric source**, then (only if it succeeds) transplants Sillon's rail-editor node candidate cache onto that source and compiles a clearly labelled **partial prototype**. This is a prerequisite for progressively porting Sillon's larger optimizations and PANAM; it is NOT a complete Sillon or compatible three-mod pack.
+
+First baseline run 39057001923 failed because latest Stonecutter plugin needs **JDK 25+**, not JDK 21. Workflow updated to JDK 26 to match upstream's own CI.
