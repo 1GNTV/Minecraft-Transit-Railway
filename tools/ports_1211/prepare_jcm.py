@@ -11,12 +11,18 @@ p.write_text(s.replace("minecraft_version=1.20.4", "minecraft_version=1.21.1").r
 
 p = root / "fabric/gradle.properties"
 s = p.read_text(encoding="utf-8")
+s = s.replace("loom_version=1.10-SNAPSHOT", "loom_version=1.17.14")
 s += """
 # Sillon 1.21.1 port: versioned build dependencies
 yarn_mappings_1.21.1=1.21.1+build.3
 fabric_api_version_1.21.1=0.116.6+1.21.1
 mod_menu_version_1.21.1=11.0.3
 """
+p.write_text(s, encoding="utf-8")
+
+p = root / "gradle/wrapper/gradle-wrapper.properties"
+s = p.read_text(encoding="utf-8")
+s = s.replace("gradle-8.14-bin.zip", "gradle-9.5.1-bin.zip")
 p.write_text(s, encoding="utf-8")
 
 p = root / "fabric/src/main/resources/fabric.mod.json"

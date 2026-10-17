@@ -29,3 +29,9 @@ The current Sillon 4.0.5 source does **not** have `Minecraft-Mappings-fabric-1.2
 6. Joint client and dedicated-server startup, save/reload, and regression performance tests.
 
 Do not install diagnostic or failed builds into an existing world. Back up the world first. Keep Forge 1.20.1 and Fabric 1.20.4 releases unchanged.
+
+## First GitHub Actions diagnostic run (39045511960)
+
+- Sillon: failed in old Fabric Loom Minecraft merge, ASM cannot read Java 21 class version 65. Upgrade Loom and Gradle first. The 1.21.1 mapping library is still missing.
+- JCM: MTR 4.1 binary was built with Loom 1.16.3, while JCM used Loom 1.10.5. Upgrade Loom and Gradle.
+- MTR France: UniversalCraft does not publish a `1.21.1-fabric` module. Try its `1.21-fabric` artifact for 1.21.1 and then verify binary compatibility.

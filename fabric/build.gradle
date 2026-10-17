@@ -4,7 +4,7 @@ import org.mtr.core.WebserverSetup
 import org.mtr.mod.BuildTools
 
 plugins {
-	id "fabric-loom" version "1.10-SNAPSHOT"
+	id "fabric-loom" version "1.17.14"
 }
 
 final BuildTools buildTools = new BuildTools(minecraftVersion, "fabric", project)

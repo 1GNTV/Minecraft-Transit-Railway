@@ -28,7 +28,7 @@ dependency.fabric_loader=0.16.14
 dependency.fabric_api=0.116.6+1.21.1
 dependency.mod_menu=11.0.3
 dependency.mtr=4.1.0-beta.2
-dependency.universal_craft_minecraft=1.21.1
+dependency.universal_craft_minecraft=1.21
 pack_format=34
 """, encoding="utf-8")
 print("MTR France 1.21.1 Stonecutter target prepared; actual 4.1 API compatibility not yet established.")
