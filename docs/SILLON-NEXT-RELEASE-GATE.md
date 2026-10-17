@@ -42,6 +42,11 @@ The source already contains partial GPU implementations from SOLIS; existence of
 
 CI publishes only `Sillon-NEXT-EXPERIMENTAL-...` artifacts. `workflow_dispatch` with `release_candidate=true` runs `tools/check_next_release_gate.py`; it fails until every gate has documented evidence on both targets. A completed evidence manifest still requires human review.
 
+## Third optimization iteration
+
+- GPU mesh bounds are cached once per uploaded model instead of allocating a fresh `float[6]` for every train/rail draw. Lifetime follows the existing `VertexArray` retain/copy/remove hooks.
+- Fabric CI now runs PANAM shader-space, UI layout and network feed regressions, in addition to existing pixel/arrival tests. These are source and simulated tests, not visual proof under Iris/Oculus.
+
 ## Second render safety iteration
 
 - Classic **coloured** rails now sample live block light instead of being forced full-bright; only explicitly flashing editor previews remain full-bright.

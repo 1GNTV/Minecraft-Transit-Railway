@@ -116,6 +116,9 @@ jobs:
           python3 tools/test_panam_eta_contrast.py
           python3 tools/test_panam_arrival_parity.py
           python3 tools/test_panam_lifecycle.py
+          python3 tools/test_panam_shader_space.py
+          python3 tools/test_panam_config_ui.py
+          python3 tools/test_panam_network_feed.py
       - name: Prepare Fabric 1.20.4 sources
         run: |
           ./gradlew fabric:setupFiles -PminecraftVersion=1.20.4

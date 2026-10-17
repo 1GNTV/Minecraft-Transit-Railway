@@ -8,7 +8,16 @@ import java.util.*;
 
 /** Conservative per-mesh clip test before applying attributes; unknown/custom shader geometry fails open. */
 public final class ModelPartVisibility {
-    private record Bounds(float x0,float y0,float z0,float x1,float y1,float z1){}
+    // One immutable GPU AABB per uploaded mesh, not a new float[6] per draw.
+    private static final class Bounds {
+        final float x0,y0,z0,x1,y1,z1;
+        final float[] gpu;
+        Bounds(float x0,float y0,float z0,float x1,float y1,float z1) {
+            this.x0=x0;this.y0=y0;this.z0=z0;
+            this.x1=x1;this.y1=y1;this.z1=z1;
+            gpu=new float[]{x0-16,y0-16,z0-16,x1+16,y1+16,z1+16};
+        }
+    }
     private static final Map<VertexArray,Bounds> BOUNDS=Collections.synchronizedMap(new WeakHashMap<>());
     private static final org.joml.Matrix4f CLIP=new org.joml.Matrix4f();
     private static final org.joml.Vector4f CORNER=new org.joml.Vector4f();
@@ -48,7 +57,8 @@ public final class ModelPartVisibility {
     public static float[] gpuBounds(VertexArray array) {
         Bounds b=BOUNDS.get(array);
         if(b==null)return null;
-        return new float[]{b.x0-16,b.y0-16,b.z0-16,b.x1+16,b.y1+16,b.z1+16};
+        // Shared read-only by internal callers. Retain/copy/remove control lifetime.
+        return b.gpu;
     }
     public static void copy(VertexArray source,VertexArray target){Bounds bounds=BOUNDS.get(source);if(bounds!=null)BOUNDS.put(target,bounds);}
     public static void remove(VertexArray array){BOUNDS.remove(array);}
