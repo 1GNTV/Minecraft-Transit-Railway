@@ -32,7 +32,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Fetch pinned upstream MTR 4.1 Stonecutter source
         run: |
-          git clone https://github.com/Minecraft-Transit-Railway/Minecraft-Transit-Railway.git upstream
+          git clone --depth 1 --branch stonecutter https://github.com/Minecraft-Transit-Railway/Minecraft-Transit-Railway.git upstream
           git -C upstream checkout f05d99efab6f27b3868913438fce2da381e5798f
       - name: Select Fabric 1.21.1 target
         working-directory: upstream
