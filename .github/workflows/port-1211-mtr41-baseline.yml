@@ -44,13 +44,26 @@ jobs:
           # Use Mod Menu's Fabric 1.21.1 Maven artifact directly for this isolated target.
           sed -i 's@modImplementation(fletchingTable.modrinth("modmenu", sc.current.version))@modImplementation("maven.modrinth:modmenu:11.0.3")@' build-fabric.gradle.kts
           chmod +x gradlew
-      - name: Generate files and compile baseline
+      - name: Switch Stonecutter Java source to 1.21.1
         working-directory: upstream
         shell: bash
+        timeout-minutes: 8
         run: |
           set -o pipefail
           ./gradlew "Set active project to 1.21.1-fabric" --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
+      - name: Generate MTR 1.21.1 sources
+        working-directory: upstream
+        shell: bash
+        timeout-minutes: 10
+        run: |
+          set -o pipefail
           ./gradlew :1.21.1-fabric:setupFiles --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
+      - name: Compile MTR 1.21.1 vanilla baseline
+        working-directory: upstream
+        shell: bash
+        timeout-minutes: 15
+        run: |
+          set -o pipefail
           ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
       - name: Preserve vanilla MTR 4.1 baseline, if compiled
         if: success()
