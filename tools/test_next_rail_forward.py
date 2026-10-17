@@ -10,7 +10,8 @@ required=(
     "float forwardY=(float)(-Math.sin(pitch));",
     "float forwardZ=(float)(Math.cos(yaw)*cosPitch);",
     "GL43.glUniform3f(forwardLoc,forwardX,forwardY,forwardZ);",
-    "if(!outside && d2>1024.0)",
+    "bool outside=d2>1024.0 && horizontalForward>0.35",
+    "dot(delta.xz,mtr_Forward.xz)<-radius*horizontalForward",
     "float radius=length(halfExtent)+16.0;",
 )
 for token in required:
@@ -34,20 +35,23 @@ for yaw in range(-180,181,15):
         v=forward(yaw,pitch)
         assert abs(sum(x*x for x in v)-1)<1e-6
 
-# Mirror the GPU conservative distance/rear-hemisphere test.
-def culled(center, half, eye, view, render_distance):
+# Mirror the GPU's conservative horizontal rear-hemisphere test.
+# MTR rail distance is selected by the CPU; the compute shader MUST NOT
+# impose vanilla chunk distance (which hid far-away but visible rail).
+def culled(center, half, eye, view):
     radius=math.sqrt(sum(x*x for x in half))+16.0
     delta=tuple(center[i]-eye[i] for i in range(3))
     d2=delta[0]**2+delta[2]**2
-    outside=d2>(render_distance+radius)**2
-    if not outside and d2>1024.0:
-        outside=sum(delta[i]*view[i] for i in range(3))<-radius
-    return outside
+    horizontal=math.hypot(view[0],view[2])
+    return d2>1024.0 and horizontal>0.35 and (delta[0]*view[0]+delta[2]*view[2])<-radius*horizontal
 
 eye=(0,64,0)
-assert not culled((0,64,20),(2,2,2),eye,forward(0,0),128)
-assert not culled((0,64,-20),(2,2,2),eye,forward(0,0),128), "32-block near bubble must remain visible"
-assert culled((0,64,-80),(2,2,2),eye,forward(0,0),128), "distant rear rail can be culled"
-assert not culled((0,64,80),(2,2,2),eye,forward(0,0),128)
-assert not culled((0,64,-80),(200,2,200),eye,forward(0,0),128), "large geometry must fail open"
+assert not culled((0,64,20),(2,2,2),eye,forward(0,0))
+assert not culled((0,64,-20),(2,2,2),eye,forward(0,0)), "32-block near bubble must remain visible"
+assert culled((0,64,-80),(2,2,2),eye,forward(0,0)), "distant rear rail can be culled"
+assert not culled((0,64,80),(2,2,2),eye,forward(0,0))
+assert not culled((0,64,-80),(200,2,200),eye,forward(0,0)), "large geometry must fail open"
+assert not culled((0,64,1000),(2,2,2),eye,forward(0,0)), "MTR long-distance rails must remain visible"
+assert not culled((0,64,-80),(2,2,2),eye,forward(0,89)), "near-vertical view must fail open"
+assert not culled((0,64,-80),(2,2,2),eye,forward(0,-89)), "near-vertical view must fail open"
 print("PASS: Minecraft camera yaw/pitch, normalized forward vector, conservative rail culling")
