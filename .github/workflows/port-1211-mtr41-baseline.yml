@@ -38,13 +38,14 @@ jobs:
         working-directory: upstream
         run: |
           sed -i 's/stonecutter active "1.21.4-fabric"/stonecutter active "1.21.1-fabric"/' stonecutter.gradle.kts
+          sed -i 's/gradle-9.5.1-bin.zip/gradle-9.7.0-bin.zip/' gradle/wrapper/gradle-wrapper.properties
           chmod +x gradlew
       - name: Generate files and compile baseline
         working-directory: upstream
         shell: bash
         run: |
           set -o pipefail
-          ./gradlew :common:setupFiles --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
+          ./gradlew :1.21.1-fabric:setupFiles --no-daemon --stacktrace 2>&1 | tee ../upstream-mtr41-1211.log
           ./gradlew :1.21.1-fabric:build -x test --no-daemon --stacktrace 2>&1 | tee -a ../upstream-mtr41-1211.log
       - name: Preserve vanilla MTR 4.1 baseline, if compiled
         if: success()
