@@ -18,8 +18,9 @@ import java.util.*;
 /**
  * Immutable per-page geometry, mutable visibility. Identical visible spans do
  * not trigger CPU index repacking or GPU indirect-command uploads.
- * OpenGL 4.3 indirect drawing is restricted to the shaderless MTR backend;
- * Oculus and unknown addon shaders always retain the proven multi-draw path.
+ * OpenGL 4.3 indirect drawing is enabled on the shaderless MTR backend;
+ * Oculus and unknown addon shaders retain the proven multi-draw path unless
+ * the user explicitly opts into the experimental shaderIndirect flag.
  */
 public final class RegionVertexRanges {
     /** Immutable range with optional local-space bounds for GPU command culling. */
@@ -36,7 +37,7 @@ public final class RegionVertexRanges {
     // Oculus-compatible shader draws can use the same standard GL4.3
     // DrawElementsIndirectCommand as shaderless. Keep this as an EXPLICIT
     // experiment until shader-pack visuals are validated on real hardware.
-    private static final boolean SHADER_INDIRECT=!"false".equalsIgnoreCase(System.getProperty("mtr.engine.shaderIndirect","true"));
+    private static final boolean SHADER_INDIRECT=Boolean.getBoolean("mtr.engine.shaderIndirect");
     // GPU buffer bindings/uploads do not amortize over tiny 2-3 span pages.
     private static final int MIN_INDIRECT_SPANS = Math.max(2, Integer.getInteger("mtr.engine.indirectMinSpans", 8));
     private static final boolean HELIX_COALESCE = !"false".equalsIgnoreCase(System.getProperty("mtr.helix.coalesceSpans","true"));

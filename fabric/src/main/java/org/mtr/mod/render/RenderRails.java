@@ -365,7 +365,9 @@ public class RenderRails implements IGui {
 					? new ClassicRailQuadBatch(rail, texture, color, yOffset, SMALL_OFFSET, u1, v1, u2, v2)
 					: null;
 			final RenderRailWithBlockPos classicVisitor = (blockPos, x1, z1, x2, z2, x3, z3, x4, z4, y1, y2) -> {
-				final int light = renderState == RenderState.FLASHING || renderState == RenderState.COLORED ? GraphicsHolder.getDefaultLight() : RailLightFrameCache.get(clientWorld, blockPos);
+				// A coloured rail is not an emissive rail. Only a genuinely flashing
+				// editor preview may bypass the live block lightmap.
+				final int light = renderState == RenderState.FLASHING ? GraphicsHolder.getDefaultLight() : RailLightFrameCache.get(clientWorld, blockPos);
 				if (classicBatch != null) {
 					classicBatch.add(x1, z1, x2, z2, x3, z3, x4, z4, y1, y2, light);
 					return;
