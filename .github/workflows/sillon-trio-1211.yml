@@ -1,0 +1,136 @@
+name: Sillon trio — Fabric 1.21.1 port diagnostics
+
+on:
+  push:
+    branches:
+      - work/sillon-trio-fabric-1211
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sillon-trio-1211-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sillon:
+    name: Sillon SOLIS 1.21.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: First 1.21.1 compilation and error capture
+        shell: bash
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew :fabric:setupFiles -PminecraftVersion=1.21.1 --stacktrace 2>&1 | tee sillon-1211.log
+          ./gradlew :fabric:build -PminecraftVersion=1.21.1 --stacktrace 2>&1 | tee -a sillon-1211.log
+      - name: Save diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sillon-1211-build-log
+          path: sillon-1211.log
+          if-no-files-found: ignore
+      - name: Save compiled Sillon if available
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sillon-SOLIS-Fabric-1.21.1-experimental
+          path: |
+            fabric/build/libs/*.jar
+            build/release/*1.21.1*.jar
+          if-no-files-found: error
+
+  jcm:
+    name: JCM v2 1.21.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: sillon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Check out pinned upstream JCM
+        run: |
+          git clone https://github.com/DistrictOfJoban/Joban-Client-Mod.git jcm
+          git -C jcm checkout fc502c4b45b581a4407aefb890c18691a3f34ea6
+      - name: Apply tracked 1.21.1 migration
+        run: python3 sillon/tools/ports_1211/prepare_jcm.py jcm
+      - name: First JCM 1.21.1 compilation and error capture
+        shell: bash
+        working-directory: jcm
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew :fabric:build --stacktrace 2>&1 | tee ../jcm-1211.log
+      - name: Save diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JCM-1211-build-log
+          path: jcm-1211.log
+          if-no-files-found: ignore
+      - name: Save compiled JCM if available
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JCM-Fabric-1.21.1-experimental
+          path: jcm/fabric/build/libs/*.jar
+          if-no-files-found: error
+
+  mtrfrance:
+    name: MTR France 1.21.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: sillon
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Check out pinned upstream MTR France
+        run: |
+          git clone https://github.com/MTR-France-Team/MTR-France-Addon.git mtrfrance
+          git -C mtrfrance checkout eaf2a8130ac31f12534480a567c9246f35c0463e
+      - name: Apply tracked 1.21.1 migration
+        run: python3 sillon/tools/ports_1211/prepare_mtrfrance.py mtrfrance
+      - name: First MTR France 1.21.1 compilation and error capture
+        shell: bash
+        working-directory: mtrfrance
+        run: |
+          set -o pipefail
+          chmod +x gradlew
+          ./gradlew :1.21.1-fabric:build --stacktrace 2>&1 | tee ../mtrfrance-1211.log
+      - name: Save diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTRFrance-1211-build-log
+          path: mtrfrance-1211.log
+          if-no-files-found: ignore
+      - name: Save compiled MTR France if available
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MTRFrance-Fabric-1.21.1-experimental
+          path: mtrfrance/versions/1.21.1-fabric/build/libs/*.jar
+          if-no-files-found: error
