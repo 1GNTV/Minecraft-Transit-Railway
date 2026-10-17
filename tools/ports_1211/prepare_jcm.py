@@ -20,6 +20,12 @@ mod_menu_version_1.21.1=11.0.3
 """
 p.write_text(s, encoding="utf-8")
 
+p = root / "settings.gradle"
+s = p.read_text(encoding="utf-8")
+# This port is Fabric-only: don't evaluate the incompatible ForgeGradle plugin under Gradle 9.
+assert 'include ("forge")' in s, "Unexpected JCM settings"
+p.write_text(s.replace('include ("forge")', '// Forge omitted for Fabric 1.21.1 port'), encoding="utf-8")
+
 p = root / "gradle/wrapper/gradle-wrapper.properties"
 s = p.read_text(encoding="utf-8")
 s = s.replace("gradle-8.14-bin.zip", "gradle-9.5.1-bin.zip")

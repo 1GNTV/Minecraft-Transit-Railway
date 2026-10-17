@@ -35,3 +35,9 @@ Do not install diagnostic or failed builds into an existing world. Back up the w
 - Sillon: failed in old Fabric Loom Minecraft merge, ASM cannot read Java 21 class version 65. Upgrade Loom and Gradle first. The 1.21.1 mapping library is still missing.
 - JCM: MTR 4.1 binary was built with Loom 1.16.3, while JCM used Loom 1.10.5. Upgrade Loom and Gradle.
 - MTR France: UniversalCraft does not publish a `1.21.1-fabric` module. Try its `1.21-fabric` artifact for 1.21.1 and then verify binary compatibility.
+
+## Second GitHub Actions diagnostic run (39045824090)
+
+- Sillon: Loom/Gradle upgrade passed plugin setup; Gradle 9 removed `shadowJar.archivePath`. Fixed task input property in next attempt.
+- JCM: Loom upgrade resolved MTR 4.1 remap dependency, but ForgeGradle 6 refuses Gradle 9 even when building only Fabric. Exclude Forge subproject in next attempt.
+- MTR France: `1.21-fabric` UniversalCraft resolved, compilation proceeded, then >100 source errors, notably missing `org.mtr.mapping.*` classes under MTR 4.1. This requires actual API migration; no fake JAR should be delivered.
