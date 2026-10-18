@@ -68,7 +68,7 @@ public final class Blocks {
 		PIDS_2 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_2"), () -> new Block(new BlockPIDSHorizontal2()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PANAM_PIDS = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "panam_pids"), () -> new Block(new BlockPANAMPIDS()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PANAM_SCREEN = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "panam_screen"), () -> new Block(new BlockPANAMScreen()), CreativeModeTabs.RAILWAY_FACILITIES);
-\t\tSILLON_SIGNAGE = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "sillon_signage"), () -> new Block(new BlockSillonSignage()), CreativeModeTabs.RAILWAY_FACILITIES);
+		SILLON_SIGNAGE = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "sillon_signage"), () -> new Block(new BlockSillonSignage()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_3 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_3"), () -> new Block(new BlockPIDSHorizontal3()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_4 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_4"), () -> new Block(new BlockPIDSVertical1()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_POLE = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_pole"), () -> new Block(new BlockPIDSPole(createDefaultBlockSettings(false))), CreativeModeTabs.RAILWAY_FACILITIES);

@@ -8,6 +8,8 @@ import org.mtr.mod.block.BlockSillonSignage;
 import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.data.IGui;
 import org.mtr.mod.data.SillonSignageSpec;
+import org.mtr.mod.data.SillonSignageIconCatalog;
+import java.util.List;
 import org.mtr.mod.packet.PacketUpdateSillonSignage;
 
 /** Unified brush editor: content, preset, icons, appearance, world geometry. */
@@ -21,6 +23,10 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
     private final TextFieldWidgetExtension[] fields=new TextFieldWidgetExtension[LABELS.length];
     private final ButtonWidgetExtension[] tabs=new ButtonWidgetExtension[3];
     private final ButtonWidgetExtension styleButton,mountButton,arrowButton,saveButton,cancelButton;
+    private final ButtonWidgetExtension browseIcon,copyButton,pasteButton;
+    private final TextFieldWidgetExtension iconSearch;
+    private int iconCursor;
+    private static SillonSignageSpec clipboard;
     private final CheckboxWidgetExtension stationAuto,illuminated,doubleSided;
     private int styleIndex,mountIndex,arrow,tab,widthLeft,left,column;
     private boolean initialized,done,cancel;
@@ -54,6 +60,11 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
         stationAuto.setChecked(spec.stationAuto());
         illuminated.setChecked(spec.illuminated());
         doubleSided.setChecked(spec.doubleSided());
+        iconSearch=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,64,TextCase.DEFAULT,null,"");
+        iconSearch.setText2("idfm_m");
+        browseIcon=button("Choisir une icône",this::browseIcon);
+        copyButton=button("Copier le panneau",()->clipboard=spec());
+        pasteButton=button("Coller le panneau",()->{if(clipboard!=null)apply(clipboard);});
         saveButton=button("Enregistrer",this::save);
         cancelButton=button("Annuler",()->{cancel=true;onClose2();});
         refreshButtons();
@@ -81,9 +92,14 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
         position(styleButton,left,88,column);
         position(mountButton,left+column+16,88,column);
         position(arrowButton,left,133,column);
+        position(iconSearch,left,236,column);
+        position(browseIcon,left+column+16,236,column);
+        position(copyButton,left,272,column);
+        position(pasteButton,left+column+16,272,column);
         IDrawing.setPositionAndWidth(stationAuto,left,190,column);
         IDrawing.setPositionAndWidth(illuminated,left+column+16,190,column);
         IDrawing.setPositionAndWidth(doubleSided,left,218,column);
+        addChild(new ClickableWidget(iconSearch));
         addChild(new ClickableWidget(stationAuto));
         addChild(new ClickableWidget(illuminated));
         addChild(new ClickableWidget(doubleSided));
@@ -112,8 +128,39 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
                 f.setX2(x);f.setY2(y+16);f.setWidth2(column);
             }
         }
+        iconSearch.visible=browseIcon.visible=copyButton.visible=pasteButton.visible=tab==0;
         styleButton.visible=mountButton.visible=arrowButton.visible=tab==1;
         stationAuto.visible=illuminated.visible=doubleSided.visible=tab==1;
+    }
+    private void browseIcon(){
+        List<String> results=SillonSignageIconCatalog.search(iconSearch.getText2());
+        if(results.isEmpty()){
+            browseIcon.setMessage2(new Text(TextHelper.literal("Aucune icône trouvée").data));
+            return;
+        }
+        String next=results.get(iconCursor++%results.size());
+        String current=fields[3].getText2().trim();
+        if(!java.util.Arrays.asList(current.split(",")).contains(next))
+            fields[3].setText2(current.isEmpty()?next:current+","+next);
+        browseIcon.setMessage2(new Text(TextHelper.literal("Ajout : "+next).data));
+    }
+    private void apply(SillonSignageSpec document){
+        String[] data={
+            document.title(),document.subtitle(),document.body(),document.icons(),
+            String.format("%06X",document.background()),
+            String.format("%06X",document.foreground()),
+            String.format("%06X",document.accent()),
+            Float.toString(document.width()),Float.toString(document.height()),
+            Float.toString(document.yaw()),Float.toString(document.pitch()),Float.toString(document.roll())
+        };
+        for(int i=0;i<data.length;i++)fields[i].setText2(data[i]);
+        styleIndex=SillonSignageSpec.STYLES.indexOf(document.style());
+        mountIndex=SillonSignageSpec.MOUNTS.indexOf(document.mount());
+        arrow=document.arrow();
+        stationAuto.setChecked(document.stationAuto());
+        illuminated.setChecked(document.illuminated());
+        doubleSided.setChecked(document.doubleSided());
+        refreshButtons();
     }
     private static int hex(String source,int fallback){
         try{return (int)(Long.parseLong(source.trim().replace("#",""),16)&0xFFFFFF);}
@@ -157,7 +204,7 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
         if(tab==1)g.drawText(fields[0].getText2(),left+12,55,0xFFFFFFFF,false,GraphicsHolder.getDefaultLight());
         if(tab==0){
             for(int i=0;i<4;i++)g.drawText(LABELS[i],left+(i%2)*(column+16),86+(i/2)*54,0xFFD5DBEB,false,GraphicsHolder.getDefaultLight());
-            g.drawText("Icônes : idfm_m14, ratp_forum, sncf_ascenseur, ...",left,222,0xFFA8BED8,false,GraphicsHolder.getDefaultLight());
+            g.drawText("Recherche des 379 icônes MTR France",left,216,0xFFA8BED8,false,GraphicsHolder.getDefaultLight());
         }else if(tab==1){
             for(int i=4;i<=6;i++)g.drawText(LABELS[i],left+((i-4)%2)*(column+16),86+((i-4)/2)*54,0xFFD5DBEB,false,GraphicsHolder.getDefaultLight());
         }else{

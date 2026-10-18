@@ -171,7 +171,7 @@ public final class SillonSignageCanvas {
         for(String line:text.split("\\|",-1)){
             if(line.isBlank())continue;
             if(++n>6)break;
-            left(g,line.trim(),font(n==1,size:size*.86f),color,x,y+(n-1)*size*1.33f,xmax-x);
+            left(g,line.trim(),font(n==1,size*(n==1?1f:.86f)),color,x,y+(n-1)*size*1.33f,xmax-x);
         }
     }
     private static void badge(Graphics2D g,String label,int x,int y,int size,int bg,int fg){
@@ -192,9 +192,11 @@ public final class SillonSignageCanvas {
     private static BufferedImage icon(String id){
         if(icons.containsKey(id))return icons.get(id);
         String family=id.startsWith("ratp_")?"ratp":id.startsWith("sncf_")?"sncf":"idfm";
-        String path="assets/mtr/mtr_france_sign/"+family+"/"+id+".png";
-        try(InputStream input=SillonSignageCanvas.class.getClassLoader().getResourceAsStream(path)){
-            if(input==null)return null;
+        String root="assets/mtr/mtr_france_sign/"+family+"/";
+        String[] paths={root+id+".png",root+"voies/"+id+".png",
+            "assets/mtr/mtr_france_sign/sncf/voies/"+id+".png"};
+        for(String path:paths)try(InputStream input=SillonSignageCanvas.class.getClassLoader().getResourceAsStream(path)){
+            if(input==null)continue;
             BufferedImage img=ImageIO.read(input);
             if(img!=null){icons.put(id,img);return img;}
         }catch(Exception ignored){}

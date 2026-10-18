@@ -47,6 +47,9 @@ public record SillonSignageSpec(
     public SillonSignageSpec withTitle(String text){
         return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided);
     }
+    public SillonSignageSpec withBody(String text){
+        return new SillonSignageSpec(title,subtitle,text,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided);
+    }
     public void write(CompoundTag tag){
         tag.putInt("sillon_signage_version",1);
         tag.putString("sillon_title",title);
