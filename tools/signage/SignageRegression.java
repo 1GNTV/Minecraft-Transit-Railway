@@ -27,7 +27,7 @@ public final class SignageRegression {
             double error=Math.abs(im.getWidth()/(double)im.getHeight()-spec.width()/spec.height())/(spec.width()/spec.height());
             check(error<.02,"Aspect ratio "+preset.name());
             CompoundTag tag=new CompoundTag();spec.write(tag);
-            commands.append("setblock ").append((index%5-2)*7).append(" ").append(5+(index/5)*4).append(" 0 mtr:sillon_signage[facing=north]").append(tag.toString()).append("\n");
+            commands.append("setblock ").append((index%5-2)*7).append(" ").append(5+(index/5)*4).append(" 0 mtr:sillon_signage[facing=south]").append(tag.toString()).append("\n");
             check(spec.equals(SillonSignageSpec.read(tag)),"NBT roundtrip "+preset.name());
             check(SillonSignageOptions.decode(spec.options().encode()).equals(spec.options()),"Options roundtrip");
             var editor=new SillonSignageEditorModel(spec);check(editor.error().isEmpty(),"Editor accepts preset");
