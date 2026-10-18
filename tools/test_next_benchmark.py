@@ -45,5 +45,5 @@ public class NextFrameBenchmarkCheck {
 """
 with tempfile.TemporaryDirectory(prefix="next-frame-benchmark-") as root:
  p=Path(root)/"NextFrameBenchmarkCheck.java"
- p.write_text(java+"\n"+harness,encoding="utf-8")
+ p.write_text(harness+"\n"+java,encoding="utf-8")
  subprocess.run(["java","-Dmtr.next.benchmark=true",str(p)],check=True)
