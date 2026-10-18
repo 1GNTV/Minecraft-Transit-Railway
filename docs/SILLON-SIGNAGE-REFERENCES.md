@@ -24,7 +24,7 @@ Les manifestes dans docs/signage conservent les URL, les empreintes des ressourc
 - Le catalogue embarque 497 images d'origine et 5 variantes dérivées identifiées : quatre quadrants du tableau d'assistance et le logo RATP blanc.
 - Une plaque de station, un jalonnement blanc, une liste de sorties bleue et un panneau de secteur ont des compositions distinctes.
 - Les éléments de secteur déjà légendés ne reçoivent pas une seconde légende identique.
-- Toutes les couleurs saisies sont utilisées ; aucune famille ne remplace silencieusement la palette choisie.
+- Les couleurs sont éditables. Les compositions conservent par défaut les zones de la charte ; « Palette choisie » permet de les remplacer. Les pictogrammes restent dans leurs couleurs d’origine.
 - Les flèches disposent de huit orientations ; les lignes composées peuvent avoir des flèches et des pictogrammes indépendants.
 - Les marges, l'échelle typographique, l'échelle des pictogrammes, l'alignement et le bandeau sont réglables.
 - Le plan intégré est le plan réel IDFM, pas une topologie inventée. Une image de pack peut le remplacer.

@@ -17,6 +17,10 @@ L'aperçu conserve les proportions et reste visible aux tailles d'interface test
 
 Le nom automatique concerne les plaques de station. Pour un plan de ligne ou une direction de quai, l'automatisation permet d'utiliser le quai MTR proche si aucune liste manuelle n'a été saisie. Les départs numériques proviennent du quai voisin et ne sont pas des horaires inventés.
 
+## Couleurs des zones
+
+Les panneaux composés et les bandeaux de secteur proposent **Charte d’origine** ou **Palette choisie** dans Aspect. La palette choisie applique le fond et le texte saisis aux zones de destination, et l’accent aux zones de service ou aux bandeaux. Les pictogrammes gardent leurs couleurs d’origine.
+
 ## Image personnalisée
 
 Placer une image PNG dans un pack de ressources, puis saisir son identifiant dans **Aspect > Image du pack de ressources**, par exemple :

@@ -5,12 +5,17 @@ import java.util.List;
 /** Independent typography, geometry and material settings shared by editor and renderer. */
 public record SillonSignageOptions(String font, String align, float textScale, float iconScale,
     float padding, float offsetX, float offsetY, float offsetZ, float thickness,
-    float suspension, String frame, int frameColor, String image, float bandRatio) {
+    float suspension, String frame, int frameColor, String image, float bandRatio, boolean freePalette) {
     public static final List<String> FONTS=List.of("parisine","grand_paris","idf_voyageur");
     public static final List<String> FRAMES=List.of("none","thin","box");
     public static final List<String> ALIGNS=List.of("auto","left","center");
     public static final SillonSignageOptions DEFAULT=new SillonSignageOptions(
         "parisine","auto",1,1,1,0,0,0,.04f,.65f,"thin",0x25272C,"",.18f);
+    public SillonSignageOptions(String font,String align,float textScale,float iconScale,float padding,
+        float offsetX,float offsetY,float offsetZ,float thickness,float suspension,String frame,
+        int frameColor,String image,float bandRatio) {
+        this(font,align,textScale,iconScale,padding,offsetX,offsetY,offsetZ,thickness,suspension,frame,frameColor,image,bandRatio,false);
+    }
     public SillonSignageOptions {
         font=FONTS.contains(font)?font:"parisine";
         align=ALIGNS.contains(align)?align:"auto";
@@ -27,20 +32,24 @@ public record SillonSignageOptions(String font, String align, float textScale, f
         return Float.isFinite(v)?Math.max(min,Math.min(max,v)):fallback;
     }
     public SillonSignageOptions withBand(float ratio) {
-        return new SillonSignageOptions(font,align,textScale,iconScale,padding,offsetX,offsetY,offsetZ,thickness,suspension,frame,frameColor,image,ratio);
+        return new SillonSignageOptions(font,align,textScale,iconScale,padding,offsetX,offsetY,offsetZ,thickness,suspension,frame,frameColor,image,ratio,freePalette);
+    }
+    public SillonSignageOptions withFreePalette(boolean enabled) {
+        return new SillonSignageOptions(font,align,textScale,iconScale,padding,offsetX,offsetY,offsetZ,
+            thickness,suspension,frame,frameColor,image,bandRatio,enabled);
     }
     public String encode() {
         return String.join(";",font,align,""+textScale,""+iconScale,""+padding,""+offsetX,""+offsetY,
-            ""+offsetZ,""+thickness,""+suspension,frame,""+frameColor,image,""+bandRatio);
+            ""+offsetZ,""+thickness,""+suspension,frame,""+frameColor,image,""+bandRatio,""+freePalette);
     }
     public static SillonSignageOptions decode(String encoded) {
         if(encoded==null||encoded.length()>2048)return DEFAULT;
         try{
             String[] p=encoded.split(";",-1);
-            if(p.length!=14)return DEFAULT;
+            if(p.length!=14&&p.length!=15)return DEFAULT;
             return new SillonSignageOptions(p[0],p[1],Float.parseFloat(p[2]),Float.parseFloat(p[3]),
                 Float.parseFloat(p[4]),Float.parseFloat(p[5]),Float.parseFloat(p[6]),Float.parseFloat(p[7]),
-                Float.parseFloat(p[8]),Float.parseFloat(p[9]),p[10],Integer.parseInt(p[11]),p[12],Float.parseFloat(p[13]));
+                Float.parseFloat(p[8]),Float.parseFloat(p[9]),p[10],Integer.parseInt(p[11]),p[12],Float.parseFloat(p[13]),p.length==15&&Boolean.parseBoolean(p[14]));
         }catch(RuntimeException ex){return DEFAULT;}
     }
 }

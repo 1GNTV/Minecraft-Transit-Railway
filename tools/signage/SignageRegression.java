@@ -70,6 +70,13 @@ public final class SignageRegression {
         model.toggleIcon(true,"idfm_m14");model.toggleIcon(true,"idfm_pmr");model.moveIcon(true,1,-1);
         check(model.icons(true).equals("idfm_pmr,idfm_m14"),"Icon reorder");
         model.removeRow();check(model.rows.size()==1,"Row removal");
+        var mixed=SillonSignagePresets.ALL.get(9).document();
+        var free=mixed.withOptions(mixed.options().withFreePalette(true));
+        check(SillonSignageOptions.decode(free.options().encode()).equals(free.options()),"Free palette serialization");
+        check(!free.visualKey().equals(mixed.visualKey()),"Free palette invalidates texture");
+        BufferedImage originalPalette=SillonSignagePainter.render(mixed),chosenPalette=SillonSignagePainter.render(free);
+        check(originalPalette.getRGB(20,20)!=chosenPalette.getRGB(20,20),"Composed transport zone uses chosen background");
+        originalPalette.flush();chosenPalette.flush();
         CompoundTag old=new CompoundTag();SillonSignageSpec.DEFAULT.write(old);old.putInt("sillon_signage_version",1);
         check(SillonSignageSpec.read(old).options().equals(SillonSignageOptions.DEFAULT),"Version 1 migration");
         for(int[] resolution:new int[][]{{320,240},{480,270},{640,360},{720,400},{960,540},{1280,720}}) {

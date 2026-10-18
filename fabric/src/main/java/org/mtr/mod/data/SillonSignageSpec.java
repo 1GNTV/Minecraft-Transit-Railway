@@ -75,7 +75,7 @@ public record SillonSignageSpec(
             arrow+"/"+background+"/"+foreground+"/"+accent+"/"+width+"/"+height+"/"+
             options.font()+"/"+options.align()+"/"+options.textScale()+"/"+options.iconScale()+"/"+
             options.padding()+"/"+options.bandRatio()+"/"+options.frame()+"/"+options.frameColor()+"/"+
-            options.image()+"/"+SillonSignageRow.encode(rows);
+            options.image()+"/"+options.freePalette()+"/"+SillonSignageRow.encode(rows);
     }
     public void write(CompoundTag tag){
         tag.putInt("sillon_signage_version",2);

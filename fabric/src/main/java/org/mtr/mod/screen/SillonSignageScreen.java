@@ -112,6 +112,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         String style=model.values.get("style");
         List<String> base=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
         return base.stream().filter(key->{
+            if("freePalette".equals(key))return Set.of("interchange","custom","rer","sector","exit").contains(style);
             if("auto".equals(key))return Set.of("metro","metro_subtitle","rer","gpe","exit","route","platform").contains(style);
             if("arrow".equals(key))return !Set.of("metro","metro_subtitle","rer","gpe","map").contains(style);
             if("subtitle".equals(key)&&"metro".equals(style))return false;

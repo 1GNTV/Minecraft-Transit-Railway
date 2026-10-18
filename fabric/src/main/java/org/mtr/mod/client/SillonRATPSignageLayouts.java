@@ -68,7 +68,7 @@ public final class SillonRATPSignageLayouts {
             BufferedImage image=icon(sector);
             if(image!=null) {
                 // The source is a complete lockup including "secteur". Do not duplicate its text.
-                g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,block,h));
+                g.setColor(new Color(s.options().freePalette()?s.accent():image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,block,h));
                 float scale=s.options().iconScale(),iw=(block-pad*.8f)*scale,ih=(h-pad*.8f)*scale;
                 Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,block,h));
                 image(g,sectorLockup(sector),(block-iw)/2,(h-ih)/2,iw,ih);g.setClip(clip);
@@ -133,14 +133,14 @@ public final class SillonRATPSignageLayouts {
                 Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,w,band));
                 image(g,sectorLockup(sectorIcon),(w-iw)/2,(band-ih)/2,iw,ih);g.setClip(clip);
             }else {
-                g.setColor(new Color(GREY));g.fill(new Rectangle2D.Float(0,0,w,band));
+                g.setColor(new Color(s.options().freePalette()?s.accent():GREY));g.fill(new Rectangle2D.Float(0,0,w,band));
                 title(g,s,s.subtitle(),band*.53f,WHITE,pad,0,w-pad*2,band,"left");
             }
             top+=band;
         }
         if(!modes.isBlank()) {
             float band=Math.min(h*.17f,w*.18f);
-            g.setColor(Color.WHITE);g.fill(new Rectangle2D.Float(0,top,w,band));
+            g.setColor(new Color(s.options().freePalette()?s.accent():WHITE));g.fill(new Rectangle2D.Float(0,top,w,band));
             icons(g,modes,pad,top+band*.07f,w-pad*2,band*.86f,band*.72f*s.options().iconScale());top+=band;
         }
         float remaining=h-top;
@@ -171,7 +171,9 @@ public final class SillonRATPSignageLayouts {
         float unit=h/(float)rows.size();
         for(int i=0;i<rows.size();i++) {
             SillonSignageRow r=rows.get(i);int bg,fg;
-            switch(r.kind()) {
+            if(s.options().freePalette()||"custom".equals(s.style())) {
+                bg="service".equals(r.kind())?s.accent():s.background();fg=s.foreground();
+            }else switch(r.kind()) {
                 case "exit"->{bg=s.background();fg=s.foreground();}
                 case "service"->{bg=s.accent();fg=WHITE;}
                 case "sector"->{bg=GREY;fg=WHITE;}

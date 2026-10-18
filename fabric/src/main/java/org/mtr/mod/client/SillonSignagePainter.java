@@ -91,7 +91,19 @@ public final class SillonSignagePainter {
             }
             if(x2<x1)return source;
             x1=Math.max(0,x1-8);y1=Math.max(0,y1-8);x2=Math.min(source.getWidth()-1,x2+8);y2=Math.min(source.getHeight()-1,y2+8);
-            return source.getSubimage(x1,y1,x2-x1+1,y2-y1+1);
+            // Sector artwork contains white ink over a flat original background.
+            // Extract ink coverage so a chosen band colour remains fully editable.
+            BufferedImage result=new BufferedImage(x2-x1+1,y2-y1+1,BufferedImage.TYPE_INT_ARGB);
+            int background=source.getRGB(source.getWidth()/16,source.getHeight()/16);
+            int br=(background>>>16)&255,bg=(background>>>8)&255,bb=background&255;
+            float range=Math.max(1,765-br-bg-bb);
+            for(int y=0;y<result.getHeight();y++)for(int x=0;x<result.getWidth();x++) {
+                int pixel=source.getRGB(x+x1,y+y1);
+                float coverage=(((pixel>>>16)&255)-br+((pixel>>>8)&255)-bg+(pixel&255)-bb)/range;
+                int alpha=Math.round(Math.max(0,Math.min(1,coverage))*(pixel>>>24));
+                result.setRGB(x,y,(alpha<<24)|0xFFFFFF);
+            }
+            return result;
         });
     }
     public static void image(Graphics2D g,BufferedImage img,float x,float y,float w,float h) {

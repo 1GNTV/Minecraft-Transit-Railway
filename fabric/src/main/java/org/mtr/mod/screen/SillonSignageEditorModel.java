@@ -12,6 +12,7 @@ public final class SillonSignageEditorModel {
         choice("auto","Nom depuis la station MTR",List.of("Non","Oui"));
         choice("style","Famille de panneau",SillonSignageSpec.STYLES);
         choice("font","Typographie",SillonSignageOptions.FONTS);choice("align","Alignement",SillonSignageOptions.ALIGNS);
+        choice("freePalette","Couleurs des zones",List.of("Charte d’origine","Palette choisie"));
         color("bg","Fond");color("fg","Texte");color("accent","Bandeau / ligne");color("frameColor","Couleur du cadre");
         number("textScale","Taille des caractères",.5f,1.8f,.05f);number("iconScale","Taille des pictogrammes",.5f,1.6f,.05f);
         number("padding","Marges",.25f,2,.05f);number("bandRatio","Part du bandeau",.1f,.4f,.01f);
@@ -30,7 +31,7 @@ public final class SillonSignageEditorModel {
         choice("row_arrow","Flèche de cette ligne",List.of("-1","0","1","2","3","4","5","6","7"));
     }
     public static final List<String> TEXT=List.of("title","title2","subtitle","auto","arrow");
-    public static final List<String> APPEARANCE=List.of("style","font","align","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
+    public static final List<String> APPEARANCE=List.of("style","font","align","freePalette","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
     public static final List<String> POSE=List.of("width","height","mount","offsetX","offsetY","offsetZ","yaw","pitch","roll","thickness","suspension","lit","double");
     public static final List<String> ROW=List.of("row_text","row_detail","row_number","row_kind","row_arrow");
     public final Map<String,String> values=new LinkedHashMap<>();
@@ -50,7 +51,7 @@ public final class SillonSignageEditorModel {
         values.put("double",s.doubleSided()?"Oui":"Non");values.put("mount",s.mount());values.put("arrow",""+s.arrow());
         values.put("bg",hex(s.background()));values.put("fg",hex(s.foreground()));values.put("accent",hex(s.accent()));
         values.put("font",o.font());values.put("align",o.align());values.put("frame",o.frame());values.put("frameColor",hex(o.frameColor()));
-        values.put("image",o.image());
+        values.put("image",o.image());values.put("freePalette",o.freePalette()?"Palette choisie":"Charte d’origine");
         put("width",s.width());put("height",s.height());put("yaw",s.yaw());put("pitch",s.pitch());put("roll",s.roll());
         put("offsetX",o.offsetX());put("offsetY",o.offsetY());put("offsetZ",o.offsetZ());
         put("textScale",o.textScale());put("iconScale",o.iconScale());put("padding",o.padding());put("bandRatio",o.bandRatio());
@@ -102,7 +103,7 @@ public final class SillonSignageEditorModel {
         String error=error();if(!error.isEmpty())throw new IllegalArgumentException(error);
         saveRow();
         SillonSignageOptions o=new SillonSignageOptions(values.get("font"),values.get("align"),n("textScale"),n("iconScale"),n("padding"),
-            n("offsetX"),n("offsetY"),n("offsetZ"),n("thickness"),n("suspension"),values.get("frame"),c("frameColor"),values.get("image"),n("bandRatio"));
+            n("offsetX"),n("offsetY"),n("offsetZ"),n("thickness"),n("suspension"),values.get("frame"),c("frameColor"),values.get("image"),n("bandRatio"),"Palette choisie".equals(values.get("freePalette")));
         return new SillonSignageSpec(values.get("title")+(values.get("title2").isBlank()?"":"|"+values.get("title2")),values.get("subtitle"),legacyBody,values.get("style"),headerIcons,
             values.get("mount"),Integer.parseInt(values.get("arrow")),c("bg"),c("fg"),c("accent"),n("width"),n("height"),
             n("yaw"),n("pitch"),n("roll"),"Oui".equals(values.get("auto")),"Oui".equals(values.get("lit")),"Oui".equals(values.get("double")),o,rows);
