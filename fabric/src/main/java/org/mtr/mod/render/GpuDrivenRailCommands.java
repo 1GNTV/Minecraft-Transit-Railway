@@ -34,8 +34,7 @@ public final class GpuDrivenRailCommands {
         layout(std430,binding=6) readonly buffer Extents { Bounds spans[]; };
         layout(std430,binding=7) buffer DrawCommands { uint words[]; };
         uniform uint mtr_Count;
-        uniform vec3 mtr_Origin;
-        uniform vec3 mtr_Eye;
+        uniform vec3 mtr_EyeLocal;
         uniform vec3 mtr_Forward;
         void main() {
             uint id=gl_GlobalInvocationID.x;
@@ -43,10 +42,10 @@ public final class GpuDrivenRailCommands {
             Bounds b=spans[id];
             // Unknown bounds fail open: shaders and add-ons must not lose meshes.
             if(b.low.x>1.0e20){words[id*5u+1u]=1u;return;}
-            vec3 center=(b.low.xyz+b.high.xyz)*0.5+mtr_Origin;
+            vec3 center=(b.low.xyz+b.high.xyz)*0.5;
             vec3 halfExtent=(b.high.xyz-b.low.xyz)*0.5;
             float radius=length(halfExtent)+16.0;
-            vec3 delta=center-mtr_Eye;
+            vec3 delta=center-mtr_EyeLocal;
             float d2=dot(delta.xz,delta.xz);
             // Distance is owned by the CPU sector selection. Never use the
             // vanilla chunk distance here: MTR may draw rails much farther.
@@ -58,7 +57,7 @@ public final class GpuDrivenRailCommands {
             words[id*5u+1u]=outside?0u:1u;
         }
         """;
-    private static int program=-1,countLoc,originLoc,eyeLoc,forwardLoc;
+    private static int program=-1,countLoc,eyeLocalLoc,forwardLoc;
     private static boolean failed;
     private static long dispatches;
     private GpuDrivenRailCommands(){}
@@ -102,8 +101,7 @@ public final class GpuDrivenRailCommands {
                 throw new IllegalStateException("Rail culling program: "+GL43.glGetProgramInfoLog(p));
             program=p;
             countLoc=GL43.glGetUniformLocation(p,"mtr_Count");
-            originLoc=GL43.glGetUniformLocation(p,"mtr_Origin");
-            eyeLoc=GL43.glGetUniformLocation(p,"mtr_Eye");
+            eyeLocalLoc=GL43.glGetUniformLocation(p,"mtr_EyeLocal");
             forwardLoc=GL43.glGetUniformLocation(p,"mtr_Forward");
             return true;
         } catch(RuntimeException error) {
@@ -119,7 +117,7 @@ public final class GpuDrivenRailCommands {
      * be updated; caller then executes the ordinary multi-draw renderer.
      */
     public static boolean cull(int commands,int boundsBuffer,int count,
-                               float originX,float originY,float originZ) {
+                               double originX,double originY,double originZ) {
         if(boundsBuffer==0||!supported(count)||!initialize())return false;
         var camera=MinecraftClient.getInstance().getGameRendererMapped().getCamera();
         var eye=camera.getPos();
@@ -141,8 +139,13 @@ public final class GpuDrivenRailCommands {
             GL43.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER,6,boundsBuffer);
             GL43.glBindBufferBase(GL43.GL_SHADER_STORAGE_BUFFER,7,commands);
             GL43.glUniform1ui(countLoc,count);
-            GL43.glUniform3f(originLoc,originX,originY,originZ);
-            GL43.glUniform3f(eyeLoc,(float)eye.getXMapped(),(float)eye.getYMapped(),(float)eye.getZMapped());
+            // Subtract camera and sector positions in double precision BEFORE
+            // conversion to GL floats. At +/-30m world coordinates, float
+            // absolute-space subtraction otherwise loses whole blocks.
+            GL43.glUniform3f(eyeLocalLoc,
+                (float)(eye.getXMapped()-originX),
+                (float)(eye.getYMapped()-originY),
+                (float)(eye.getZMapped()-originZ));
             GL43.glUniform3f(forwardLoc,forwardX,forwardY,forwardZ);
             GL43.glDispatchCompute((count+GROUP_SIZE-1)/GROUP_SIZE,1,1);
             GL43.glMemoryBarrier(GL43.GL_COMMAND_BARRIER_BIT|GL43.GL_SHADER_STORAGE_BARRIER_BIT);

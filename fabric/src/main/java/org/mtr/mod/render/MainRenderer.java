@@ -95,6 +95,10 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 			}
 			millisElapsed = 0;
 		} else {
+			final NextFrameBenchmark.Result sample=NextFrameBenchmark.sample(System.nanoTime());
+            if(sample!=null)org.mtr.mod.Init.LOGGER.info(
+                "Sillon NEXT frametimes: frames={}, avgFPS={}, low1FPS={}, p99FrameMs={} (actual game client, main pass)",
+                sample.frames(),sample.averageFps(),sample.onePercentLowFps(),sample.p99Millis());
 			millisElapsed = getMillisElapsed();
 			timerMillis += millisElapsed;
 

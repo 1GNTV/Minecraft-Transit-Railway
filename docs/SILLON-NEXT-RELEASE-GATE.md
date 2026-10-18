@@ -59,3 +59,9 @@ CI publishes only `Sillon-NEXT-EXPERIMENTAL-...` artifacts. `workflow_dispatch` 
 GPU rail command culling now computes the camera forward vector using Minecraft yaw/pitch conventions instead of rotated basis-vector components. The regression test checks six cardinal/up/down camera directions and the 32-block conservative near bubble. This is a math/source test, NOT an in-game OpenGL visual test.
 
 Use `-Dmtr.mega.railCompute=false`, `-Dmtr.mega.materialAtlas=false` and `-Dmtr.mega.gpuDriven=false` for A/B isolation of GPU regressions.
+
+## Frame-time benchmark and world-border rail safety iteration
+
+Both NEXT branches now include a bounded real-client frametime sampler, opt-in with `-Dmtr.next.benchmark=true`. It logs 10-second main-pass windows with mean FPS, slowest 1% frame-time FPS, p99 milliseconds and sample count; game pauses longer than one second reset a window. This instrumentation is not an in-game benchmark result and does not satisfy the dense-station comparison gate by itself.
+
+GPU rail command culling now computes local eye coordinates in 64-bit world space before converting to GLSL floats, preventing camera/sector rounding mismatches at far world coordinates. The legacy classic rail GPU cache, previously enabled despite its opt-in comment, is also made opt-in with `-Dmtr.mega.classicGpu=true` until shaderless and shader-pack parity is proven. Both platforms retain normal rendering when experimental GPU paths are disabled.
