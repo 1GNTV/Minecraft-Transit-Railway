@@ -32,7 +32,7 @@ public final class SignageVisualQa {
         if(!started) {
             String current=mc.screen==null?"none":mc.screen.getClass().getSimpleName();
             if(!current.equals(lastScreen)){System.out.println("SIGNAGE_QA_STARTUP "+current);lastScreen=current;}
-            if(!opening&&mc.screen instanceof TitleScreen&&mc.getOverlay()==null&&++waiting>100){opening=true;mc.createWorldOpenFlows().loadLevel("SignageQA");}
+            if(!opening&&mc.screen instanceof TitleScreen&&mc.getOverlay()==null&&++waiting>100){opening=true;mc.createWorldOpenFlows().loadLevel(mc.screen,"SignageQA");}
             if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
             started=true;stage=0;tick=0;
             if(Boolean.getBoolean("sillon.qa.shader")){worldView=0;mc.options.hideGui=true;world(mc);}else setup(mc);return;
