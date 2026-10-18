@@ -1,0 +1,81 @@
+package org.mtr.mod.data;
+
+import org.mtr.mapping.holder.CompoundTag;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Versioned and bounded signage document. Both the server and the compositor
+ * consume this single immutable object; no client-side text is trusted.
+ */
+public record SillonSignageSpec(
+    String title, String subtitle, String body, String style, String icons,
+    String mount, int arrow, int background, int foreground, int accent,
+    float width, float height, float yaw, float pitch, float roll,
+    boolean stationAuto, boolean illuminated, boolean doubleSided) {
+    public static final List<String> STYLES=List.of(
+        "metro","metro_subtitle","rer","direction","exit","vertical",
+        "platform","route","map","services","totem","digital","custom");
+    public static final List<String> MOUNTS=List.of("wall","ceiling","hanging","flag","standing");
+    public static final SillonSignageSpec DEFAULT=new SillonSignageSpec(
+        "Rambuteau","Centre Georges Pompidou","","metro_subtitle",
+        "idfm_m11","wall",-1,0x101D56,0xFFFFFF,0x80591B,
+        2.0f,.60f,0,0,0,true,false,false);
+
+    public SillonSignageSpec {
+        title=bounded(title,128);
+        subtitle=bounded(subtitle,128);
+        body=bounded(body,1024);
+        style=STYLES.contains(style)?style:"metro";
+        icons=bounded(icons,384).replaceAll("[^a-zA-Z0-9_,/\\-]","");
+        mount=MOUNTS.contains(mount)?mount:"wall";
+        arrow=Math.max(-1,Math.min(7,arrow));
+        background&=0xFFFFFF;foreground&=0xFFFFFF;accent&=0xFFFFFF;
+        width=boundedFloat(width,.4f,12f,2f);
+        height=boundedFloat(height,.2f,8f,.6f);
+        yaw=boundedFloat(yaw,-180f,180f,0f);
+        pitch=boundedFloat(pitch,-90f,90f,0f);
+        roll=boundedFloat(roll,-180f,180f,0f);
+    }
+    private static String bounded(String value,int max) {
+        if(value==null)return "";
+        return value.length()<=max?value:value.substring(0,max);
+    }
+    private static float boundedFloat(float value,float min,float max,float fallback){
+        return Float.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
+    }
+    public SillonSignageSpec withTitle(String text){
+        return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided);
+    }
+    public void write(CompoundTag tag){
+        tag.putInt("sillon_signage_version",1);
+        tag.putString("sillon_title",title);
+        tag.putString("sillon_subtitle",subtitle);
+        tag.putString("sillon_body",body);
+        tag.putString("sillon_style",style);
+        tag.putString("sillon_icons",icons);
+        tag.putString("sillon_mount",mount);
+        tag.putInt("sillon_arrow",arrow);
+        tag.putInt("sillon_background",background);
+        tag.putInt("sillon_foreground",foreground);
+        tag.putInt("sillon_accent",accent);
+        tag.putFloat("sillon_width",width);
+        tag.putFloat("sillon_height",height);
+        tag.putFloat("sillon_yaw",yaw);
+        tag.putFloat("sillon_pitch",pitch);
+        tag.putFloat("sillon_roll",roll);
+        tag.putBoolean("sillon_auto",stationAuto);
+        tag.putBoolean("sillon_lit",illuminated);
+        tag.putBoolean("sillon_double",doubleSided);
+    }
+    public static SillonSignageSpec read(CompoundTag tag){
+        if(tag.getInt("sillon_signage_version")!=1)return DEFAULT;
+        return new SillonSignageSpec(
+            tag.getString("sillon_title"),tag.getString("sillon_subtitle"),tag.getString("sillon_body"),
+            tag.getString("sillon_style"),tag.getString("sillon_icons"),tag.getString("sillon_mount"),
+            tag.getInt("sillon_arrow"),tag.getInt("sillon_background"),tag.getInt("sillon_foreground"),
+            tag.getInt("sillon_accent"),tag.getFloat("sillon_width"),tag.getFloat("sillon_height"),
+            tag.getFloat("sillon_yaw"),tag.getFloat("sillon_pitch"),tag.getFloat("sillon_roll"),
+            tag.getBoolean("sillon_auto"),tag.getBoolean("sillon_lit"),tag.getBoolean("sillon_double"));
+    }
+}

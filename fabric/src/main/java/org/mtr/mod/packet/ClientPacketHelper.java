@@ -19,7 +19,10 @@ public final class ClientPacketHelper {
 
 	public static void openBlockEntityScreen(BlockPos blockPos) {
 		getBlockEntity(blockPos, blockEntity -> {
-			if (blockEntity.data instanceof BlockTrainAnnouncer.BlockEntity) {
+			if (blockEntity.data instanceof BlockSillonSignage.BlockEntity) {
+                openScreen(new SillonSignageScreen(blockPos,(BlockSillonSignage.BlockEntity)blockEntity.data),
+                    screenExtension -> screenExtension instanceof SillonSignageScreen);
+            } else if (blockEntity.data instanceof BlockTrainAnnouncer.BlockEntity) {
 				openScreen(new TrainAnnouncerScreen(blockPos, (BlockTrainAnnouncer.BlockEntity) blockEntity.data), screenExtension -> screenExtension instanceof TrainAnnouncerScreen);
 			} else if (blockEntity.data instanceof BlockTrainScheduleSensor.BlockEntity) {
 				openScreen(new TrainScheduleSensorScreen(blockPos, (BlockTrainScheduleSensor.BlockEntity) blockEntity.data), screenExtension -> screenExtension instanceof TrainScheduleSensorScreen);
