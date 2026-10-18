@@ -35,7 +35,7 @@ public final class SillonSignageEditorModel {
         choice("row_kind","Type de ligne",SillonSignageRow.KINDS);
         choice("row_arrow","Flèche de cette ligne",List.of("-1","0","1","2","3","4","5","6","7"));
     }
-    public static final List<String> NETWORK=List.of("auto","stationId","platformId","routeId","mode","scope","routeLayout","exitFilter","serviceSource","arrowsAuto","lineColors");
+    public static final List<String> NETWORK=List.of("auto","stationId","platformId","routeId","mode","scope","routeLayout","exitFilter","serviceSource","arrowsAuto","arrow","lineColors");
     public static final List<String> TEXT=List.of("title","title2","subtitle","auto","arrow");
     public static final List<String> APPEARANCE=List.of("style","font","align","freePalette","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
     public static final List<String> POSE=List.of("width","height","mount","offsetX","offsetY","offsetZ","yaw","pitch","roll","thickness","suspension","lit","double");
