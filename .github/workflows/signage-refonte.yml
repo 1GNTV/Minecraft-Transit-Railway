@@ -31,6 +31,17 @@ jobs:
         run: python tools/complete_signage_refs.py
       - name: Render and exercise the actual compositor and editor model
         run: python tools/test_sillon_signage_reference.py
+      - name: Publish QA images for review
+        if: always()
+        run: |
+          mkdir -p docs/signage/review
+          cp -r build/signage-qa/* docs/signage/review/ 2>/dev/null || true
+          git config user.name "Sillon build"
+          git config user.email "48333136+1GNTV@users.noreply.github.com"
+          git add docs/signage
+          test ! -d fabric/src/main/resources/assets/mtr/signage/maps || git add fabric/src/main/resources/assets/mtr/signage/maps
+          git diff --cached --quiet || git commit -m "qa(signage): preserve real references and rendered panel review"
+          git push origin HEAD:work/sillon-signage-refonte-forge-1201
       - uses: actions/cache@v4
         id: website
         with:
@@ -60,16 +71,6 @@ jobs:
           mkdir -p build/signage-delivery
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
-      - name: Publish QA images for review
-        if: always()
-        run: |
-          mkdir -p docs/signage/review
-          cp -r build/signage-qa/* docs/signage/review/ 2>/dev/null || true
-          git config user.name "Sillon build"
-          git config user.email "48333136+1GNTV@users.noreply.github.com"
-          git add docs/signage fabric/src/main/resources/assets/mtr/signage/maps
-          git diff --cached --quiet || git commit -m "qa(signage): preserve real references and rendered panel review"
-          git push origin HEAD:work/sillon-signage-refonte-forge-1201
       - uses: actions/upload-artifact@v4
         if: always()
         with:

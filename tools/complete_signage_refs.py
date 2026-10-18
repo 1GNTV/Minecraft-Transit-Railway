@@ -18,7 +18,12 @@ for name,url in sources.items():
         manifest[name]={"url":url,"sha256":hashlib.sha256(data).hexdigest()}
     except Exception as e:manifest[name]={"url":url,"error":str(e)}
 url="https://assets-web.bonjour-ratp.fr/PLAN_PARIS_SCHEMATIQUE_SANS_CARROYAGE_01_2026_b1eeff4966.pdf"
-pdf=get(url);doc=fitz.open(stream=pdf,filetype="pdf");page=doc[0]
+try:
+    pdf=get(url)
+except Exception:
+    url="https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf"
+    pdf=get(url)
+doc=fitz.open(stream=pdf,filetype="pdf");page=doc[0]
 scale=min(2560/page.rect.width,2560/page.rect.height)
 destination=root/"fabric/src/main/resources/assets/mtr/signage/maps/metro.png"
 destination.parent.mkdir(parents=True,exist_ok=True)
