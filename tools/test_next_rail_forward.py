@@ -54,4 +54,20 @@ assert not culled((0,64,-80),(200,2,200),eye,forward(0,0)), "large geometry must
 assert not culled((0,64,1000),(2,2,2),eye,forward(0,0)), "MTR long-distance rails must remain visible"
 assert not culled((0,64,-80),(2,2,2),eye,forward(0,89)), "near-vertical view must fail open"
 assert not culled((0,64,-80),(2,2,2),eye,forward(0,-89)), "near-vertical view must fail open"
-print("PASS: Minecraft camera yaw/pitch, normalized forward vector, conservative rail culling")
+# Camera subtraction must occur in world-coordinate double precision
+# before the GPU receives sector-local floats. Avoid world-border holes.
+assert 'uniform vec3 mtr_EyeLocal;' in source
+assert 'vec3 delta=center-mtr_EyeLocal;' in source
+assert 'eye.getXMapped()-originX' in source
+assert 'eye.getYMapped()-originY' in source
+assert 'eye.getZMapped()-originZ' in source
+regions=(root/"fabric/src/main/java/org/mtr/mod/render/RegionVertexRanges.java").read_text()
+static=(root/"fabric/src/main/java/org/mtr/mod/render/StaticRegionRenderer.java").read_text()
+assert "double originX,originY,originZ;" in regions
+assert "worldOrigin(VertexArray array,double x,double y,double z)" in regions
+assert "sector.x()*16D,sector.y()*16D,sector.z()*16D" in static
+for pos in (-29999999.875,-17000000.5,-1.125,0,17500000.75,29999999.125):
+    origin=math.floor(pos/16)*16
+    local=pos-origin
+    assert abs(local)<=16 and abs((origin+local)-pos)<1e-9
+print("PASS: Minecraft camera yaw/pitch, conservative rail culling, precise world-border sector coordinates")

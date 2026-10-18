@@ -38,7 +38,7 @@ public final class ClassicRailGpuCache {
     // The new GPU-driven path is opt-in until shaderless visual parity is
     // confirmed. Explicit legacy opt-in keeps its former behavior.
     public static final boolean ENABLED=LEGACY_GPU ||
-        (SillonMegaEngine.GPU_DRIVEN && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.classicGpu","true")));
+        (SillonMegaEngine.GPU_DRIVEN && Boolean.getBoolean("mtr.mega.classicGpu"));
     private static final Map<Identifier,MaterialProperties> MATERIALS=new HashMap<>();
     private static final int MAX_PAGES=Math.max(16,Math.min(512,Integer.getInteger("mtr.engine.classicGpuPages",192)));
     private static final int MAX_VERTICES=Math.max(131_072,Math.min(2_097_152,Integer.getInteger("mtr.engine.classicGpuVertices",786_432)));

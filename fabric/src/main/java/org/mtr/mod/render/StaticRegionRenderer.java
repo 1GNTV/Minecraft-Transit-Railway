@@ -157,7 +157,7 @@ public final class StaticRegionRenderer {
             if(SillonMegaEngine.SCENE && submittedRanges==ranges)return;
             arrays.forEach((material,array)->{
                 RegionVertexRanges.select(array,ranges.getOrDefault(material,List.of()));
-                if(gpuCull)RegionVertexRanges.worldOrigin(array,sector.x()*16F,sector.y()*16F,sector.z()*16F);
+                if(gpuCull)RegionVertexRanges.worldOrigin(array,sector.x()*16D,sector.y()*16D,sector.z()*16D);
             });
             submittedRanges=ranges;
         }

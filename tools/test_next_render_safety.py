@@ -33,4 +33,7 @@ loop=panam.index("for(ArrivalResponse a:selected)",reset)
 assert selected<reset<loop
 for token in ('panel.line="?";','panel.destination="En attente";','panel.color=0x808080;','panel.activeRouteId=-1;'):
     assert token in panam[reset:loop],token
-print("PASS: rail lighting, culling, compute opt-in, stale PANAM route reset, fallback")
+classic=(root/"ClassicRailGpuCache.java").read_text()
+assert 'Boolean.getBoolean("mtr.mega.classicGpu")' in classic
+assert 'System.getProperty("mtr.mega.classicGpu","true")' not in classic
+print("PASS: rail lighting/culling, opt-in compute/classic GPU, PANAM route reset, fallback")

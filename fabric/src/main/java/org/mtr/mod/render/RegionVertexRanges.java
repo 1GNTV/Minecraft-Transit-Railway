@@ -90,7 +90,7 @@ public final class RegionVertexRanges {
         List<Span> last = List.of();
         ByteBuffer commandBytes;
         int indirectBuffer, boundsBuffer;
-        float originX,originY,originZ;
+        double originX,originY,originZ;
         boolean hasWorldOrigin;
         boolean indirectDirty = true, boundsDirty=true, gpuModified;
 
@@ -153,7 +153,7 @@ public final class RegionVertexRanges {
      * Only the render-thread caller that owns the baked page may register
      * that world-space origin. Normal arrays without it never GPU-cull.
      */
-    public static void worldOrigin(VertexArray array,float x,float y,float z) {
+    public static void worldOrigin(VertexArray array,double x,double y,double z) {
         Ranges ranges=ACTIVE.get(array);
         if(ranges!=null) {
             ranges.originX=x; ranges.originY=y; ranges.originZ=z;
