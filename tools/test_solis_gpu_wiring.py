@@ -3,7 +3,10 @@
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 src=lambda name:(ROOT/'fabric/src/main/java/org/mtr/mod/render'/name).read_text(encoding='utf-8')
-assert 'System.getProperty("mtr.mega.railCompute","true")' in src('GpuDrivenRailCommands.java')
+# Compute pipelines exist but remain opt-in pending driver, shader and scene validation.
+assert 'Boolean.getBoolean("mtr.mega.railCompute")' in src('GpuDrivenRailCommands.java')
+assert 'Boolean.getBoolean("mtr.mega.computeCull")' in src('GpuDrivenInstanceRenderer.java')
+assert 'Boolean.getBoolean("mtr.mega.materialAtlas")' in src('GpuDrivenMaterialAtlas.java')
 assert 'GpuDrivenRailCommands.cull(' in src('RegionVertexRanges.java')
 assert 'GL43.glMultiDrawElementsIndirect(' in src('RegionVertexRanges.java')
 assert 'GpuDrivenMaterialAtlas.sameMaterial(' in src('InstancedModelRenderer.java')
