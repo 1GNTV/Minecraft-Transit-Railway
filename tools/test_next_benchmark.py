@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 java=(ROOT/"fabric/src/main/java/org/mtr/mod/render/NextFrameBenchmark.java").read_text()
 main=(ROOT/"fabric/src/main/java/org/mtr/mod/render/MainRenderer.java").read_text()
 assert "NextFrameBenchmark.sample(System.nanoTime())" in main
-assert "if(OptimizedRenderer.renderingShadows())" in main
+assert "if (OptimizedRenderer.renderingShadows())" in main
 java=java.replace("package org.mtr.mod.render;", "").replace("public final class NextFrameBenchmark", "final class NextFrameBenchmark")
 harness=r"""
 public class NextFrameBenchmarkCheck {
