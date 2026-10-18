@@ -225,11 +225,17 @@ public final class SillonSignageCanvas {
         g.setColor(new Color(color,true));
         g.setStroke(new BasicStroke(Math.max(5,size*.13f),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
         float dx=0,dy=0;
-        switch(direction%4){
+        final float diagonal=(float)(size/Math.sqrt(2.0));
+        switch(direction){
             case 0->dx=-size;
             case 1->dx=size;
             case 2->dy=-size;
-            default->dy=size;
+            case 3->dy=size;
+            case 4->{dx=-diagonal;dy=-diagonal;}
+            case 5->{dx=diagonal;dy=-diagonal;}
+            case 6->{dx=-diagonal;dy=diagonal;}
+            case 7->{dx=diagonal;dy=diagonal;}
+            default->{return;}
         }
         float nx=dx/size,ny=dy/size;
         g.drawLine(Math.round(x-dx*.35f),Math.round(y-dy*.35f),Math.round(x+dx*.35f),Math.round(y+dy*.35f));

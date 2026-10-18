@@ -6,6 +6,7 @@ import org.mtr.mapping.tool.TextCase;
 import org.mtr.mod.InitClient;
 import org.mtr.mod.block.BlockSillonSignage;
 import org.mtr.mod.client.IDrawing;
+import org.mtr.mod.client.DynamicTextureCache;
 import org.mtr.mod.data.IGui;
 import org.mtr.mod.data.SillonSignageSpec;
 import org.mtr.mod.data.SillonSignageIconCatalog;
@@ -200,6 +201,16 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
                 0xFF000000|hex(fields[4].getText2(),0x13235A));
         }
         drawing.finishDrawingRectangle();
+        if(height>=430){
+            int top=height-116;
+            int x1=left+widthLeft/5,x2=left+widthLeft-widthLeft/5;
+            g.drawText("Aperçu du panneau en direct",left,top-16,
+                0xFFD4D9E6,false,GraphicsHolder.getDefaultLight());
+            Identifier image=DynamicTextureCache.instance.getSillonSignage(spec()).identifier;
+            drawing.beginDrawingTexture(image);
+            drawing.drawTexture(x1,top,x2,height-44,0F,0F,1F,1F);
+            drawing.finishDrawingTexture();
+        }
         g.drawText("Sillon Signage — Éditeur universel",left,7,0xFFFFFFFF,false,GraphicsHolder.getDefaultLight());
         if(tab==1)g.drawText(fields[0].getText2(),left+12,55,0xFFFFFFFF,false,GraphicsHolder.getDefaultLight());
         if(tab==0){
