@@ -22,7 +22,7 @@ public final class SillonSignagePresets {
     }
     private static SillonSignageSpec sign(String title,String subtitle,String body,String style,String icons,String mount,int arrow,
         int bg,int fg,int accent,float w,float h) {
-        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,bg,fg,accent,w,h,0,0,0,false,false,Set.of("ceiling","hanging","flag","standing").contains(mount));
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,bg,fg,accent,w,h,0,0,0,false,"digital".equals(style),Set.of("ceiling","hanging","flag","standing").contains(mount));
     }
     private static SillonSignageRow row(String kind,String number,String text,String detail,String icons,int arrow) {
         return new SillonSignageRow(kind,number,text,detail,icons,arrow);

@@ -61,6 +61,9 @@ public final class SignageRegression {
         check(encoded.length()<30000,"Network budget");
         check(SillonSignageRow.decode(encoded).equals(SillonSignageRow.bounded(huge)),"Bounded Unicode document");
         var model=new SillonSignageEditorModel(SillonSignageSpec.DEFAULT);
+        model.values.put("title","x".repeat(128));model.values.put("title2","y");
+        check(!model.error().isEmpty(),"Two-line names cannot silently truncate");
+        model.values.put("title",SillonSignageSpec.DEFAULT.title());model.values.put("title2","");
         model.values.put("width","NaN");check(!model.error().isEmpty(),"NaN rejected");
         model.values.put("width","13");check(!model.error().isEmpty(),"Out of range rejected");
         model.values.put("width","2,5");check(model.error().isEmpty(),"French decimal accepted");

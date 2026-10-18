@@ -101,6 +101,7 @@ jobs:
         run: |
           mkdir -p build/signage-qa/native docs/signage/review/native
           cp forge/run/screenshots/signage*.png build/signage-qa/native/ 2>/dev/null || true
+          cp forge/run/signage-world-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/signage-ui-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/signage-shader-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/logs/latest.log build/signage-qa/native/minecraft-latest.log 2>/dev/null || true

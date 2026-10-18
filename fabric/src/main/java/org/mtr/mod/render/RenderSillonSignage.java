@@ -161,8 +161,8 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
         IDrawing.drawTexture(g,X,Y,Z,x,Y,Z,x,y,Z,X,y,Z,0,0,1,1,Direction.SOUTH,color,light);
         IDrawing.drawTexture(g,x,Y,Z,x,Y,z,x,y,z,x,y,Z,0,0,1,1,Direction.WEST,color,light);
         IDrawing.drawTexture(g,X,Y,z,X,Y,Z,X,y,Z,X,y,z,0,0,1,1,Direction.EAST,color,light);
-        IDrawing.drawTexture(g,x,y,z,X,y,z,X,y,Z,x,y,Z,0,0,1,1,Direction.UP,color,light);
-        IDrawing.drawTexture(g,x,Y,Z,X,Y,Z,X,Y,z,x,Y,z,0,0,1,1,Direction.DOWN,color,light);
+        IDrawing.drawTexture(g,x,y,z,X,y,z,X,y,Z,x,y,Z,0,0,1,1,Direction.DOWN,color,light);
+        IDrawing.drawTexture(g,x,Y,Z,X,Y,Z,X,Y,z,x,Y,z,0,0,1,1,Direction.UP,color,light);
     }
     @Override public boolean rendersOutsideBoundingBox2(BlockSillonSignage.BlockEntity entity){return true;}
     @Override public boolean isInRenderDistance(BlockSillonSignage.BlockEntity entity,Vector3d camera){

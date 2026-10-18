@@ -80,6 +80,8 @@ public final class SillonSignageEditorModel {
         }catch(RuntimeException ignored){}
     }
     public String error() {
+        String name=values.getOrDefault("title","")+(values.getOrDefault("title2","").isBlank()?"":"|"+values.get("title2"));
+        if(name.length()>128)return "Nom complet : 128 caractères maximum, deux lignes comprises.";
         for(Field f:FIELDS.values()) {
             String v=values.getOrDefault(f.key(),"");
             try {
