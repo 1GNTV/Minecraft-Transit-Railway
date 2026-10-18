@@ -68,3 +68,23 @@ CI, but neither is a visual approval. The release gate requires photographed
 side-by-side comparisons, shader testing, original icon rendering and world
 save/multiplayer checks. No release may claim every panel is fully accurate
 without these tests.
+
+## Photo-calibrated editable presets (not licensed official assets)
+Eleven editable scene presets are offered in the in-game brush editor. Based
+on the player's photographed real metro examples, not fictional station names:
+Monceau; Pigalle; Saint-Sulpice; Rambuteau/Centre Georges Pompidou;
+Saint-Denis/Porte de Paris/Stade de France; Châtelet–Les Halles/Forum;
+Châtelet/Rivoli numbered exits; Strasbourg–Saint-Denis; official RATP-style
+multi-band wayfinding; and an information totem.
+
+Approximate sampled sRGB values from the supplied compressed photographs:
+- Rambuteau navy #21275B, lower band #51330C;
+- Saint-Denis Porte de Paris navy #2A4078, lower band #875E29.
+
+Photographic white balance and illumination vary. These are just starting
+settings and must not be represented as official RATP material specifications.
+The presets preserve those background / accent choices and store the title as
+a *fixed* value (stationAuto=false), unless the player enables MTR auto naming.
+
+The in-game renderer preserves two-line explicit titles (pipe character)
+and the per-preset background/accent to reproduce photographed differences.

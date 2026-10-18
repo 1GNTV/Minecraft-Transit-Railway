@@ -29,4 +29,15 @@ assert 'SillonSignageCanvas.font(' in layout
 assert 'SillonSignageCanvas.drawIcons(' in layout
 assert 'SillonSignageCanvas.drawArrow(' in layout
 assert 'Parisine-Regular.otf' in canvas and 'Parisine-Bold.otf' in canvas
-print("PASS: real family-specific RATP layouts, palette semantics, absent-resource honesty")
+presets=(root/"fabric/src/main/java/org/mtr/mod/data/SillonSignagePresets.java").read_text()
+screen=(root/"fabric/src/main/java/org/mtr/mod/screen/SillonSignageScreen.java").read_text()
+assert presets.count("new Preset(")>=11
+for sample in ("Monceau","Pigalle","Saint-Sulpice","Rambuteau",
+               "Saint-Denis|Porte de Paris","Châtelet|Les Halles",
+               "secteur Rivoli","Strasbourg|Saint-Denis"):
+    assert sample in presets, sample
+assert 'SillonSignagePresets.at(presetCursor++)' in screen
+assert 'spec.stationAuto()' not in presets
+assert "s.background()==0?NAVY:s.background()" in layout
+assert '"metro_subtitle".equals(s.style())' in layout
+print("PASS: real family-specific RATP layouts and 11 editable photo-based samples")

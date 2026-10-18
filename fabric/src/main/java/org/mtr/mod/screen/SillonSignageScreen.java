@@ -10,6 +10,7 @@ import org.mtr.mod.client.DynamicTextureCache;
 import org.mtr.mod.data.IGui;
 import org.mtr.mod.data.SillonSignageSpec;
 import org.mtr.mod.data.SillonSignageIconCatalog;
+import org.mtr.mod.data.SillonSignagePresets;
 import java.util.List;
 import org.mtr.mod.packet.PacketUpdateSillonSignage;
 
@@ -24,9 +25,9 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
     private final TextFieldWidgetExtension[] fields=new TextFieldWidgetExtension[LABELS.length];
     private final ButtonWidgetExtension[] tabs=new ButtonWidgetExtension[3];
     private final ButtonWidgetExtension styleButton,mountButton,arrowButton,saveButton,cancelButton;
-    private final ButtonWidgetExtension browseIcon,copyButton,pasteButton;
+    private final ButtonWidgetExtension browseIcon,copyButton,pasteButton,presetButton;
     private final TextFieldWidgetExtension iconSearch;
-    private int iconCursor;
+    private int iconCursor,presetCursor;
     private static SillonSignageSpec clipboard;
     private final CheckboxWidgetExtension stationAuto,illuminated,doubleSided;
     private int styleIndex,mountIndex,arrow,tab,widthLeft,left,column;
@@ -64,6 +65,11 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
         iconSearch=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,64,TextCase.DEFAULT,null,"");
         iconSearch.setText2("idfm_m");
         browseIcon=button("Choisir une icône",this::browseIcon);
+        presetButton=button("Modèles réels (photos RATP)",()->{
+            SillonSignagePresets.Preset preset=SillonSignagePresets.at(presetCursor++);
+            apply(preset.document());
+            presetButton.setMessage2(new Text(TextHelper.literal("Photo : "+preset.name()).data));
+        });
         copyButton=button("Copier le panneau",()->clipboard=spec());
         pasteButton=button("Coller le panneau",()->{if(clipboard!=null)apply(clipboard);});
         saveButton=button("Enregistrer",this::save);
@@ -93,6 +99,7 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
         position(styleButton,left,88,column);
         position(mountButton,left+column+16,88,column);
         position(arrowButton,left,133,column);
+        position(presetButton,left,203,widthLeft);
         position(iconSearch,left,236,column);
         position(browseIcon,left+column+16,236,column);
         position(copyButton,left,272,column);
@@ -129,7 +136,7 @@ public final class SillonSignageScreen extends ScreenExtension implements IGui {
                 f.setX2(x);f.setY2(y+16);f.setWidth2(column);
             }
         }
-        iconSearch.visible=browseIcon.visible=copyButton.visible=pasteButton.visible=tab==0;
+        iconSearch.visible=browseIcon.visible=copyButton.visible=pasteButton.visible=presetButton.visible=tab==0;
         styleButton.visible=mountButton.visible=arrowButton.visible=tab==1;
         stationAuto.visible=illuminated.visible=doubleSided.visible=tab==1;
     }

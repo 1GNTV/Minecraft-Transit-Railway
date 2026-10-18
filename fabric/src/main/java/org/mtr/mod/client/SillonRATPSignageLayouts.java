@@ -201,20 +201,47 @@ public final class SillonRATPSignageLayouts {
         g.drawRect(1,1,w-3,h-3);
     }
     private static void sector(Graphics2D g,SillonSignageSpec s,int w,int h){
-        int head=px(h,.34f);
+        // Chatelet Rivoli photograph: sector logo INSIDE grey header,
+        // metro lines IN their white band, numbered streets IN blue body.
+        int head=px(h,.34f),stripe=px(h,.20f),pad=px(w,.045f);
         g.setColor(new Color(GREY));g.fillRect(0,0,w,head);
-        g.setColor(new Color(WHITE));g.fillRect(0,head,w,px(h,.20f));
-        g.setColor(new Color(BLUE));g.fillRect(0,head+px(h,.20f),w,h-head-px(h,.20f));
+        g.setColor(new Color(WHITE));g.fillRect(0,head,w,stripe);
+        g.setColor(new Color(BLUE));g.fillRect(0,head+stripe,w,h-head-stripe);
+        String symbol="",lines="";
+        for(String item:s.icons().split(",")){
+            item=item.strip();
+            if(item.startsWith("ratp_")&&symbol.isEmpty())symbol=item;
+            else if(!item.isEmpty())lines+=lines.isEmpty()?item:","+item;
+        }
+        if(!symbol.isBlank())SillonSignageCanvas.drawIcons(g,symbol,pad,px(h,.035f),
+            Math.max(26,px(h,.25f)),6,px(w,.38f));
         String sector=s.subtitle().isBlank()?"secteur":s.subtitle();
-        textCenter(g,sector,true,Math.min(head*.44f,w*.07f),WHITE,w*.5f,head*.66f,w*.05f,w*.95f);
-        SillonSignageCanvas.drawIcons(g,s.icons(),px(w,.045f),head+px(h,.025f),
-            Math.max(23,px(h,.145f)),5,px(w,.95f));
+        textLeft(g,sector,true,Math.min(head*.38f,w*.078f),WHITE,
+            px(w,.41f),head*.64f,w*.56f);
+        SillonSignageCanvas.drawIcons(g,lines,pad,head+px(h,.025f),
+            Math.max(23,px(h,.145f)),6,px(w,.94f));
+        float headingY=(head+stripe)+h*.145f;
         textLeft(g,s.title().isBlank()?"Sortie":s.title(),true,
-            Math.min(h*.20f,w*.105f),WHITE,px(w,.04f),h*.78f,w*.73f);
-        SillonSignageCanvas.drawArrow(g,s.arrow(),w*.88f,h*.76f,
-            Math.min(h*.13f,w*.06f),WHITE);
-        if(!s.body().isBlank())textLeft(g,s.body().replace('|',' '),true,h*.08f,WHITE,
-            px(w,.04f),h*.94f,w*.90f);
+            Math.min(h*.145f,w*.105f),WHITE,pad,headingY,w*.73f);
+        SillonSignageCanvas.drawArrow(g,s.arrow(),w*.88f,headingY-h*.065f,
+            Math.min(h*.075f,w*.06f),WHITE);
+        String[] exits=s.body().split("\\|");
+        int n=Math.min(7,exits.length);
+        if(!s.body().isBlank())for(int i=0;i<n;i++){
+            String name=exits[i].strip();
+            float y=h*(.747f+i*.037f);
+            int j=0;while(j<name.length()&&Character.isDigit(name.charAt(j)))j++;
+            String number=name.substring(0,j),street=name.substring(j).strip();
+            if(!number.isEmpty()){
+                int side=Math.max(12,px(h,.035f));
+                g.setColor(new Color(WHITE));
+                g.setStroke(new BasicStroke(Math.max(1.5f,h*.003f)));
+                g.drawRect(pad,Math.round(y-side*.82f),side,side);
+                textCenter(g,number,true,side*.63f,WHITE,pad+side*.5f,y,pad+1,pad+side-1);
+            }
+            textLeft(g,street.isEmpty()?name:street,true,h*.041f,WHITE,
+                pad+px(h,.047f),y,w-pad*2-px(h,.047f));
+        }
     }
     private static void vertical(Graphics2D g,SillonSignageSpec s,int w,int h){
         panel(g,w,h,WHITE,false);

@@ -2,6 +2,8 @@ package org.mtr.mod.client;
 
 import org.mtr.mapping.holder.NativeImage;
 import org.mtr.mapping.holder.NativeImageFormat;
+import org.mtr.mapping.holder.Identifier;
+import org.mtr.mapping.mapper.ResourceManagerHelper;
 import org.mtr.mod.data.SillonSignageSpec;
 
 import javax.imageio.ImageIO;
@@ -193,14 +195,32 @@ public final class SillonSignageCanvas {
     private static BufferedImage icon(String id){
         if(icons.containsKey(id))return icons.get(id);
         String family=id.startsWith("ratp_")?"ratp":id.startsWith("sncf_")?"sncf":"idfm";
-        String root="assets/mtr/mtr_france_sign/"+family+"/";
+        String root="mtr_france_sign/"+family+"/";
         String[] paths={root+id+".png",root+"voies/"+id+".png",
-            "assets/mtr/mtr_france_sign/sncf/voies/"+id+".png"};
-        for(String path:paths)try(InputStream input=SillonSignageCanvas.class.getClassLoader().getResourceAsStream(path)){
-            if(input==null)continue;
-            BufferedImage img=ImageIO.read(input);
-            if(img!=null){icons.put(id,img);return img;}
-        }catch(Exception ignored){}
+            "mtr_france_sign/sncf/voies/"+id+".png"};
+        for(String path:paths){
+            // Resource manager sees icon assets shipped by an installed MTR
+            // France mod OR a selected resource pack; the Sillon JAR need not
+            // contain any trademark-protected operator artwork.
+            try{
+                final BufferedImage[] result=new BufferedImage[1];
+                ResourceManagerHelper.readResource(new Identifier("mtr",path),input->{
+                    try{result[0]=ImageIO.read(input);}catch(Exception ignored){}
+                });
+                if(result[0]!=null){
+                    icons.put(id,result[0]);
+                    return result[0];
+                }
+            }catch(Exception ignored){}
+            // Classloader fallback for environments before client resources
+            // are available; only the original assets are ever shown.
+            try(InputStream input=SillonSignageCanvas.class.getClassLoader()
+                    .getResourceAsStream("assets/mtr/"+path)){
+                if(input==null)continue;
+                BufferedImage raster=ImageIO.read(input);
+                if(raster!=null){icons.put(id,raster);return raster;}
+            }catch(Exception ignored){}
+        }
         return null;
     }
     static void drawIcons(Graphics2D g,String values,int x,int y,int size,int gap,int maxWidth){
