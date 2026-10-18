@@ -19,12 +19,6 @@
     "url": "https://media.licdn.com/dms/image/v2/D4E22AQH6_jT9jiAFNA/feedshare-shrink_800/B4EZZIgYuXHgAk-/0/1744973173857?e=2147483647&t=QPFWWyyn50HMBGy-OkN-QF-eV7zdT1gG9tZEyRcGn6M&v=beta",
     "sha256": "66d2aa06c8ec7d5570a2cbe204438c1d9f00a1dfebc46ca09a94a1440d7b76bd"
   },
-  "metro-plan": {
-    "url": "https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf",
-    "sha256": "5dd0ff815c75c0072a6623bdddde54fb9c06367a722e7f5a50ab938398702215",
-    "date": "01.2026",
-    "credit": "RATP / BDC Conseil"
-  },
   "regional-plan": {
     "url": "https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf",
     "date": "2026",
