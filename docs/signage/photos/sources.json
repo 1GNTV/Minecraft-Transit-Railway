@@ -1,0 +1,28 @@
+{
+  "rer-forum": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Panneau_Gare_Ch%C3%A2telet_Halles_RER_Paris_Ligne_B_-_Paris_I_%28FR75%29_-_2022-07-05_-_2.jpg",
+    "sha256": "1ef9a756b3c82d3924cfee1465fe5078268157abf4134a231a64f422c6307371"
+  },
+  "rivoli": {
+    "url": "https://chateletleshalles.com/sortie11/sortie-11-panneau.jpg",
+    "sha256": "b63f40ab8e7f66a866ce70c0246c697e9ea1d76aabacb85de6b976a2f9753625"
+  },
+  "chatelet-fabricant": {
+    "url": "https://girod-group.com/wp-content/uploads/2018/04/habillage-email-architectural-ratp.jpg",
+    "sha256": "cea9ae998790850cd6799e97cd1390260f09a96f22c55c640ed973e8fed32aaf"
+  },
+  "ratp-parisine": {
+    "url": "https://www.ratp.fr/sites/default/files/styles/scale_m/public/article/image/montage-typographie-parisine.jpg",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  "gpe-arep": {
+    "url": "https://media.licdn.com/dms/image/v2/D4E22AQH6_jT9jiAFNA/feedshare-shrink_800/B4EZZIgYuXHgAk-/0/1744973173857?e=2147483647&t=QPFWWyyn50HMBGy-OkN-QF-eV7zdT1gG9tZEyRcGn6M&v=beta",
+    "sha256": "66d2aa06c8ec7d5570a2cbe204438c1d9f00a1dfebc46ca09a94a1440d7b76bd"
+  },
+  "metro-plan": {
+    "url": "https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf",
+    "sha256": "5dd0ff815c75c0072a6623bdddde54fb9c06367a722e7f5a50ab938398702215",
+    "date": "01.2026",
+    "credit": "RATP / BDC Conseil"
+  }
+}
