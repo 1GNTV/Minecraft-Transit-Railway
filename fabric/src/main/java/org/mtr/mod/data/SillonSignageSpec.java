@@ -13,16 +13,22 @@ public record SillonSignageSpec(
     String mount, int arrow, int background, int foreground, int accent,
     float width, float height, float yaw, float pitch, float roll,
     boolean stationAuto, boolean illuminated, boolean doubleSided,
-    SillonSignageOptions options, List<SillonSignageRow> rows) {
+    SillonSignageOptions options, List<SillonSignageRow> rows, SillonSignageBinding binding, SillonSignagePlan plan) {
     public static final List<String> STYLES=List.of(
         "metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical",
         "platform","route","map","services","totem","digital","custom","gpe","gpe_direction");
     public static final List<String> MOUNTS=List.of("wall","ceiling","hanging","flag","standing");
     public static final SillonSignageSpec DEFAULT=new SillonSignageSpec(
-        "Rambuteau","Centre Georges Pompidou","","metro_subtitle",
-        "idfm_m11","wall",-1,0x101D56,0xFFFFFF,0x80591B,
+        "Station à associer","","","metro_subtitle",
+        "","wall",-1,0x101D56,0xFFFFFF,0x80591B,
         2.0f,.60f,0,0,0,true,false,false);
 
+    public SillonSignageSpec(String title,String subtitle,String body,String style,String icons,String mount,
+        int arrow,int background,int foreground,int accent,float width,float height,float yaw,float pitch,float roll,
+        boolean stationAuto,boolean illuminated,boolean doubleSided,SillonSignageOptions options,List<SillonSignageRow> rows) {
+        this(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,
+            stationAuto,illuminated,doubleSided,options,rows,SillonSignageBinding.DEFAULT,SillonSignagePlan.EMPTY);
+    }
     public SillonSignageSpec(String title,String subtitle,String body,String style,String icons,String mount,
         int arrow,int background,int foreground,int accent,float width,float height,float yaw,float pitch,float roll,
         boolean stationAuto,boolean illuminated,boolean doubleSided) {
@@ -34,6 +40,7 @@ public record SillonSignageSpec(
         subtitle=bounded(subtitle,128);
         body=bounded(body,2048);
         options=options==null?SillonSignageOptions.DEFAULT:options;
+        binding=binding==null?SillonSignageBinding.DEFAULT:binding;plan=plan==null?SillonSignagePlan.EMPTY:plan;
         rows=SillonSignageRow.bounded(rows);
         style=STYLES.contains(style)?style:"metro";
         icons=SillonSignageRow.normalizeIcons(icons);
@@ -54,18 +61,38 @@ public record SillonSignageSpec(
         return Float.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
     }
     public SillonSignageSpec withTitle(String text){
-        return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows);
+        return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows,binding,plan);
     }
     public SillonSignageSpec withBody(String text){
-        return new SillonSignageSpec(title,subtitle,text,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows);
+        return new SillonSignageSpec(title,subtitle,text,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows,binding,plan);
     }
     public SillonSignageSpec withOptions(SillonSignageOptions value) {
         return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
-            yaw,pitch,roll,stationAuto,illuminated,doubleSided,value,rows);
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,value,rows,binding,plan);
     }
     public SillonSignageSpec withRows(List<SillonSignageRow> value) {
         return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
-            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,value);
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,value,binding,plan);
+    }
+    public SillonSignageSpec withArrow(int direction) {
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,direction,background,foreground,accent,width,height,
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows,binding,plan);
+    }
+    public SillonSignageSpec manual() {
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
+            yaw,pitch,roll,false,illuminated,doubleSided,options,plan.lines().isEmpty()?rows:plan.lines().get(0).stops().stream().map(s->new SillonSignageRow("text","",s.name(),s.detail(),s.icons(),-1)).toList(),binding,SillonSignagePlan.EMPTY);
+    }
+    public SillonSignageSpec withBinding(SillonSignageBinding value) {
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows,value,plan);
+    }
+    public SillonSignageSpec automatic() {
+        return new SillonSignageSpec("","","",style,"",mount,arrow,background,foreground,accent,width,height,
+            yaw,pitch,roll,true,illuminated,doubleSided,options,List.of(),binding,SillonSignagePlan.EMPTY);
+    }
+    public SillonSignageSpec materialize(String name,String sub,String symbols,int lineColor,List<SillonSignageRow> content,SillonSignagePlan diagram) {
+        return new SillonSignageSpec(name,sub,"",style,symbols,mount,arrow,background,foreground,lineColor,width,height,
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,content,binding,diagram);
     }
     public List<SillonSignageRow> effectiveRows(String kind) {
         return rows.isEmpty()?SillonSignageRow.legacy(body,kind):rows;
@@ -75,10 +102,11 @@ public record SillonSignageSpec(
             arrow+"/"+background+"/"+foreground+"/"+accent+"/"+width+"/"+height+"/"+
             options.font()+"/"+options.align()+"/"+options.textScale()+"/"+options.iconScale()+"/"+
             options.padding()+"/"+options.bandRatio()+"/"+options.frame()+"/"+options.frameColor()+"/"+
-            options.image()+"/"+options.freePalette()+"/"+SillonSignageRow.encode(rows);
+            options.image()+"/"+options.freePalette()+"/"+SillonSignageRow.encode(rows)+"/"+plan.key();
     }
     public void write(CompoundTag tag){
-        tag.putInt("sillon_signage_version",2);
+        tag.putInt("sillon_signage_version",3);
+        tag.putString("sillon_binding",binding.encode());
         tag.putString("sillon_options",options.encode());
         tag.putString("sillon_rows",SillonSignageRow.encode(rows));
         tag.putString("sillon_title",title);
@@ -109,7 +137,7 @@ public record SillonSignageSpec(
     }
     public static SillonSignageSpec read(CompoundTag tag){
         int version=tag.getInt("sillon_signage_version");
-        if(version!=1&&version!=2)return DEFAULT;
+        if(version<1||version>3)return DEFAULT;
         return new SillonSignageSpec(
             tag.getString("sillon_title"),tag.getString("sillon_subtitle"),tag.getString("sillon_body"),
             tag.getString("sillon_style"),tag.getString("sillon_icons"),tag.getString("sillon_mount"),
@@ -117,7 +145,8 @@ public record SillonSignageSpec(
             tag.getInt("sillon_accent"),tag.getFloat("sillon_width"),tag.getFloat("sillon_height"),
             tag.getFloat("sillon_yaw"),tag.getFloat("sillon_pitch"),tag.getFloat("sillon_roll"),
             tag.getBoolean("sillon_auto"),tag.getBoolean("sillon_lit"),tag.getBoolean("sillon_double"),
-            version==2?SillonSignageOptions.decode(tag.getString("sillon_options")):legacyOptions(tag.getString("sillon_style")),
-            version==2?SillonSignageRow.decode(tag.getString("sillon_rows")):List.of());
+            version>=2?SillonSignageOptions.decode(tag.getString("sillon_options")):legacyOptions(tag.getString("sillon_style")),
+            version>=2?SillonSignageRow.decode(tag.getString("sillon_rows")):List.of(),
+            version>=3?SillonSignageBinding.decode(tag.getString("sillon_binding")):SillonSignageBinding.DEFAULT,SillonSignagePlan.EMPTY);
     }
 }

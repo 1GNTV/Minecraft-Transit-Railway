@@ -11,6 +11,8 @@ with zipfile.ZipFile(jar) as z:
 "org/mtr/mod/data/SillonSignageSpec.class","org/mtr/mod/screen/SillonSignageScreen.class",
 "org/mtr/mod/screen/SillonSignageEditorModel.class","org/mtr/mod/packet/PacketUpdateSillonSignage.class",
 "org/mtr/mod/render/RenderSillonSignage.class",
+"org/mtr/mod/client/SillonSignageNetwork.class","org/mtr/mod/client/SillonSignageAutomatic.class",
+"org/mtr/mod/packet/PacketSignageNetwork.class","org/mtr/mod/data/SillonSignageBinding.class",
 "assets/mtr/font/panam/Parisine-Regular.otf","assets/mtr/font/panam/Parisine-Bold.otf",
 "assets/mtr/signage/fonts/GrandParis-Bold.otf","assets/mtr/signage/fonts/IDFVoyageur-Medium.otf",
 "assets/mtr/signage/maps/metro.png","META-INF/licenses/MTR-France-Addon-MIT.txt",
@@ -24,7 +26,7 @@ with zipfile.ZipFile(jar) as z:
     for style in ["metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical","platform","route","map","services","totem","digital","custom","gpe","gpe_direction"]:
         if style.encode() not in spec:raise AssertionError("Missing style "+style)
 report={"jar":jar.name,"bytes":jar.stat().st_size,"sha256":hashlib.sha256(jar.read_bytes()).hexdigest(),
-"bundled_icons":len(icons),"families":18,"presets":22,"real_fonts":["Parisine","Grand Paris","IDF Voyageur"],
+"bundled_icons":len(icons),"families":18,"presets":23,"real_fonts":["Parisine","Grand Paris","IDF Voyageur"],
 "required_resources_checked":len(required),"test_helpers_in_user_jar":False}
 (jar.parent/"verification.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
 print("PASS assembled signage JAR",json.dumps(report))

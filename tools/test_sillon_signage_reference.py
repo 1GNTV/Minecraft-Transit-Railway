@@ -17,8 +17,8 @@ stub.write_text("package org.mtr.mapping.holder; import java.util.*; public fina
 base=root/"fabric/src/main/java/org/mtr/mod"
 sources=[stub,root/"tools/signage/SignageRegression.java"]
 for folder,names in {
-"data":["SillonSignageOptions","SillonSignageRow","SillonSignageSpec","SillonSignagePresets","SillonSignageIconCatalog"],
-"client":["SillonSignagePainter","SillonRATPSignageLayouts","SillonSignageGeometry"],
+"data":["SillonSignageBinding","SillonSignagePlan","SillonSignageNetworkSnapshot","SillonSignageLineBadge","SillonSignageNetworkOrdering","SillonSignageOptions","SillonSignageRow","SillonSignageSpec","SillonSignagePresets","SillonSignageIconCatalog"],
+"client":["SillonSignageAutomatic","SillonSignagePlanPainter","SillonSignagePainter","SillonRATPSignageLayouts","SillonSignageGeometry"],
 "screen":["SillonSignageEditorModel","SillonSignageEditorLayout"]}.items():
     sources.extend(base/folder/(name+".java") for name in names)
 subprocess.run(["javac","--release","17","-encoding","UTF-8","-d",str(out/"classes"),*[str(p) for p in sources]],check=True)

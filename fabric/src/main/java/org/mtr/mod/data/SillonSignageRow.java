@@ -18,8 +18,8 @@ public record SillonSignageRow(String kind,String number,String text,String deta
         if(value==null)return "";
         List<String> out=new ArrayList<>();int length=0;
         for(String id:value.toLowerCase(Locale.ROOT).split(",")) {
-            id=id.strip();if(!id.matches("[a-z0-9_/-]{1,64}"))continue;
-            if(out.size()==16||length+id.length()+1>512)break;
+            id=id.strip();if(!id.matches("[a-z0-9_/-]{1,192}"))continue;
+            if(out.size()==16||length+id.length()+1>1024)break;
             out.add(id);length+=id.length()+1;
         }
         return String.join(",",out);

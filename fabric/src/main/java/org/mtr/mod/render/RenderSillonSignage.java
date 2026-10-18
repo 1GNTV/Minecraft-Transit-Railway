@@ -25,78 +25,9 @@ import java.util.Map;
 
 /** Cached texture signage. Rendered inside block entity shader context, never in a shadow pass. */
 public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSignage.BlockEntity> {
-    private static final Map<String,DigitalFrame> digitalFrames=new java.util.LinkedHashMap<>() {
-        @Override protected boolean removeEldestEntry(Map.Entry<String,DigitalFrame> eldest){return size()>256;}
-    };
-    private static final class DigitalFrame {
-        long sampled;
-        String text="";
-    }
-    private static String firstLanguage(String source){
-        return source==null?"":source.split("\\|",2)[0].split("\\(",2)[0].trim();
-    }
-    private static String digitalDepartures(BlockPos pos){
-        LongAVLTreeSet platforms=new LongAVLTreeSet();
-        InitClient.findClosePlatform(pos.down(4),5,p->platforms.add(p.getId()));
-        if(platforms.isEmpty())return "Aucun quai associé";
-        List<ArrivalResponse> arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(platforms));
-        List<ArrivalResponse> selected=PanamArrivalSelection.select(arrivals,5,0,index->false);
-        StringBuilder rows=new StringBuilder();
-        long now=System.currentTimeMillis();
-        for(ArrivalResponse a:selected){
-            if(rows.length()>0)rows.append('|');
-            String route=firstLanguage(a.getRouteNumber());
-            if(route.isEmpty())route=firstLanguage(a.getRouteName());
-            long at=PanamArrivalSelection.clientArrivalMillis(a.getArrival(),ArrivalsCacheClient.INSTANCE.getMillisOffset());
-            rows.append(route).append("  ").append(firstLanguage(a.getDestination()))
-                .append("  ").append(Math.max(0,(at-now+59999)/60000)).append(" min");
-        }
-        return rows.length()==0?"Prochains départs indisponibles":rows.toString();
-    }
-    public static Identifier routeDiagram(BlockPos pos,SillonSignageSpec spec){
-        if(!spec.stationAuto()||!spec.body().isBlank()||!spec.rows().isEmpty())return null;
-        if(!("route".equals(spec.style())||"platform".equals(spec.style())))return null;
-        final long[] platform={-1L};
-        InitClient.findClosePlatform(pos.down(4),5,p->{if(platform[0]<0)platform[0]=p.getId();});
-        if(platform[0]<0)return null;
-        float pad=Math.min(spec.width()*.08f,spec.height()*.10f)*spec.options().padding();
-        float mapWidth=spec.width()-2*pad,mapHeight=spec.height()*.73f-pad;
-        return DynamicTextureCache.instance.getRouteMap(platform[0],mapHeight>mapWidth,false,
-            mapWidth/mapHeight,false).identifier;
-    }
-    /** Shared live content for the editor preview and the world renderer. */
+    public static Identifier routeDiagram(BlockPos pos,SillonSignageSpec spec){return null;}
     public static SillonSignageSpec resolveContent(BlockPos pos,SillonSignageSpec spec) {
-        if(spec.stationAuto()){
-            Station near=InitClient.findStation(pos);
-            if(near!=null){
-                if(java.util.Set.of("metro","metro_subtitle","rer","gpe").contains(spec.style()))
-                    spec=spec.withTitle(firstLanguage(near.getName()));
-                // For MTR stations with configured exits, generate an actual
-                // destination list. No hardcoded Paris street names.
-                if(spec.body().isBlank() && spec.rows().isEmpty() && "exit".equals(spec.style())){
-                    StringBuilder descriptions=new StringBuilder();
-                    int count=0;
-                    for(StationExit exit:EditStationScreen.getStationExits(near,true)){
-                        if(count++>=8)break;
-                        if(descriptions.length()>0)descriptions.append('|');
-                        descriptions.append(exit.getName());
-                        if(!exit.getDestinations().isEmpty())
-                            descriptions.append("  ").append(exit.getDestinations().get(0));
-                    }
-                    if(descriptions.length()>0)spec=spec.withBody(descriptions.toString());
-                }
-            }
-        }
-        if("digital".equals(spec.style())&&spec.body().isBlank()&&spec.rows().isEmpty()){
-            DigitalFrame frame=digitalFrames.computeIfAbsent(pos.getX()+":"+pos.getY()+":"+pos.getZ(),ignored->new DigitalFrame());
-            long now=System.currentTimeMillis();
-            if(now-frame.sampled>2000){
-                frame.text=digitalDepartures(pos);
-                frame.sampled=now;
-            }
-            spec=spec.withBody(frame.text);
-        }
-        return spec;
+        return org.mtr.mod.client.SillonSignageNetwork.resolve(pos,spec).document();
     }
     public RenderSillonSignage(Argument dispatcher){super(dispatcher);}
     @Override public void render(BlockSillonSignage.BlockEntity entity,float tickDelta,GraphicsHolder g,int light,int overlay){

@@ -57,7 +57,7 @@ public final class SignageVisualQa {
                     var clientBe=mc.level.getBlockEntity(new net.minecraft.core.BlockPos(0,5,0));
                     if(!(clientBe instanceof BlockSillonSignage.BlockEntity clientEntity)||!clientEntity.document().title().equals("Sauvegarde vérifiée"))
                         throw new IllegalStateException("Edited sign was not synchronized to the client");
-                    try{Files.writeString(Path.of("signage-ui-qa-success.txt"),"18 native editor captures; 5 in-world views; edit sent through real brush packet and synchronized to client; responsive widgets checked.");}catch(Exception ignored){}
+                    try{Files.writeString(Path.of("signage-ui-qa-success.txt"),"21 native editor captures; 5 in-world views; edit sent through real brush packet and synchronized to client; responsive widgets checked.");}catch(Exception ignored){}
                     System.out.println("SIGNAGE_QA_SUCCESS");
                     mc.execute(mc::stop);
                 });
@@ -107,14 +107,14 @@ public final class SignageVisualQa {
         if(++tick==35) {
             try{
                 checkGeometry(mc);
-                String name=String.format("signage-ui-%02d-%dx%d-tab%d.png",stage,SIZES[stage/6][0],SIZES[stage/6][1],stage%6);
+                String name=String.format("signage-ui-%02d-%dx%d-tab%d.png",stage,SIZES[stage/7][0],SIZES[stage/7][1],stage%7);
                 Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),message->System.out.println("SIGNAGE_QA_SCREENSHOT "+message.getString()));
                 System.out.println("SIGNAGE_QA_CAPTURE "+stage+" "+mc.getWindow().getGuiScaledWidth()+"x"+mc.getWindow().getGuiScaledHeight());
             }catch(Exception e){e.printStackTrace();System.exit(2);}
         }
         if(tick>=55) {
             stage++;tick=0;
-            if(stage>=18) {
+            if(stage>=21) {
                 worldView=0;tick=0;mc.setScreen(null);mc.options.hideGui=true;world(mc);return;
             }
             setup(mc);
@@ -140,7 +140,7 @@ public final class SignageVisualQa {
         });
     }
     private static void setup(Minecraft mc) {
-        int[] size=SIZES[stage/6];
+        int[] size=SIZES[stage/7];
         GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),size[0],size[1]);
         mc.options.guiScale().set(size[2]);mc.resizeDisplay();
         BlockPos pos=new BlockPos(0,64,0);
@@ -149,10 +149,10 @@ public final class SignageVisualQa {
         entity.setDocument(SillonSignagePresets.ALL.get(11).document());
         SillonSignageScreen screen=new SillonSignageScreen(pos,entity);
         mc.setScreen(screen);
-        int w=mc.getWindow().getGuiScaledWidth(),tw=(w-24)/6;
-        screen.mouseClicked(12+(stage%6)*tw+tw/2.0,52,0);
+        int w=mc.getWindow().getGuiScaledWidth(),tw=(w-24)/7;
+        screen.mouseClicked(12+(stage%7)*tw+tw/2.0,52,0);
         // Exercise visual search using the real text-field input path.
-        if(stage%6==3) {
+        if(stage%7==3) {
             var a=SillonSignageEditorLayout.of(w,mc.getWindow().getGuiScaledHeight()).editor();
             screen.mouseClicked(a.x()+12,a.y()+10,0);
             for(char c:"metro".toCharArray())screen.charTyped(c,0);

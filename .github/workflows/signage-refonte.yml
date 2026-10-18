@@ -74,6 +74,12 @@ jobs:
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
           python tools/verify_signage_jar.py
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.build.outcome == 'success'
+        with:
+          name: Sillon-Signaletique-Forge-1.20.1
+          path: build/signage-delivery
+          if-no-files-found: error
       - name: Prepare the native Minecraft visual test world
         run: |
           python tools/qa/install_signage_visual_qa.py
@@ -116,9 +122,3 @@ jobs:
           path: |
             build/signage-qa
             docs/signage/reference-photos.jpg
-      - uses: actions/upload-artifact@v4
-        if: always() && steps.build.outcome == 'success'
-        with:
-          name: Sillon-Signaletique-Forge-1.20.1
-          path: build/signage-delivery
-          if-no-files-found: error

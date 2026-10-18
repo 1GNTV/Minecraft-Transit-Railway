@@ -21,8 +21,16 @@ public final class SillonRATPSignageLayouts {
             case "sector"->exits(g,s,w,h,true);
             case "interchange"->stack(g,s,w,h);
             case "vertical","totem"->vertical(g,s,w,h);
-            case "platform","route"->route(g,s,w,h);
-            case "map"->plan(g,s,w,h);
+            case "platform","route"->{
+                SillonSignageSpec drawn=s;
+                if(s.plan().lines().isEmpty()&&!s.effectiveRows("text").isEmpty()){
+                    var badge=ids(s.icons()).stream().map(SillonSignageLineBadge::parse).filter(java.util.Objects::nonNull).findFirst().orElse(new SillonSignageLineBadge("metro",s.accent(),""));
+                    var stops=s.effectiveRows("text").stream().map(r->new SillonSignagePlan.Stop(0,r.text(),r.detail(),r.icons(),0,0,false)).toList();
+                    drawn=s.materialize(s.title(),s.subtitle(),s.icons(),s.accent(),s.rows(),new SillonSignagePlan(List.of(new SillonSignagePlan.Line(0,badge.label(),badge.mode(),badge.color(),stops)),-1,s.binding().layout()));
+                }
+                SillonSignagePlanPainter.route(g,drawn,w,h);
+            }
+            case "map"->{if(s.stationAuto())SillonSignagePlanPainter.network(g,s,w,h);else plan(g,s,w,h);}
             case "services"->services(g,s,w,h);
             case "digital"->digital(g,s,w,h);
             default->custom(g,s,w,h);
@@ -125,8 +133,8 @@ public final class SillonRATPSignageLayouts {
         String sectorIcon=ids(s.icons()).stream().filter(x->Set.of("ratp_rivoli","ratp_forum","ratp_seine").contains(x)).findFirst().orElse("");
         String modes=String.join(",",ids(s.icons()).stream().filter(x->!x.equals(sectorIcon)).toList());
         if(sector) {
-            float band=h*s.options().bandRatio();
-            BufferedImage image=icon(sectorIcon);
+            float band=h*(s.stationAuto()?.25f:s.options().bandRatio());
+            BufferedImage image=s.stationAuto()?null:icon(sectorIcon);
             if(image!=null) {
                 g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,w,band));
                 float scale=s.options().iconScale(),iw=(w-pad*2)*scale,ih=band*.82f*scale;
@@ -139,19 +147,19 @@ public final class SillonRATPSignageLayouts {
             top+=band;
         }
         if(!modes.isBlank()) {
-            float band=Math.min(h*.17f,w*.18f);
+            float band=Math.min(h*.12f,w*.18f);
             g.setColor(new Color(s.options().freePalette()?s.accent():WHITE));g.fill(new Rectangle2D.Float(0,top,w,band));
             icons(g,modes,pad,top+band*.07f,w-pad*2,band*.86f,band*.72f*s.options().iconScale());top+=band;
         }
         float remaining=h-top;
         boolean explicit=!s.rows().isEmpty();
         List<SillonSignageRow> rows=s.effectiveRows("exit");
-        float heading=remaining*(rows.isEmpty()?.65f:.24f);
+        float heading=remaining*(rows.isEmpty()?.65f:.19f);
         SillonSignageRow header=new SillonSignageRow("exit","",s.title().isBlank()?"Sortie":s.title(),sector?"":s.subtitle(),"",s.arrow());
         destination(g,s,header,0,top,w,heading,s.background(),s.foreground());
         top+=heading;
         if(rows.isEmpty())return;
-        float rh=(h-top)/rows.size();
+        float rh=Math.min((h-top)/rows.size(),h*.095f);
         for(int i=0;i<rows.size();i++) {
             SillonSignageRow row=rows.get(i);
             // Legacy body rows have no independent arrows; explicit rows retain theirs.
@@ -183,22 +191,15 @@ public final class SillonRATPSignageLayouts {
         }
     }
     private static void vertical(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h);
-        String symbol=s.icons();
-        if("totem".equals(s.style())) {
-            float d=Math.min(w*.80f,h*.26f);
-            icons(g,"ratp_metro",(w-d)/2,h*.035f,d,d,d*s.options().iconScale());
-            float start=h*.35f;
-            List<String> list=ids(symbol);
-            float bh=Math.min(w*.72f,(h*.35f)/Math.max(1,list.size()));
-            for(String id:list){icons(g,id,pad,start,w-pad*2,bh,bh*s.options().iconScale());start+=bh*1.12f;}
-        }else {
-            List<String> list=ids(symbol);float total=Math.min(h*.52f,w*.78f*Math.max(1,list.size()));
-            float side=total/Math.max(1,list.size());
-            for(int i=0;i<list.size();i++)icons(g,list.get(i),pad,h*.07f+i*side,w-pad*2,side*.95f,side*.88f*s.options().iconScale());
-        }
-        if(!s.title().isBlank())title(g,s,s.title(),Math.min(h*.10f,w*.25f),s.foreground(),pad,h*.55f,w-pad*2,h*.17f,"center");
-        arrow(g,s.arrow(),w*.5f,h*.84f,Math.min(w*.56f,h*.19f),s.foreground());
+        float pad=margin(s,w,h);List<String> symbols=ids(s.icons());
+        String mode=symbols.stream().filter(id->!id.startsWith("line_")).findFirst().orElse("ratp_metro");
+        List<String> lines=symbols.stream().filter(id->id.startsWith("line_")||id.matches("idfm_m[0-9].*")).toList();
+        float diameter=Math.min(w*.96f,h*.27f);
+        icons(g,mode,(w-diameter)/2,h*.035f,diameter,diameter,diameter*s.options().iconScale());
+        float lineTop=h*.35f,unit=Math.min(w*.90f,h*.32f/Math.max(1,lines.size()));
+        for(String id:lines){icons(g,id,(w-unit)/2,lineTop,unit,unit,unit*s.options().iconScale());lineTop+=unit*1.05f;}
+        if(!s.title().isBlank())title(g,s,s.title(),Math.min(h*.09f,w*.25f),s.foreground(),pad,h*.65f,w-pad*2,h*.13f,"center");
+        arrow(g,s.arrow(),w*.5f,h*.86f,Math.min(w*.64f,h*.19f),s.foreground());
     }
     private static void route(Graphics2D g,SillonSignageSpec s,int w,int h) {
         float pad=margin(s,w,h),head=h*.22f;
@@ -264,13 +265,14 @@ public final class SillonRATPSignageLayouts {
         destination(g,s,new SillonSignageRow("service","",s.title(),s.subtitle(),s.icons(),s.arrow()),0,0,w,h,s.background(),s.foreground());
     }
     private static void digital(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float head=h*.21f;
-        destination(g,s,new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),-1),0,0,w,head,s.background(),s.foreground());
-        List<SillonSignageRow> rows=s.effectiveRows("text");
-        float rh=(h-head)/Math.max(1,rows.size());
-        for(int i=0;i<rows.size();i++) {
-            int bg=i%2==0?s.background():new Color(s.background()).brighter().getRGB()&0xFFFFFF;
-            destination(g,s,rows.get(i),0,head+i*rh,w,rh,bg,s.foreground());
+        float head=h*.20f;destination(g,s,new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),-1),0,0,w,head,s.background(),s.foreground());
+        List<SillonSignageRow> rows=s.effectiveRows("text");float rh=Math.min(h*.16f,(h-head)/Math.max(1,rows.size()));
+        for(int i=0;i<rows.size();i++){
+            var row=rows.get(i);float y=head+i*rh,pad=w*.025f;
+            if(i%2==1){g.setColor(new Color(s.background()).brighter());g.fill(new Rectangle2D.Float(0,y,w,rh));}
+            icons(g,row.icons(),pad,y+rh*.12f,w*.14f,rh*.76f,rh*.68f*s.options().iconScale());
+            title(g,s,row.text(),rh*.44f,s.foreground(),w*.19f,y,w*.55f,rh,"left");
+            text(g,row.number(),face(s,true,rh*.39f),s.foreground(),w*.76f,y,w*.21f,rh,"right");
         }
     }
     private static void custom(Graphics2D g,SillonSignageSpec s,int w,int h) {

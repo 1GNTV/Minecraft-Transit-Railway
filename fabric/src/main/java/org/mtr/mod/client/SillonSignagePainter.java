@@ -75,8 +75,21 @@ public final class SillonSignagePainter {
         }).orElse(null);
     }
     public static BufferedImage icon(String id) {
+        SillonSignageLineBadge badge=id==null?null:SillonSignageLineBadge.parse(id);
+        if(badge!=null)return IMAGES.computeIfAbsent(id,key->Optional.of(lineBadge(badge))).orElse(null);
         if(id==null||!id.matches("[a-zA-Z0-9_/-]+"))return null;
         return resource("signage/icons/"+id.toLowerCase(Locale.ROOT)+".png");
+    }
+    private static BufferedImage lineBadge(SillonSignageLineBadge badge) {
+        BufferedImage image=new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();
+        try{quality(g);int colour=badge.color();
+            boolean ring="rer".equals(badge.mode()),square=Set.of("train","bus","air","boat").contains(badge.mode());
+            Shape shape=square?new RoundRectangle2D.Float(8,8,240,240,30,30):new Ellipse2D.Float(8,8,240,240);
+            g.setColor(new Color(ring?0xFFFFFF:colour));g.fill(shape);
+            if(ring){g.setColor(new Color(colour));g.setStroke(new BasicStroke(12));g.draw(shape);}
+            double luminance=(((colour>>>16)&255)*.299+((colour>>>8)&255)*.587+(colour&255)*.114)/255;
+            text(g,badge.label(),font("parisine",true,185),ring?colour:luminance>.58?0x101A28:0xFFFFFF,23,14,210,226,"center");
+        }finally{g.dispose();}return image;
     }
     public static BufferedImage sectorLockup(String id) {
         if(id==null||id.isBlank())return null;

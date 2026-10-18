@@ -7,6 +7,7 @@ import org.mtr.mod.InitClient;
 import org.mtr.mod.render.RenderSillonSignage;
 import org.mtr.mod.block.BlockSillonSignage;
 import org.mtr.mod.client.DynamicTextureCache;
+import org.mtr.mod.client.SillonSignageNetwork;
 import org.mtr.mod.data.*;
 import org.mtr.mod.packet.PacketUpdateSillonSignage;
 import java.util.*;
@@ -14,11 +15,11 @@ import java.util.List;
 
 /** Responsive brush editor with visual libraries, independent rows and explicit save/cancel. */
 public final class SillonSignageScreen extends ScreenExtension {
-    private static final String[] TABS={"Modèles","Texte","Lignes","Icônes","Aspect","Pose"};
+    private static final String[] TABS={"Modèles","Texte","Lignes","Icônes","Aspect","Pose","Réseau"};
     private final BlockPos pos;
     private final SillonSignageEditorModel model;
     private final Map<String,Input> inputs=new LinkedHashMap<>();
-    private final Button[] buttons=new Button[64],tiles=new Button[96],tabs=new Button[6];
+    private final Button[] buttons=new Button[64],tiles=new Button[96],tabs=new Button[7];
     private final Button undo,redo,copy,paste,save,cancel;
     private final Input filter;
     private final Deque<SillonSignageSpec> history=new ArrayDeque<>(),future=new ArrayDeque<>();
@@ -27,7 +28,7 @@ public final class SillonSignageScreen extends ScreenExtension {
     private SillonSignageEditorLayout layout;
     private int tab,page,pages=1,buttonCount,tileCount,category;
     private boolean loading,ready,rowIcons,selectedOnly,closed;
-    private String selectedIcon="";
+    private String selectedIcon="",networkPicker="";
     private long lastPreview;
     private String status="",lastFilter="";
     private static final int BG=0xFF101722,PANEL=0xFF1A2432,EDGE=0xFF354354,INK=0xFFE9EFF7,MUTED=0xFFA5B3C5,ACCENT=0xFF5BBCE8;
@@ -62,9 +63,10 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Button b:List.of(undo,redo,copy,paste,save,cancel))addChild(new ClickableWidget(b));
         ready=true;arrange();
     }
-    private void selectTab(int next){record();model.saveRow();if(next==2)model.importLegacyRows();tab=next;page=0;loading=true;filter.setText2("");loading=false;sync();arrange();}
+    private void selectTab(int next){record();networkPicker="";model.saveRow();if(next==2&&!"Oui".equals(model.values.get("auto")))model.importLegacyRows();tab=next;page=0;loading=true;filter.setText2("");loading=false;sync();arrange();}
     private void sync() {
         if(model.selectedRow<0)rowIcons=false;
+        if(!Arrays.asList(model.icons(rowIcons).split(",")).contains(selectedIcon))selectedIcon="";
         loading=true;
         for(var e:inputs.entrySet())e.getValue().setText2(model.values.getOrDefault(e.getKey(),""));
         loading=false;
@@ -74,11 +76,11 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Input f:inputs.values())f.visible=false;filter.visible=false;
         for(Button b:buttons)b.visible=false;for(Button b:tiles)b.visible=false;
         buttonCount=tileCount=0;
-        int tw=(width-24)/6;
-        for(int i=0;i<6;i++){
+        int tw=(width-24)/TABS.length;
+        for(int i=0;i<TABS.length;i++){
             tabs[i].move(12+i*tw,42,tw-3);tabs[i].selected=tab==i;
             boolean plaque=Set.of("metro","metro_subtitle","rer","gpe").contains(model.values.get("style"));
-            tabs[i].enabled(!(i==2&&plaque)&&!(i==3&&plaque&&!"rer".equals(model.values.get("style"))));
+            tabs[i].enabled("Oui".equals(model.values.get("auto"))||(!(i==2&&plaque)&&!(i==3&&plaque&&!"rer".equals(model.values.get("style")))));
         }
         int small=width<480?34:64;int right=width-12;
         for(Button b:List.of(paste,copy,redo,undo)){right-=small;b.move(right,8,small-3);}
@@ -88,7 +90,10 @@ public final class SillonSignageScreen extends ScreenExtension {
         paste.enabled(clipboard!=null);undo.enabled(!history.isEmpty());redo.enabled(!future.isEmpty());
         save.move(width-130,layout.footerY(),118);cancel.move(12,layout.footerY(),100);
         var area=layout.editor();
-        if(tab==0)models(area);else if(tab==3)icons(area);else {
+        if(!networkPicker.isBlank())networkGallery(area);
+        else if(tab==0)models(area);
+        else if("Oui".equals(model.values.get("auto"))&&(tab==1||tab==2||tab==3))generated(area);
+        else if(tab==3)icons(area);else {
             List<String> keys=fieldsForTab();
             int toolbar=tab==2?24:0;
             if(tab==2)rowToolbar(area);
@@ -110,10 +115,13 @@ public final class SillonSignageScreen extends ScreenExtension {
     }
     private List<String> fieldsForTab() {
         String style=model.values.get("style");
-        List<String> base=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+        List<String> base=tab==6?SillonSignageEditorModel.NETWORK:tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
         return base.stream().filter(key->{
             if("freePalette".equals(key))return Set.of("interchange","custom","rer","sector","exit").contains(style);
-            if("auto".equals(key))return Set.of("metro","metro_subtitle","rer","gpe","exit","route","platform").contains(style);
+            if("auto".equals(key))return tab==6;
+            if("scope".equals(key)||"routeLayout".equals(key))return Set.of("route","platform").contains(style);
+            if("exitFilter".equals(key))return Set.of("exit","sector","interchange","custom").contains(style);
+            if("serviceSource".equals(key))return Set.of("services","interchange","custom").contains(style);
             if("arrow".equals(key))return !Set.of("metro","metro_subtitle","rer","gpe","map").contains(style);
             if("subtitle".equals(key)&&"metro".equals(style))return false;
             if("image".equals(key))return Set.of("map","custom").contains(style);
@@ -128,7 +136,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         int x=layout.editor().x(),w=layout.editor().w(),y=layout.pagerY();
         button("<",()->{record();page=Math.max(0,page-1);arrange();},x,y,28).enabled(page>0);
         button(">",()->{record();page=Math.min(pages-1,page+1);arrange();},x+w-28,y,28).enabled(page+1<pages);
-        if(tab==3) {
+        if(tab==3&&networkPicker.isBlank()&&!"Oui".equals(model.values.get("auto"))) {
             button(selectedOnly?"Biblioth.":"Sélection",()->{selectedOnly=!selectedOnly;page=0;arrange();},x+35,y,70);
             if(selectedOnly) {
                 button("←",()->moveSelectedIcon(-1),x+110,y,24);
@@ -141,7 +149,9 @@ public final class SillonSignageScreen extends ScreenExtension {
     private void field(String key,int x,int y,int w) {
         var f=SillonSignageEditorModel.FIELDS.get(key);Input input=inputs.get(key);
         input.labelX=x;input.labelY=y;input.labelWidth=w;
-        if("choice".equals(f.type())) {
+        if("network".equals(f.type())) {
+            button(networkLabel(key,Long.parseLong(model.values.get(key))),()->{record();networkPicker=key;page=0;loading=true;filter.setText2("");loading=false;arrange();},x,y+12,w);input.visible=false;
+        }else if("choice".equals(f.type())) {
             String display=display(key,model.values.get(key));
             button(display,()->{record();model.cycle(key,1);sync();arrange();},x,y+12,w);
             input.visible=false;
@@ -161,8 +171,8 @@ public final class SillonSignageScreen extends ScreenExtension {
         pages=Math.max(1,(list.size()+per-1)/per);page=Math.min(page,pages-1);
         for(int i=0;i<per&&page*per+i<list.size();i++) {
             var p=list.get(page*per+i);int cw=(area.w()-4*(cols-1))/cols;
-            Button b=tile(p.name(),()->{replace(p.document());status=p.reference();},area.x()+(i%cols)*(cw+4),area.y()+24+(i/cols)*36,cw);
-            b.thumbnail=p.document();b.detail=SillonSignagePresets.label(p.document().style());
+            Button b=tile(p.name(),()->{replace(p.document().withBinding(model.spec().binding()));status=p.reference();},area.x()+(i%cols)*(cw+4),area.y()+24+(i/cols)*36,cw);
+            b.thumbnail=RenderSillonSignage.resolveContent(pos,p.document().withBinding(model.spec().binding()));b.detail=SillonSignagePresets.label(p.document().style());
         }
     }
     private void rowToolbar(SillonSignageEditorLayout.Rect a) {
@@ -193,6 +203,57 @@ public final class SillonSignageScreen extends ScreenExtension {
             b.icon=entry;b.selected=selectedOnly?entry.id().equals(selectedIcon):chosen.contains(entry.id());b.iconOnly=true;
         }
     }
+    private String networkLabel(String key,long id) {
+        if(id==0)return "Automatique · à proximité";
+        var data=SillonSignageNetwork.snapshot();
+        return switch(key){
+            case "stationId"->data.stations().stream().filter(x->x.id()==id).map(x->x.name()).findFirst().orElse("Station supprimée / chargement…");
+            case "platformId"->data.platforms().stream().filter(x->x.id()==id).map(x->"Quai "+x.name()).findFirst().orElse("Quai supprimé / chargement…");
+            default->data.lines().stream().filter(x->x.id()==id).map(x->x.label()).findFirst().orElse("Ligne supprimée / chargement…");
+        };
+    }
+    private record NetworkChoice(long id,String label,String detail){}
+    private void networkGallery(SillonSignageEditorLayout.Rect a) {
+        filter.move(a.x(),a.y(),a.w()-75);filter.visible=true;
+        button("Retour",()->{networkPicker="";page=0;arrange();},a.right()-70,a.y(),70);
+        var data=SillonSignageNetwork.snapshot();List<NetworkChoice> choices=new ArrayList<>();
+        choices.add(new NetworkChoice(0,"Automatique","Détection à proximité du panneau"));
+        long station=Long.parseLong(model.values.get("stationId"));
+        if(station==0)station=SillonSignageNetwork.resolve(pos,model.spec()).stationId();
+        final long sid=station;String q=SillonSignageIconCatalog.normalize(filter.getText2());
+        if("stationId".equals(networkPicker))for(var x:data.stations())choices.add(new NetworkChoice(x.id(),x.name(),"Station MTR"));
+        else if("platformId".equals(networkPicker))for(var x:data.platforms()){
+            if(sid!=0&&x.stationId()!=sid)continue;
+            String stationName=data.stations().stream().filter(st->st.id()==x.stationId()).map(st->st.name()).findFirst().orElse("");
+            choices.add(new NetworkChoice(x.id(),"Quai "+x.name(),stationName));
+        }else for(var x:data.lines()){
+            if(sid!=0&&x.stops().stream().noneMatch(stop->stop.stationId()==sid))continue;
+            String destination=x.stops().isEmpty()?"":x.stops().get(x.stops().size()-1).name();
+            choices.add(new NetworkChoice(x.id(),x.label(),"Vers "+destination));
+        }
+        choices=choices.stream().filter(x->SillonSignageIconCatalog.normalize(x.label()+" "+x.detail()).contains(q)).toList();
+        int per=Math.max(1,(a.h()-24)/36);pages=Math.max(1,(choices.size()+per-1)/per);page=Math.min(page,pages-1);
+        for(int i=0;i<per&&page*per+i<choices.size();i++){
+            var choice=choices.get(page*per+i);String field=networkPicker;
+            Button b=tile(choice.label(),()->{record();model.values.put(field,Long.toString(choice.id()));
+                if(field.equals("stationId")){model.values.put("platformId","0");model.values.put("routeId","0");}
+                if(field.equals("platformId"))model.values.put("routeId","0");
+                networkPicker="";page=0;sync();arrange();},a.x(),a.y()+24+i*36,a.w());
+            b.detail=choice.detail();b.selected=Long.toString(choice.id()).equals(model.values.get(field));
+        }
+    }
+    private void generated(SillonSignageEditorLayout.Rect a) {
+        displayPreview=RenderSillonSignage.resolveContent(pos,model.spec());
+        button("Association MTR",()->selectTab(6),a.x(),a.y(),a.w()/2-3);
+        button("Contenu manuel",()->{replace(displayPreview.manual());status="Contenu figé : modification manuelle";},a.x()+a.w()/2+3,a.y(),a.w()/2-3);
+        List<SillonSignageRow> rows=displayPreview.rows();
+        if(rows.isEmpty())rows=List.of(new SillonSignageRow("text","",displayPreview.title(),displayPreview.subtitle(),displayPreview.icons(),-1));
+        int per=Math.max(1,(a.h()-24)/36);pages=Math.max(1,(rows.size()+per-1)/per);page=Math.min(page,pages-1);
+        for(int i=0;i<per&&page*per+i<rows.size();i++){
+            var row=rows.get(page*per+i);Button b=tile(row.number().isBlank()?row.text():row.number()+"  "+row.text(),()->{},a.x(),a.y()+24+i*36,a.w());
+            b.detail=row.detail().isBlank()?"Actualisé depuis les données MTR":row.detail();b.enabled(false);
+        }
+    }
     private void moveSelectedIcon(int delta) {
         record();List<String> current=Arrays.asList(model.icons(rowIcons).split(","));
         model.moveIcon(rowIcons,current.indexOf(selectedIcon),delta);arrange();
@@ -205,7 +266,11 @@ public final class SillonSignageScreen extends ScreenExtension {
         };
         return switch(value) {
             case "parisine"->"Parisine - RATP";case "grand_paris"->"Grand Paris - GPE";case "idf_voyageur"->"IDF Voyageur";
-            case "auto"->"Selon le modèle";case "left"->"À gauche";case "center"->"Centré";
+            case "auto"->"Détection automatique";case "full"->"Parcours complet";case "remaining"->"Depuis le quai associé";
+            case "horizontal"->"Horizontal · noms inclinés";case "vertical"->"Vertical · liste et correspondances";
+            case "metro"->"Métro";case "rer"->"RER";case "train"->"Train";case "tram"->"Tramway";case "bus"->"Bus";
+            case "boat"->"Bateau";case "cable"->"Câble";case "air"->"Avion";
+            case "lift"->"Ascenseurs MTR";case "escalator"->"Escalators proches";case "stairs"->"Escaliers proches";case "information"->"Billetterie proche";case "left"->"À gauche";case "center"->"Centré";
             case "wall"->"Mural";case "ceiling"->"Au plafond";case "hanging"->"Suspendu";case "flag"->"En drapeau";case "standing"->"Sur pied";
             case "none"->"Sans cadre";case "thin"->"Bord fin";case "box"->"Caisson";
             case "transport"->"Transport / correspondance";case "exit"->"Sortie";case "service"->"Service";case "sector"->"Secteur";case "text"->"Texte libre";
@@ -242,7 +307,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Input f:inputs.values())if(f.visible)f.tick2();if(filter.visible)filter.tick2();
         String error=model.error();save.enabled(error.isBlank());
         long now=System.currentTimeMillis();
-        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();displayPreview=RenderSillonSignage.resolveContent(pos,preview);lastPreview=now;}
+        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();var live=SillonSignageNetwork.resolve(pos,preview);displayPreview=live.document();if(preview.stationAuto())status=live.status();lastPreview=now;}
         undo.enabled(!history.isEmpty()||!preview.equals(lastRecorded));redo.enabled(!future.isEmpty());
     }
     @Override public boolean mouseScrolled2(double mouseX,double mouseY,double amount) {
@@ -277,7 +342,7 @@ public final class SillonSignageScreen extends ScreenExtension {
             label(g,"APERÇU DE FACE",p.x(),p.y()-14,p.w(),MUTED);
             label(g,preview.width()+" × "+preview.height()+" blocs",p.x(),layout.pagerY()+5,p.w(),MUTED);
         }
-        if(tab==1||tab==2||tab==4||tab==5) {
+        if(networkPicker.isBlank()&&(tab==4||tab==5||tab==6||(!"Oui".equals(model.values.get("auto"))&&(tab==1||tab==2)))) {
             List<String> keys=fieldsForTab();
             int toolbar=tab==2?24:0,count=layout.formRows(toolbar);
             if(tab!=2||model.selectedRow>=0)for(int i=0;i<count&&page*count+i<keys.size();i++) {
@@ -295,7 +360,7 @@ public final class SillonSignageScreen extends ScreenExtension {
             }
             else label(g,"Ajoutez une ligne avec +.",a.x(),a.y()+30,a.w(),MUTED);
         }
-        if(tab!=3)label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
+        if(tab!=3||!networkPicker.isBlank())label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
         
         super.render(g,mouseX,mouseY,delta);
     }
@@ -350,6 +415,8 @@ public final class SillonSignageScreen extends ScreenExtension {
                 texture(g,DynamicTextureCache.instance.getSillonSignage(thumbnail).identifier,thumbnail.width()/thumbnail.height(),bx+3,by+3,52,bh-6);
                 label(g,caption,bx+61,by+6,bw-65,INK);
                 label(g,detail,bx+61,by+19,bw-65,MUTED);
+            }else if(!detail.isBlank()) {
+                label(g,caption,bx+6,by+4,bw-12,INK);label(g,detail,bx+6,by+18,bw-12,MUTED);
             }else {
                 int textWidth=GraphicsHolder.getTextWidth(caption),tx=bx+Math.max(4,(bw-textWidth)/2);
                 label(g,caption,tx,by+(bh-8)/2,bw-8,enabled?INK:0xFF68798D);
