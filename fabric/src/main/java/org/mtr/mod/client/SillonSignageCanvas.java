@@ -39,7 +39,7 @@ public final class SillonSignageCanvas {
             }
         }
     }
-    private static Font font(boolean strong,float size){
+    static Font font(boolean strong,float size){
         ensureFonts();
         return (strong?bold:normal).deriveFont(size);
     }
@@ -79,6 +79,7 @@ public final class SillonSignageCanvas {
         };
     }
     private static void draw(Graphics2D g,SillonSignageSpec s,int w,int h){
+        if(SillonRATPSignageLayouts.draw(g,s,w,h))return;
         final int navy=background(s),white=foreground(s),margin=Math.max(16,Math.min(w,h)/16);
         g.setColor(new Color(navy,true));
         g.fill(new RoundRectangle2D.Float(1,1,w-2,h-2,Math.min(h/12f,28),Math.min(h/12f,28)));
@@ -145,13 +146,13 @@ public final class SillonSignageCanvas {
         g.setStroke(new BasicStroke(Math.max(2,h/180f)));
         g.draw(new RoundRectangle2D.Float(2,2,w-4,h-4,Math.min(h/12f,28),Math.min(h/12f,28)));
     }
-    private static void left(Graphics2D g,String text,Font font,int color,float x,float y,float available){
+    static void left(Graphics2D g,String text,Font font,int color,float x,float y,float available){
         if(text==null||text.isBlank())return;
         fit(g,text,font,available);
         g.setColor(new Color(color,true));
         g.drawString(text,x,y);
     }
-    private static void center(Graphics2D g,String text,Font font,int color,float x,float y,float xmin,float xmax){
+    static void center(Graphics2D g,String text,Font font,int color,float x,float y,float xmin,float xmax){
         if(text==null||text.isBlank())return;
         fit(g,text,font,xmax-xmin);
         g.setColor(new Color(color,true));
@@ -202,7 +203,7 @@ public final class SillonSignageCanvas {
         }catch(Exception ignored){}
         return null;
     }
-    private static void drawIcons(Graphics2D g,String values,int x,int y,int size,int gap,int maxWidth){
+    static void drawIcons(Graphics2D g,String values,int x,int y,int size,int gap,int maxWidth){
         if(values.isBlank())return;
         int count=0;
         for(String id:values.split(",")){
@@ -212,15 +213,20 @@ public final class SillonSignageCanvas {
             BufferedImage raster=icon(id);
             if(raster!=null)g.drawImage(raster,x,y,size,size,null);
             else{
-                String name=id.replaceFirst("^(idfm_|ratp_|sncf_)","");
-                name=name.replaceFirst("^(metro_|rer_)","");
-                if(name.startsWith("m")&&name.length()>1&&Character.isDigit(name.charAt(1)))name=name.substring(1);
-                badge(g,name.toUpperCase(java.util.Locale.ROOT),x,y,size,colorFor(id),0xFFFEFEFE);
+                // Never counterfeit official line pictograms. Missing resources
+                // get a neutral explicit placeholder instead of a fake circle.
+                g.setColor(new Color(0xFFD8DADF));
+                g.fillRect(x,y,size,size);
+                g.setColor(new Color(0xFF384152));
+                g.setStroke(new BasicStroke(Math.max(1,size*.045f)));
+                g.drawRect(x+2,y+2,size-4,size-4);
+                center(g,"?",font(true,size*.7f),0xFF384152,
+                    x+size/2f,y+size*.76f,x+4,x+size-4);
             }
             x+=size+gap;
         }
     }
-    private static void drawArrow(Graphics2D g,int direction,float x,float y,float size,int color){
+    static void drawArrow(Graphics2D g,int direction,float x,float y,float size,int color){
         if(direction<0)return;
         g.setColor(new Color(color,true));
         g.setStroke(new BasicStroke(Math.max(5,size*.13f),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
