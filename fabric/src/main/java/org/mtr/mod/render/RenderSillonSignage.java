@@ -13,9 +13,51 @@ import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.data.SillonSignageSpec;
 import org.mtr.mod.screen.EditStationScreen;
 import org.mtr.core.data.StationExit;
+import org.mtr.core.operation.ArrivalResponse;
+import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongAVLTreeSet;
+import org.mtr.mod.data.ArrivalsCacheClient;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /** Cached texture signage. Rendered inside block entity shader context, never in a shadow pass. */
 public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSignage.BlockEntity> {
+    private static final Map<BlockSillonSignage.BlockEntity,DigitalFrame> digitalFrames=new WeakHashMap<>();
+    private static final class DigitalFrame {
+        long sampled;
+        String text="";
+    }
+    private static String firstLanguage(String source){
+        return source==null?"":source.split("\\|",2)[0].split("\\(",2)[0].trim();
+    }
+    private static String digitalDepartures(BlockPos pos){
+        LongAVLTreeSet platforms=new LongAVLTreeSet();
+        InitClient.findClosePlatform(pos.down(4),5,p->platforms.add(p.getId()));
+        if(platforms.isEmpty())return "Aucun quai associé";
+        List<ArrivalResponse> arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(platforms));
+        List<ArrivalResponse> selected=PanamArrivalSelection.select(arrivals,5,0,index->false);
+        StringBuilder rows=new StringBuilder();
+        long now=System.currentTimeMillis();
+        for(ArrivalResponse a:selected){
+            if(rows.length()>0)rows.append('|');
+            String route=firstLanguage(a.getRouteNumber());
+            if(route.isEmpty())route=firstLanguage(a.getRouteName());
+            long at=PanamArrivalSelection.clientArrivalMillis(a.getArrival(),ArrivalsCacheClient.INSTANCE.getMillisOffset());
+            rows.append(route).append("  ").append(firstLanguage(a.getDestination()))
+                .append("  ").append(Math.max(0,(at-now+59999)/60000)).append(" min");
+        }
+        return rows.length()==0?"Prochains départs indisponibles":rows.toString();
+    }
+    private static Identifier routeDiagram(BlockPos pos,SillonSignageSpec spec){
+        if(!spec.stationAuto()||!spec.body().isBlank())return null;
+        if(!("route".equals(spec.style())||"platform".equals(spec.style())))return null;
+        final long[] platform={-1L};
+        InitClient.findClosePlatform(pos.down(4),5,p->{if(platform[0]<0)platform[0]=p.getId();});
+        if(platform[0]<0)return null;
+        return DynamicTextureCache.instance.getRouteMap(platform[0],true,false,
+            spec.width()/spec.height(),false).identifier;
+    }
     public RenderSillonSignage(Argument dispatcher){super(dispatcher);}
     @Override public void render(BlockSillonSignage.BlockEntity entity,float tickDelta,GraphicsHolder g,int light,int overlay){
         if(OptimizedRenderer.renderingShadows())return;
@@ -42,7 +84,18 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
                 }
             }
         }
-        Identifier texture=DynamicTextureCache.instance.getSillonSignage(spec).identifier;
+        if("digital".equals(spec.style())&&spec.body().isBlank()){
+            DigitalFrame frame=digitalFrames.computeIfAbsent(entity,ignored->new DigitalFrame());
+            long now=System.currentTimeMillis();
+            if(now-frame.sampled>2000){
+                frame.text=digitalDepartures(pos);
+                frame.sampled=now;
+            }
+            spec=spec.withBody(frame.text);
+        }
+        Identifier diagram=routeDiagram(pos,spec);
+        Identifier texture=diagram==null
+            ?DynamicTextureCache.instance.getSillonSignage(spec).identifier:diagram;
         Direction facing=IBlock.getStatePropertySafe(world,pos,BlockSillonSignage.FACING);
         double w=spec.width(),h=spec.height();
         int faces=spec.doubleSided()?2:1;
