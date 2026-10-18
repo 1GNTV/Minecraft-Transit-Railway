@@ -106,7 +106,7 @@ public class DynamicTextureCache implements IGui {
 	}
 
 	public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
-        return getResource("sillon_signage_"+spec.toString(),
+        return getResource("sillon_signage_"+spec.visualKey(),
             () -> SillonSignageCanvas.generate(spec), DefaultRenderingColor.BLACK);
     }
 

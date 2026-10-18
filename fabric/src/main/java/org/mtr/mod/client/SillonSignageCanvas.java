@@ -24,7 +24,8 @@ public final class SillonSignageCanvas {
     }
     private SillonSignageCanvas(){}
     public static NativeImage generate(SillonSignageSpec spec) {
-        BufferedImage image=SillonSignagePainter.render(spec);
+        int maximum=2048*(int)Math.pow(2,org.mtr.mod.config.Config.getClient().getDynamicTextureResolution());
+        BufferedImage image=SillonSignagePainter.render(spec,maximum);
         int w=image.getWidth(),h=image.getHeight();
         NativeImage out=new NativeImage(NativeImageFormat.getAbgrMapped(),w,h,false);
         for(int y=0;y<h;y++)for(int x=0;x<w;x++){

@@ -14,6 +14,7 @@ public final class SignageRegression {
     public static void main(String[] args)throws Exception {
         Path out=Path.of("build/signage-qa/panels");Files.createDirectories(out);
         Set<String> families=new HashSet<>();
+        StringBuilder commands=new StringBuilder();
         int index=0,cols=3,cw=640,ch=360,rows=(SillonSignagePresets.ALL.size()+cols-1)/cols;
         BufferedImage atlas=new BufferedImage(cw*cols,ch*rows,BufferedImage.TYPE_INT_RGB);
         Graphics2D g=atlas.createGraphics();SillonSignagePainter.quality(g);
@@ -25,7 +26,9 @@ public final class SignageRegression {
             check(im.getWidth()==dims[0]&&im.getHeight()==dims[1],"Texture dimensions");
             double error=Math.abs(im.getWidth()/(double)im.getHeight()-spec.width()/spec.height())/(spec.width()/spec.height());
             check(error<.02,"Aspect ratio "+preset.name());
-            CompoundTag tag=new CompoundTag();spec.write(tag);check(spec.equals(SillonSignageSpec.read(tag)),"NBT roundtrip "+preset.name());
+            CompoundTag tag=new CompoundTag();spec.write(tag);
+            commands.append("setblock ").append((index%5-2)*7).append(" ").append(5+(index/5)*4).append(" 0 mtr:sillon_signage[facing=north]").append(tag.toString()).append("\n");
+            check(spec.equals(SillonSignageSpec.read(tag)),"NBT roundtrip "+preset.name());
             check(SillonSignageOptions.decode(spec.options().encode()).equals(spec.options()),"Options roundtrip");
             var editor=new SillonSignageEditorModel(spec);check(editor.error().isEmpty(),"Editor accepts preset");
             check(editor.spec().equals(spec),"Editor roundtrip "+preset.name());
@@ -37,6 +40,7 @@ public final class SignageRegression {
             ImageIO.write(im,"png",out.resolve(String.format("%02d-%s.png",index,spec.style())).toFile());
             im.flush();index++;
         }
+        Files.writeString(Path.of("build/signage-qa/fixtures-commands.txt"),commands.toString());
         g.dispose();ImageIO.write(atlas,"png",Path.of("build/signage-qa/panel-atlas.png").toFile());
         check(families.containsAll(SillonSignageSpec.STYLES),"Every family has a preset");
         for(var entry:SillonSignageIconCatalog.ENTRIES)check(SillonSignagePainter.icon(entry.id())!=null,"Missing icon "+entry.id());

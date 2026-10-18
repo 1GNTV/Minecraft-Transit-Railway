@@ -11,8 +11,18 @@ public record SillonSignageRow(String kind,String number,String text,String deta
     public SillonSignageRow {
         kind=KINDS.contains(kind)?kind:"transport";
         number=limit(number,12);text=limit(text,128);detail=limit(detail,128);
-        icons=limit(icons,192).replaceAll("[^a-zA-Z0-9_,/\\-]","");
+        icons=normalizeIcons(icons);
         arrow=Math.max(-1,Math.min(7,arrow));
+    }
+    public static String normalizeIcons(String value) {
+        if(value==null)return "";
+        List<String> out=new ArrayList<>();int length=0;
+        for(String id:value.toLowerCase(Locale.ROOT).split(",")) {
+            id=id.strip();if(!id.matches("[a-z0-9_/-]{1,64}"))continue;
+            if(out.size()==16||length+id.length()+1>512)break;
+            out.add(id);length+=id.length()+1;
+        }
+        return String.join(",",out);
     }
     private static String limit(String value,int max) {
         return value==null?"":value.substring(0,Math.min(max,value.length())).replace('\n',' ');

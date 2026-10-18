@@ -90,7 +90,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
                 }
             }
         }
-        if("digital".equals(spec.style())&&spec.body().isBlank()){
+        if("digital".equals(spec.style())&&spec.body().isBlank()&&spec.rows().isEmpty()){
             DigitalFrame frame=digitalFrames.computeIfAbsent(entity,ignored->new DigitalFrame());
             long now=System.currentTimeMillis();
             if(now-frame.sampled>2000){
@@ -107,7 +107,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
         g.push();
         try {
             g.translate(.5,SillonSignageGeometry.pivotY(spec),.5);
-            g.rotateYDegrees(-facing.asRotation()+spec.yaw());
+            g.rotateYDegrees(-facing.asRotation()+spec.yaw()+("flag".equals(spec.mount())?90:0));
             g.translate(o.offsetX(),o.offsetY(),o.offsetZ());
             g.rotateXDegrees(spec.pitch());g.rotateZDegrees(spec.roll()+180);
             float z=SillonSignageGeometry.frontZ(spec);

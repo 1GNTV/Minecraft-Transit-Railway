@@ -13,6 +13,11 @@ public final class SillonSignageIconCatalog {
     }
     public static final List<String> CATEGORIES=List.of("Tout","Métro","RER","Train","Tramway","Services","Flèches","Secteurs","Voies","Autres réseaux");
     public static final List<Entry> ENTRIES=List.of(
+        new Entry("ratp_logo_white",500,500),
+        new Entry("ratp_assistance_audio",250,250),
+        new Entry("ratp_assistance_hearing",250,250),
+        new Entry("ratp_assistance_visual",250,250),
+        new Entry("ratp_assistance_cognitive",250,250),
         new Entry("idfm_bus_1",250,250),
         new Entry("idfm_bus_2",250,250),
         new Entry("idfm_bus_tram",401,401),
@@ -203,7 +208,7 @@ public final class SillonSignageIconCatalog {
         new Entry("ratp_cdgex",500,500),
         new Entry("ratp_cdgval",500,500),
         new Entry("ratp_covoit",250,250),
-        new Entry("ratp_disney",256,256),
+        new Entry("ratp_disney",250,250),
         new Entry("ratp_down",64,64),
         new Entry("ratp_down_left",64,64),
         new Entry("ratp_est",128,128),
@@ -519,10 +524,11 @@ public final class SillonSignageIconCatalog {
     }
     public static List<String> search(String text){return find(text,"Tout").stream().map(Entry::id).toList();}
     public static Entry get(String id){return ENTRIES.stream().filter(e->e.id().equals(id)).findFirst().orElse(null);}
-    private static String normalize(String text) {
+    public static String normalize(String text) {
         return Normalizer.normalize(text==null?"":text,Normalizer.Form.NFD).replaceAll("\\p{M}","").toLowerCase(Locale.ROOT).strip();
     }
     private static String category(String id) {
+        if(id.startsWith("toulouse")||id.startsWith("lyon")||id.startsWith("marseille")||id.startsWith("rennes"))return "Autres réseaux";
         if(id.startsWith("voie_")||id.startsWith("ratp_voie"))return "Voies";
         if(id.matches(".*_(left|up|down|down_left|up_left)"))return "Flèches";
         if(Set.of("ratp_rivoli","ratp_forum","ratp_seine","ratp_est","ratp_ouest","ratp_nord","ratp_sud").contains(id))return "Secteurs";
@@ -544,7 +550,8 @@ public final class SillonSignageIconCatalog {
             case "left"->"Flèche gauche";case "up"->"Flèche haut";case "down"->"Flèche bas";
             case "up_left"->"Flèche haut gauche";case "down_left"->"Flèche bas gauche";
             case "pmr"->"Accessibilité";case "wc"->"Toilettes";case "ascenseur"->"Ascenseur";
-            case "metro_1","metro_2","metro"->"Mode métro";
+            case "metro_1"->"Mode métro blanc";case "metro_2"->"Mode métro sombre";case "metro"->"Mode métro";
+            case "assistance_audio"->"Assistance voyageurs";case "assistance_hearing"->"Boucle magnétique";case "assistance_visual"->"Déficience visuelle";case "assistance_cognitive"->"Handicap mental";case "logo_white"->"Logo RATP blanc";
             case "forum"->"Secteur Forum";case "rivoli"->"Secteur Rivoli";case "seine"->"Secteur Seine";
             case "assistance"->"Assistance";case "info"->"Information";case "aeroport","airport"->"Aéroport";
             default->text.replace('_',' ');

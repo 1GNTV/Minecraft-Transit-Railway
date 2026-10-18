@@ -20,13 +20,15 @@ public final class SillonSignagePainter {
     private SillonSignagePainter(){}
     public static void setResourceResolver(Function<String,BufferedImage> resolver){external=resolver;}
     public static void clearCache(){IMAGES.clear();}
-    public static int[] dimensions(SillonSignageSpec spec) {
-        double scale=Math.min(512,Math.min(2048/Math.max(spec.width(),spec.height()),
+    public static int[] dimensions(SillonSignageSpec spec) {return dimensions(spec,2048);}
+    public static int[] dimensions(SillonSignageSpec spec,int maximum) {
+        double scale=Math.min(512,Math.min(maximum/Math.max(spec.width(),spec.height()),
             Math.sqrt(2097152.0/(spec.width()*spec.height()))));
         return new int[]{Math.max(16,(int)Math.round(spec.width()*scale)),Math.max(16,(int)Math.round(spec.height()*scale))};
     }
-    public static BufferedImage render(SillonSignageSpec spec) {
-        int[] size=dimensions(spec);
+    public static BufferedImage render(SillonSignageSpec spec) {return render(spec,2048);}
+    public static BufferedImage render(SillonSignageSpec spec,int maximum) {
+        int[] size=dimensions(spec,Math.max(64,maximum));
         BufferedImage image=new BufferedImage(size[0],size[1],BufferedImage.TYPE_INT_ARGB);
         Graphics2D g=image.createGraphics();
         try{

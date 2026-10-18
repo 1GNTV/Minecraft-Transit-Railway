@@ -86,6 +86,10 @@ public final class SillonSignageEditorModel {
                 }else if("color".equals(f.type())&&!v.matches("#?[0-9a-fA-F]{6}"))return f.label()+" : 6 chiffres hexadécimaux";
             }catch(RuntimeException e){return f.label()+" : nombre attendu";}
         }
+        List<SillonSignageRow> pending=new ArrayList<>(rows);
+        if(selectedRow>=0&&selectedRow<pending.size())pending.set(selectedRow,new SillonSignageRow(
+            values.get("row_kind"),values.get("row_number"),values.get("row_text"),values.get("row_detail"),rowIcons,Integer.parseInt(values.getOrDefault("row_arrow","-1"))));
+        if(SillonSignageRow.bounded(pending).size()!=pending.size())return "Document trop volumineux : raccourcir les lignes ou retirer des pictogrammes.";
         String image=values.getOrDefault("image","");
         if(image.length()>192||image.contains("..")||!image.matches("[a-z0-9_.:/-]*"))return "Image : utiliser un identifiant du pack, par ex. mtr:signage/maps/metro.png";
         return "";

@@ -36,7 +36,7 @@ public record SillonSignageSpec(
         options=options==null?SillonSignageOptions.DEFAULT:options;
         rows=SillonSignageRow.bounded(rows);
         style=STYLES.contains(style)?style:"metro";
-        icons=bounded(icons,384).replaceAll("[^a-zA-Z0-9_,/\\-]","");
+        icons=SillonSignageRow.normalizeIcons(icons);
         mount=MOUNTS.contains(mount)?mount:"wall";
         arrow=Math.max(-1,Math.min(7,arrow));
         background&=0xFFFFFF;foreground&=0xFFFFFF;accent&=0xFFFFFF;
@@ -69,6 +69,13 @@ public record SillonSignageSpec(
     }
     public List<SillonSignageRow> effectiveRows(String kind) {
         return rows.isEmpty()?SillonSignageRow.legacy(body,kind):rows;
+    }
+    public String visualKey() {
+        return title+"\u0001"+subtitle+"\u0001"+body+"\u0001"+style+"\u0001"+icons+"\u0001"+
+            arrow+"/"+background+"/"+foreground+"/"+accent+"/"+width+"/"+height+"/"+
+            options.font()+"/"+options.align()+"/"+options.textScale()+"/"+options.iconScale()+"/"+
+            options.padding()+"/"+options.bandRatio()+"/"+options.frame()+"/"+options.frameColor()+"/"+
+            options.image()+"/"+SillonSignageRow.encode(rows);
     }
     public void write(CompoundTag tag){
         tag.putInt("sillon_signage_version",2);

@@ -134,8 +134,8 @@ public final class SillonSignageScreen extends ScreenExtension {
     }
     private void models(SillonSignageEditorLayout.Rect area) {
         filter.move(area.x(),area.y(),area.w());filter.visible=true;
-        String q=filter.getText2().toLowerCase(Locale.ROOT);
-        List<SillonSignagePresets.Preset> list=SillonSignagePresets.ALL.stream().filter(p->(p.name()+" "+p.document().style()).toLowerCase(Locale.ROOT).contains(q)).toList();
+        String q=SillonSignageIconCatalog.normalize(filter.getText2());
+        List<SillonSignagePresets.Preset> list=SillonSignagePresets.ALL.stream().filter(p->SillonSignageIconCatalog.normalize(p.name()+" "+p.document().style()).contains(q)).toList();
         int rows=Math.max(1,(area.h()-24)/36),cols=area.w()>=410?2:1,per=rows*cols;
         pages=Math.max(1,(list.size()+per-1)/per);page=Math.min(page,pages-1);
         for(int i=0;i<per&&page*per+i<list.size();i++) {
@@ -249,7 +249,11 @@ public final class SillonSignageScreen extends ScreenExtension {
             int toolbar=tab==2?24:0,count=layout.formRows(toolbar);
             if(tab!=2||model.selectedRow>=0)for(int i=0;i<count&&page*count+i<keys.size();i++) {
                 var f=SillonSignageEditorModel.FIELDS.get(keys.get(page*count+i));
-                label(g,f.label(),a.x(),a.y()+toolbar+i*38,a.w(),MUTED);
+                label(g,f.label(),a.x(),a.y()+toolbar+i*38,a.w()-20,MUTED);
+                if("color".equals(f.type()))try{
+                    int color=Integer.parseInt(model.values.get(f.key()).replace("#",""),16);
+                    rect(g,a.right()-16,a.y()+toolbar+i*38,a.right(),a.y()+toolbar+i*38+8,0xFF000000|color);
+                }catch(RuntimeException ignored){}
             }
             else label(g,"Ajoutez une ligne avec +.",a.x(),a.y()+30,a.w(),MUTED);
         }
@@ -263,7 +267,10 @@ public final class SillonSignageScreen extends ScreenExtension {
     }
     private static void label(GraphicsHolder g,String text,int x,int y,int maxWidth,int color) {
         if(maxWidth<6)return;String value=text==null?"":text;
-        while(!value.isEmpty()&&GraphicsHolder.getTextWidth(value)>maxWidth)value=value.substring(0,value.length()-1);
+        if(GraphicsHolder.getTextWidth(value)>maxWidth) {
+            while(!value.isEmpty()&&GraphicsHolder.getTextWidth(value+"…")>maxWidth)value=value.substring(0,value.length()-1);
+            value+="…";
+        }
         g.drawText(value,x,y,color,false,GraphicsHolder.getDefaultLight());
     }
     private static void texture(GraphicsHolder g,Identifier image,float ratio,int x,int y,int w,int h) {

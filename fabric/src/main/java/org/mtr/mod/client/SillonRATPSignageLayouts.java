@@ -68,13 +68,13 @@ public final class SillonRATPSignageLayouts {
             BufferedImage image=icon(sector);
             if(image!=null) {
                 // The source is a complete lockup including "secteur". Do not duplicate its text.
-                g.setColor(new Color(image.getRGB(0,0)));g.fill(new Rectangle2D.Float(0,0,block,h));
+                g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,block,h));
                 image(g,image,pad*.4f,pad*.4f,block-pad*.8f,h-pad*.8f);
             }
             left=block+pad;
         }else left=pad;
-        if(ids(s.icons()).contains("ratp_logo")) {
-            float side=h*.42f;icons(g,"ratp_logo",w-pad-side,(h-side)/2,side,side,side);right-=side+pad;
+        if(ids(s.icons()).contains("ratp_logo")||ids(s.icons()).contains("ratp_logo_white")) {
+            float side=h*.38f;icons(g,"ratp_logo_white",w-pad-side,h*.50f,side,side,side);right-=side+pad;
         }
         title(g,s,s.title(),h*(s.title().contains("|")?.42f:.58f),s.foreground(),left,pad*.5f,right-left,h-pad,"center");
     }
@@ -125,7 +125,7 @@ public final class SillonRATPSignageLayouts {
             float band=h*.25f;
             BufferedImage image=icon(sectorIcon);
             if(image!=null) {
-                g.setColor(new Color(image.getRGB(0,0)));g.fill(new Rectangle2D.Float(0,0,w,band));
+                g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,w,band));
                 image(g,image,pad,0,w-pad*2,band);
             }else {
                 g.setColor(new Color(GREY));g.fill(new Rectangle2D.Float(0,0,w,band));
@@ -200,7 +200,7 @@ public final class SillonRATPSignageLayouts {
         List<SillonSignageRow> stops=s.effectiveRows("text");
         if(stops.isEmpty())return; // MTR diagram is supplied by the world renderer when auto is enabled.
         int n=stops.size();float top=head+h*.045f,bottom=h-pad;
-        if(w/(float)h<2.8f || n>16) {
+        if(w/(float)h<2.8f) {
             int cols=w/(float)h>2?2:1,per=(n+cols-1)/cols;
             for(int c=0;c<cols;c++){
                 int first=c*per,last=Math.min(n,first+per);if(first>=n)break;
@@ -210,20 +210,26 @@ public final class SillonRATPSignageLayouts {
                 g.draw(new Line2D.Float(x,cy+step*.5f,x,cy+(last-first-.5f)*step));
                 for(int i=first;i<last;i++){
                     float y=cy+(i-first+.5f)*step;stop(g,s,x,y,step*.19f);
-                    text(g,stops.get(i).text(),face(s,true,step*.50f),s.foreground(),x+step*.32f,y-step*.4f,
+                    text(g,stops.get(i).text(),face(s,true,step*.69f),s.foreground(),x+step*.32f,y-step*.4f,
                         (w-pad*2)/cols-step*.5f,step*.8f,"left");
                 }
             }
         }else {
-            float xl=pad+pad*.5f,xr=w-pad*1.5f,y=top+(bottom-top)*.32f,step=(xr-xl)/Math.max(1,n-1);
+            float step=(w-2*pad)/Math.max(1,n),xl=pad+step*.5f,xr=w-pad-step*.5f,y=top+(bottom-top)*.22f;
             g.setColor(new Color(s.accent()));g.setStroke(new BasicStroke(Math.max(3,h*.026f)));
             g.draw(new Line2D.Float(xl,y,xr,y));
             for(int i=0;i<n;i++){
                 float x=xl+i*step;stop(g,s,x,y,h*.033f);
-                text(g,stops.get(i).text(),face(s,false,h*.105f),s.foreground(),x-step*.46f,y+h*.06f,
+                text(g,wrapped(stops.get(i).text()),face(s,false,h*.13f),s.foreground(),x-step*.46f,y+h*.06f,
                     step*.92f,bottom-y-h*.07f,"center");
             }
         }
+    }
+    private static String wrapped(String text) {
+        if(text.length()<15)return text;
+        int middle=text.length()/2,at=-1,best=999;
+        for(int i=2;i<text.length()-2;i++)if(text.charAt(i)==' '&&Math.abs(i-middle)<best){at=i;best=Math.abs(i-middle);}
+        return at<0?text:text.substring(0,at)+"|"+text.substring(at+1);
     }
     private static void stop(Graphics2D g,SillonSignageSpec s,float x,float y,float r) {
         g.setColor(new Color(s.background()));g.fill(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
