@@ -50,6 +50,7 @@ public class DynamicTextureCache implements IGui {
 	 * Clear all asset-related cache and mark all dynamic textures to be drawn.
 	 */
 	public synchronized void reload() {
+        SillonSignagePainter.clearCache();
 		font = null;
 		fontCjk = null;
 		refresh();

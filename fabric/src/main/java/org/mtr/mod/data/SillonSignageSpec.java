@@ -2,7 +2,7 @@ package org.mtr.mod.data;
 
 import org.mtr.mapping.holder.CompoundTag;
 import java.util.List;
-import java.util.Objects;
+
 
 /**
  * Versioned and bounded signage document. Both the server and the compositor
@@ -12,20 +12,29 @@ public record SillonSignageSpec(
     String title, String subtitle, String body, String style, String icons,
     String mount, int arrow, int background, int foreground, int accent,
     float width, float height, float yaw, float pitch, float roll,
-    boolean stationAuto, boolean illuminated, boolean doubleSided) {
+    boolean stationAuto, boolean illuminated, boolean doubleSided,
+    SillonSignageOptions options, List<SillonSignageRow> rows) {
     public static final List<String> STYLES=List.of(
         "metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical",
-        "platform","route","map","services","totem","digital","custom");
+        "platform","route","map","services","totem","digital","custom","gpe","gpe_direction");
     public static final List<String> MOUNTS=List.of("wall","ceiling","hanging","flag","standing");
     public static final SillonSignageSpec DEFAULT=new SillonSignageSpec(
         "Rambuteau","Centre Georges Pompidou","","metro_subtitle",
         "idfm_m11","wall",-1,0x101D56,0xFFFFFF,0x80591B,
         2.0f,.60f,0,0,0,true,false,false);
 
+    public SillonSignageSpec(String title,String subtitle,String body,String style,String icons,String mount,
+        int arrow,int background,int foreground,int accent,float width,float height,float yaw,float pitch,float roll,
+        boolean stationAuto,boolean illuminated,boolean doubleSided) {
+        this(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,
+            stationAuto,illuminated,doubleSided,SillonSignageOptions.DEFAULT,List.of());
+    }
     public SillonSignageSpec {
         title=bounded(title,128);
         subtitle=bounded(subtitle,128);
-        body=bounded(body,1024);
+        body=bounded(body,2048);
+        options=options==null?SillonSignageOptions.DEFAULT:options;
+        rows=SillonSignageRow.bounded(rows);
         style=STYLES.contains(style)?style:"metro";
         icons=bounded(icons,384).replaceAll("[^a-zA-Z0-9_,/\\-]","");
         mount=MOUNTS.contains(mount)?mount:"wall";
@@ -45,13 +54,26 @@ public record SillonSignageSpec(
         return Float.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
     }
     public SillonSignageSpec withTitle(String text){
-        return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided);
+        return new SillonSignageSpec(text,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows);
     }
     public SillonSignageSpec withBody(String text){
-        return new SillonSignageSpec(title,subtitle,text,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided);
+        return new SillonSignageSpec(title,subtitle,text,style,icons,mount,arrow,background,foreground,accent,width,height,yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,rows);
+    }
+    public SillonSignageSpec withOptions(SillonSignageOptions value) {
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,value,rows);
+    }
+    public SillonSignageSpec withRows(List<SillonSignageRow> value) {
+        return new SillonSignageSpec(title,subtitle,body,style,icons,mount,arrow,background,foreground,accent,width,height,
+            yaw,pitch,roll,stationAuto,illuminated,doubleSided,options,value);
+    }
+    public List<SillonSignageRow> effectiveRows(String kind) {
+        return rows.isEmpty()?SillonSignageRow.legacy(body,kind):rows;
     }
     public void write(CompoundTag tag){
-        tag.putInt("sillon_signage_version",1);
+        tag.putInt("sillon_signage_version",2);
+        tag.putString("sillon_options",options.encode());
+        tag.putString("sillon_rows",SillonSignageRow.encode(rows));
         tag.putString("sillon_title",title);
         tag.putString("sillon_subtitle",subtitle);
         tag.putString("sillon_body",body);
@@ -72,13 +94,16 @@ public record SillonSignageSpec(
         tag.putBoolean("sillon_double",doubleSided);
     }
     public static SillonSignageSpec read(CompoundTag tag){
-        if(tag.getInt("sillon_signage_version")!=1)return DEFAULT;
+        int version=tag.getInt("sillon_signage_version");
+        if(version!=1&&version!=2)return DEFAULT;
         return new SillonSignageSpec(
             tag.getString("sillon_title"),tag.getString("sillon_subtitle"),tag.getString("sillon_body"),
             tag.getString("sillon_style"),tag.getString("sillon_icons"),tag.getString("sillon_mount"),
             tag.getInt("sillon_arrow"),tag.getInt("sillon_background"),tag.getInt("sillon_foreground"),
             tag.getInt("sillon_accent"),tag.getFloat("sillon_width"),tag.getFloat("sillon_height"),
             tag.getFloat("sillon_yaw"),tag.getFloat("sillon_pitch"),tag.getFloat("sillon_roll"),
-            tag.getBoolean("sillon_auto"),tag.getBoolean("sillon_lit"),tag.getBoolean("sillon_double"));
+            tag.getBoolean("sillon_auto"),tag.getBoolean("sillon_lit"),tag.getBoolean("sillon_double"),
+            version==2?SillonSignageOptions.decode(tag.getString("sillon_options")):SillonSignageOptions.DEFAULT,
+            version==2?SillonSignageRow.decode(tag.getString("sillon_rows")):List.of());
     }
 }

@@ -5,230 +5,312 @@ import org.mtr.mapping.mapper.*;
 import org.mtr.mapping.tool.TextCase;
 import org.mtr.mod.InitClient;
 import org.mtr.mod.block.BlockSillonSignage;
-import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.DynamicTextureCache;
-import org.mtr.mod.data.IGui;
-import org.mtr.mod.data.SillonSignageSpec;
-import org.mtr.mod.data.SillonSignageIconCatalog;
-import org.mtr.mod.data.SillonSignagePresets;
-import java.util.List;
+import org.mtr.mod.data.*;
 import org.mtr.mod.packet.PacketUpdateSillonSignage;
+import java.util.*;
+import java.util.List;
 
-/** Unified brush editor: content, preset, icons, appearance, world geometry. */
-public final class SillonSignageScreen extends ScreenExtension implements IGui {
-    private static final String[] LABELS={
-        "Nom principal","Sous-titre","Texte / itinéraire (séparateur |)","Icônes MTR France (séparateur ,)",
-        "Fond (hex)","Texte (hex)","Accent (hex)",
-        "Largeur en blocs","Hauteur en blocs","Rotation Y","Inclinaison X","Rotation Z"
-    };
+/** Responsive brush editor with visual libraries, independent rows and explicit save/cancel. */
+public final class SillonSignageScreen extends ScreenExtension {
+    private static final String[] TABS={"Modèles","Texte","Lignes","Icônes","Aspect","Pose"};
     private final BlockPos pos;
-    private final TextFieldWidgetExtension[] fields=new TextFieldWidgetExtension[LABELS.length];
-    private final ButtonWidgetExtension[] tabs=new ButtonWidgetExtension[3];
-    private final ButtonWidgetExtension styleButton,mountButton,arrowButton,saveButton,cancelButton;
-    private final ButtonWidgetExtension browseIcon,copyButton,pasteButton,presetButton;
-    private final TextFieldWidgetExtension iconSearch;
-    private int iconCursor,presetCursor;
+    private final SillonSignageEditorModel model;
+    private final Map<String,Input> inputs=new LinkedHashMap<>();
+    private final Button[] buttons=new Button[64],tiles=new Button[96],tabs=new Button[6];
+    private final Button undo,redo,copy,paste,save,cancel;
+    private final Input filter;
+    private final Deque<SillonSignageSpec> history=new ArrayDeque<>(),future=new ArrayDeque<>();
     private static SillonSignageSpec clipboard;
-    private final CheckboxWidgetExtension stationAuto,illuminated,doubleSided;
-    private int styleIndex,mountIndex,arrow,tab,widthLeft,left,column;
-    private boolean initialized,done,cancel;
+    private SillonSignageSpec preview,lastRecorded;
+    private SillonSignageEditorLayout layout;
+    private int tab,page,pages=1,buttonCount,tileCount,category;
+    private boolean loading,ready,rowIcons,selectedOnly,closed;
+    private String selectedIcon="";
+    private long lastPreview;
+    private String status="",lastFilter="";
+    private static final int BG=0xFF101722,PANEL=0xFF1A2432,EDGE=0xFF354354,INK=0xFFE9EFF7,MUTED=0xFFA5B3C5,ACCENT=0xFF5BBCE8;
 
-    public SillonSignageScreen(BlockPos pos,BlockSillonSignage.BlockEntity entity){
-        this.pos=pos;
-        SillonSignageSpec spec=entity.document();
-        styleIndex=Math.max(0,SillonSignageSpec.STYLES.indexOf(spec.style()));
-        mountIndex=Math.max(0,SillonSignageSpec.MOUNTS.indexOf(spec.mount()));
-        arrow=spec.arrow();
-        for(int i=0;i<fields.length;i++)
-            fields[i]=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,i==2?1024:i==3?384:128,
-                TextCase.DEFAULT,null,"");
-        String[] defaults={
-            spec.title(),spec.subtitle(),spec.body(),spec.icons(),
-            String.format("%06X",spec.background()),String.format("%06X",spec.foreground()),String.format("%06X",spec.accent()),
-            Float.toString(spec.width()),Float.toString(spec.height()),Float.toString(spec.yaw()),
-            Float.toString(spec.pitch()),Float.toString(spec.roll())
-        };
-        for(int i=0;i<fields.length;i++)fields[i].setText2(defaults[i]);
-        for(int i=0;i<tabs.length;i++){
-            final int which=i;
-            tabs[i]=button(new String[]{"Contenu","Apparence","Position"}[i],()->switchTab(which));
+    public SillonSignageScreen(BlockPos pos,BlockSillonSignage.BlockEntity entity) {
+        this.pos=pos;model=new SillonSignageEditorModel(entity.document());preview=lastRecorded=entity.document();
+        for(var f:SillonSignageEditorModel.FIELDS.values()) {
+            Input input=new Input(f.key(),f.label(),128);
+            input.setText2(model.values.getOrDefault(f.key(),""));inputs.put(f.key(),input);
+            input.setChangedListener2(value->{if(!loading)model.values.put(f.key(),value);});
         }
-        styleButton=button("",()->{styleIndex=(styleIndex+1)%SillonSignageSpec.STYLES.size();refreshButtons();});
-        mountButton=button("",()->{mountIndex=(mountIndex+1)%SillonSignageSpec.MOUNTS.size();refreshButtons();});
-        arrowButton=button("",()->{arrow=arrow>=7?-1:arrow+1;refreshButtons();});
-        stationAuto=check("Nom automatique depuis MTR");
-        illuminated=check("Panneau rétroéclairé");
-        doubleSided=check("Double face");
-        stationAuto.setChecked(spec.stationAuto());
-        illuminated.setChecked(spec.illuminated());
-        doubleSided.setChecked(spec.doubleSided());
-        iconSearch=new TextFieldWidgetExtension(0,0,0,SQUARE_SIZE,64,TextCase.DEFAULT,null,"");
-        iconSearch.setText2("idfm_m");
-        browseIcon=button("Choisir une icône",this::browseIcon);
-        presetButton=button("Modèles réels (photos RATP)",()->{
-            SillonSignagePresets.Preset preset=SillonSignagePresets.at(presetCursor++);
-            apply(preset.document());
-            presetButton.setMessage2(new Text(TextHelper.literal("Photo : "+preset.name()).data));
-        });
-        copyButton=button("Copier le panneau",()->clipboard=spec());
-        pasteButton=button("Coller le panneau",()->{if(clipboard!=null)apply(clipboard);});
-        saveButton=button("Enregistrer",this::save);
-        cancelButton=button("Annuler",()->{cancel=true;onClose2();});
-        refreshButtons();
+        filter=new Input("filter","Rechercher un modèle ou un pictogramme",80);
+        filter.setChangedListener2(v->{if(!loading){page=0;lastFilter=v;arrange();}});
+        for(int i=0;i<buttons.length;i++)buttons[i]=new Button(20);
+        for(int i=0;i<tiles.length;i++)tiles[i]=new Button(32);
+        for(int i=0;i<tabs.length;i++) {
+            final int which=i;tabs[i]=new Button(20);tabs[i].configure(TABS[i],()->selectTab(which));
+        }
+        undo=action("Annuler modif.",()->history(false));redo=action("Rétablir",()->history(true));
+        copy=action("Copier",()->{if(valid()){clipboard=model.spec();status="Panneau copié";}});
+        paste=action("Coller",()->{if(clipboard!=null)replace(clipboard);});
+        save=action("Enregistrer",this::save);
+        cancel=action("Annuler",()->{closed=true;super.onClose2();});
     }
-    private static ButtonWidgetExtension button(String text,Runnable action){
-        ButtonWidgetExtension b=new ButtonWidgetExtension(0,0,0,SQUARE_SIZE,ignore->action.run());
-        b.setMessage2(new Text(TextHelper.literal(text).data));
-        return b;
+    private Button action(String text,Runnable run){Button b=new Button(20);b.configure(text,run);return b;}
+    @Override protected void init2() {
+        super.init2();layout=SillonSignageEditorLayout.of(width,height);
+        for(Input f:inputs.values())addChild(new ClickableWidget(f));addChild(new ClickableWidget(filter));
+        for(Button b:buttons)addChild(new ClickableWidget(b));
+        for(Button b:tiles)addChild(new ClickableWidget(b));
+        for(Button b:tabs)addChild(new ClickableWidget(b));
+        for(Button b:List.of(undo,redo,copy,paste,save,cancel))addChild(new ClickableWidget(b));
+        ready=true;arrange();
     }
-    private static CheckboxWidgetExtension check(String label){
-        CheckboxWidgetExtension b=new CheckboxWidgetExtension(0,0,0,SQUARE_SIZE,true,value->{});
-        b.setMessage2(new Text(TextHelper.literal(label).data));
-        return b;
+    private void selectTab(int next){record();model.saveRow();if(next==2)model.importLegacyRows();tab=next;page=0;loading=true;filter.setText2("");loading=false;sync();arrange();}
+    private void sync() {
+        if(model.selectedRow<0)rowIcons=false;
+        loading=true;
+        for(var e:inputs.entrySet())e.getValue().setText2(model.values.getOrDefault(e.getKey(),""));
+        loading=false;
     }
-    private void refreshButtons(){
-        styleButton.setMessage2(new Text(TextHelper.literal("Style : "+SillonSignageSpec.STYLES.get(styleIndex)).data));
-        mountButton.setMessage2(new Text(TextHelper.literal("Support : "+SillonSignageSpec.MOUNTS.get(mountIndex)).data));
-        arrowButton.setMessage2(new Text(TextHelper.literal("Flèche : "+(arrow<0?"aucune":arrow==0?"←":arrow==1?"→":arrow==2?"↑":arrow==3?"↓":"diagonale "+arrow)).data));
+    private void arrange() {
+        if(!ready)return;
+        for(Input f:inputs.values())f.visible=false;filter.visible=false;
+        for(Button b:buttons)b.visible=false;for(Button b:tiles)b.visible=false;
+        buttonCount=tileCount=0;
+        int tw=(width-24)/6;
+        for(int i=0;i<6;i++){tabs[i].move(12+i*tw,42,tw-3);tabs[i].selected=tab==i;}
+        int small=width<480?34:64;int right=width-12;
+        for(Button b:List.of(paste,copy,redo,undo)){right-=small;b.move(right,8,small-3);}
+        undo.configure(width<480?"<":"Annuler",()->history(false));redo.configure(width<480?">":"Rétablir",()->history(true));
+        copy.configure(width<480?"Cop.":"Copier",()->{if(valid()){clipboard=model.spec();status="Panneau copié";}});
+        paste.configure(width<480?"Col.":"Coller",()->{if(clipboard!=null)replace(clipboard);});
+        paste.enabled(clipboard!=null);undo.enabled(!history.isEmpty());redo.enabled(!future.isEmpty());
+        save.move(width-130,layout.footerY(),118);cancel.move(12,layout.footerY(),100);
+        var area=layout.editor();
+        if(tab==0)models(area);else if(tab==3)icons(area);else {
+            List<String> keys=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+            int toolbar=tab==2?24:0;
+            if(tab==2)rowToolbar(area);
+            if(tab!=2||model.selectedRow>=0) {
+                int count=layout.formRows(toolbar);
+                pages=Math.max(1,(keys.size()+count-1)/count);page=Math.max(0,Math.min(page,pages-1));
+                for(int i=0;i<count&&page*count+i<keys.size();i++)field(keys.get(page*count+i),area.x(),area.y()+toolbar+i*38,area.w());
+            }else {pages=1;page=0;}
+        }
+        pageControls();
+        for(Input f:inputs.values())if(!f.visible)f.setTextFieldFocused2(false);
+        if(!filter.visible)filter.setTextFieldFocused2(false);
     }
-    @Override protected void init2(){
-        super.init2();
-        widthLeft=Math.min(660,width-28);left=(width-widthLeft)/2;column=(widthLeft-16)/2;
-        for(int i=0;i<3;i++)position(tabs[i],left+i*(widthLeft/3),20,widthLeft/3-4);
-        for(TextFieldWidgetExtension field:fields)position(field,left,85,column-16);
-        position(styleButton,left,88,column);
-        position(mountButton,left+column+16,88,column);
-        position(arrowButton,left,133,column);
-        position(presetButton,left,203,widthLeft);
-        position(iconSearch,left,236,column);
-        position(browseIcon,left+column+16,236,column);
-        position(copyButton,left,272,column);
-        position(pasteButton,left+column+16,272,column);
-        IDrawing.setPositionAndWidth(stationAuto,left,190,column);
-        IDrawing.setPositionAndWidth(illuminated,left+column+16,190,column);
-        IDrawing.setPositionAndWidth(doubleSided,left,218,column);
-        addChild(new ClickableWidget(iconSearch));
-        addChild(new ClickableWidget(stationAuto));
-        addChild(new ClickableWidget(illuminated));
-        addChild(new ClickableWidget(doubleSided));
-        position(saveButton,left+widthLeft/2+4,height-28,widthLeft/2-4);
-        position(cancelButton,left,height-28,widthLeft/2-4);
-        initialized=true;
-        switchTab(tab);
+    private Button button(String label,Runnable action,int x,int y,int w) {
+        Button b=buttons[buttonCount++];b.configure(label,action);b.move(x,y,w);b.visible=true;return b;
     }
-    private void position(ButtonWidgetExtension b,int x,int y,int w){
-        b.setX2(x);b.setY2(y);b.setWidth2(w);addChild(new ClickableWidget(b));
+    private Button tile(String label,Runnable action,int x,int y,int w) {
+        Button b=tiles[tileCount++];b.configure(label,action);b.move(x,y,w);b.visible=true;return b;
     }
-    private void position(TextFieldWidgetExtension f,int x,int y,int w){
-        f.setX2(x);f.setY2(y);f.setWidth2(w);addChild(new ClickableWidget(f));
-    }
-    private void switchTab(int t){
-        tab=t;
-        for(int i=0;i<tabs.length;i++)tabs[i].setActiveMapped(tab!=i);
-        for(int i=0;i<fields.length;i++){
-            TextFieldWidgetExtension f=fields[i];
-            f.visible=(tab==0&&i<4)||(tab==1&&i>=4&&i<=6)||(tab==2&&i>=7);
-            f.setTextFieldFocused2(false);
-            if(f.visible){
-                int first=tab==0?0:tab==1?4:7;
-                int slot=i-first;
-                int x=left+(slot%2)*(column+16),y=84+(slot/2)*54;
-                f.setX2(x);f.setY2(y+16);f.setWidth2(column);
+    private void pageControls() {
+        int x=layout.editor().x(),w=layout.editor().w(),y=layout.pagerY();
+        button("<",()->{record();page=Math.max(0,page-1);arrange();},x,y,28).enabled(page>0);
+        button(">",()->{record();page=Math.min(pages-1,page+1);arrange();},x+w-28,y,28).enabled(page+1<pages);
+        if(tab==3) {
+            button(selectedOnly?"Biblioth.":"Sélection",()->{selectedOnly=!selectedOnly;page=0;arrange();},x+35,y,70);
+            if(selectedOnly) {
+                button("←",()->moveSelectedIcon(-1),x+110,y,24);
+                button("→",()->moveSelectedIcon(1),x+138,y,24);
+                button("X",()->{record();model.toggleIcon(rowIcons,selectedIcon);selectedIcon="";arrange();},x+166,y,24)
+                    .enabled(!selectedIcon.isBlank());
             }
         }
-        iconSearch.visible=browseIcon.visible=copyButton.visible=pasteButton.visible=presetButton.visible=tab==0;
-        styleButton.visible=mountButton.visible=arrowButton.visible=tab==1;
-        stationAuto.visible=illuminated.visible=doubleSided.visible=tab==1;
     }
-    private void browseIcon(){
-        List<String> results=SillonSignageIconCatalog.search(iconSearch.getText2());
-        if(results.isEmpty()){
-            browseIcon.setMessage2(new Text(TextHelper.literal("Aucune icône trouvée").data));
-            return;
+    private void field(String key,int x,int y,int w) {
+        var f=SillonSignageEditorModel.FIELDS.get(key);Input input=inputs.get(key);
+        input.labelX=x;input.labelY=y;input.labelWidth=w;
+        if("choice".equals(f.type())) {
+            String display=display(key,model.values.get(key));
+            button(display,()->{record();model.cycle(key,1);sync();arrange();},x,y+12,w);
+            input.visible=false;
+        }else {
+            boolean number="number".equals(f.type());input.move(x,y+12,w-(number?54:0));input.visible=true;
+            if(number) {
+                button("-",()->{record();model.adjust(key,-1);sync();},x+w-50,y+12,23);
+                button("+",()->{record();model.adjust(key,1);sync();},x+w-23,y+12,23);
+            }
         }
-        String next=results.get(iconCursor++%results.size());
-        String current=fields[3].getText2().trim();
-        if(!java.util.Arrays.asList(current.split(",")).contains(next))
-            fields[3].setText2(current.isEmpty()?next:current+","+next);
-        browseIcon.setMessage2(new Text(TextHelper.literal("Ajout : "+next).data));
     }
-    private void apply(SillonSignageSpec document){
-        String[] data={
-            document.title(),document.subtitle(),document.body(),document.icons(),
-            String.format("%06X",document.background()),
-            String.format("%06X",document.foreground()),
-            String.format("%06X",document.accent()),
-            Float.toString(document.width()),Float.toString(document.height()),
-            Float.toString(document.yaw()),Float.toString(document.pitch()),Float.toString(document.roll())
+    private void models(SillonSignageEditorLayout.Rect area) {
+        filter.move(area.x(),area.y(),area.w());filter.visible=true;
+        String q=filter.getText2().toLowerCase(Locale.ROOT);
+        List<SillonSignagePresets.Preset> list=SillonSignagePresets.ALL.stream().filter(p->(p.name()+" "+p.document().style()).toLowerCase(Locale.ROOT).contains(q)).toList();
+        int rows=Math.max(1,(area.h()-24)/36),cols=area.w()>=410?2:1,per=rows*cols;
+        pages=Math.max(1,(list.size()+per-1)/per);page=Math.min(page,pages-1);
+        for(int i=0;i<per&&page*per+i<list.size();i++) {
+            var p=list.get(page*per+i);int cw=(area.w()-4*(cols-1))/cols;
+            Button b=tile(p.name(),()->{replace(p.document());status=p.reference();},area.x()+(i%cols)*(cw+4),area.y()+24+(i/cols)*36,cw);
+            b.thumbnail=p.document();b.detail=SillonSignagePresets.label(p.document().style());
+        }
+    }
+    private void rowToolbar(SillonSignageEditorLayout.Rect a) {
+        int bw=28,x=a.x(),y=a.y();
+        button("<",()->{record();model.selectRow(model.selectedRow-1);sync();arrange();},x,y,bw).enabled(!model.rows.isEmpty());
+        int selectWidth=Math.max(66,a.w()-5*(bw+3));
+        button(model.selectedRow<0?"Aucune ligne":("Ligne "+(model.selectedRow+1)+" / "+model.rows.size()),()->{
+            record();model.selectRow(model.selectedRow+1);sync();arrange();},x+bw+3,y,selectWidth);
+        x+=bw+selectWidth+6;
+        button("+",()->{record();model.addRow();sync();page=0;arrange();},x,y,bw).enabled(model.rows.size()<32);x+=bw+3;
+        button("X",()->{record();model.removeRow();sync();arrange();},x,y,bw).enabled(model.selectedRow>=0);x+=bw+3;
+        button("↑",()->{record();model.moveRow(-1);sync();arrange();},x,y,bw).enabled(model.selectedRow>0);x+=bw+3;
+        button("↓",()->{record();model.moveRow(1);sync();arrange();},x,y,bw).enabled(model.selectedRow>=0&&model.selectedRow+1<model.rows.size());
+    }
+    private void icons(SillonSignageEditorLayout.Rect a) {
+        filter.move(a.x(),a.y(),Math.max(72,a.w()-148));filter.visible=true;
+        button(SillonSignageIconCatalog.CATEGORIES.get(category),()->{category=(category+1)%SillonSignageIconCatalog.CATEGORIES.size();page=0;arrange();},a.right()-144,a.y(),76);
+        button(rowIcons?"Ligne":"Panneau",()->{rowIcons=!rowIcons&&model.selectedRow>=0;page=0;arrange();},a.right()-64,a.y(),64);
+        var found=SillonSignageIconCatalog.find(filter.getText2(),SillonSignageIconCatalog.CATEGORIES.get(category));
+        Set<String> chosen=new LinkedHashSet<>(Arrays.asList(model.icons(rowIcons).split(",")));
+        if(selectedOnly)found=found.stream().filter(e->chosen.contains(e.id())).toList();
+        int cols=Math.max(1,a.w()/40),rows=Math.max(1,(a.h()-24)/36),per=Math.min(tiles.length,cols*rows);
+        pages=Math.max(1,(found.size()+per-1)/per);page=Math.min(page,pages-1);
+        int cw=(a.w()-4*(cols-1))/cols;
+        for(int i=0;i<per&&page*per+i<found.size()&&i<tiles.length;i++) {
+            var entry=found.get(page*per+i);
+            Button b=tile(entry.label(),()->{record();if(selectedOnly)selectedIcon=entry.id();else model.toggleIcon(rowIcons,entry.id());arrange();},a.x()+(i%cols)*(cw+4),a.y()+24+(i/cols)*36,cw);
+            b.icon=entry;b.selected=selectedOnly?entry.id().equals(selectedIcon):chosen.contains(entry.id());b.iconOnly=true;
+        }
+    }
+    private void moveSelectedIcon(int delta) {
+        record();List<String> current=Arrays.asList(model.icons(rowIcons).split(","));
+        model.moveIcon(rowIcons,current.indexOf(selectedIcon),delta);arrange();
+    }
+    private String display(String key,String value) {
+        if("style".equals(key))return SillonSignagePresets.label(value);
+        if("arrow".equals(key)||"row_arrow".equals(key))return switch(value) {
+            case "0"->"Gauche";case "1"->"Droite";case "2"->"Tout droit / haut";case "3"->"Bas";
+            case "4"->"Haut gauche";case "5"->"Haut droite";case "6"->"Bas gauche";case "7"->"Bas droite";default->"Aucune";
         };
-        for(int i=0;i<data.length;i++)fields[i].setText2(data[i]);
-        styleIndex=SillonSignageSpec.STYLES.indexOf(document.style());
-        mountIndex=SillonSignageSpec.MOUNTS.indexOf(document.mount());
-        arrow=document.arrow();
-        stationAuto.setChecked(document.stationAuto());
-        illuminated.setChecked(document.illuminated());
-        doubleSided.setChecked(document.doubleSided());
-        refreshButtons();
+        return switch(value) {
+            case "parisine"->"Parisine - RATP";case "grand_paris"->"Grand Paris - GPE";case "idf_voyageur"->"IDF Voyageur";
+            case "auto"->"Selon le modèle";case "left"->"À gauche";case "center"->"Centré";
+            case "wall"->"Mural";case "ceiling"->"Au plafond";case "hanging"->"Suspendu";case "flag"->"En drapeau";case "standing"->"Sur pied";
+            case "none"->"Sans cadre";case "thin"->"Bord fin";case "box"->"Caisson";
+            case "transport"->"Transport / correspondance";case "exit"->"Sortie";case "service"->"Service";case "sector"->"Secteur";case "text"->"Texte libre";
+            default->value;
+        };
     }
-    private static int hex(String source,int fallback){
-        try{return (int)(Long.parseLong(source.trim().replace("#",""),16)&0xFFFFFF);}
-        catch(Exception error){return fallback;}
-    }
-    private float number(int i,float fallback){
-        try{return Float.parseFloat(fields[i].getText2().replace(',','.'));}
-        catch(Exception error){return fallback;}
-    }
-    private SillonSignageSpec spec(){
-        SillonSignageSpec d=SillonSignageSpec.DEFAULT;
-        return new SillonSignageSpec(
-            fields[0].getText2(),fields[1].getText2(),fields[2].getText2(),
-            SillonSignageSpec.STYLES.get(styleIndex),fields[3].getText2(),
-            SillonSignageSpec.MOUNTS.get(mountIndex),arrow,
-            hex(fields[4].getText2(),d.background()),hex(fields[5].getText2(),d.foreground()),
-            hex(fields[6].getText2(),d.accent()),
-            number(7,d.width()),number(8,d.height()),number(9,d.yaw()),
-            number(10,d.pitch()),number(11,d.roll()),
-            stationAuto.isChecked2(),illuminated.isChecked2(),doubleSided.isChecked2());
-    }
-    private void save(){
-        if(done)return;
-        done=true;
-        InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdateSillonSignage(pos,spec()));
-        super.onClose2();
-    }
-    @Override public void onClose2(){super.onClose2();}
-    @Override public void tick2(){for(TextFieldWidgetExtension f:fields)f.tick2();}
-    @Override public void render(GraphicsHolder g,int mouseX,int mouseY,float delta){
-        renderBackground(g);
-        GuiDrawing drawing=new GuiDrawing(g);
-        drawing.beginDrawingRectangle();
-        drawing.drawRectangle(left-10,4,left+widthLeft+10,height-4,0xE9131721);
-        if(tab==1){
-            drawing.drawRectangle(left,46,left+widthLeft,76,
-                0xFF000000|hex(fields[4].getText2(),0x13235A));
+    private boolean valid(){String e=model.error();if(!e.isBlank()){status=e;return false;}return true;}
+    private void record() {
+        if(!valid())return;
+        SillonSignageSpec now=model.spec();
+        if(!now.equals(lastRecorded)) {
+            history.addLast(lastRecorded);while(history.size()>40)history.removeFirst();
+            lastRecorded=now;future.clear();
         }
-        drawing.finishDrawingRectangle();
-        if(height>=430){
-            int top=height-116;
-            int x1=left+widthLeft/5,x2=left+widthLeft-widthLeft/5;
-            g.drawText("Aperçu du panneau en direct",left,top-16,
-                0xFFD4D9E6,false,GraphicsHolder.getDefaultLight());
-            Identifier image=DynamicTextureCache.instance.getSillonSignage(spec()).identifier;
-            drawing.beginDrawingTexture(image);
-            drawing.drawTexture(x1,top,x2,height-44,0F,0F,1F,1F);
-            drawing.finishDrawingTexture();
+    }
+    private void replace(SillonSignageSpec value) {
+        record();history.addLast(lastRecorded);future.clear();model.read(value);preview=lastRecorded=value;
+        sync();arrange();
+    }
+    private void history(boolean forward) {
+        record();
+        Deque<SillonSignageSpec> source=forward?future:history,target=forward?history:future;
+        if(source.isEmpty())return;
+        target.addLast(lastRecorded);SillonSignageSpec next=source.removeLast();
+        model.read(next);preview=lastRecorded=next;sync();arrange();status=forward?"Modification rétablie":"Modification annulée";
+    }
+    private void save() {
+        if(closed||!valid())return;
+        InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdateSillonSignage(pos,model.spec()));
+        closed=true;super.onClose2();
+    }
+    @Override public void onClose2(){closed=true;super.onClose2();}
+    @Override public void tick2() {
+        for(Input f:inputs.values())if(f.visible)f.tick2();if(filter.visible)filter.tick2();
+        String error=model.error();save.enabled(error.isBlank());
+        long now=System.currentTimeMillis();
+        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();lastPreview=now;}
+        undo.enabled(!history.isEmpty()||!preview.equals(lastRecorded));redo.enabled(!future.isEmpty());
+    }
+    @Override public boolean mouseScrolled2(double mouseX,double mouseY,double amount) {
+        if(amount==0)return false;record();page=Math.max(0,Math.min(pages-1,page+(amount<0?1:-1)));arrange();return true;
+    }
+    @Override public void render(GraphicsHolder g,int mouseX,int mouseY,float delta) {
+        if(layout==null)return;
+        renderBackground(g);rect(g,0,0,width,height,BG);rect(g,0,0,width,36,0xFF151E2B);
+        label(g,"SILLON / Signalétique",12,12,Math.max(100,width-300),INK);
+        String error=model.error();
+        label(g,error.isBlank()?(status.isBlank()?"Choisissez un modèle, puis adaptez son contenu.":status):error,
+            12,29,width-24,error.isBlank()?MUTED:0xFFFFA18E);
+        var a=layout.editor();rect(g,a.x()-5,a.y()-5,a.right()+5,layout.pagerY()+23,PANEL);
+        var p=layout.preview();rect(g,p.x()-3,p.y()-3,p.right()+3,p.bottom()+3,0xFF252E3B);
+        for(int x=p.x();x<p.right();x+=12)for(int y=p.y();y<p.bottom();y+=12)
+            rect(g,x,y,Math.min(x+12,p.right()),Math.min(y+12,p.bottom()),((x/12+y/12)%2==0)?0xFF293342:0xFF303C4D);
+        texture(g,DynamicTextureCache.instance.getSillonSignage(preview).identifier,
+            preview.width()/preview.height(),p.x()+4,p.y()+4,p.w()-8,p.h()-8);
+        if(width>=720) {
+            label(g,"APERÇU DE FACE",p.x(),p.y()-14,p.w(),MUTED);
+            label(g,preview.width()+" × "+preview.height()+" blocs",p.x(),layout.pagerY()+5,p.w(),MUTED);
         }
-        g.drawText("Sillon Signage — Éditeur universel",left,7,0xFFFFFFFF,false,GraphicsHolder.getDefaultLight());
-        if(tab==1)g.drawText(fields[0].getText2(),left+12,55,0xFFFFFFFF,false,GraphicsHolder.getDefaultLight());
-        if(tab==0){
-            for(int i=0;i<4;i++)g.drawText(LABELS[i],left+(i%2)*(column+16),86+(i/2)*54,0xFFD5DBEB,false,GraphicsHolder.getDefaultLight());
-            g.drawText("Recherche des 379 icônes MTR France",left,216,0xFFA8BED8,false,GraphicsHolder.getDefaultLight());
-        }else if(tab==1){
-            for(int i=4;i<=6;i++)g.drawText(LABELS[i],left+((i-4)%2)*(column+16),86+((i-4)/2)*54,0xFFD5DBEB,false,GraphicsHolder.getDefaultLight());
-        }else{
-            for(int i=7;i<12;i++)g.drawText(LABELS[i],left+((i-7)%2)*(column+16),86+((i-7)/2)*54,0xFFD5DBEB,false,GraphicsHolder.getDefaultLight());
+        if(tab==1||tab==2||tab==4||tab==5) {
+            List<String> keys=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+            int toolbar=tab==2?24:0,count=layout.formRows(toolbar);
+            if(tab!=2||model.selectedRow>=0)for(int i=0;i<count&&page*count+i<keys.size();i++) {
+                var f=SillonSignageEditorModel.FIELDS.get(keys.get(page*count+i));
+                label(g,f.label(),a.x(),a.y()+toolbar+i*38,a.w(),MUTED);
+            }
+            else label(g,"Ajoutez une ligne avec +.",a.x(),a.y()+30,a.w(),MUTED);
         }
+        if(tab!=3)label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
+        
         super.render(g,mouseX,mouseY,delta);
+        for(Button b:tiles)if(b.visible&&b.isHovered())label(g,b.caption,12,height-40,width-24,INK);
+    }
+    private static void rect(GraphicsHolder g,int x,int y,int right,int bottom,int color) {
+        GuiDrawing d=new GuiDrawing(g);d.beginDrawingRectangle();d.drawRectangle(x,y,right,bottom,color);d.finishDrawingRectangle();
+    }
+    private static void label(GraphicsHolder g,String text,int x,int y,int maxWidth,int color) {
+        if(maxWidth<6)return;String value=text==null?"":text;
+        while(!value.isEmpty()&&GraphicsHolder.getTextWidth(value)>maxWidth)value=value.substring(0,value.length()-1);
+        g.drawText(value,x,y,color,false,GraphicsHolder.getDefaultLight());
+    }
+    private static void texture(GraphicsHolder g,Identifier image,float ratio,int x,int y,int w,int h) {
+        if(w<=0||h<=0)return;int dw=Math.min(w,Math.round(h*ratio)),dh=Math.min(h,Math.round(w/ratio));
+        int left=x+(w-dw)/2,top=y+(h-dh)/2;
+        GuiDrawing d=new GuiDrawing(g);d.beginDrawingTexture(image);d.drawTexture(left,top,left+dw,top+dh,0,0,1,1);d.finishDrawingTexture();
+    }
+    private final class Input extends TextFieldWidgetExtension {
+        final String key,hint;int labelX,labelY,labelWidth;
+        Input(String key,String hint,int max){super(0,0,100,20,max,TextCase.DEFAULT,null,"");this.key=key;this.hint=hint;}
+        void move(int x,int y,int width){setX2(x);setY2(y);setWidth2(Math.max(30,width));}
+        @Override public void render(GraphicsHolder g,int mouseX,int mouseY,float delta) {
+            super.render(g,mouseX,mouseY,delta);
+            if(getText2().isBlank()&&"filter".equals(key))label(g,"Rechercher…",getX2()+5,getY2()+6,100,MUTED);
+        }
+    }
+    private static final class Callback {Runnable action=()->{};}
+    private final class Button extends ButtonWidgetExtension {
+        private final Callback callback;private int bx,by,bw,bh;
+        String caption="",detail="";boolean selected,iconOnly,enabled=true;
+        SillonSignageIconCatalog.Entry icon;SillonSignageSpec thumbnail;
+        Button(int height){this(new Callback(),height);}
+        private Button(Callback callback,int height) {
+            super(0,0,10,height,ignore->callback.action.run());this.callback=callback;bh=height;
+        }
+        void enabled(boolean value){enabled=value;setActiveMapped(value);}
+        void configure(String text,Runnable action) {
+            enabled(true);
+            caption=text;callback.action=action;detail="";thumbnail=null;icon=null;selected=false;iconOnly=false;
+            setMessage2(new Text(TextHelper.literal(text).data));
+        }
+        void move(int x,int y,int w){bx=x;by=y;bw=w;setX2(x);setY2(y);setWidth2(w);visible=true;}
+        @Override public void render(GraphicsHolder g,int mouseX,int mouseY,float delta) {
+            int fill=!enabled?0xFF202A37:selected?0xFF24536B:isHovered()?0xFF3A4D61:0xFF293748;
+            rect(g,bx,by,bx+bw,by+bh,fill);rect(g,bx,by+bh-1,bx+bw,by+bh,selected?ACCENT:EDGE);
+            if(icon!=null) {
+                texture(g,new Identifier("mtr",icon.resource()),icon.width()/(float)icon.height(),bx+3,by+3,bw-6,bh-6);
+                if(selected)rect(g,bx+bw-5,by+2,bx+bw-2,by+5,ACCENT);
+            }else if(thumbnail!=null) {
+                texture(g,DynamicTextureCache.instance.getSillonSignage(thumbnail).identifier,thumbnail.width()/thumbnail.height(),bx+3,by+3,52,bh-6);
+                label(g,caption,bx+61,by+6,bw-65,INK);
+                label(g,detail,bx+61,by+19,bw-65,MUTED);
+            }else {
+                int textWidth=GraphicsHolder.getTextWidth(caption),tx=bx+Math.max(4,(bw-textWidth)/2);
+                label(g,caption,tx,by+(bh-8)/2,bw-8,enabled?INK:0xFF68798D);
+            }
+        }
     }
     @Override public boolean isPauseScreen2(){return false;}
 }
