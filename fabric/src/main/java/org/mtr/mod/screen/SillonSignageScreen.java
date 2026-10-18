@@ -312,7 +312,8 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Input f:inputs.values())if(f.visible)f.tick2();if(filter.visible)filter.tick2();
         String error=model.error();save.enabled(error.isBlank());
         long now=System.currentTimeMillis();
-        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();var live=SillonSignageNetwork.resolve(pos,preview);displayPreview=live.document();if(preview.stationAuto())status=live.status();lastPreview=now;}
+        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();var live=SillonSignageNetwork.resolve(pos,preview);SillonSignageSpec next=live.document();boolean changed=!next.visualKey().equals(displayPreview.visualKey());displayPreview=next;
+            if(preview.stationAuto()){status=live.status();if(changed&&networkPicker.isBlank()&&(tab==1||tab==2||tab==3))arrange();}lastPreview=now;}
         undo.enabled(!history.isEmpty()||!preview.equals(lastRecorded));redo.enabled(!future.isEmpty());
     }
     @Override public boolean mouseScrolled2(double mouseX,double mouseY,double amount) {

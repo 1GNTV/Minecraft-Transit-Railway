@@ -52,7 +52,7 @@ public final class SillonSignageNetwork {
         var data=snapshot();long now=System.currentTimeMillis();CacheKey key=new CacheKey(pos.asLong(),spec);Entry cached=CACHE.get(key);
         if(cached!=null&&cached.revision()==revision&&now-cached.time()<1500)return cached.result();
         var station=InitClient.findStation(pos);final long[] platform={0};InitClient.findClosePlatform(pos.down(3),24,p->platform[0]=p.getId());
-        double rotation=spec.yaw();var world=MinecraftClient.getInstance().getWorldMapped();
+        double rotation=-spec.yaw()-("flag".equals(spec.mount())?90:0);var world=MinecraftClient.getInstance().getWorldMapped();
         if(world!=null)rotation+=IBlock.getStatePropertySafe(new World(world.data),pos,BlockSillonSignage.FACING).asRotation();
         var context=new SillonSignageAutomatic.Context(new Point(pos.getX()+.5,pos.getY()+.5,pos.getZ()+.5),station==null?0:station.getId(),platform[0],rotation);
         if(world!=null&&Set.of("services","interchange","custom").contains(spec.style()))data=nearbyServices(data,context,spec.binding().stationId(),new World(world.data),pos);
