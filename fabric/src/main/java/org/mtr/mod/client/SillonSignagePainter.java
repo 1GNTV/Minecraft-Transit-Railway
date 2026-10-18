@@ -16,10 +16,11 @@ public final class SillonSignagePainter {
     public static final int NAVY=0x101D56, WHITE=0xFFFFFF, DARK=0x132047, GREY=0x6F6760;
     private static final Map<String,Optional<BufferedImage>> IMAGES=new ConcurrentHashMap<>();
     private static final Map<String,Font> FONTS=new ConcurrentHashMap<>();
+    private static final Map<String,BufferedImage> LOCKUPS=new ConcurrentHashMap<>();
     private static volatile Function<String,BufferedImage> external;
     private SillonSignagePainter(){}
     public static void setResourceResolver(Function<String,BufferedImage> resolver){external=resolver;}
-    public static void clearCache(){IMAGES.clear();}
+    public static void clearCache(){IMAGES.clear();LOCKUPS.clear();}
     public static int[] dimensions(SillonSignageSpec spec) {return dimensions(spec,2048);}
     public static int[] dimensions(SillonSignageSpec spec,int maximum) {
         double scale=Math.min(512,Math.min(maximum/Math.max(spec.width(),spec.height()),
@@ -76,6 +77,22 @@ public final class SillonSignagePainter {
     public static BufferedImage icon(String id) {
         if(id==null||!id.matches("[a-zA-Z0-9_/-]+"))return null;
         return resource("signage/icons/"+id.toLowerCase(Locale.ROOT)+".png");
+    }
+    public static BufferedImage sectorLockup(String id) {
+        if(id==null||id.isBlank())return null;
+        BufferedImage source=icon(id);if(source==null)return null;
+        return LOCKUPS.computeIfAbsent(id,key->{
+            int x1=source.getWidth(),y1=source.getHeight(),x2=-1,y2=-1;
+            for(int y=2;y<source.getHeight()-2;y++)for(int x=2;x<source.getWidth()-2;x++){
+                int pixel=source.getRGB(x,y);
+                if((pixel>>>24)>128&&((pixel>>>16)&255)>210&&((pixel>>>8)&255)>210&&(pixel&255)>210) {
+                    x1=Math.min(x1,x);y1=Math.min(y1,y);x2=Math.max(x2,x);y2=Math.max(y2,y);
+                }
+            }
+            if(x2<x1)return source;
+            x1=Math.max(0,x1-8);y1=Math.max(0,y1-8);x2=Math.min(source.getWidth()-1,x2+8);y2=Math.min(source.getHeight()-1,y2+8);
+            return source.getSubimage(x1,y1,x2-x1+1,y2-y1+1);
+        });
     }
     public static void image(Graphics2D g,BufferedImage img,float x,float y,float w,float h) {
         if(img==null||w<=0||h<=0)return;

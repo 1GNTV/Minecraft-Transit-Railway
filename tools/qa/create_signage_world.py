@@ -14,7 +14,7 @@ commands=[
 "fill -22 4 1 22 26 1 minecraft:quartz_block",
 "fill -22 3 -22 22 3 2 minecraft:smooth_quartz"]
 commands+=Path("build/signage-qa/fixtures-commands.txt").read_text().splitlines()
-process=subprocess.Popen(["./gradlew","forge:runServer","-PminecraftVersion=1.20.1","-Dorg.gradle.jvmargs=-Xmx3G"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,bufsize=1)
+process=subprocess.Popen(["../../gradlew","runServer","-Dorg.gradle.jvmargs=-Xmx3G"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,bufsize=1,cwd="tools/qa-runtime")
 lines=queue.Queue()
 def read():
     for line in process.stdout:lines.put(line)

@@ -72,7 +72,9 @@ jobs:
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
       - name: Prepare the native Minecraft visual test world
-        run: python tools/qa/create_signage_world.py
+        run: |
+          python tools/qa/install_signage_visual_qa.py
+          python tools/qa/create_signage_world.py
       - name: Capture the real editor and in-world signs
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -80,15 +82,24 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
-          python tools/qa/install_signage_visual_qa.py
-          timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew forge:runClient -PminecraftVersion=1.20.1 -Dorg.gradle.jvmargs=-Xmx3G
+          timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/signage-ui-qa-success.txt
+      - name: Capture signs with Oculus and Complementary
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 'true'
+          ALSOFT_DRIVERS: 'null'
+        run: |
+          python tools/qa/install_signage_shader_qa.py
+          cp tools/qa/SignageVisualQa.java tools/qa-runtime/src/main/java/org/sillon/qa/SignageVisualQa.java
+          timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          test -f forge/run/signage-shader-qa-success.txt
       - name: Preserve native captures
         if: always()
         run: |
           mkdir -p build/signage-qa/native docs/signage/review/native
           cp forge/run/screenshots/signage*.png build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/signage-ui-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
+          cp forge/run/signage-shader-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/logs/latest.log build/signage-qa/native/minecraft-latest.log 2>/dev/null || true
           cp -r build/signage-qa/native/* docs/signage/review/native/ 2>/dev/null || true
           git add docs/signage/review/native

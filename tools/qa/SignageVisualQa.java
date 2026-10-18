@@ -1,4 +1,4 @@
-package org.mtr.init;
+package org.sillon.qa;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
@@ -29,7 +29,8 @@ public final class SignageVisualQa {
         Minecraft mc=Minecraft.getInstance();
         if(!started) {
             if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
-            started=true;stage=0;tick=0;setup(mc);return;
+            started=true;stage=0;tick=0;
+            if(Boolean.getBoolean("sillon.qa.shader")){worldView=0;mc.options.hideGui=true;world(mc);}else setup(mc);return;
         }
         if(networkPhase>=0) {
             tick++;
@@ -65,12 +66,31 @@ public final class SignageVisualQa {
         }
         if(worldView>=0) {
             if(++tick==35) {
-                String name=String.format("signage-world-%02d.png",worldView);
+                String name=String.format(Boolean.getBoolean("sillon.qa.shader")?"signage-shader-world-%02d.png":"signage-world-%02d.png",worldView);
                 Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),message->System.out.println("SIGNAGE_QA_WORLD "+message.getString()));
             }
             if(tick>=60) {
                 worldView++;tick=0;
                 if(worldView>=5) {
+                    if(Boolean.getBoolean("sillon.qa.shader")) {
+                        try {
+                            boolean active=false;
+                            for(String name:List.of("net.irisshaders.iris.Iris","net.coderbot.iris.Iris"))try{
+                                Class<?> iris=Class.forName(name);
+                                Object pack=iris.getMethod("getCurrentPack").invoke(null);
+                                Object manager=iris.getMethod("getPipelineManager").invoke(null);
+                                Object pipeline=manager.getClass().getMethod("getPipeline").invoke(manager);
+                                if(pack instanceof Optional<?> optional&&optional.isPresent()&&pipeline instanceof Optional<?> rendered&&rendered.isPresent()) {
+                                    String type=rendered.get().getClass().getName();
+                                    System.out.println("SIGNAGE_QA_SHADER_PIPELINE "+type);
+                                    active=!type.contains("FixedFunction");
+                                }
+                            }catch(ReflectiveOperationException ignored){}
+                            if(!active)throw new IllegalStateException("Shader pack not active");
+                            Files.writeString(Path.of("signage-shader-qa-success.txt"),"Oculus 1.8.0 / Embeddium 0.3.31 / Complementary r5.3 active; 5 world captures.");
+                            System.out.println("SIGNAGE_QA_SHADER_SUCCESS");mc.stop();return;
+                        }catch(Exception e){e.printStackTrace();System.exit(2);}
+                    }
                     networkPhase=0;tick=0;mc.options.hideGui=false;
                     mc.getSingleplayerServer().execute(()->{
                         var player=mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());

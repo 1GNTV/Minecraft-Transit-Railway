@@ -33,6 +33,7 @@ if not destination.exists():
     scale=min(2560/page.rect.width,2560/page.rect.height)
     destination.parent.mkdir(parents=True,exist_ok=True)
     page.get_pixmap(matrix=fitz.Matrix(scale,scale)).save(str(destination))
+manifest.pop("metro-plan",None)
 manifest["regional-plan"]={"url":url,"date":"2026","credit":"Île-de-France Mobilités","resource_sha256":hashlib.sha256(destination.read_bytes()).hexdigest()}
 pages=[59,61,62,70,72,73,78,79,80,81,83,85,88,89,92,93,94,95,127,128,132,133]
 if any(not (root/"docs/signage"/("prescriptions-"+str(p)+".png")).exists() for p in pages):

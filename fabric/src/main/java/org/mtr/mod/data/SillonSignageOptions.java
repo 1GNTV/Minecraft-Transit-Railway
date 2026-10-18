@@ -26,6 +26,9 @@ public record SillonSignageOptions(String font, String align, float textScale, f
     public static float clamp(float v,float min,float max,float fallback) {
         return Float.isFinite(v)?Math.max(min,Math.min(max,v)):fallback;
     }
+    public SillonSignageOptions withBand(float ratio) {
+        return new SillonSignageOptions(font,align,textScale,iconScale,padding,offsetX,offsetY,offsetZ,thickness,suspension,frame,frameColor,image,ratio);
+    }
     public String encode() {
         return String.join(";",font,align,""+textScale,""+iconScale,""+padding,""+offsetX,""+offsetY,
             ""+offsetZ,""+thickness,""+suspension,frame,""+frameColor,image,""+bandRatio);

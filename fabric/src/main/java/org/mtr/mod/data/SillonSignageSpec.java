@@ -100,6 +100,13 @@ public record SillonSignageSpec(
         tag.putBoolean("sillon_lit",illuminated);
         tag.putBoolean("sillon_double",doubleSided);
     }
+    private static SillonSignageOptions legacyOptions(String style) {
+        return switch(style) {
+            case "rer"->SillonSignageOptions.DEFAULT.withBand(.26f);
+            case "sector"->SillonSignageOptions.DEFAULT.withBand(.34f);
+            default->SillonSignageOptions.DEFAULT;
+        };
+    }
     public static SillonSignageSpec read(CompoundTag tag){
         int version=tag.getInt("sillon_signage_version");
         if(version!=1&&version!=2)return DEFAULT;
@@ -110,7 +117,7 @@ public record SillonSignageSpec(
             tag.getInt("sillon_accent"),tag.getFloat("sillon_width"),tag.getFloat("sillon_height"),
             tag.getFloat("sillon_yaw"),tag.getFloat("sillon_pitch"),tag.getFloat("sillon_roll"),
             tag.getBoolean("sillon_auto"),tag.getBoolean("sillon_lit"),tag.getBoolean("sillon_double"),
-            version==2?SillonSignageOptions.decode(tag.getString("sillon_options")):SillonSignageOptions.DEFAULT,
+            version==2?SillonSignageOptions.decode(tag.getString("sillon_options")):legacyOptions(tag.getString("sillon_style")),
             version==2?SillonSignageRow.decode(tag.getString("sillon_rows")):List.of());
     }
 }

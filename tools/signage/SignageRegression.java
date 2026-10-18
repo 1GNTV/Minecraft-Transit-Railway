@@ -32,6 +32,7 @@ public final class SignageRegression {
             check(SillonSignageOptions.decode(spec.options().encode()).equals(spec.options()),"Options roundtrip");
             var editor=new SillonSignageEditorModel(spec);check(editor.error().isEmpty(),"Editor accepts preset");
             check(editor.spec().equals(spec),"Editor roundtrip "+preset.name());
+            if(spec.title().contains("|"))check(!editor.values.get("title2").isBlank(),"Two separate title inputs");
             int x=(index%cols)*cw,y=(index/cols)*ch;
             g.setColor(Color.WHITE);g.fillRoundRect(x+8,y+8,cw-16,ch-16,12,12);
             SillonSignagePainter.image(g,im,x+24,y+42,cw-48,ch-82);

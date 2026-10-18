@@ -1,0 +1,13 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="signageqa"
+version="1.0"
+displayName="Sillon signage CI visual checks"
+[[dependencies.signageqa]]
+modId="mtr"
+mandatory=true
+versionRange="[4.0,)"
+ordering="AFTER"
+side="BOTH"

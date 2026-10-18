@@ -116,7 +116,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
             if(!"none".equals(o.frame())) {
                 float rim="box".equals(o.frame())?.018f:.005f;
                 box(g,-w/2-rim,-h/2-rim,z,w/2+rim,h/2+rim,z+depth,color,light);
-            }else if(spec.doubleSided())box(g,-w/2,-h/2,z,w/2,h/2,z+depth,color,light);
+            }else box(g,-w/2,-h/2,z,w/2,h/2,z+depth,0xFF000000|spec.background(),light);
             switch(spec.mount()) {
                 case "hanging" -> {
                     for(float x:new float[]{-w*.32f,w*.32f})box(g,x-.012f,-h/2-o.suspension(),z+depth*.5f-.012f,

@@ -39,7 +39,7 @@ public final class SillonSignagePresets {
         preset("Rambuteau / Centre Georges Pompidou",RATP,sign("Rambuteau","Centre Georges Pompidou","","metro_subtitle","","wall",-1,0x21275B,0xFFFFFF,0x51330C,2.2f,.60f)),
         preset("Saint-Denis Porte de Paris",RATP,sign("Saint-Denis|Porte de Paris","Stade de France","","metro_subtitle","","wall",-1,0x2A4078,0xFFFFFF,0x875E29,2.25f,.78f)),
         preset("Strasbourg-Saint-Denis",RATP,sign("Strasbourg|Saint-Denis","","","metro","","wall",-1,0x080A18,0xFFFFFF,0x80591B,2.35f,.88f)),
-        preset("Châtelet-Les Halles / Forum",HALL,sign("Châtelet|Les Halles","","","rer","ratp_forum,ratp_logo_white","wall",-1,0x101B54,0xFFFFFF,0x707347,3.75f,.83f)),
+        preset("Châtelet-Les Halles / Forum",HALL,sign("Châtelet|Les Halles","","","rer","ratp_forum,ratp_logo_white","wall",-1,0x101B54,0xFFFFFF,0x707347,3.75f,.83f).withOptions(SillonSignageOptions.DEFAULT.withBand(.28f))),
         preset("Direction métro 14",RATP,sign("Aéroport d’Orly","","","direction","ratp_metro,idfm_m14","ceiling",0,0xFFFFFF,0x132047,0x640082,3,.65f)),
         preset("Correspondances 5 et 9",RATP,sign("Correspondances","","","transfer","","wall",0,0xFFFFFF,0x132047,0x996017,3,1.1f).withRows(List.of(
             row("transport","","Bobigny - Pablo Picasso","Direction","idfm_m5",0),
@@ -49,7 +49,7 @@ public final class SillonSignagePresets {
             row("service","","Information","Information · Información","ratp_assistance_audio",0),
             row("exit","1","boulevard Voltaire","","",0)))),
         preset("Sorties 10 à 14 / Rivoli",HALL,sign("Sortie","","10 pl. Sainte-Opportune|11 r. de Rivoli|12 r. Bertin Poirée|13 r. des Lavandières|14 r. Saint-Denis","exit","idfm_m1,idfm_m4,idfm_m14","wall",1,0x101E5E,0xFFFFFF,0x836130,2.7f,1.35f)),
-        preset("Secteur Rivoli",HALL,sign("Sortie","secteur Rivoli","10 pl. Sainte-Opportune|11 r. de Rivoli|12 r. Bertin Poirée|13 r. des Lavandières|14 r. Saint-Denis","sector","ratp_rivoli,idfm_m1,idfm_m4,idfm_m14","wall",-1,0x101E5E,0xFFFFFF,0x836130,2.4f,1.85f)),
+        preset("Secteur Rivoli",HALL,sign("Sortie","secteur Rivoli","10 pl. Sainte-Opportune|11 r. de Rivoli|12 r. Bertin Poirée|13 r. des Lavandières|14 r. Saint-Denis","sector","ratp_rivoli,idfm_m1,idfm_m4,idfm_m14","wall",-1,0x101E5E,0xFFFFFF,0x836130,2.4f,1.85f).withOptions(SillonSignageOptions.DEFAULT.withBand(.34f))),
         preset("Colonne métro 1",RATP,sign("","","","vertical","idfm_m1","standing",0,0xFFFFFF,0x101D56,0xFFBE00,.65f,2.2f)),
         preset("Totem métro",RATP,sign("","","","totem","idfm_m14","standing",0,0xFFFFFF,0x101D56,0x640082,.75f,2.5f)),
         preset("Quai 14 / Orly",RATP,sign("Aéroport d’Orly","","Maison Blanche|Hôpital Bicêtre|Villejuif - Gustave Roussy|L’Haÿ-les-Roses|Chevilly-Larue|Thiais - Orly|Aéroport d’Orly",

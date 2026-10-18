@@ -74,7 +74,11 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Button b:buttons)b.visible=false;for(Button b:tiles)b.visible=false;
         buttonCount=tileCount=0;
         int tw=(width-24)/6;
-        for(int i=0;i<6;i++){tabs[i].move(12+i*tw,42,tw-3);tabs[i].selected=tab==i;}
+        for(int i=0;i<6;i++){
+            tabs[i].move(12+i*tw,42,tw-3);tabs[i].selected=tab==i;
+            boolean plaque=Set.of("metro","metro_subtitle","rer","gpe").contains(model.values.get("style"));
+            tabs[i].enabled(!(i==2&&plaque)&&!(i==3&&plaque&&!"rer".equals(model.values.get("style"))));
+        }
         int small=width<480?34:64;int right=width-12;
         for(Button b:List.of(paste,copy,redo,undo)){right-=small;b.move(right,8,small-3);}
         undo.configure(width<480?"<":"Annuler",()->history(false));redo.configure(width<480?">":"Rétablir",()->history(true));
@@ -84,7 +88,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         save.move(width-130,layout.footerY(),118);cancel.move(12,layout.footerY(),100);
         var area=layout.editor();
         if(tab==0)models(area);else if(tab==3)icons(area);else {
-            List<String> keys=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+            List<String> keys=fieldsForTab();
             int toolbar=tab==2?24:0;
             if(tab==2)rowToolbar(area);
             if(tab!=2||model.selectedRow>=0) {
@@ -102,6 +106,21 @@ public final class SillonSignageScreen extends ScreenExtension {
     }
     private Button tile(String label,Runnable action,int x,int y,int w) {
         Button b=tiles[tileCount++];b.configure(label,action);b.move(x,y,w);b.visible=true;return b;
+    }
+    private List<String> fieldsForTab() {
+        String style=model.values.get("style");
+        List<String> base=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+        return base.stream().filter(key->{
+            if("auto".equals(key))return Set.of("metro","metro_subtitle","rer","gpe","exit","route","platform").contains(style);
+            if("arrow".equals(key))return !Set.of("metro","metro_subtitle","rer","gpe","map").contains(style);
+            if("subtitle".equals(key)&&"metro".equals(style))return false;
+            if("image".equals(key))return Set.of("map","custom").contains(style);
+            if("bandRatio".equals(key))return Set.of("metro_subtitle","rer","sector").contains(style);
+            if("iconScale".equals(key))return !Set.of("metro","metro_subtitle","gpe").contains(style);
+            if("frameColor".equals(key))return !"none".equals(model.values.get("frame"));
+            if("suspension".equals(key))return "hanging".equals(model.values.get("mount"));
+            return true;
+        }).toList();
     }
     private void pageControls() {
         int x=layout.editor().x(),w=layout.editor().w(),y=layout.pagerY();
@@ -231,8 +250,9 @@ public final class SillonSignageScreen extends ScreenExtension {
         if(layout==null)return;
         renderBackground(g);rect(g,0,0,width,height,BG);rect(g,0,0,width,36,0xFF151E2B);
         label(g,"SILLON / Signalétique",12,12,Math.max(100,width-300),INK);
-        String error=model.error();
-        label(g,error.isBlank()?(status.isBlank()?"Choisissez un modèle, puis adaptez son contenu.":status):error,
+        String error=model.error(),hovered="";
+        for(Button b:tiles)if(b.visible&&b.isHovered())hovered=b.caption;
+        label(g,error.isBlank()?(!hovered.isBlank()?hovered:status.isBlank()?"Choisissez un modèle, puis adaptez son contenu.":status):error,
             12,29,width-24,error.isBlank()?MUTED:0xFFFFA18E);
         var a=layout.editor();rect(g,a.x()-5,a.y()-5,a.right()+5,layout.pagerY()+23,PANEL);
         var p=layout.preview();rect(g,p.x()-3,p.y()-3,p.right()+3,p.bottom()+3,0xFF252E3B);
@@ -245,11 +265,16 @@ public final class SillonSignageScreen extends ScreenExtension {
             label(g,preview.width()+" × "+preview.height()+" blocs",p.x(),layout.pagerY()+5,p.w(),MUTED);
         }
         if(tab==1||tab==2||tab==4||tab==5) {
-            List<String> keys=tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
+            List<String> keys=fieldsForTab();
             int toolbar=tab==2?24:0,count=layout.formRows(toolbar);
             if(tab!=2||model.selectedRow>=0)for(int i=0;i<count&&page*count+i<keys.size();i++) {
                 var f=SillonSignageEditorModel.FIELDS.get(keys.get(page*count+i));
-                label(g,f.label(),a.x(),a.y()+toolbar+i*38,a.w()-20,MUTED);
+                String fieldLabel=f.label();
+                if("auto".equals(f.key())) {
+                    if(Set.of("route","platform").contains(model.values.get("style")))fieldLabel="Desserte du quai MTR voisin";
+                    else if("exit".equals(model.values.get("style")))fieldLabel="Sorties depuis la station MTR";
+                }
+                label(g,fieldLabel,a.x(),a.y()+toolbar+i*38,a.w()-20,MUTED);
                 if("color".equals(f.type()))try{
                     int color=Integer.parseInt(model.values.get(f.key()).replace("#",""),16);
                     rect(g,a.right()-16,a.y()+toolbar+i*38,a.right(),a.y()+toolbar+i*38+8,0xFF000000|color);
@@ -260,7 +285,6 @@ public final class SillonSignageScreen extends ScreenExtension {
         if(tab!=3)label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
         
         super.render(g,mouseX,mouseY,delta);
-        for(Button b:tiles)if(b.visible&&b.isHovered())label(g,b.caption,12,height-40,width-24,INK);
     }
     private static void rect(GraphicsHolder g,int x,int y,int right,int bottom,int color) {
         GuiDrawing d=new GuiDrawing(g);d.beginDrawingRectangle();d.drawRectangle(x,y,right,bottom,color);d.finishDrawingRectangle();

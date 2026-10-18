@@ -8,7 +8,7 @@ public final class SillonSignageEditorModel {
     public record Field(String key,String label,String type,List<String> choices,float min,float max,float step) {}
     public static final Map<String,Field> FIELDS=new LinkedHashMap<>();
     static {
-        string("title","Nom / destination");string("subtitle","Sous-titre / traduction");
+        string("title","Nom / destination");string("title2","Deuxième ligne du nom (facultatif)");string("subtitle","Sous-titre / traduction");
         choice("auto","Nom depuis la station MTR",List.of("Non","Oui"));
         choice("style","Famille de panneau",SillonSignageSpec.STYLES);
         choice("font","Typographie",SillonSignageOptions.FONTS);choice("align","Alignement",SillonSignageOptions.ALIGNS);
@@ -29,7 +29,7 @@ public final class SillonSignageEditorModel {
         choice("row_kind","Type de ligne",SillonSignageRow.KINDS);
         choice("row_arrow","Flèche de cette ligne",List.of("-1","0","1","2","3","4","5","6","7"));
     }
-    public static final List<String> TEXT=List.of("title","subtitle","auto","arrow");
+    public static final List<String> TEXT=List.of("title","title2","subtitle","auto","arrow");
     public static final List<String> APPEARANCE=List.of("style","font","align","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
     public static final List<String> POSE=List.of("width","height","mount","offsetX","offsetY","offsetZ","yaw","pitch","roll","thickness","suspension","lit","double");
     public static final List<String> ROW=List.of("row_text","row_detail","row_number","row_kind","row_arrow");
@@ -44,7 +44,8 @@ public final class SillonSignageEditorModel {
     public SillonSignageEditorModel(SillonSignageSpec spec){read(spec);}
     public void read(SillonSignageSpec s) {
         values.clear();var o=s.options();
-        values.put("title",s.title());values.put("subtitle",s.subtitle());values.put("style",s.style());
+        String[] name=s.title().split("\\|",2);
+        values.put("title",name[0]);values.put("title2",name.length>1?name[1]:"");values.put("subtitle",s.subtitle());values.put("style",s.style());
         values.put("auto",s.stationAuto()?"Oui":"Non");values.put("lit",s.illuminated()?"Oui":"Non");
         values.put("double",s.doubleSided()?"Oui":"Non");values.put("mount",s.mount());values.put("arrow",""+s.arrow());
         values.put("bg",hex(s.background()));values.put("fg",hex(s.foreground()));values.put("accent",hex(s.accent()));
@@ -68,6 +69,7 @@ public final class SillonSignageEditorModel {
             SillonSignageSpec preset=SillonSignagePresets.forStyle(values.get(key));
             values.put("bg",hex(preset.background()));values.put("fg",hex(preset.foreground()));
             values.put("accent",hex(preset.accent()));values.put("font",preset.options().font());
+            put("bandRatio",preset.options().bandRatio());
         }
     }
     public void adjust(String key,int direction) {
@@ -101,7 +103,7 @@ public final class SillonSignageEditorModel {
         saveRow();
         SillonSignageOptions o=new SillonSignageOptions(values.get("font"),values.get("align"),n("textScale"),n("iconScale"),n("padding"),
             n("offsetX"),n("offsetY"),n("offsetZ"),n("thickness"),n("suspension"),values.get("frame"),c("frameColor"),values.get("image"),n("bandRatio"));
-        return new SillonSignageSpec(values.get("title"),values.get("subtitle"),legacyBody,values.get("style"),headerIcons,
+        return new SillonSignageSpec(values.get("title")+(values.get("title2").isBlank()?"":"|"+values.get("title2")),values.get("subtitle"),legacyBody,values.get("style"),headerIcons,
             values.get("mount"),Integer.parseInt(values.get("arrow")),c("bg"),c("fg"),c("accent"),n("width"),n("height"),
             n("yaw"),n("pitch"),n("roll"),"Oui".equals(values.get("auto")),"Oui".equals(values.get("lit")),"Oui".equals(values.get("double")),o,rows);
     }

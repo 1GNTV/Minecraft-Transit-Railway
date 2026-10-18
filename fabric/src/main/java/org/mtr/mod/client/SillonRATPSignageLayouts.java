@@ -64,19 +64,22 @@ public final class SillonRATPSignageLayouts {
         float pad=margin(s,w,h),left=0,right=w-pad;
         String sector=ids(s.icons()).stream().filter(x->Set.of("ratp_forum","ratp_rivoli","ratp_seine").contains(x)).findFirst().orElse("");
         if(!sector.isEmpty()){
-            float block=Math.min(w*.28f,h*1.35f);
+            float block=w*s.options().bandRatio();
             BufferedImage image=icon(sector);
             if(image!=null) {
                 // The source is a complete lockup including "secteur". Do not duplicate its text.
                 g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,block,h));
-                image(g,image,pad*.4f,pad*.4f,block-pad*.8f,h-pad*.8f);
+                float scale=s.options().iconScale(),iw=(block-pad*.8f)*scale,ih=(h-pad*.8f)*scale;
+                Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,block,h));
+                image(g,sectorLockup(sector),(block-iw)/2,(h-ih)/2,iw,ih);g.setClip(clip);
             }
             left=block+pad;
         }else left=pad;
         if(ids(s.icons()).contains("ratp_logo")||ids(s.icons()).contains("ratp_logo_white")) {
-            float side=h*.38f;icons(g,"ratp_logo_white",w-pad-side,h*.50f,side,side,side);right-=side+pad;
+            float side=Math.min(h*.48f,h*.38f*s.options().iconScale());icons(g,"ratp_logo_white",w-pad-side,h*.50f,side,side,side);right-=side+pad;
         }
-        title(g,s,s.title(),h*(s.title().contains("|")?.42f:.58f),s.foreground(),left,pad*.5f,right-left,h-pad,"center");
+        title(g,s,s.title(),h*(s.title().contains("|")?.42f:.58f),s.foreground(),left,pad*.5f,right-left,h-pad-(s.subtitle().isBlank()?0:h*.2f),"center");
+        if(!s.subtitle().isBlank())text(g,s.subtitle(),face(s,false,h*.15f),s.foreground(),left,h*.77f,right-left,h*.20f,"center");
     }
     private static List<SillonSignageRow> directionRows(SillonSignageSpec s) {
         if(!s.rows().isEmpty())return s.rows();
@@ -122,11 +125,13 @@ public final class SillonRATPSignageLayouts {
         String sectorIcon=ids(s.icons()).stream().filter(x->Set.of("ratp_rivoli","ratp_forum","ratp_seine").contains(x)).findFirst().orElse("");
         String modes=String.join(",",ids(s.icons()).stream().filter(x->!x.equals(sectorIcon)).toList());
         if(sector) {
-            float band=h*.25f;
+            float band=h*s.options().bandRatio();
             BufferedImage image=icon(sectorIcon);
             if(image!=null) {
                 g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,w,band));
-                image(g,image,pad,0,w-pad*2,band);
+                float scale=s.options().iconScale(),iw=(w-pad*2)*scale,ih=band*.82f*scale;
+                Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,w,band));
+                image(g,sectorLockup(sectorIcon),(w-iw)/2,(band-ih)/2,iw,ih);g.setClip(clip);
             }else {
                 g.setColor(new Color(GREY));g.fill(new Rectangle2D.Float(0,0,w,band));
                 title(g,s,s.subtitle(),band*.53f,WHITE,pad,0,w-pad*2,band,"left");
@@ -136,13 +141,13 @@ public final class SillonRATPSignageLayouts {
         if(!modes.isBlank()) {
             float band=Math.min(h*.17f,w*.18f);
             g.setColor(Color.WHITE);g.fill(new Rectangle2D.Float(0,top,w,band));
-            icons(g,modes,pad,top+band*.14f,w-pad*2,band*.72f,band*.72f);top+=band;
+            icons(g,modes,pad,top+band*.07f,w-pad*2,band*.86f,band*.72f*s.options().iconScale());top+=band;
         }
         float remaining=h-top;
         boolean explicit=!s.rows().isEmpty();
         List<SillonSignageRow> rows=s.effectiveRows("exit");
         float heading=remaining*(rows.isEmpty()?.65f:.24f);
-        SillonSignageRow header=new SillonSignageRow("exit","",s.title().isBlank()?"Sortie":s.title(),"","",s.arrow());
+        SillonSignageRow header=new SillonSignageRow("exit","",s.title().isBlank()?"Sortie":s.title(),sector?"":s.subtitle(),"",s.arrow());
         destination(g,s,header,0,top,w,heading,s.background(),s.foreground());
         top+=heading;
         if(rows.isEmpty())return;
@@ -180,15 +185,15 @@ public final class SillonRATPSignageLayouts {
         String symbol=s.icons();
         if("totem".equals(s.style())) {
             float d=Math.min(w*.80f,h*.26f);
-            icons(g,"ratp_metro",(w-d)/2,h*.035f,d,d,d);
+            icons(g,"ratp_metro",(w-d)/2,h*.035f,d,d,d*s.options().iconScale());
             float start=h*.35f;
             List<String> list=ids(symbol);
             float bh=Math.min(w*.72f,(h*.35f)/Math.max(1,list.size()));
-            for(String id:list){icons(g,id,pad,start,w-pad*2,bh,bh);start+=bh*1.12f;}
+            for(String id:list){icons(g,id,pad,start,w-pad*2,bh,bh*s.options().iconScale());start+=bh*1.12f;}
         }else {
             List<String> list=ids(symbol);float total=Math.min(h*.52f,w*.78f*Math.max(1,list.size()));
             float side=total/Math.max(1,list.size());
-            for(int i=0;i<list.size();i++)icons(g,list.get(i),pad,h*.07f+i*side,w-pad*2,side*.88f,side*.88f);
+            for(int i=0;i<list.size();i++)icons(g,list.get(i),pad,h*.07f+i*side,w-pad*2,side*.95f,side*.88f*s.options().iconScale());
         }
         if(!s.title().isBlank())title(g,s,s.title(),Math.min(h*.10f,w*.25f),s.foreground(),pad,h*.55f,w-pad*2,h*.17f,"center");
         arrow(g,s.arrow(),w*.5f,h*.84f,Math.min(w*.56f,h*.19f),s.foreground());
@@ -218,10 +223,17 @@ public final class SillonRATPSignageLayouts {
             float step=(w-2*pad)/Math.max(1,n),xl=pad+step*.5f,xr=w-pad-step*.5f,y=top+(bottom-top)*.22f;
             g.setColor(new Color(s.accent()));g.setStroke(new BasicStroke(Math.max(3,h*.026f)));
             g.draw(new Line2D.Float(xl,y,xr,y));
+            Font labels=face(s,false,h*.13f);float widest=1;
+            for(SillonSignageRow stop:stops)for(String line:wrapped(stop.text()).split("\\|"))
+                widest=Math.max(widest,(float)labels.getStringBounds(line,g.getFontRenderContext()).getWidth());
+            labels=labels.deriveFont(labels.getSize2D()*Math.min(1,step*.92f/widest));
+            float lineHeight=labels.getLineMetrics("ÉAgjp",g.getFontRenderContext()).getHeight();
             for(int i=0;i<n;i++){
                 float x=xl+i*step;stop(g,s,x,y,h*.033f);
-                text(g,wrapped(stops.get(i).text()),face(s,false,h*.13f),s.foreground(),x-step*.46f,y+h*.06f,
-                    step*.92f,bottom-y-h*.07f,"center");
+                String name=wrapped(stops.get(i).text());
+                int lines=name.split("\\|",-1).length;
+                text(g,name,labels,s.foreground(),x-step*.46f,y+h*.06f,
+                    step*.92f,Math.min(bottom-y-h*.07f,lineHeight*lines),"center");
             }
         }
     }
@@ -237,7 +249,7 @@ public final class SillonRATPSignageLayouts {
     }
     private static void plan(Graphics2D g,SillonSignageSpec s,int w,int h) {
         float pad=margin(s,w,h),top=h*.18f;
-        title(g,s,s.title(),h*.13f,s.foreground(),pad,0,w-pad*2,top,"left");
+        destination(g,s,new SillonSignageRow("text","",s.title(),s.subtitle(),"",-1),pad,0,w-pad*2,top,s.background(),s.foreground());
         BufferedImage im=resource(s.options().image());
         if(im!=null)image(g,im,pad,top,w-2*pad,h-top-pad);
         else if(!s.rows().isEmpty()||!s.body().isBlank()) {

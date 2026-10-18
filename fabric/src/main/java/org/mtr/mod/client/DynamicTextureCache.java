@@ -105,8 +105,11 @@ public class DynamicTextureCache implements IGui {
 		return getResource(String.format("color_%s", platformId), () -> RouteMapGenerator.generateColorStrip(platformId), DefaultRenderingColor.TRANSPARENT);
 	}
 
-	public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
-        return getResource("sillon_signage_"+spec.visualKey(),
+	private final java.util.Map<org.mtr.mod.data.SillonSignageSpec,String> signageKeys =
+        java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+    public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
+        String key=signageKeys.computeIfAbsent(spec,org.mtr.mod.data.SillonSignageSpec::visualKey);
+        return getResource("sillon_signage_"+key,
             () -> SillonSignageCanvas.generate(spec), DefaultRenderingColor.BLACK);
     }
 
