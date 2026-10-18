@@ -10,6 +10,8 @@ minecraft {
         configureEach {
             workingDirectory project.file("../../forge/run")
             property "forge.logging.console.level","info"
+            property "mixin.env.remapRefMap","true"
+            property "mixin.env.refMapRemappingFile",project.file("build/createSrgToMcp/output.srg").absolutePath
             mods { signageqa { source sourceSets.main } }
         }
         client {
@@ -27,3 +29,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:1.20.1-47.4.28"
     implementation fg.deobf("org.sillon:tested-build:1.0")
 }
+
+// Production refmaps use SRG members; the isolated Forge development runtime uses official names.
+tasks.matching { it.name in ["runClient","runServer"] }.configureEach { dependsOn "createSrgToMcp" }

@@ -17,7 +17,7 @@ import java.nio.file.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-/** CI-only helper, copied into Forge sources AFTER the deliverable JAR is built. */
+/** CI-only helper compiled as a separate mod against the assembled deliverable. */
 public final class SignageVisualQa {
     private static int stage=-1,tick;
     private static boolean started;
@@ -126,6 +126,12 @@ public final class SignageVisualQa {
         GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),1280,720);
         mc.options.guiScale().set(1);mc.resizeDisplay();
         mc.getSingleplayerServer().execute(()->{
+            if(worldView==4) {
+                var level=mc.getSingleplayerServer().overworld();
+                // Remove the backing wall so the fifth view actually exposes reverse faces.
+                for(int x=-22;x<=22;x++)for(int y=4;y<=26;y++)
+                    level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,y,1),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+            }
             var player=mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());
             if(player!=null) {
                 player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);

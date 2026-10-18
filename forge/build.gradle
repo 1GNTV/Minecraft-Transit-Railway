@@ -99,6 +99,12 @@ tasks.register("setupFiles") {
 
 	copy {
 		outputs.upToDateWhen { false }
+		from "../fabric/src/main/resources/META-INF/licenses"
+		into "src/main/resources/META-INF/licenses"
+	}
+
+	copy {
+		outputs.upToDateWhen { false }
 		from "../fabric/src/main/resources/data"
 		into "src/main/resources/data"
 	}

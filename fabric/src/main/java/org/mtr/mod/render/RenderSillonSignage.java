@@ -22,11 +22,12 @@ import org.mtr.mod.data.ArrivalsCacheClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /** Cached texture signage. Rendered inside block entity shader context, never in a shadow pass. */
 public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSignage.BlockEntity> {
-    private static final Map<BlockSillonSignage.BlockEntity,DigitalFrame> digitalFrames=new WeakHashMap<>();
+    private static final Map<String,DigitalFrame> digitalFrames=new java.util.LinkedHashMap<>() {
+        @Override protected boolean removeEldestEntry(Map.Entry<String,DigitalFrame> eldest){return size()>256;}
+    };
     private static final class DigitalFrame {
         long sampled;
         String text="";
@@ -52,7 +53,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
         }
         return rows.length()==0?"Prochains départs indisponibles":rows.toString();
     }
-    private static Identifier routeDiagram(BlockPos pos,SillonSignageSpec spec){
+    public static Identifier routeDiagram(BlockPos pos,SillonSignageSpec spec){
         if(!spec.stationAuto()||!spec.body().isBlank()||!spec.rows().isEmpty())return null;
         if(!("route".equals(spec.style())||"platform".equals(spec.style())))return null;
         final long[] platform={-1L};
@@ -63,12 +64,8 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
         return DynamicTextureCache.instance.getRouteMap(platform[0],mapHeight>mapWidth,false,
             mapWidth/mapHeight,false).identifier;
     }
-    public RenderSillonSignage(Argument dispatcher){super(dispatcher);}
-    @Override public void render(BlockSillonSignage.BlockEntity entity,float tickDelta,GraphicsHolder g,int light,int overlay){
-        if(OptimizedRenderer.renderingShadows())return;
-        World world=entity.getWorld2();if(world==null)return;
-        BlockPos pos=entity.getPos2();
-        SillonSignageSpec spec=entity.document();
+    /** Shared live content for the editor preview and the world renderer. */
+    public static SillonSignageSpec resolveContent(BlockPos pos,SillonSignageSpec spec) {
         if(spec.stationAuto()){
             Station near=InitClient.findStation(pos);
             if(near!=null){
@@ -91,7 +88,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
             }
         }
         if("digital".equals(spec.style())&&spec.body().isBlank()&&spec.rows().isEmpty()){
-            DigitalFrame frame=digitalFrames.computeIfAbsent(entity,ignored->new DigitalFrame());
+            DigitalFrame frame=digitalFrames.computeIfAbsent(pos.getX()+":"+pos.getY()+":"+pos.getZ(),ignored->new DigitalFrame());
             long now=System.currentTimeMillis();
             if(now-frame.sampled>2000){
                 frame.text=digitalDepartures(pos);
@@ -99,6 +96,15 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
             }
             spec=spec.withBody(frame.text);
         }
+        return spec;
+    }
+    public RenderSillonSignage(Argument dispatcher){super(dispatcher);}
+    @Override public void render(BlockSillonSignage.BlockEntity entity,float tickDelta,GraphicsHolder g,int light,int overlay){
+        if(OptimizedRenderer.renderingShadows())return;
+        World world=entity.getWorld2();if(world==null)return;
+        BlockPos pos=entity.getPos2();
+        SillonSignageSpec spec=entity.document();
+        spec=resolveContent(pos,spec);
         Identifier diagram=routeDiagram(pos,spec);
         Identifier texture=DynamicTextureCache.instance.getSillonSignage(spec).identifier;
         Direction facing=IBlock.getStatePropertySafe(world,pos,BlockSillonSignage.FACING);

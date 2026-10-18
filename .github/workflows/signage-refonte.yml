@@ -26,6 +26,8 @@ jobs:
         with:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
       - run: pip install pillow pymupdf
       - name: Complete real reference material and the offline map
         run: python tools/complete_signage_refs.py
@@ -71,6 +73,7 @@ jobs:
           mkdir -p build/signage-delivery
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
+          python tools/verify_signage_jar.py
       - name: Prepare the native Minecraft visual test world
         run: |
           python tools/qa/install_signage_visual_qa.py

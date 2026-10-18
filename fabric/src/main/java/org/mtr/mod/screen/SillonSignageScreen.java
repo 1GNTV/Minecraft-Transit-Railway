@@ -4,6 +4,7 @@ import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.*;
 import org.mtr.mapping.tool.TextCase;
 import org.mtr.mod.InitClient;
+import org.mtr.mod.render.RenderSillonSignage;
 import org.mtr.mod.block.BlockSillonSignage;
 import org.mtr.mod.client.DynamicTextureCache;
 import org.mtr.mod.data.*;
@@ -22,7 +23,7 @@ public final class SillonSignageScreen extends ScreenExtension {
     private final Input filter;
     private final Deque<SillonSignageSpec> history=new ArrayDeque<>(),future=new ArrayDeque<>();
     private static SillonSignageSpec clipboard;
-    private SillonSignageSpec preview,lastRecorded;
+    private SillonSignageSpec preview,displayPreview,lastRecorded;
     private SillonSignageEditorLayout layout;
     private int tab,page,pages=1,buttonCount,tileCount,category;
     private boolean loading,ready,rowIcons,selectedOnly,closed;
@@ -32,7 +33,7 @@ public final class SillonSignageScreen extends ScreenExtension {
     private static final int BG=0xFF101722,PANEL=0xFF1A2432,EDGE=0xFF354354,INK=0xFFE9EFF7,MUTED=0xFFA5B3C5,ACCENT=0xFF5BBCE8;
 
     public SillonSignageScreen(BlockPos pos,BlockSillonSignage.BlockEntity entity) {
-        this.pos=pos;model=new SillonSignageEditorModel(entity.document());preview=lastRecorded=entity.document();
+        this.pos=pos;model=new SillonSignageEditorModel(entity.document());displayPreview=preview=lastRecorded=entity.document();
         for(var f:SillonSignageEditorModel.FIELDS.values()) {
             Input input=new Input(f.key(),f.label(),128);
             input.setText2(model.values.getOrDefault(f.key(),""));inputs.put(f.key(),input);
@@ -240,7 +241,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         for(Input f:inputs.values())if(f.visible)f.tick2();if(filter.visible)filter.tick2();
         String error=model.error();save.enabled(error.isBlank());
         long now=System.currentTimeMillis();
-        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();lastPreview=now;}
+        if(now-lastPreview>=200&&error.isBlank()) {preview=model.spec();displayPreview=RenderSillonSignage.resolveContent(pos,preview);lastPreview=now;}
         undo.enabled(!history.isEmpty()||!preview.equals(lastRecorded));redo.enabled(!future.isEmpty());
     }
     @Override public boolean mouseScrolled2(double mouseX,double mouseY,double amount) {
@@ -258,8 +259,19 @@ public final class SillonSignageScreen extends ScreenExtension {
         var p=layout.preview();rect(g,p.x()-3,p.y()-3,p.right()+3,p.bottom()+3,0xFF252E3B);
         for(int x=p.x();x<p.right();x+=12)for(int y=p.y();y<p.bottom();y+=12)
             rect(g,x,y,Math.min(x+12,p.right()),Math.min(y+12,p.bottom()),((x/12+y/12)%2==0)?0xFF293342:0xFF303C4D);
-        texture(g,DynamicTextureCache.instance.getSillonSignage(preview).identifier,
-            preview.width()/preview.height(),p.x()+4,p.y()+4,p.w()-8,p.h()-8);
+        texture(g,DynamicTextureCache.instance.getSillonSignage(displayPreview).identifier,
+            displayPreview.width()/displayPreview.height(),p.x()+4,p.y()+4,p.w()-8,p.h()-8);
+        Identifier diagram=RenderSillonSignage.routeDiagram(pos,displayPreview);
+        if(diagram!=null) {
+            float ratio=displayPreview.width()/displayPreview.height();
+            int dw=Math.min(p.w()-8,Math.round((p.h()-8)*ratio));
+            int dh=Math.min(p.h()-8,Math.round((p.w()-8)/ratio));
+            int left=p.x()+4+(p.w()-8-dw)/2,top=p.y()+4+(p.h()-8-dh)/2;
+            float pad=Math.min(displayPreview.width()*.08f,displayPreview.height()*.10f)*displayPreview.options().padding();
+            int xPad=Math.round(dw*pad/displayPreview.width()),yPad=Math.round(dh*pad/displayPreview.height());
+            GuiDrawing draw=new GuiDrawing(g);draw.beginDrawingTexture(diagram);
+            draw.drawTexture(left+xPad,top+Math.round(dh*.27f),left+dw-xPad,top+dh-yPad,0,0,1,1);draw.finishDrawingTexture();
+        }
         if(width>=720) {
             label(g,"APERÇU DE FACE",p.x(),p.y()-14,p.w(),MUTED);
             label(g,preview.width()+" × "+preview.height()+" blocs",p.x(),layout.pagerY()+5,p.w(),MUTED);
