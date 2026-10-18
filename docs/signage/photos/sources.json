@@ -24,5 +24,15 @@
     "sha256": "5dd0ff815c75c0072a6623bdddde54fb9c06367a722e7f5a50ab938398702215",
     "date": "01.2026",
     "credit": "RATP / BDC Conseil"
+  },
+  "regional-plan": {
+    "url": "https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf",
+    "date": "2026",
+    "credit": "Île-de-France Mobilités",
+    "resource_sha256": "c43bfd885109b536a2d532e64a90e0f863a296f2bd02c4a90321fa7cf6df3a27"
+  },
+  "derived-icons": {
+    "source": "MTR France pinned catalog",
+    "changes": "4 quadrants extracted from ratp_assistance; ratp_logo white alpha variant"
   }
 }
