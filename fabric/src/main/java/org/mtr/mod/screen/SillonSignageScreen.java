@@ -163,6 +163,10 @@ public final class SillonSignageScreen extends ScreenExtension {
             }
         }
     }
+    private SillonSignageSpec templateDocument(SillonSignageSpec template){
+        var current=model.spec().binding();var next=template.binding();
+        return template.withBinding(new SillonSignageBinding(current.stationId(),current.platformId(),current.routeId(),current.mode(),next.scope(),next.layout(),current.exitFilter(),current.service(),current.arrows(),current.lineColors()));
+    }
     private void models(SillonSignageEditorLayout.Rect area) {
         filter.move(area.x(),area.y(),area.w());filter.visible=true;
         String q=SillonSignageIconCatalog.normalize(filter.getText2());
@@ -171,8 +175,8 @@ public final class SillonSignageScreen extends ScreenExtension {
         pages=Math.max(1,(list.size()+per-1)/per);page=Math.min(page,pages-1);
         for(int i=0;i<per&&page*per+i<list.size();i++) {
             var p=list.get(page*per+i);int cw=(area.w()-4*(cols-1))/cols;
-            Button b=tile(p.name(),()->{replace(p.document().withBinding(model.spec().binding()));status=p.reference();},area.x()+(i%cols)*(cw+4),area.y()+24+(i/cols)*36,cw);
-            b.thumbnail=RenderSillonSignage.resolveContent(pos,p.document().withBinding(model.spec().binding()));b.detail=SillonSignagePresets.label(p.document().style());
+            Button b=tile(p.name(),()->{replace(templateDocument(p.document()));status=p.reference();},area.x()+(i%cols)*(cw+4),area.y()+24+(i/cols)*36,cw);
+            b.thumbnail=RenderSillonSignage.resolveContent(pos,templateDocument(p.document()));b.detail=SillonSignagePresets.label(p.document().style());
         }
     }
     private void rowToolbar(SillonSignageEditorLayout.Rect a) {
@@ -247,6 +251,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         button("Association MTR",()->selectTab(6),a.x(),a.y(),a.w()/2-3);
         button("Contenu manuel",()->{replace(displayPreview.manual());status="Contenu figé : modification manuelle";},a.x()+a.w()/2+3,a.y(),a.w()/2-3);
         List<SillonSignageRow> rows=displayPreview.rows();
+        if(rows.isEmpty()&&!displayPreview.plan().lines().isEmpty())rows=displayPreview.plan().lines().get(0).stops().stream().map(stop->new SillonSignageRow("text","",stop.name(),stop.detail(),stop.icons(),-1)).toList();
         if(rows.isEmpty())rows=List.of(new SillonSignageRow("text","",displayPreview.title(),displayPreview.subtitle(),displayPreview.icons(),-1));
         int per=Math.max(1,(a.h()-24)/36);pages=Math.max(1,(rows.size()+per-1)/per);page=Math.min(page,pages-1);
         for(int i=0;i<per&&page*per+i<rows.size();i++){
@@ -360,7 +365,7 @@ public final class SillonSignageScreen extends ScreenExtension {
             }
             else label(g,"Ajoutez une ligne avec +.",a.x(),a.y()+30,a.w(),MUTED);
         }
-        if(tab!=3||!networkPicker.isBlank())label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
+        if(tab!=3||"Oui".equals(model.values.get("auto"))||!networkPicker.isBlank())label(g,"Page "+(page+1)+" / "+pages,a.x()+38,layout.pagerY()+6,a.w()-76,MUTED);
         
         super.render(g,mouseX,mouseY,delta);
     }

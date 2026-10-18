@@ -32,9 +32,9 @@ public final class SillonSignagePlanPainter {
             g.draw(new Line2D.Float(spine,top+(i+.5f)*step,spine,top+(i+1.5f)*step));
         }
         for(int i=0;i<stops.size();i++){
-            var stop=stops.get(i);float cy=top+(i+.5f)*step,r=Math.min(step*.17f,stroke*.85f),left=spine+Math.max(step*.38f,w*.025f);
+            var stop=stops.get(i);float cy=top+(i+.5f)*step,r=Math.min(step*.12f,stroke*.62f),left=spine+Math.max(step*.38f,w*.025f);
             boolean terminus=i==0||i==stops.size()-1;
-            g.setColor(new Color(terminus?line.color():s.background()));g.fill(new Ellipse2D.Float(spine-r,cy-r,r*2,r*2));
+            g.setColor(new Color(terminus?line.color():0xD4D5D7));g.fill(new Ellipse2D.Float(spine-r,cy-r,r*2,r*2));
             g.setColor(new Color(i==here?s.foreground():line.color()));g.setStroke(new BasicStroke(Math.max(1.5f,stroke*.28f)));g.draw(new Ellipse2D.Float(spine-r,cy-r,r*2,r*2));
             if(i==here){g.setStroke(new BasicStroke(2));g.draw(new Ellipse2D.Float(spine-r-3,cy-r-3,r*2+6,r*2+6));}
             int ink=here>=0&&i<here?0x85878B:s.foreground();
@@ -56,11 +56,11 @@ public final class SillonSignagePlanPainter {
             g.setColor(new Color(here>=0&&i<here?0xA2A4A8:line.color()));g.setStroke(new BasicStroke(stroke));
             g.draw(new Line2D.Float(left+i*step,y,left+(i+1)*step,y));
         }
-        float size=Math.min(h*.105f,Math.max(8,step*.48f));
+        float size=Math.min(h*.085f,Math.max(6,step*.25f));
         for(int i=0;i<stops.size();i++){
             var stop=stops.get(i);float x=left+i*step;boolean end=i==0||i==stops.size()-1;
-            g.setColor(new Color(here>=0&&i<here?0xA7A9AD:end?0x83868B:s.background()));g.fill(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
-            g.setColor(new Color(i==here?s.foreground():line.color()));g.setStroke(new BasicStroke(Math.max(1.5f,stroke*.4f)));g.draw(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
+            g.setColor(new Color(here>=0&&i<here?0xA7A9AD:0xC0C2C5));g.fill(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
+            g.setColor(new Color(i==here?s.foreground():0x96999D));g.setStroke(new BasicStroke(Math.max(1.5f,stroke*.4f)));g.draw(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
             Graphics2D name=(Graphics2D)g.create();
             try{
                 name.translate(x,y-r-h*.025f);name.rotate(Math.toRadians(-32));

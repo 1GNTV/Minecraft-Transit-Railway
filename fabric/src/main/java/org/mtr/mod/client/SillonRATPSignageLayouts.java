@@ -121,7 +121,7 @@ public final class SillonRATPSignageLayouts {
         if(!row.icons().isBlank()) {
             float height=h*.62f*s.options().iconScale();
             float maxIconW=Math.min((right-left)*(row.text().isBlank()?.95f:.37f),h*4.8f);
-            float used=icons(g,row.icons(),left,y+(h-height)/2,maxIconW,height,height);
+            float used=icons(g,contrastSymbols(row.icons(),bg,fg),left,y+(h-height)/2,maxIconW,height,height);
             left+=used+pad;
         }
         boolean detail=!row.detail().isBlank();
@@ -270,7 +270,7 @@ public final class SillonRATPSignageLayouts {
         for(int i=0;i<rows.size();i++){
             var row=rows.get(i);float y=head+i*rh,pad=w*.025f;
             if(i%2==1){g.setColor(new Color(s.background()).brighter());g.fill(new Rectangle2D.Float(0,y,w,rh));}
-            icons(g,row.icons(),pad,y+rh*.12f,w*.14f,rh*.76f,rh*.68f*s.options().iconScale());
+            icons(g,contrastSymbols(row.icons(),s.background(),s.foreground()),pad,y+rh*.12f,w*.14f,rh*.76f,rh*.68f*s.options().iconScale());
             title(g,s,row.text(),rh*.44f,s.foreground(),w*.19f,y,w*.55f,rh,"left");
             text(g,row.number(),face(s,true,rh*.39f),s.foreground(),w*.76f,y,w*.21f,rh,"right");
         }

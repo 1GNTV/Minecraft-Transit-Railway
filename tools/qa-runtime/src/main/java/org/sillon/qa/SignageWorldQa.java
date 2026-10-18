@@ -29,13 +29,13 @@ public final class SignageWorldQa {
                     ||!sign.document().equals(SillonSignagePresets.ALL.get(i).document()))
                     throw new IllegalStateException("Dedicated server fixture mismatch "+i);
             }
-            System.out.println("SIGNAGE_QA_FIXTURES_PLACED 22 native block entities verified");
+            System.out.println("SIGNAGE_QA_FIXTURES_PLACED 23 native block entities verified");
         }catch(Exception e){e.printStackTrace();System.exit(2);}
     }
     private static void tick(TickEvent.ServerTickEvent event) {
         if(server==null||event.phase!=TickEvent.Phase.END||++ticks<20)return;
         try {
-            Files.writeString(Path.of("signage-world-qa-success.txt"),"22 real block entities verified on the dedicated Forge server.");
+            Files.writeString(Path.of("signage-world-qa-success.txt"),"23 real block entities verified on the dedicated Forge server.");
             System.out.println("SIGNAGE_QA_DEDICATED_SUCCESS");
             server.halt(false);server=null;
         }catch(Exception e){e.printStackTrace();System.exit(2);}

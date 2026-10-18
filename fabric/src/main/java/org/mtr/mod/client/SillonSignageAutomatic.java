@@ -107,7 +107,7 @@ public final class SillonSignageAutomatic {
         Station station=stations.get(stop.stationId());Set<Long> group=new HashSet<>();group.add(stop.stationId());if(station!=null)group.addAll(station.connected());
         Map<String,String> connections=new LinkedHashMap<>();
         for(Line line:network.lines())if(!key(line).equals(key(own))&&line.stops().stream().anyMatch(s->group.contains(s.stationId())))
-            connections.putIfAbsent(key(line),badge(line,line.mode()));
+            {connections.putIfAbsent("mode/"+line.mode(),SillonSignageLineBadge.modeIcon(line.mode()));connections.putIfAbsent(key(line),badge(line,line.mode()));}
         return new SillonSignagePlan.Stop(stop.stationId(),stop.name(),station==null?"":station.detail(),String.join(",",connections.values()),
             station==null?0:station.center().x(),station==null?0:station.center().z(),station!=null);
     }

@@ -51,9 +51,21 @@ public final class SignageRegression {
         check(exit.rows().size()==2&&exit.rows().get(1).text().equals("Place des Tilleuls"),"Actual MTR exits");
         check(SillonSignageNetworkOrdering.compare("2","10")<0,"Natural exit numbering");
         check(SillonSignageAutomatic.resolve(preset("services"),network(false),context()).document().rows().get(0).text().equals("Ascenseur"),"Actual service");
+        for(String mode:SillonSignageBinding.MODES)check(SillonSignagePainter.icon(SillonSignageLineBadge.modeIcon(mode))!=null,"Actual mode asset "+mode);
         String token=new SillonSignageLineBadge("metro",0x123456,"é😀".repeat(20)).token();
         check(SillonSignageLineBadge.parse(token)!=null&&SillonSignageRow.normalizeIcons(token).equals(token),"Unicode custom badges stay valid");
         System.out.println("PASS automatic data for all 18 families, arbitrary network edits, IDs, platform scope, exits, services and interchange graph");
+    }
+    private static void renderDenseRoute(Path out)throws Exception {
+        List<SillonSignagePlan.Stop> stops=new ArrayList<>();
+        String[] names={"Bois des Forges","Parc des Saules","Université des Arts","Les Ateliers","Jardin des Halles","Manufacture","Hôtel de Ville","Place des Tilleuls","Musée des Rives","Cours des Verriers","Les Docks","Quai des Écluses","Port des Brumes","Grand Théâtre","Rochefontaine","Parc du Belvédère","Cité des Jardins","Val des Sources","Les Amandiers","Monts de Lumière","Aérogare du Levant"};
+        for(int i=0;i<names.length;i++)stops.add(new SillonSignagePlan.Stop(i+1,names[i],i%5==0?"Quartier des Arts":"",i%3==0?"ratp_rer,"+new SillonSignageLineBadge("rer",0xC24C9A,"R9").token():"",i*100,i*40,true));
+        for(String orientation:List.of("horizontal","vertical")){
+            var spec=SillonSignagePresets.ALL.stream().map(p->p.document()).filter(d->d.style().equals("route")&&d.binding().layout().equals(orientation)).findFirst().orElseThrow();
+            var plan=new SillonSignagePlan(List.of(new SillonSignagePlan.Line(101,"X42","metro",0x15865A,stops)),6,orientation);
+            var resolved=spec.materialize("Aérogare du Levant","","ratp_metro,"+new SillonSignageLineBadge("metro",0x15865A,"X42").token(),0x15865A,List.of(),plan);
+            ImageIO.write(SillonSignagePainter.render(resolved),"png",out.resolve("dense-21-stops-"+orientation+".png").toFile());
+        }
     }
     public static void main(String[] args)throws Exception {
         automaticChecks();
@@ -88,6 +100,7 @@ public final class SignageRegression {
             im.flush();index++;
         }
         Files.writeString(Path.of("build/signage-qa/fixtures-commands.txt"),commands.toString());
+        renderDenseRoute(out);
         g.dispose();ImageIO.write(atlas,"png",Path.of("build/signage-qa/panel-atlas.png").toFile());
         check(families.containsAll(SillonSignageSpec.STYLES),"Every family has a preset");
         for(var entry:SillonSignageIconCatalog.ENTRIES)check(SillonSignagePainter.icon(entry.id())!=null,"Missing icon "+entry.id());

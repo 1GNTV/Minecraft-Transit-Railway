@@ -12,5 +12,5 @@ public record SillonSignageLineBadge(String mode,int color,String label) {
             return new SillonSignageLineBadge(p[1],Integer.parseInt(p[2],16),new String(HexFormat.of().parseHex(p[3]),StandardCharsets.UTF_8));
         }catch(RuntimeException e){return null;}
     }
-    public static String modeIcon(String mode){return switch(mode){case "rer"->"ratp_rer";case "tram"->"idfm_tram_2";case "bus"->"idfm_bus_2";case "train"->"idfm_train_2";case "cable"->"idfm_cable_2";case "boat"->"idfm_ferry_2";case "air"->"idfm_aeroport";default->"ratp_metro";};}
+    public static String modeIcon(String mode){return switch(mode){case "rer"->"ratp_rer";case "tram"->"idfm_tram_2";case "bus"->"idfm_bus_2";case "train"->"idfm_train_2";case "cable"->"idfm_cable_2";case "boat"->"idfm_ferry_2";case "air"->"ratp_aeroport";default->"ratp_metro";};}
 }

@@ -20,7 +20,9 @@ import java.util.*;
 /** CI-only helper compiled as a separate mod against the assembled deliverable. */
 public final class SignageVisualQa {
     private static int stage=-1,tick;
-    private static boolean started;
+    private static boolean started,opening;
+    private static int waiting;
+    private static String lastScreen="";
     private static int worldView=-1,networkPhase=-1;
     private static final int[][] SIZES={{960,540,1},{960,540,2},{640,480,2}};
     public static void register(){MinecraftForge.EVENT_BUS.addListener(SignageVisualQa::tick);}
@@ -28,6 +30,9 @@ public final class SignageVisualQa {
         if(event.phase!=TickEvent.Phase.END)return;
         Minecraft mc=Minecraft.getInstance();
         if(!started) {
+            String current=mc.screen==null?"none":mc.screen.getClass().getSimpleName();
+            if(!current.equals(lastScreen)){System.out.println("SIGNAGE_QA_STARTUP "+current);lastScreen=current;}
+            if(!opening&&mc.screen instanceof TitleScreen&&mc.getOverlay()==null&&++waiting>100){opening=true;mc.createWorldOpenFlows().loadLevel("SignageQA");}
             if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
             started=true;stage=0;tick=0;
             if(Boolean.getBoolean("sillon.qa.shader")){worldView=0;mc.options.hideGui=true;world(mc);}else setup(mc);return;

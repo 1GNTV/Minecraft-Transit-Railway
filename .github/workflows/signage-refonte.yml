@@ -74,6 +74,8 @@ jobs:
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
           python tools/verify_signage_jar.py
+          javac --release 17 -cp build/signage-headless/classes:build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar -d build/signage-headless/classes tools/signage/SignageMtrIntegration.java
+          java -cp build/signage-headless/classes:build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar SignageMtrIntegration
       - uses: actions/upload-artifact@v4
         if: always() && steps.build.outcome == 'success'
         with:

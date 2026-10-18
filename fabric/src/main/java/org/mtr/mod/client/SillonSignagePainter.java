@@ -75,6 +75,15 @@ public final class SillonSignagePainter {
         }).orElse(null);
     }
     public static BufferedImage icon(String id) {
+        if(id!=null&&id.startsWith("ink_")){
+            String[] parts=id.split("_",3);
+            if(parts.length==3&&parts[1].matches("[0-9a-f]{6}")&&Set.of("ratp_metro","ratp_rer").contains(parts[2]))return IMAGES.computeIfAbsent(id,key->{
+                BufferedImage source=icon(parts[2]);if(source==null)return Optional.empty();
+                BufferedImage result=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);int colour=Integer.parseInt(parts[1],16);
+                for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)result.setRGB(x,y,(source.getRGB(x,y)&0xFF000000)|colour);
+                return Optional.of(result);
+            }).orElse(null);
+        }
         SillonSignageLineBadge badge=id==null?null:SillonSignageLineBadge.parse(id);
         if(badge!=null)return IMAGES.computeIfAbsent(id,key->Optional.of(lineBadge(badge))).orElse(null);
         if(id==null||!id.matches("[a-zA-Z0-9_/-]+"))return null;
@@ -128,6 +137,11 @@ public final class SillonSignagePainter {
     public static List<String> ids(String text) {
         if(text==null||text.isBlank())return List.of();
         return Arrays.stream(text.split(",")).map(String::strip).filter(x->!x.isBlank()).limit(16).toList();
+    }
+    public static String contrastSymbols(String symbols,int background,int foreground){
+        double luminance=.2126*((background>>16)&255)+.7152*((background>>8)&255)+.0722*(background&255);
+        if(luminance>=100)return symbols;
+        return String.join(",",ids(symbols).stream().map(id->Set.of("ratp_metro","ratp_rer").contains(id)?"ink_"+String.format(Locale.ROOT,"%06x",foreground&0xFFFFFF)+"_"+id:id).toList());
     }
     /** Returns width consumed. Keeps source aspect ratio and fits the entire group. */
     public static float icons(Graphics2D g,String text,float x,float y,float maxW,float maxH,float preferred) {
