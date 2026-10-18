@@ -10,7 +10,7 @@ java=(ROOT/"fabric/src/main/java/org/mtr/mod/render/NextFrameBenchmark.java").re
 main=(ROOT/"fabric/src/main/java/org/mtr/mod/render/MainRenderer.java").read_text()
 assert "NextFrameBenchmark.sample(System.nanoTime())" in main
 assert "if (OptimizedRenderer.renderingShadows())" in main
-java=java.replace("package org.mtr.mod.render;", "").replace("public final class NextFrameBenchmark", "final class NextFrameBenchmark")
+java=java.replace("package org.mtr.mod.render;", "").replace("import java.util.Arrays;", "").replace("Arrays.", "java.util.Arrays.").replace("public final class NextFrameBenchmark", "final class NextFrameBenchmark")
 harness=r"""
 public class NextFrameBenchmarkCheck {
  static void check(boolean ok,String msg){if(!ok)throw new AssertionError(msg);}
