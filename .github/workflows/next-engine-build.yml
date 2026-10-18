@@ -125,7 +125,9 @@ jobs:
       - name: Check GPU backend wiring
         run: python3 tools/test_solis_gpu_wiring.py
       - name: Check camera culling regression
-        run: python3 tools/test_next_rail_forward.py
+        run: |
+          python3 tools/test_next_rail_forward.py
+          python3 tools/test_next_render_safety.py
       - name: Build NEXT experimental Fabric
         run: ./gradlew fabric:build -PminecraftVersion=1.20.4 --stacktrace
       - name: Preserve JCM compatibility

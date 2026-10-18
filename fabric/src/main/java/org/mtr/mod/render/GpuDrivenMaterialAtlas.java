@@ -47,7 +47,7 @@ public final class GpuDrivenMaterialAtlas {
     private static final int MAX_ATLASES=12, MAX_SOURCES=64, MAX_VERTEX_BYTES=32*1024*1024;
     private static final int MAX_INDEX_BYTES=16*1024*1024;
     private static final boolean ENABLED=SillonMegaEngine.GPU_DRIVEN
-        && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.materialAtlas","true"));
+        && Boolean.getBoolean("mtr.mega.materialAtlas");
     private static final VertexAttributeType[] TYPES=VertexAttributeType.values();
     private static final VertexAttributeType[] VARYING={
         VertexAttributeType.COLOR,VertexAttributeType.UV_LIGHTMAP,VertexAttributeType.UV_OVERLAY

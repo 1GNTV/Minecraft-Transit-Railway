@@ -151,6 +151,13 @@ public final class RenderPANAMPIDS<T extends BlockPanamDisplayEntity> extends Bl
         // server arrivals via extra freshness, distance or de-duplication filters.
         List<ArrivalResponse> selected=PanamArrivalSelection.select(
                 arrivals,entity.maxArrivals,entity.getDisplayPage(),entity::getHideArrival);
+        // Empty/hidden departures must discard stale route identity and STOP state.
+        if(selected.isEmpty()){
+            panel.line="?";
+            panel.destination="En attente";
+            panel.color=0x808080;
+            panel.activeRouteId=-1;
+        }
         int slot=0;
         for(ArrivalResponse a:selected){
             long at=PanamArrivalSelection.clientArrivalMillis(

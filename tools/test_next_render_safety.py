@@ -21,4 +21,16 @@ assert "horizontalForward>0.35" in gpu
 assert "d2>1024.0" in gpu
 assert "dot(delta.xz,mtr_Forward.xz)<-radius*horizontalForward" in gpu
 assert "words[id*5u+1u]=outside?0u:1u;" in gpu
-print("PASS: colored rail lighting, conservative GPU rail culling, shader indirect opt-in, fallback")
+instances=(root/"GpuDrivenInstanceRenderer.java").read_text(encoding="utf-8")
+atlas=(root/"GpuDrivenMaterialAtlas.java").read_text(encoding="utf-8")
+panam=(root/"RenderPANAMPIDS.java").read_text(encoding="utf-8")
+assert 'Boolean.getBoolean("mtr.mega.railCompute")' in gpu
+assert 'Boolean.getBoolean("mtr.mega.computeCull")' in instances
+assert 'Boolean.getBoolean("mtr.mega.materialAtlas")' in atlas
+selected=panam.index("List<ArrivalResponse> selected=PanamArrivalSelection.select(")
+reset=panam.index("if(selected.isEmpty())",selected)
+loop=panam.index("for(ArrivalResponse a:selected)",reset)
+assert selected<reset<loop
+for token in ('panel.line="?";','panel.destination="En attente";','panel.color=0x808080;','panel.activeRouteId=-1;'):
+    assert token in panam[reset:loop],token
+print("PASS: rail lighting, culling, compute opt-in, stale PANAM route reset, fallback")

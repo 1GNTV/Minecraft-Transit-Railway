@@ -74,7 +74,7 @@ public final class GpuDrivenInstanceRenderer {
 
     public static boolean potential(RenderCallData call) {
         return SillonMegaEngine.GPU_DRIVEN && SillonMegaEngine.INSTANCES
-            && !"false".equalsIgnoreCase(System.getProperty("mtr.mega.computeCull","true"))
+            && Boolean.getBoolean("mtr.mega.computeCull")
             && (call.mtr$family()==RenderPipelineMetrics.Family.TRAIN
              || call.mtr$family()==RenderPipelineMetrics.Family.RAIL)
             && Utilities.canUseCustomShader() && !OptimizedRenderer.renderingShadows()
