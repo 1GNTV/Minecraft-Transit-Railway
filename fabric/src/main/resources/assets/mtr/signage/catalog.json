@@ -1,0 +1,3978 @@
+[
+  {
+    "id": "idfm_bus_1",
+    "path": "signage/icons/idfm_bus_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_bus_1.png",
+    "sha256": "235044d4205b890dca89b511a366250ca1afd63c3b1ce85618ce85ccfe85c740"
+  },
+  {
+    "id": "idfm_bus_2",
+    "path": "signage/icons/idfm_bus_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_bus_2.png",
+    "sha256": "a6b42f37f4f950d56a5d230f30dc867c7156de4b38469a250145ff08ae368bd5"
+  },
+  {
+    "id": "idfm_bus_tram",
+    "path": "signage/icons/idfm_bus_tram.png",
+    "width": 401,
+    "height": 401,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_bus_tram.png",
+    "sha256": "819f4b67e8d698283204243ec4bc1f93682d0c72fb63f51ddff312166362234f"
+  },
+  {
+    "id": "idfm_bus_tram_blanc",
+    "path": "signage/icons/idfm_bus_tram_blanc.png",
+    "width": 401,
+    "height": 401,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_bus_tram_blanc.png",
+    "sha256": "f9d96e2c1668d6a8569b735c2e3602dca25d8bb442e1fd9f817c2264811a258d"
+  },
+  {
+    "id": "idfm_c1",
+    "path": "signage/icons/idfm_c1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_c1.png",
+    "sha256": "768433d31706dd93d3dbbfafbc6264ac1f47bdee43e69823c171bb909f226ee8"
+  },
+  {
+    "id": "idfm_c1_2",
+    "path": "signage/icons/idfm_c1_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_c1_2.png",
+    "sha256": "e74299051af8c47e479f80e81f155576866a68ebe50628706460cc8928bdacad"
+  },
+  {
+    "id": "idfm_cable_1",
+    "path": "signage/icons/idfm_cable_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_cable_1.png",
+    "sha256": "4615ab6b856791f579c309f2369c33114076a8cb90ee9b07ab0b0a8bb6749754"
+  },
+  {
+    "id": "idfm_cable_2",
+    "path": "signage/icons/idfm_cable_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_cable_2.png",
+    "sha256": "1be2f2b060cda5a4618eb76c70c47d85b86b732c9e55bf748a1bdfa24ba449df"
+  },
+  {
+    "id": "idfm_cdgex",
+    "path": "signage/icons/idfm_cdgex.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_cdgex.png",
+    "sha256": "90071353d853eecc17491e153f05ad5b8c35cab0b69c965eb58f656232431eed"
+  },
+  {
+    "id": "idfm_covoit_1",
+    "path": "signage/icons/idfm_covoit_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_covoit_1.png",
+    "sha256": "29fcbd8ca4f122d63ab940b46f07c12a3390503d66fac5ad377d7f29266134c4"
+  },
+  {
+    "id": "idfm_covoit_2",
+    "path": "signage/icons/idfm_covoit_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_covoit_2.png",
+    "sha256": "1d6816ca30be3f5d44629fc3f48b32029e3cf42e3848e7491c8f5d34e9e41743"
+  },
+  {
+    "id": "idfm_down",
+    "path": "signage/icons/idfm_down.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_down.png",
+    "sha256": "a39495acc1888cffbe773a7349fd230565654a8bff97419d8f3e911f1fed193d"
+  },
+  {
+    "id": "idfm_down_left",
+    "path": "signage/icons/idfm_down_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_down_left.png",
+    "sha256": "75be3fcfe1faf371d1674027f50b499e27895507a176d52ed7154b1fe79a542b"
+  },
+  {
+    "id": "idfm_ferry_1",
+    "path": "signage/icons/idfm_ferry_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_ferry_1.png",
+    "sha256": "a3edf7aa0f5979e958152eeca8079a0a6243c57ef3a85477a2c7b7cd95eee86f"
+  },
+  {
+    "id": "idfm_ferry_2",
+    "path": "signage/icons/idfm_ferry_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_ferry_2.png",
+    "sha256": "7a3184a49f8f57be4b988af5ba5e5711f0b050fb0ed1ec2d8d1891292c748b32"
+  },
+  {
+    "id": "idfm_left",
+    "path": "signage/icons/idfm_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_left.png",
+    "sha256": "d076b21f69ca6890bc1429d1c47a358e78d7403755ce505693aa002a102d798e"
+  },
+  {
+    "id": "idfm_logo",
+    "path": "signage/icons/idfm_logo.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_logo.png",
+    "sha256": "ff4436f73b70c147579b07ecfca8bb6a25a1cbef23067dc02d700948b4bd3c01"
+  },
+  {
+    "id": "idfm_m1",
+    "path": "signage/icons/idfm_m1.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m1.png",
+    "sha256": "7be47428ccfb451d936372d199a637cd218a9d6ecff2fe08d1e1d7f30c2198e9"
+  },
+  {
+    "id": "idfm_m10",
+    "path": "signage/icons/idfm_m10.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m10.png",
+    "sha256": "f43d6a4bae7277d7abd2e0808e7c28e27a4f68f395b9b879d787c2d1962be606"
+  },
+  {
+    "id": "idfm_m11",
+    "path": "signage/icons/idfm_m11.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m11.png",
+    "sha256": "a0307eae20f1f890d68f8d2489a04c5a8b6237521f1d004b57a942eff63c52af"
+  },
+  {
+    "id": "idfm_m12",
+    "path": "signage/icons/idfm_m12.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m12.png",
+    "sha256": "ef5b0cad76c16900ca134c212ee5da3ed85563ffec8745958e2805dfb55ee7f0"
+  },
+  {
+    "id": "idfm_m13",
+    "path": "signage/icons/idfm_m13.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m13.png",
+    "sha256": "f03d83a2dd1010c42ca000c8764d07e6efc6feef9bf5c17d07f279e81dc1b2b2"
+  },
+  {
+    "id": "idfm_m14",
+    "path": "signage/icons/idfm_m14.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m14.png",
+    "sha256": "4960c3948fbb1b3f51d79fed61676e31bbeada4de731a3e3cde6eb7ea80fbfda"
+  },
+  {
+    "id": "idfm_m15",
+    "path": "signage/icons/idfm_m15.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m15.png",
+    "sha256": "b13a1ff91051ed91bca546c0ff993dff3113ddab7c85823a0af6643ed0268702"
+  },
+  {
+    "id": "idfm_m16",
+    "path": "signage/icons/idfm_m16.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m16.png",
+    "sha256": "91eb7a09ea89a4526baa77ddd1a0146867af544528d41ca17a236ca985936947"
+  },
+  {
+    "id": "idfm_m17",
+    "path": "signage/icons/idfm_m17.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m17.png",
+    "sha256": "dc75b603f7f89a1ef5907d2f7a151d6016824327483dec89d73c4217047d6890"
+  },
+  {
+    "id": "idfm_m18",
+    "path": "signage/icons/idfm_m18.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m18.png",
+    "sha256": "b6f8897f9bb86d5397aac6f696d0c3f8b92af955795bc48272ee721725099979"
+  },
+  {
+    "id": "idfm_m2",
+    "path": "signage/icons/idfm_m2.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m2.png",
+    "sha256": "5ab50547109371db4ee62a93d92e3ac4aa04207b14e68baaadbc628f58b8d185"
+  },
+  {
+    "id": "idfm_m3",
+    "path": "signage/icons/idfm_m3.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m3.png",
+    "sha256": "3dbed0ea1050f107bdf57dd5581a010fe333e900997ac804472ace270d906ada"
+  },
+  {
+    "id": "idfm_m3b",
+    "path": "signage/icons/idfm_m3b.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m3b.png",
+    "sha256": "68b0fed2f3927d8ff236d8f2f042dc3af73a108f24910eebf72bb5c7671978ed"
+  },
+  {
+    "id": "idfm_m4",
+    "path": "signage/icons/idfm_m4.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m4.png",
+    "sha256": "4fc3ea520fc94a38e9e3943d8f4012dbe66db80f99a7e68cfa382b2cd6272538"
+  },
+  {
+    "id": "idfm_m5",
+    "path": "signage/icons/idfm_m5.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m5.png",
+    "sha256": "21e26f1df995c0ac3ac20c7c265528db4db9851ea45edf792762741194f91659"
+  },
+  {
+    "id": "idfm_m6",
+    "path": "signage/icons/idfm_m6.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m6.png",
+    "sha256": "e4133fd87760fa39b99b91c9ba868a56679fa11939f49fb79b6aee7a773df75c"
+  },
+  {
+    "id": "idfm_m7",
+    "path": "signage/icons/idfm_m7.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m7.png",
+    "sha256": "5ef9a239fb70100a0f464280fe1062c4ee4b6dd3f17ed0cf230d72aa278b1530"
+  },
+  {
+    "id": "idfm_m7b",
+    "path": "signage/icons/idfm_m7b.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m7b.png",
+    "sha256": "1a40c770047a1a3697581847337e8521357efe5a22090645bd44caefa5523fed"
+  },
+  {
+    "id": "idfm_m8",
+    "path": "signage/icons/idfm_m8.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m8.png",
+    "sha256": "f11184435f6c5d87ff82f992eabb8f5a127847d92990146e69b73dd50a9c00f7"
+  },
+  {
+    "id": "idfm_m9",
+    "path": "signage/icons/idfm_m9.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_m9.png",
+    "sha256": "7b662145a1641ce7417972005ac9a95a2ef4ea1e7a32c77a6044c32c3c9ad54b"
+  },
+  {
+    "id": "idfm_metro_1",
+    "path": "signage/icons/idfm_metro_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_metro_1.png",
+    "sha256": "1c1bf1ae294671a994eb88f648804cfe7e99a67ec14b60479af2fe3fad9d8b74"
+  },
+  {
+    "id": "idfm_metro_2",
+    "path": "signage/icons/idfm_metro_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_metro_2.png",
+    "sha256": "5007b900903bad064eaaa0a02cfbf0feeb371c47b77df71c819c48112bf151eb"
+  },
+  {
+    "id": "idfm_metro_train_rer",
+    "path": "signage/icons/idfm_metro_train_rer.png",
+    "width": 401,
+    "height": 401,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_metro_train_rer.png",
+    "sha256": "6fe5658794b5b5d39f7159cb412fb153971a261bc16db19078cc461abf07dd9e"
+  },
+  {
+    "id": "idfm_metro_train_rer_blanc",
+    "path": "signage/icons/idfm_metro_train_rer_blanc.png",
+    "width": 401,
+    "height": 401,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_metro_train_rer_blanc.png",
+    "sha256": "dc2b20c80f6c6582792574ec109a32759ec673c231de8e70c1a7fda5ccf60158"
+  },
+  {
+    "id": "idfm_navigo",
+    "path": "signage/icons/idfm_navigo.png",
+    "width": 161,
+    "height": 161,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_navigo.png",
+    "sha256": "55799baf001c6d81ad6dd73b8f39a12b2634b4da1a25d2542347a8ed7de894ae"
+  },
+  {
+    "id": "idfm_noctilien_1",
+    "path": "signage/icons/idfm_noctilien_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_noctilien_1.png",
+    "sha256": "47f2ed362189b4828e918e7b0558bd4e11be2edcb1d991f36bf853fcaea18bc3"
+  },
+  {
+    "id": "idfm_noctilien_2",
+    "path": "signage/icons/idfm_noctilien_2.png",
+    "width": 160,
+    "height": 160,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_noctilien_2.png",
+    "sha256": "bbb56e5756111b9205d0323a03c486134ad7231069e5af1d26f064f6f6ea234f"
+  },
+  {
+    "id": "idfm_pmr",
+    "path": "signage/icons/idfm_pmr.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_pmr.png",
+    "sha256": "65d695f6520872b9cb15302caa6af4d218a3e074c162353f830adc9236dd1630"
+  },
+  {
+    "id": "idfm_rer_1",
+    "path": "signage/icons/idfm_rer_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_1.png",
+    "sha256": "24f3c7f84381a53abdb42afd7e0100796e106f55e339c6d59cf1af3441800a0f"
+  },
+  {
+    "id": "idfm_rer_2",
+    "path": "signage/icons/idfm_rer_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_2.png",
+    "sha256": "425c18fb618b038bd2157639df5d280922ad9bad3034d2b3344b02831044dc36"
+  },
+  {
+    "id": "idfm_rer_a",
+    "path": "signage/icons/idfm_rer_a.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_a.png",
+    "sha256": "504bc0b0c35c1b4e43af13b1c92c5ee532921ea378d64341fb77c1f72a659cbc"
+  },
+  {
+    "id": "idfm_rer_b",
+    "path": "signage/icons/idfm_rer_b.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_b.png",
+    "sha256": "cc683847929c71c78530dcb4d3ffdeac737a8d6764b6acdf1e853cdea5c77116"
+  },
+  {
+    "id": "idfm_rer_c",
+    "path": "signage/icons/idfm_rer_c.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_c.png",
+    "sha256": "70c22827d1efa52780602c1051b45882d779b8f019dd1c4bf822e9377e598dd8"
+  },
+  {
+    "id": "idfm_rer_d",
+    "path": "signage/icons/idfm_rer_d.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_d.png",
+    "sha256": "ec01c0149a4b05c3cc28522115f92bd6818593dc45cd4701b057dd8fc784af4d"
+  },
+  {
+    "id": "idfm_rer_e",
+    "path": "signage/icons/idfm_rer_e.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_e.png",
+    "sha256": "f0c14d6a56bcdbd76e124b4a05946b54f2d7963bf561a58ed2765dd011dc9528"
+  },
+  {
+    "id": "idfm_rer_train_1",
+    "path": "signage/icons/idfm_rer_train_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_train_1.png",
+    "sha256": "8d6b46d8416e1953640418662108a08db445d96d7fc65f6a529f856d0b84ea40"
+  },
+  {
+    "id": "idfm_rer_train_2",
+    "path": "signage/icons/idfm_rer_train_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_rer_train_2.png",
+    "sha256": "0f70e906f3fe1866ed06fa4a30c1c76c151506f979bfa30be1082839ba35e3bd"
+  },
+  {
+    "id": "idfm_sortie",
+    "path": "signage/icons/idfm_sortie.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_sortie.png",
+    "sha256": "7678acbf8fe4f3a863f2dc05eb23d236e24a11e3e2042e88b725bb5320dd9c7e"
+  },
+  {
+    "id": "idfm_t1",
+    "path": "signage/icons/idfm_t1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t1.png",
+    "sha256": "ef7cd30d6d77c903629fbbe4d60bde7ffd70dd08f7a65a97892b59d309229e74"
+  },
+  {
+    "id": "idfm_t10",
+    "path": "signage/icons/idfm_t10.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t10.png",
+    "sha256": "3ad3e506509681e36bb1168689d025c3f3805f16700e69a0a9d84d4cb11061d2"
+  },
+  {
+    "id": "idfm_t10_2",
+    "path": "signage/icons/idfm_t10_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t10_2.png",
+    "sha256": "11da6e05f3b2b819920ad1ce0102fc66ae6b57945581230b52ab279d8774d7c9"
+  },
+  {
+    "id": "idfm_t11",
+    "path": "signage/icons/idfm_t11.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t11.png",
+    "sha256": "943d9d3de1bd868f77ddf33571043bb9acb99b6b8764ba2e6729edda7fcf0f4d"
+  },
+  {
+    "id": "idfm_t11_2",
+    "path": "signage/icons/idfm_t11_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t11_2.png",
+    "sha256": "09f3e58af28bbd7211ea796fb421927e0a34fb408b4134223e14471b1b8e65e0"
+  },
+  {
+    "id": "idfm_t12",
+    "path": "signage/icons/idfm_t12.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t12.png",
+    "sha256": "d004618d603f7251f59c28f576df3971be6005bbbd779cc98821207a2125886f"
+  },
+  {
+    "id": "idfm_t12_2",
+    "path": "signage/icons/idfm_t12_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t12_2.png",
+    "sha256": "6f14a0d3bdc98868564f3ed43200d6b34fb92a2e16a034231aef91c87fcbe46b"
+  },
+  {
+    "id": "idfm_t13",
+    "path": "signage/icons/idfm_t13.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t13.png",
+    "sha256": "e3a1248c5039b451c8c720b6e34492abac38fd16ae9fddab0fe66d4391659d79"
+  },
+  {
+    "id": "idfm_t13_2",
+    "path": "signage/icons/idfm_t13_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t13_2.png",
+    "sha256": "12e1819d69b18b1c81b39abe641e95bf0b4fa52e7e2d729e992f8c3eb0ac2a1e"
+  },
+  {
+    "id": "idfm_t14",
+    "path": "signage/icons/idfm_t14.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t14.png",
+    "sha256": "6b0f3be58fe90dff2f2b0f639b09ce1061de3efc78fa6931978f9628b6efe72d"
+  },
+  {
+    "id": "idfm_t14_2",
+    "path": "signage/icons/idfm_t14_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t14_2.png",
+    "sha256": "84357777d6febfdfdda9693bff0e99ebce4b3c659ff0aeb1704d54d28272990a"
+  },
+  {
+    "id": "idfm_t1_2",
+    "path": "signage/icons/idfm_t1_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t1_2.png",
+    "sha256": "f83898d2bf15ffe6613cd0810796a3f13b053f0f07b865f45b172d0dda5b36a7"
+  },
+  {
+    "id": "idfm_t2",
+    "path": "signage/icons/idfm_t2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t2.png",
+    "sha256": "5bc71d863d895aa29b4b5089ad4be0abdc35b0a507b3fce742117459ea9bedd2"
+  },
+  {
+    "id": "idfm_t2_2",
+    "path": "signage/icons/idfm_t2_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t2_2.png",
+    "sha256": "c3513bbd981dd7bf7cfae3643816bcbc454a4f115c1fe152eb8c31e98d248235"
+  },
+  {
+    "id": "idfm_t3",
+    "path": "signage/icons/idfm_t3.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3.png",
+    "sha256": "f8d881bbc4c83c4b5fd534dee5c26563cf8d5ea28bc251ecf2b1cfd08b260663"
+  },
+  {
+    "id": "idfm_t3_2",
+    "path": "signage/icons/idfm_t3_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3_2.png",
+    "sha256": "3c70643d079ef08fb597e98c05d9245779d39ca0c18de4349fe0ec3f01d689c0"
+  },
+  {
+    "id": "idfm_t3a",
+    "path": "signage/icons/idfm_t3a.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3a.png",
+    "sha256": "6abaffb2b750789b11597fc2ab78f3057d14404b1569002913f4e390b8a48020"
+  },
+  {
+    "id": "idfm_t3a_2",
+    "path": "signage/icons/idfm_t3a_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3a_2.png",
+    "sha256": "54dc04db528a8d061cdb93fbcdadecaa88a94a8cd40d54b89c46ce17be4844e7"
+  },
+  {
+    "id": "idfm_t3b",
+    "path": "signage/icons/idfm_t3b.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3b.png",
+    "sha256": "919e24ac5bcb7a8a12c1c389c2b6e983635169c8494637abe871d330018693ba"
+  },
+  {
+    "id": "idfm_t3b_2",
+    "path": "signage/icons/idfm_t3b_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t3b_2.png",
+    "sha256": "5ac5f0d59bed69770538e0b8ac3e9db52d016632189478cf96f58b26f117f823"
+  },
+  {
+    "id": "idfm_t4",
+    "path": "signage/icons/idfm_t4.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t4.png",
+    "sha256": "13b984758648c8aba0c6a020dd4c9026f449c98b0940be31701dac5fcff228ca"
+  },
+  {
+    "id": "idfm_t4_2",
+    "path": "signage/icons/idfm_t4_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t4_2.png",
+    "sha256": "2b88fca880e85f73c66894d0629fb1c57a32f58fc46a53bb61c3bdc31eef141b"
+  },
+  {
+    "id": "idfm_t5",
+    "path": "signage/icons/idfm_t5.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t5.png",
+    "sha256": "d45945ef651c268b1215521f94b2681981c48944e00300bb472ef69450c5ffd8"
+  },
+  {
+    "id": "idfm_t5_2",
+    "path": "signage/icons/idfm_t5_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t5_2.png",
+    "sha256": "8441c3b63d6e34857c43c5497546612e0cee80c011a96d80070efb791a743488"
+  },
+  {
+    "id": "idfm_t6",
+    "path": "signage/icons/idfm_t6.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t6.png",
+    "sha256": "c8dc680b69e56748f6a921110e658811840d98a998f4f56ba79c46efdcc67711"
+  },
+  {
+    "id": "idfm_t6_2",
+    "path": "signage/icons/idfm_t6_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t6_2.png",
+    "sha256": "f1a7803e5967010fefc556d7cf6ff4f2bee61c96d79a5ee74ec5ee9c72cee01e"
+  },
+  {
+    "id": "idfm_t7",
+    "path": "signage/icons/idfm_t7.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t7.png",
+    "sha256": "f7ece80e81e07591e58df490a3ae23b3975d13730588139240c63bfdbfbd3251"
+  },
+  {
+    "id": "idfm_t7_2",
+    "path": "signage/icons/idfm_t7_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t7_2.png",
+    "sha256": "5cec89a4c87dc3a8d27a1f615449ab5870b383dc8117bb0b8553b1caade46a70"
+  },
+  {
+    "id": "idfm_t8",
+    "path": "signage/icons/idfm_t8.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t8.png",
+    "sha256": "4303593759005f538f99503572da700674748811c1f6aa3e77cb65d855b2fbc0"
+  },
+  {
+    "id": "idfm_t8_2",
+    "path": "signage/icons/idfm_t8_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t8_2.png",
+    "sha256": "264d7dcccea7fc7360b00feb6628ca093aedb21ddea5ef8fd7e01fff88c4bd10"
+  },
+  {
+    "id": "idfm_t9",
+    "path": "signage/icons/idfm_t9.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t9.png",
+    "sha256": "c0e2173dd1c7a9280b2cf85a64d436a759aba5cee36143f3982254553bd8fef8"
+  },
+  {
+    "id": "idfm_t9_2",
+    "path": "signage/icons/idfm_t9_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_t9_2.png",
+    "sha256": "fb9a76497d20a9343b7c62ab68d4abe7183403df2d127c4b0be3856c2f938819"
+  },
+  {
+    "id": "idfm_train_1",
+    "path": "signage/icons/idfm_train_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_1.png",
+    "sha256": "026c9b80cfa2b87f56a5142b4b3cc6b3623b99a1225f54b21c1a711a85e60b44"
+  },
+  {
+    "id": "idfm_train_2",
+    "path": "signage/icons/idfm_train_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_2.png",
+    "sha256": "2485af132032e02f160d7ca963fcfcab43bb4129872b772bd541ad77d47c1628"
+  },
+  {
+    "id": "idfm_train_h",
+    "path": "signage/icons/idfm_train_h.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_h.png",
+    "sha256": "177425740b524930e8a684a4da39989c1f96625ae7d90e5ecc66e21798b40df8"
+  },
+  {
+    "id": "idfm_train_j",
+    "path": "signage/icons/idfm_train_j.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_j.png",
+    "sha256": "074823e9c059b2f452c0cf18f5597cd49b268c43927dc6e810b35e187ab21894"
+  },
+  {
+    "id": "idfm_train_k",
+    "path": "signage/icons/idfm_train_k.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_k.png",
+    "sha256": "7bbcc6ad46bd98dfa2804b95dc1536bf25ac0e8f7decc6ffe71cdffef383d976"
+  },
+  {
+    "id": "idfm_train_l",
+    "path": "signage/icons/idfm_train_l.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_l.png",
+    "sha256": "2772033ef41e4b354f15f982f76f557fb35d5ccae5409624df99d98235588dd6"
+  },
+  {
+    "id": "idfm_train_n",
+    "path": "signage/icons/idfm_train_n.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_n.png",
+    "sha256": "e9a419cb8d80c4d7040b34b82abc3500d2bce25daf8bfd6cb1a38cc34f734627"
+  },
+  {
+    "id": "idfm_train_p",
+    "path": "signage/icons/idfm_train_p.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_p.png",
+    "sha256": "619ae64e09a30ecd0d0a02b768d66b543df8cb78f532544a3052e7643111185b"
+  },
+  {
+    "id": "idfm_train_r",
+    "path": "signage/icons/idfm_train_r.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_r.png",
+    "sha256": "78908f4054087fd0b379eb85a527a6517ee3f6a9a45da80a3c451f9d57c71bd2"
+  },
+  {
+    "id": "idfm_train_u",
+    "path": "signage/icons/idfm_train_u.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_u.png",
+    "sha256": "e0763e8895cf9337674c5fa197fcdd8cb6eba6385c886cdb1990d134bae4ce60"
+  },
+  {
+    "id": "idfm_train_v",
+    "path": "signage/icons/idfm_train_v.png",
+    "width": 378,
+    "height": 378,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_train_v.png",
+    "sha256": "0ee2fffd06fc1bd92f983650a8c7a11fbe44d84b5137791b62b8f1a1f15e6039"
+  },
+  {
+    "id": "idfm_tram_1",
+    "path": "signage/icons/idfm_tram_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tram_1.png",
+    "sha256": "dd83d4a9e82406baf5c5300913b8f0e9ceead937a777f9e090c67b9b70e37bd9"
+  },
+  {
+    "id": "idfm_tram_2",
+    "path": "signage/icons/idfm_tram_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tram_2.png",
+    "sha256": "5904e9c58d740a5f4e7f7c7c1c785f70fa754dfd8db355c416af8471c77990ef"
+  },
+  {
+    "id": "idfm_tzen1",
+    "path": "signage/icons/idfm_tzen1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tzen1.png",
+    "sha256": "d5417754182c62216e246772ea1646597be786ef73db9548a9fb9db21c653af4"
+  },
+  {
+    "id": "idfm_tzen2",
+    "path": "signage/icons/idfm_tzen2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tzen2.png",
+    "sha256": "15893b3c1c5760ee6b05f1bdf38c14d77a16d8a007f51aec53d68d930e7a6daa"
+  },
+  {
+    "id": "idfm_tzen3",
+    "path": "signage/icons/idfm_tzen3.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tzen3.png",
+    "sha256": "f2958a9eede60e1fb190ddfd9743e7f9ca8cd8c571a2af47c8ffbeec09682a69"
+  },
+  {
+    "id": "idfm_tzen4",
+    "path": "signage/icons/idfm_tzen4.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tzen4.png",
+    "sha256": "0a795b13e9ce38751ceba521672138e1ddb6deb71e8c9203b75ecd099b795dd6"
+  },
+  {
+    "id": "idfm_tzen5",
+    "path": "signage/icons/idfm_tzen5.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_tzen5.png",
+    "sha256": "135cbfb3438de5f9c38fcf86e8d9b943da5fc806754597dd2f69c6bcecf64d47"
+  },
+  {
+    "id": "idfm_up",
+    "path": "signage/icons/idfm_up.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_up.png",
+    "sha256": "907ce4d7ddee0f6796fe871fb94d96561104178f4062f4d6514b50bcd4b1d680"
+  },
+  {
+    "id": "idfm_up_left",
+    "path": "signage/icons/idfm_up_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_up_left.png",
+    "sha256": "d4f58d0ba3514a30a7a7519b94e95b8d16c515fec3136cbb2fa37d6301552747"
+  },
+  {
+    "id": "idfm_velo_1",
+    "path": "signage/icons/idfm_velo_1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_velo_1.png",
+    "sha256": "efef546b4fea2a778c652fa7f6703a50176bb52ac9632dc4ac189fe7130aa24a"
+  },
+  {
+    "id": "idfm_velo_2",
+    "path": "signage/icons/idfm_velo_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/idfm/idfm_velo_2.png",
+    "sha256": "77fa29e0f44a2a78bbb15ff8c70dd5f8bcef59eef3295038b617c435258b8494"
+  },
+  {
+    "id": "lille_1",
+    "path": "signage/icons/lille_1.png",
+    "width": 521,
+    "height": 521,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_1.png",
+    "sha256": "00e778cc3e2a033a9d1bcfced21893739b7d7801e61ca3fba1db8cab528730c6"
+  },
+  {
+    "id": "lille_2",
+    "path": "signage/icons/lille_2.png",
+    "width": 521,
+    "height": 521,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_2.png",
+    "sha256": "4ff91595565512359fa065df5ef6fed95715f31ef3ba0836e727a21dc43c863b"
+  },
+  {
+    "id": "lille_bus",
+    "path": "signage/icons/lille_bus.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_bus.png",
+    "sha256": "4365484b74d2391da3031627c7e5d2447d04678bcbf7ee7572ecc0075fb614b6"
+  },
+  {
+    "id": "lille_bus_blanc",
+    "path": "signage/icons/lille_bus_blanc.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_bus_blanc.png",
+    "sha256": "2db020e12f3fd84a240b3063b20d7361280c969ac38b2bb49a3e75957cd72511"
+  },
+  {
+    "id": "lille_down",
+    "path": "signage/icons/lille_down.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_down.png",
+    "sha256": "621fd631b87b2a51ca38cc2803fa473404b5c89d8d5197af89fd36e13bdafd80"
+  },
+  {
+    "id": "lille_down_left",
+    "path": "signage/icons/lille_down_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_down_left.png",
+    "sha256": "3665ee1e2cef42a65cf170dd76eab4d96086da1af9946c2281e6b584b30b4488"
+  },
+  {
+    "id": "lille_ilevia",
+    "path": "signage/icons/lille_ilevia.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_ilevia.png",
+    "sha256": "588d9cdb46a88b03fdf202c68b919946bb93c8407970568ed6b5e5f8907c1035"
+  },
+  {
+    "id": "lille_left",
+    "path": "signage/icons/lille_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_left.png",
+    "sha256": "cffc7b28e6d750b6d72f30d1ffb5cedb4abf288fa4d6bb945ba7309d8d5ae59b"
+  },
+  {
+    "id": "lille_mel",
+    "path": "signage/icons/lille_mel.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_mel.png",
+    "sha256": "0a78fa7956f3e602131c6e0996356bd696cea76dd53ee40ec1d97e80b0194db6"
+  },
+  {
+    "id": "lille_metro",
+    "path": "signage/icons/lille_metro.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_metro.png",
+    "sha256": "8108445d0b74191e558d8b8dbc07c8ec9c4e456fbfc5ee0d79d872644322faa0"
+  },
+  {
+    "id": "lille_metro_blanc",
+    "path": "signage/icons/lille_metro_blanc.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_metro_blanc.png",
+    "sha256": "b608794a95f3a6d8652dc5c64684fe782b358b0c7ec307ef01dc2c7a6a4c8541"
+  },
+  {
+    "id": "lille_metro_old",
+    "path": "signage/icons/lille_metro_old.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_metro_old.png",
+    "sha256": "bc483a11b2c2358fe20a518a85b311fe26aaf058b1ad71881ff694aae797b7e7"
+  },
+  {
+    "id": "lille_r",
+    "path": "signage/icons/lille_r.png",
+    "width": 521,
+    "height": 521,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_r.png",
+    "sha256": "9897278330f4c73f6cb7b99e51be7b905fcf847b5f9602586f0d815d30eb8e7a"
+  },
+  {
+    "id": "lille_t",
+    "path": "signage/icons/lille_t.png",
+    "width": 521,
+    "height": 521,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_t.png",
+    "sha256": "e5efae44944fd092af1b7f0bd73c7f5b4bf596e22c6d4deaca890e797590cc23"
+  },
+  {
+    "id": "lille_tram",
+    "path": "signage/icons/lille_tram.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_tram.png",
+    "sha256": "eaf829188a7493452797e8853d5721191fc2ba9ba6c4bd63c9eaddbcbb2e07d4"
+  },
+  {
+    "id": "lille_tram_blanc",
+    "path": "signage/icons/lille_tram_blanc.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_tram_blanc.png",
+    "sha256": "98fdebcdcde1d562ab800ca17cb342376282b9b9d25050dfa77894939128b946"
+  },
+  {
+    "id": "lille_up",
+    "path": "signage/icons/lille_up.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_up.png",
+    "sha256": "a1dadd6e38aa61602cc31524d77157993e8fde7ac93e9a6aef3290d24b0cda4e"
+  },
+  {
+    "id": "lille_up_left",
+    "path": "signage/icons/lille_up_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_up_left.png",
+    "sha256": "ff61b6eaf1276dec4897ae37cf5c6f101a85b279a5b319777394c7c562ba9afd"
+  },
+  {
+    "id": "lille_vlille",
+    "path": "signage/icons/lille_vlille.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lille/lille_vlille.png",
+    "sha256": "c25f98f86d11c2b06143573bc4f189e9200830acfb3a650934ae101c9b3a0f6c"
+  },
+  {
+    "id": "lyon_agence",
+    "path": "signage/icons/lyon_agence.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_agence.png",
+    "sha256": "ab1381518ba8075edf076733cdbd98967e3b8ce7c4eebd7cca2d519a15a23091"
+  },
+  {
+    "id": "lyon_agence_nb",
+    "path": "signage/icons/lyon_agence_nb.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_agence_nb.png",
+    "sha256": "164e82ac31d2c048c296d5542251f4cb30211e92e1d20e173964903c11fa17a6"
+  },
+  {
+    "id": "lyon_bord",
+    "path": "signage/icons/lyon_bord.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_bord.png",
+    "sha256": "6f5bad194daf675d0558e750eb03890eaa8336d19d5f2c7d767b5559dc87a2ac"
+  },
+  {
+    "id": "lyon_bord_nb",
+    "path": "signage/icons/lyon_bord_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_bord_nb.png",
+    "sha256": "3dd3fe0ef3c08a20e49a81faac27b33ae62cf75629893a6c86a9adfd7ff41b69"
+  },
+  {
+    "id": "lyon_bus",
+    "path": "signage/icons/lyon_bus.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_bus.png",
+    "sha256": "da814438eae1ef600824aa8ecce8f69a159f7cf9c5c184e96d2f0c9848eea148"
+  },
+  {
+    "id": "lyon_bus_nb",
+    "path": "signage/icons/lyon_bus_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_bus_nb.png",
+    "sha256": "b674bc3c845945843f57a0ef412269c6031cfa5438f4dcef6dd4546510f891a2"
+  },
+  {
+    "id": "lyon_chrono",
+    "path": "signage/icons/lyon_chrono.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_chrono.png",
+    "sha256": "20f453bb752fd859a5329f1f10e1a17c8530ca403e787d467d0a2e47350ceb12"
+  },
+  {
+    "id": "lyon_chrono_nb",
+    "path": "signage/icons/lyon_chrono_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_chrono_nb.png",
+    "sha256": "a9b37f06b983083279072d7238cd22e8331d8698371042250d067ee4089fbb98"
+  },
+  {
+    "id": "lyon_down",
+    "path": "signage/icons/lyon_down.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_down.png",
+    "sha256": "6b2ee1639c09d5fdf4ecf2e4800b3aee2f9c8256c8364edf20d85086d35c2f9b"
+  },
+  {
+    "id": "lyon_down_left",
+    "path": "signage/icons/lyon_down_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_down_left.png",
+    "sha256": "84540b9a44b4ccbfa712c4858ab318c9e8885660951250dc6671f3c4abbcc0af"
+  },
+  {
+    "id": "lyon_f1",
+    "path": "signage/icons/lyon_f1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_f1.png",
+    "sha256": "508e27e97ba4759820b68829df82010df3aa0b5ddc6440c7b2133dda17d4bf87"
+  },
+  {
+    "id": "lyon_f2",
+    "path": "signage/icons/lyon_f2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_f2.png",
+    "sha256": "a1561685d63d526bab72a750e20f57dd163577136340d24c380f2b057f739028"
+  },
+  {
+    "id": "lyon_funi",
+    "path": "signage/icons/lyon_funi.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_funi.png",
+    "sha256": "6b4b0782cb3d8d9382509de95f354fb8c5d49f9d1673332c0f6cd1c24ec34845"
+  },
+  {
+    "id": "lyon_funi_nb",
+    "path": "signage/icons/lyon_funi_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_funi_nb.png",
+    "sha256": "c6c0be63c11f7c0eca6c7b58658e8b7db9580718b14935fef493bbf2b4717dee"
+  },
+  {
+    "id": "lyon_jd",
+    "path": "signage/icons/lyon_jd.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_jd.png",
+    "sha256": "8786a1a9e3611210cd1361e6a429184e97912ab2160796a8a57f0d68e5029a57"
+  },
+  {
+    "id": "lyon_jd_nb",
+    "path": "signage/icons/lyon_jd_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_jd_nb.png",
+    "sha256": "f931de33ddc15d0ab2e3d0ca86c446436d129e87b5dddfa0f05ee3557976e499"
+  },
+  {
+    "id": "lyon_left",
+    "path": "signage/icons/lyon_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_left.png",
+    "sha256": "63864717ac5e7efbd145778ea65d32a38619cd63257a840036581a7702296483"
+  },
+  {
+    "id": "lyon_ma",
+    "path": "signage/icons/lyon_ma.png",
+    "width": 240,
+    "height": 240,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_ma.png",
+    "sha256": "52d9d322ad95584096acb1056280bffd3c56781f5f7dca73916bbfa444133bd1"
+  },
+  {
+    "id": "lyon_mb",
+    "path": "signage/icons/lyon_mb.png",
+    "width": 240,
+    "height": 240,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_mb.png",
+    "sha256": "28f3a5f4cc3c221da0d52d61fa4581a092f862998a2e3a040b8fd14cd39a5ff3"
+  },
+  {
+    "id": "lyon_mc",
+    "path": "signage/icons/lyon_mc.png",
+    "width": 240,
+    "height": 240,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_mc.png",
+    "sha256": "df62229cd100dff1dc6ce4abc8c91073c7afcc96bb1084bf65970808e158a0ed"
+  },
+  {
+    "id": "lyon_md",
+    "path": "signage/icons/lyon_md.png",
+    "width": 240,
+    "height": 240,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_md.png",
+    "sha256": "73f6bc774e7ce492a51cc576d4d995efa54137134fa99276f40b2622acce0b90"
+  },
+  {
+    "id": "lyon_metro",
+    "path": "signage/icons/lyon_metro.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_metro.png",
+    "sha256": "d56b2af498a0d6552afa48ff518b12780a33a3749b9200020b3fd91afd99789b"
+  },
+  {
+    "id": "lyon_metro_nb",
+    "path": "signage/icons/lyon_metro_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_metro_nb.png",
+    "sha256": "596e3e39fa1ec481bdd58b5ca38beb5dcc2dbfdc91a948c71199505da00cc8ce"
+  },
+  {
+    "id": "lyon_n1",
+    "path": "signage/icons/lyon_n1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_n1.png",
+    "sha256": "d609a3f84c98000c6687bc8c8f71f84eabff42f74857938b213d903855b87c66"
+  },
+  {
+    "id": "lyon_navi",
+    "path": "signage/icons/lyon_navi.png",
+    "width": 230,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_navi.png",
+    "sha256": "df4707f9bfaf89e040c45a86d0ed37db574f5152afc3262cbfd8bfb4ac2ab3c8"
+  },
+  {
+    "id": "lyon_navi_nb",
+    "path": "signage/icons/lyon_navi_nb.png",
+    "width": 230,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_navi_nb.png",
+    "sha256": "41d2713541b67a715376f65a44b8c40c7cca37e8538603d1b566e777bda1fe2f"
+  },
+  {
+    "id": "lyon_rx",
+    "path": "signage/icons/lyon_rx.png",
+    "width": 250,
+    "height": 251,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_rx.png",
+    "sha256": "10ea58c88a4cad3062907a3274aaf9a924a90dc6161d9a107d75ae0144b58849"
+  },
+  {
+    "id": "lyon_t1",
+    "path": "signage/icons/lyon_t1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t1.png",
+    "sha256": "64ef5a4fcb87cc23c8c8fd1a4e790cb9fdc32a55da4b092669db700d74ca18e1"
+  },
+  {
+    "id": "lyon_t10",
+    "path": "signage/icons/lyon_t10.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t10.png",
+    "sha256": "6ada18955d4b765f10f563d16613e08b3b5ca04214d0b6723230bd2de9d9d5d8"
+  },
+  {
+    "id": "lyon_t2",
+    "path": "signage/icons/lyon_t2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t2.png",
+    "sha256": "b7a3c043e81191c447afd831172916cab79f92edde2d1432b3c87dfe55ddb198"
+  },
+  {
+    "id": "lyon_t3",
+    "path": "signage/icons/lyon_t3.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t3.png",
+    "sha256": "80f181a7cb1f3ffc853eaf737355bedaf8d93d1da33ca46ae7ca7675148d0e75"
+  },
+  {
+    "id": "lyon_t4",
+    "path": "signage/icons/lyon_t4.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t4.png",
+    "sha256": "22fe289dcd741216a7188bd46fb6f0d98ece11b49cde991bfd3ba4ff4304d427"
+  },
+  {
+    "id": "lyon_t5",
+    "path": "signage/icons/lyon_t5.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t5.png",
+    "sha256": "e4963be09b49d07f8031a2b0a67fd635a0325596541689bd92fad3bfed90b316"
+  },
+  {
+    "id": "lyon_t6",
+    "path": "signage/icons/lyon_t6.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t6.png",
+    "sha256": "9db792a1a6cd97469b9738f57588de1c199f9c595c8ade899532c75e05b142b4"
+  },
+  {
+    "id": "lyon_t7",
+    "path": "signage/icons/lyon_t7.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t7.png",
+    "sha256": "b129c510f600d60ccebec1ad1a9927d65692c49113bbe15e1f7e339e66d370d7"
+  },
+  {
+    "id": "lyon_t8",
+    "path": "signage/icons/lyon_t8.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t8.png",
+    "sha256": "66243d8b288db0ed4e64c860a5355fa7fa0c356992ac322b93a878431f60d6dd"
+  },
+  {
+    "id": "lyon_t9",
+    "path": "signage/icons/lyon_t9.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_t9.png",
+    "sha256": "04bd1e585760edd34604188c8cbbda267c2d304707d9fd0fd492915a06c8b594"
+  },
+  {
+    "id": "lyon_tb11",
+    "path": "signage/icons/lyon_tb11.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tb11.png",
+    "sha256": "7d7ffb3af1f50b7f71f95512cb944097208958cfb600e1fe2d63bbae225c25f8"
+  },
+  {
+    "id": "lyon_tb12",
+    "path": "signage/icons/lyon_tb12.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tb12.png",
+    "sha256": "392c51e002490fa39a6f22fddb54f3dd00ac8f32b04d2bc1656552d5b7092939"
+  },
+  {
+    "id": "lyon_tcl",
+    "path": "signage/icons/lyon_tcl.png",
+    "width": 320,
+    "height": 320,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tcl.png",
+    "sha256": "f4c9b365f88b3fc753ca06561685f105f1e6297fb8ac48a46e6d1f6321f474e2"
+  },
+  {
+    "id": "lyon_tcl_nb",
+    "path": "signage/icons/lyon_tcl_nb.png",
+    "width": 320,
+    "height": 320,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tcl_nb.png",
+    "sha256": "51df0a254da35ed7a9feb9346d01e201ee3e7c88d38556dcbb370599ff2df253"
+  },
+  {
+    "id": "lyon_train",
+    "path": "signage/icons/lyon_train.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_train.png",
+    "sha256": "0491c112385f42df89284934bcb57db7bb483ff683ec28f7d9e35d71726aad57"
+  },
+  {
+    "id": "lyon_tram",
+    "path": "signage/icons/lyon_tram.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tram.png",
+    "sha256": "9c94f9e4116ab31fe5d6fa4d621eb2b91e9252ed4be5041756e3e57305a33338"
+  },
+  {
+    "id": "lyon_tram_nb",
+    "path": "signage/icons/lyon_tram_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_tram_nb.png",
+    "sha256": "034c77583601cf6be0ba2f64c8d6cd9592b278eb84ab016ef9428f6129cefb4d"
+  },
+  {
+    "id": "lyon_trambus",
+    "path": "signage/icons/lyon_trambus.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_trambus.png",
+    "sha256": "b8f4c0cbb04b1526f472ed9673edd485e62f44c5d8df2b3ab3b2915518ee00ad"
+  },
+  {
+    "id": "lyon_trambus_nb",
+    "path": "signage/icons/lyon_trambus_nb.png",
+    "width": 195,
+    "height": 195,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_trambus_nb.png",
+    "sha256": "94de942ac8d11cda12bf9921e0a421367fccd4281496a83af0aca043f040f39a"
+  },
+  {
+    "id": "lyon_up",
+    "path": "signage/icons/lyon_up.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_up.png",
+    "sha256": "36248eba3c59eb5884ca3ec3730588067288ee561ba766b1d9a7a9f4922908c6"
+  },
+  {
+    "id": "lyon_up_left",
+    "path": "signage/icons/lyon_up_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/lyon/lyon_up_left.png",
+    "sha256": "9fa825785d15b6002eb88e401283da888b63eb69596d5f08d8b5443a9b518651"
+  },
+  {
+    "id": "ratp_aeroport",
+    "path": "signage/icons/ratp_aeroport.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_aeroport.png",
+    "sha256": "6f48f7779e3ba200b450ae80e41d9aae892b65f7afdb0ec60e6d31371c54ec80"
+  },
+  {
+    "id": "ratp_aeroport_old",
+    "path": "signage/icons/ratp_aeroport_old.png",
+    "width": 222,
+    "height": 222,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_aeroport_old.png",
+    "sha256": "00ff6166b46c8bfc0fedeb9f89b0485f941ca21ef57d4f5990a01ab5906ee410"
+  },
+  {
+    "id": "ratp_assistance",
+    "path": "signage/icons/ratp_assistance.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_assistance.png",
+    "sha256": "4727a2974b38e2f6ee36eb3c585fdfef2d8c6e42d76c88c1a985063bce366138"
+  },
+  {
+    "id": "ratp_banlieue",
+    "path": "signage/icons/ratp_banlieue.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_banlieue.png",
+    "sha256": "c0f0e889648fddea759535c255f38afbb3fb42944fbf90f0bc5b6ec678430fd5"
+  },
+  {
+    "id": "ratp_bus",
+    "path": "signage/icons/ratp_bus.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_bus.png",
+    "sha256": "33b8d1494d6febb27e8f0f177b1f2b23ef0c13af40f043d38e7a7e274f3b6faf"
+  },
+  {
+    "id": "ratp_bus_393",
+    "path": "signage/icons/ratp_bus_393.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_bus_393.png",
+    "sha256": "cadd9712c82f5fc22a4b28b68a57e9faa8417653c4258a537ef0fe06436628bc"
+  },
+  {
+    "id": "ratp_bus_old",
+    "path": "signage/icons/ratp_bus_old.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_bus_old.png",
+    "sha256": "1e6e71335780a651ba9d2eb6f1f22b2236d97039c10cfdee7dd34a8cf9f3c331"
+  },
+  {
+    "id": "ratp_bus_old_2",
+    "path": "signage/icons/ratp_bus_old_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_bus_old_2.png",
+    "sha256": "2c12a8497e2f38d07982a61fedf8aeaadc7fe1091101426588263ae73716844c"
+  },
+  {
+    "id": "ratp_bus_tvm",
+    "path": "signage/icons/ratp_bus_tvm.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_bus_tvm.png",
+    "sha256": "c784c2ef24777563078dd2a288597c75a6f09f32121dbb4ac736b1528a2d7a6d"
+  },
+  {
+    "id": "ratp_cable",
+    "path": "signage/icons/ratp_cable.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_cable.png",
+    "sha256": "0ddcb42a9b7133a0476f6f928cf03654f8213dae8a3517f92857eaa3ecf98f72"
+  },
+  {
+    "id": "ratp_car",
+    "path": "signage/icons/ratp_car.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_car.png",
+    "sha256": "f95f03d156f7ac2ebc603a2525121f553b8d48026c58644705b168a7f357be76"
+  },
+  {
+    "id": "ratp_cdgex",
+    "path": "signage/icons/ratp_cdgex.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_cdgex.png",
+    "sha256": "6ca6783caebac9690d4fb6c3caae35cd04180ceae10fa1b8c919eee30608d441"
+  },
+  {
+    "id": "ratp_cdgval",
+    "path": "signage/icons/ratp_cdgval.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_cdgval.png",
+    "sha256": "33d89745265096e531608085859ce1692e53fe28f33cf41fcaef243ed6b0c66d"
+  },
+  {
+    "id": "ratp_covoit",
+    "path": "signage/icons/ratp_covoit.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_covoit.png",
+    "sha256": "787f1d951f487dd58bb239e841a6aff4f2eb7a6085b4cfb35936705c22d2692f"
+  },
+  {
+    "id": "ratp_disney",
+    "path": "signage/icons/ratp_disney.png",
+    "width": 256,
+    "height": 256,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_disney.png",
+    "sha256": "dc8c5344393ee01c98535878783836ce8adce9d9727d5f419f86fa9faa7eb564"
+  },
+  {
+    "id": "ratp_down",
+    "path": "signage/icons/ratp_down.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_down.png",
+    "sha256": "f2a8101991b3737760f0e892efec1ce22db2723648116b28bafb22a5ac906598"
+  },
+  {
+    "id": "ratp_down_left",
+    "path": "signage/icons/ratp_down_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_down_left.png",
+    "sha256": "8fe5ef1ad617e79071ef24e0ddf51255884824c69779a6ac18be0c62f208a329"
+  },
+  {
+    "id": "ratp_est",
+    "path": "signage/icons/ratp_est.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_est.png",
+    "sha256": "5dab33c3e1945f38173bfdbd426e22dd6627f3b402f13621bda7fc04f368e553"
+  },
+  {
+    "id": "ratp_ferry",
+    "path": "signage/icons/ratp_ferry.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_ferry.png",
+    "sha256": "b195864fb39f1224881f8fc8f0015ff85d6be8187b36cf4758a7148e21502afe"
+  },
+  {
+    "id": "ratp_forum",
+    "path": "signage/icons/ratp_forum.png",
+    "width": 512,
+    "height": 512,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_forum.png",
+    "sha256": "fc096ae559b5fd03a829e3c64c439955be30ef19b539a8c97e2af35ecd53e23a"
+  },
+  {
+    "id": "ratp_funiculaire",
+    "path": "signage/icons/ratp_funiculaire.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_funiculaire.png",
+    "sha256": "56a89af4082fec51d279d1869427e64f0aba7a95c8ec96fc8ea82035d730d6a5"
+  },
+  {
+    "id": "ratp_gare",
+    "path": "signage/icons/ratp_gare.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_gare.png",
+    "sha256": "0b576387c0e49f2769b9ebbaf4e0177ec4bf12de79926bc653b556b4ce88632f"
+  },
+  {
+    "id": "ratp_left",
+    "path": "signage/icons/ratp_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_left.png",
+    "sha256": "80dc557c12249fa865cf30f4ca96ad79ff88f942ba3feb688914f2821b3f30c0"
+  },
+  {
+    "id": "ratp_logo",
+    "path": "signage/icons/ratp_logo.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_logo.png",
+    "sha256": "5bc73609ed451a8c76681a506ce65df3ad6965d531e213ce0c09db577196e76f"
+  },
+  {
+    "id": "ratp_metro",
+    "path": "signage/icons/ratp_metro.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_metro.png",
+    "sha256": "553a8c175d26f0e625c5c0ad0fca913a8d6cfa00a990cb5739a29e46fd86d9b8"
+  },
+  {
+    "id": "ratp_noctilien",
+    "path": "signage/icons/ratp_noctilien.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_noctilien.png",
+    "sha256": "6d2f105a5a6c82844445abb884e58ac592726b5f1c53bc95ec5e0c8c2b198324"
+  },
+  {
+    "id": "ratp_noctilien_old",
+    "path": "signage/icons/ratp_noctilien_old.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_noctilien_old.png",
+    "sha256": "e12e658b9052a758930ed3e37e130aecd3aff3a7218a680f3389d846b080fe2b"
+  },
+  {
+    "id": "ratp_noctilien_old_2",
+    "path": "signage/icons/ratp_noctilien_old_2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_noctilien_old_2.png",
+    "sha256": "1d74ddb1ed9240f78e835a0f179cdc577527013baf54f46916c51730048de79e"
+  },
+  {
+    "id": "ratp_nord",
+    "path": "signage/icons/ratp_nord.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_nord.png",
+    "sha256": "d7d0fb4bb0271ea499adeb770568387a06791e5e2bc3356ab348e0fd8d93f16d"
+  },
+  {
+    "id": "ratp_orlyval",
+    "path": "signage/icons/ratp_orlyval.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_orlyval.png",
+    "sha256": "b49f903aaa59bfe84ecc7a557827e0900a0b31db077a5d9c04ddd455c55cc2ad"
+  },
+  {
+    "id": "ratp_ouest",
+    "path": "signage/icons/ratp_ouest.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_ouest.png",
+    "sha256": "0e5be63cfc01bcfc848a61918f6cc4c80d35c1512f6d72427571e9a37839cda1"
+  },
+  {
+    "id": "ratp_pieton",
+    "path": "signage/icons/ratp_pieton.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_pieton.png",
+    "sha256": "c71b3bea98426ab8c94a1532faf3cc3b5d240ae311c17d62aad1a809b0acc5f0"
+  },
+  {
+    "id": "ratp_pmr",
+    "path": "signage/icons/ratp_pmr.png",
+    "width": 222,
+    "height": 222,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_pmr.png",
+    "sha256": "6b3c1873d365c454ca8957b4f6a8b619bf26eca53d78246382dde10a6064af2e"
+  },
+  {
+    "id": "ratp_rer",
+    "path": "signage/icons/ratp_rer.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer.png",
+    "sha256": "67b2e985bf5c705baf548cb29d42a86efa946edc70bcd10911975e7c12d1c88f"
+  },
+  {
+    "id": "ratp_rer_a",
+    "path": "signage/icons/ratp_rer_a.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_a.png",
+    "sha256": "6c4d07d1b715f112e61246b5e61b818e781d63e5f771e925d45941f846b4dc9a"
+  },
+  {
+    "id": "ratp_rer_b",
+    "path": "signage/icons/ratp_rer_b.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_b.png",
+    "sha256": "913c8f122ffefed8e35c8e7680910c499a9315a33393060ea1d2d59714a2cada"
+  },
+  {
+    "id": "ratp_rer_c",
+    "path": "signage/icons/ratp_rer_c.png",
+    "width": 144,
+    "height": 144,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_c.png",
+    "sha256": "343ef21814e7c870d182fba3e705a17717827aebf3ef583aa0d85ce7d7947242"
+  },
+  {
+    "id": "ratp_rer_d",
+    "path": "signage/icons/ratp_rer_d.png",
+    "width": 224,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_d.png",
+    "sha256": "0758b16c92bc74243c12a312525d191b4ad15ed870ef0c30685a818ac85191d3"
+  },
+  {
+    "id": "ratp_rer_e",
+    "path": "signage/icons/ratp_rer_e.png",
+    "width": 240,
+    "height": 241,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_e.png",
+    "sha256": "e3f8b74ccd37529b4964d725412bdb9a966f7f0e25c69ea578d531e972efec69"
+  },
+  {
+    "id": "ratp_rer_old",
+    "path": "signage/icons/ratp_rer_old.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_old.png",
+    "sha256": "0f9e27d5d9a761a93ba753b6193c6d954073fef5ec6d40bcfb516f51eed86e43"
+  },
+  {
+    "id": "ratp_rer_old_2",
+    "path": "signage/icons/ratp_rer_old_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_old_2.png",
+    "sha256": "d8618731046b7b2b95fb1a149736d3d94df36a591c57f6db2da1073c86770b91"
+  },
+  {
+    "id": "ratp_rer_train",
+    "path": "signage/icons/ratp_rer_train.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rer_train.png",
+    "sha256": "04a7fb31e30007d096639c9b67caa959596be39e3156a2ac97ed67bdaab8d86c"
+  },
+  {
+    "id": "ratp_rivoli",
+    "path": "signage/icons/ratp_rivoli.png",
+    "width": 512,
+    "height": 512,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_rivoli.png",
+    "sha256": "9ea72d50a2e04d32392c9ed0362b7afb89746ac887b3239305a5cf6e5b515183"
+  },
+  {
+    "id": "ratp_seine",
+    "path": "signage/icons/ratp_seine.png",
+    "width": 512,
+    "height": 512,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_seine.png",
+    "sha256": "30a31baa015cf920f359e57075c9246391e0e485c5f5824bc193c04d9620175f"
+  },
+  {
+    "id": "ratp_sor",
+    "path": "signage/icons/ratp_sor.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_sor.png",
+    "sha256": "1c71b316079be8f63f51a8120b5f3d0da7e27d95e8574fe0ea9617764497b192"
+  },
+  {
+    "id": "ratp_sud",
+    "path": "signage/icons/ratp_sud.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_sud.png",
+    "sha256": "d901f44ce32a1bd00cfe43c1ebfb6369e7a51d38d85427cc464e0dd55a7b4fc0"
+  },
+  {
+    "id": "ratp_t1",
+    "path": "signage/icons/ratp_t1.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t1.png",
+    "sha256": "acbbcecf008ce281ec1529d237e239e03517541fdd3477aa9209af4e9bae0a86"
+  },
+  {
+    "id": "ratp_t10",
+    "path": "signage/icons/ratp_t10.png",
+    "width": 355,
+    "height": 355,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t10.png",
+    "sha256": "7b66b3ef0a657ed5e2bc0d1c20e15c78c6ae7f73b79bc7b3974cc6e5bef68b52"
+  },
+  {
+    "id": "ratp_t11",
+    "path": "signage/icons/ratp_t11.png",
+    "width": 355,
+    "height": 355,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t11.png",
+    "sha256": "4c19e6a6ef3bd182b879bfba2745479c312097234e417df3944a20ab7632d596"
+  },
+  {
+    "id": "ratp_t11ex",
+    "path": "signage/icons/ratp_t11ex.png",
+    "width": 355,
+    "height": 355,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t11ex.png",
+    "sha256": "dfa54ab966e17a012e1509a3c92eb5de9023674c2aefb72bcfac03d307d72cd6"
+  },
+  {
+    "id": "ratp_t2",
+    "path": "signage/icons/ratp_t2.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t2.png",
+    "sha256": "64b3fa07b3b4448e932dc5e4d8d04a550241c675757044143195b413bcf753ae"
+  },
+  {
+    "id": "ratp_t3",
+    "path": "signage/icons/ratp_t3.png",
+    "width": 120,
+    "height": 120,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t3.png",
+    "sha256": "d2c80622ce61c81424fe9c578935b0338915242c3d21ea60347e74fbdeec51f0"
+  },
+  {
+    "id": "ratp_t3a",
+    "path": "signage/icons/ratp_t3a.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t3a.png",
+    "sha256": "de2c178745ddd4c8679c016a2cf84a6f8bdeff34167cfd5060083a769b9d23d6"
+  },
+  {
+    "id": "ratp_t3b",
+    "path": "signage/icons/ratp_t3b.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t3b.png",
+    "sha256": "9a3461b5684a7959d233049efc575b7fc5542281343430e0d228c4a2a69ce64f"
+  },
+  {
+    "id": "ratp_t4",
+    "path": "signage/icons/ratp_t4.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t4.png",
+    "sha256": "720d75f2d8afeddb9ba354dc20ddcd0acd27a1b0ddfca0010e2aacb6f94a66a9"
+  },
+  {
+    "id": "ratp_t5",
+    "path": "signage/icons/ratp_t5.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t5.png",
+    "sha256": "f41c7d452607a475d48bba0ac6804cd53d96f6476aaa6b5694ca0bac5d5c2637"
+  },
+  {
+    "id": "ratp_t6",
+    "path": "signage/icons/ratp_t6.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t6.png",
+    "sha256": "01ca1d74d38ba309bcb448a1a0e1964a7802da31408dbe6cea7154075dc8a7e6"
+  },
+  {
+    "id": "ratp_t7",
+    "path": "signage/icons/ratp_t7.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t7.png",
+    "sha256": "3f15453818d07bf4b962d2cd3b9ba93ef8065b545126f401ebb9b50465c62d27"
+  },
+  {
+    "id": "ratp_t8",
+    "path": "signage/icons/ratp_t8.png",
+    "width": 355,
+    "height": 355,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t8.png",
+    "sha256": "0663bfe12d173390304c8b549d9d17bd043b1aa0bf7df5a5782f218174162002"
+  },
+  {
+    "id": "ratp_t9",
+    "path": "signage/icons/ratp_t9.png",
+    "width": 355,
+    "height": 355,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_t9.png",
+    "sha256": "0e0615437d8e2362bd59e913137002311207ea3460efd2fadde0d944ee5de355"
+  },
+  {
+    "id": "ratp_ter",
+    "path": "signage/icons/ratp_ter.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_ter.png",
+    "sha256": "a0a2c84063c3b0844942b30cb1bc376024d4d7553325c6584a4240239bfe833b"
+  },
+  {
+    "id": "ratp_tgv",
+    "path": "signage/icons/ratp_tgv.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tgv.png",
+    "sha256": "3d6ee8152bdbc97f7290c9a133e211e760e457b0db6342b1294e3d7d5091ec25"
+  },
+  {
+    "id": "ratp_tgv_logo",
+    "path": "signage/icons/ratp_tgv_logo.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tgv_logo.png",
+    "sha256": "58e57a03a85eff8795cd5a7762b20bb82a3cb8a6e446f589e6dd357fd3cc2401"
+  },
+  {
+    "id": "ratp_tie",
+    "path": "signage/icons/ratp_tie.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tie.png",
+    "sha256": "31cbb78a3e68d097cff716f4b85f090f2b0ac91fcc7476537b3e084711868d45"
+  },
+  {
+    "id": "ratp_train",
+    "path": "signage/icons/ratp_train.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train.png",
+    "sha256": "b7c0c0d11e46608d6b76015eac0ad6135d8a06172e1641e6b05e07d155babe11"
+  },
+  {
+    "id": "ratp_train_h",
+    "path": "signage/icons/ratp_train_h.png",
+    "width": 200,
+    "height": 200,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_h.png",
+    "sha256": "b40ba7465debab1cd98832394b17822f01c8b61b7c149c441e15a0a0d5e8a146"
+  },
+  {
+    "id": "ratp_train_j",
+    "path": "signage/icons/ratp_train_j.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_j.png",
+    "sha256": "773326923a79c59c8348d5ee2bbe44db13aad8e665ec4117f6cd236cc918df33"
+  },
+  {
+    "id": "ratp_train_k",
+    "path": "signage/icons/ratp_train_k.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_k.png",
+    "sha256": "7909bfb45d0faf426cbe8cb6a84745e834ed8bdffbef4a1b6639775130abe3c7"
+  },
+  {
+    "id": "ratp_train_l",
+    "path": "signage/icons/ratp_train_l.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_l.png",
+    "sha256": "d74ac532fc21cad8b854ae15a364e0d687e403d017b21252be4f1c1a32c48ae6"
+  },
+  {
+    "id": "ratp_train_n",
+    "path": "signage/icons/ratp_train_n.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_n.png",
+    "sha256": "70a987a3767a8952895a8b5a6f719f504a5d9a972c39d81dfefbf7c6d5e0c505"
+  },
+  {
+    "id": "ratp_train_old",
+    "path": "signage/icons/ratp_train_old.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_old.png",
+    "sha256": "76093aacb6bdd145c4fb07c76c025d560b10271f312c598af95846ee98062f6f"
+  },
+  {
+    "id": "ratp_train_old_2",
+    "path": "signage/icons/ratp_train_old_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_old_2.png",
+    "sha256": "25cfb01e85a7857647aab4f47d77f8de48a4daeb832f72a9b50ba6d918cfb54d"
+  },
+  {
+    "id": "ratp_train_p",
+    "path": "signage/icons/ratp_train_p.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_p.png",
+    "sha256": "fb8074d60e6969135f28022adf0da6236c878093aa790c8977fb308568319ad2"
+  },
+  {
+    "id": "ratp_train_r",
+    "path": "signage/icons/ratp_train_r.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_r.png",
+    "sha256": "e270bd65aa880a1aeb48ab94129c18206c017bcaa15b0bde9e8857b1924af820"
+  },
+  {
+    "id": "ratp_train_u",
+    "path": "signage/icons/ratp_train_u.png",
+    "width": 225,
+    "height": 225,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_train_u.png",
+    "sha256": "e967acc474460a88353d2c49d2749f5eb33090d7d0dba1659234099130343a98"
+  },
+  {
+    "id": "ratp_tram",
+    "path": "signage/icons/ratp_tram.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tram.png",
+    "sha256": "1f80c17015b38418e0fa1cbdde123fcfe9490df95545bc951bfdb681ad33cd7e"
+  },
+  {
+    "id": "ratp_tram_old",
+    "path": "signage/icons/ratp_tram_old.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tram_old.png",
+    "sha256": "0857d9877e8eff0a2f484b430d6c19a1e66631334204c430800d9cb51bc3512e"
+  },
+  {
+    "id": "ratp_tram_old_2",
+    "path": "signage/icons/ratp_tram_old_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_tram_old_2.png",
+    "sha256": "3725ef996bc95320bee0b4cf9ac670f224ef21733b2f6afb8c90c3f74c27f4b0"
+  },
+  {
+    "id": "ratp_up",
+    "path": "signage/icons/ratp_up.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_up.png",
+    "sha256": "1e2d7f4375c48c8ba1907bf8a9e540b94231217a0f61517252b12619bb5c0d6e"
+  },
+  {
+    "id": "ratp_up_left",
+    "path": "signage/icons/ratp_up_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_up_left.png",
+    "sha256": "b72a659009d0ef68092b71f3e209cf46b13f8f77c57b1c02929641fea1b1b249"
+  },
+  {
+    "id": "ratp_velo",
+    "path": "signage/icons/ratp_velo.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/ratp_velo.png",
+    "sha256": "9faa7bcb39c003e5ed5d385425296ec34d598f802804122aa82f0eb9ad63a7f1"
+  },
+  {
+    "id": "ratp_voie_1",
+    "path": "signage/icons/ratp_voie_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_1.png",
+    "sha256": "628f409bf64a1c49b30daada90b6146ef6b522a1381aed52277dc71f5e2abbd3"
+  },
+  {
+    "id": "ratp_voie_1a",
+    "path": "signage/icons/ratp_voie_1a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_1a.png",
+    "sha256": "745e6af2b34752ace1d093b7981aae0b0ca47616b65fc0b9709622ac6b95807c"
+  },
+  {
+    "id": "ratp_voie_1b",
+    "path": "signage/icons/ratp_voie_1b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_1b.png",
+    "sha256": "4532e432276ca63c41558b9e77884e10a70ecd8282a03e2bd7d99a83f537660d"
+  },
+  {
+    "id": "ratp_voie_1c",
+    "path": "signage/icons/ratp_voie_1c.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_1c.png",
+    "sha256": "ea9d26aca5cc1f3edf931535bcaaa66564ac343c3f27b18ec05c490f5c7984d7"
+  },
+  {
+    "id": "ratp_voie_2",
+    "path": "signage/icons/ratp_voie_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_2.png",
+    "sha256": "a0d72b475d695a07c607247f9adabace571db9751009d138c363c27549af1d7d"
+  },
+  {
+    "id": "ratp_voie_2a",
+    "path": "signage/icons/ratp_voie_2a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_2a.png",
+    "sha256": "3f433ee97466b8a237ed0c694d8494ca39d0773e9ab20b814f0cea10a3a9a6c5"
+  },
+  {
+    "id": "ratp_voie_2b",
+    "path": "signage/icons/ratp_voie_2b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_2b.png",
+    "sha256": "e98cb0fe7af41e93240bb68a53126aed5d57cbbe11d5c0d74b528453792ebfa3"
+  },
+  {
+    "id": "ratp_voie_2c",
+    "path": "signage/icons/ratp_voie_2c.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_2c.png",
+    "sha256": "720b6f6e9fb6ba14abd2b66b68a6b5d13498d3b0582c838cca70127e8bd4520f"
+  },
+  {
+    "id": "ratp_voie_3",
+    "path": "signage/icons/ratp_voie_3.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_3.png",
+    "sha256": "be049aa8e39a302119466f6f1c404a11b136676678184ccedb9d73c9d656a685"
+  },
+  {
+    "id": "ratp_voie_3z",
+    "path": "signage/icons/ratp_voie_3z.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_3z.png",
+    "sha256": "c08130bfe3e6a4ab7db4202d1a63186970d65f79b07bf80b85993b872a975c89"
+  },
+  {
+    "id": "ratp_voie_4",
+    "path": "signage/icons/ratp_voie_4.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_4.png",
+    "sha256": "6f83c78d564610da2f2c127d9b0d2309b1a74c346fa590feb93037011fcc549f"
+  },
+  {
+    "id": "ratp_voie_4z",
+    "path": "signage/icons/ratp_voie_4z.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_4z.png",
+    "sha256": "6af0c871a28e1e9f400c68122335654ac7cc8a1047e9acf6d6782aa25ea654ec"
+  },
+  {
+    "id": "ratp_voie_a",
+    "path": "signage/icons/ratp_voie_a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_a.png",
+    "sha256": "85f307dce83f5977e2f29c4fb11b6b55cecf24ef0f50bca6a53ccee7cfd8a17c"
+  },
+  {
+    "id": "ratp_voie_b",
+    "path": "signage/icons/ratp_voie_b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_b.png",
+    "sha256": "a1253dba3dd5cb27ee121c946388ca48c309a8f7b3055214ca462d18d8421a08"
+  },
+  {
+    "id": "ratp_voie_z",
+    "path": "signage/icons/ratp_voie_z.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/ratp/voies/ratp_voie_z.png",
+    "sha256": "166a429d438f3601d5f8950e26b64cfffba8bba53518c29ce8120988bcb8bb31"
+  },
+  {
+    "id": "rennes_arrow_blanc_down",
+    "path": "signage/icons/rennes_arrow_blanc_down.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_blanc_down.png",
+    "sha256": "7a5f4f62798a6a060312f9fde7e065d9cc408609820b59164528b4f382082ad9"
+  },
+  {
+    "id": "rennes_arrow_blanc_left",
+    "path": "signage/icons/rennes_arrow_blanc_left.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_blanc_left.png",
+    "sha256": "6649038ec78479b8fdf88be8851122267cc98a5b30fa1fd7ad23091a585e6303"
+  },
+  {
+    "id": "rennes_arrow_blanc_up",
+    "path": "signage/icons/rennes_arrow_blanc_up.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_blanc_up.png",
+    "sha256": "d521dfd254962f113860f6b61241399092862b3f568f95a44798dde75496c5f9"
+  },
+  {
+    "id": "rennes_arrow_bleu_down",
+    "path": "signage/icons/rennes_arrow_bleu_down.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_bleu_down.png",
+    "sha256": "b71c7edf0466a2a3c33aa0f73577899dec5f23b8d4a00e4c92a61a16bb6be092"
+  },
+  {
+    "id": "rennes_arrow_bleu_left",
+    "path": "signage/icons/rennes_arrow_bleu_left.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_bleu_left.png",
+    "sha256": "71c57d2792b3dcf389bf795f01590fa29652508a51f9bd38c1369252635a8ec2"
+  },
+  {
+    "id": "rennes_arrow_bleu_up",
+    "path": "signage/icons/rennes_arrow_bleu_up.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_arrow_bleu_up.png",
+    "sha256": "0d3a2030bf4f1fdee7b1c6edf626f4f65a3b166b6b2d15468400dcccafa29467"
+  },
+  {
+    "id": "rennes_bus",
+    "path": "signage/icons/rennes_bus.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_bus.png",
+    "sha256": "d0bf86255e67bde21c5b1213f6537fbc7617a50a3d184960c7b6af6aedeef163"
+  },
+  {
+    "id": "rennes_escalator",
+    "path": "signage/icons/rennes_escalator.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_escalator.png",
+    "sha256": "913bf61c966315dca84c809d5cc27f894091c9d5dc0d1e556702b553a865870c"
+  },
+  {
+    "id": "rennes_escalator_bleu",
+    "path": "signage/icons/rennes_escalator_bleu.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_escalator_bleu.png",
+    "sha256": "fb3d309c354ef50ce6a185318a848fb93eb8abee85d0d7f38639f9a7f7b972fe"
+  },
+  {
+    "id": "rennes_escalier",
+    "path": "signage/icons/rennes_escalier.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_escalier.png",
+    "sha256": "bde4418d6891fd9b2314f6130fd4f9be3e60f8b4e18f73da0fcfab4acaa587a1"
+  },
+  {
+    "id": "rennes_escalier_bleu",
+    "path": "signage/icons/rennes_escalier_bleu.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_escalier_bleu.png",
+    "sha256": "b07a2864d27e0103b3d315e22cfe79bed490b2ef287328ac30708a9aed22a4ae"
+  },
+  {
+    "id": "rennes_info",
+    "path": "signage/icons/rennes_info.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_info.png",
+    "sha256": "c6b1ace4808f3db55cecac97d49c927e95acbf86b5515b7862c784d41193031d"
+  },
+  {
+    "id": "rennes_info_bleu",
+    "path": "signage/icons/rennes_info_bleu.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_info_bleu.png",
+    "sha256": "6acdfb26fa3cb34dcbb460cea43cc6d2cd99e7b4fab0c866d9f9c49fed03f4d9"
+  },
+  {
+    "id": "rennes_ma",
+    "path": "signage/icons/rennes_ma.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_ma.png",
+    "sha256": "e0288819010cfab2388b04426a8ccd56bcb611ef66e5ed5b8c26899f3100f3c8"
+  },
+  {
+    "id": "rennes_ma_jaune",
+    "path": "signage/icons/rennes_ma_jaune.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_ma_jaune.png",
+    "sha256": "71bfa01497d7f9b6ac51a2679dfce940aa9bba433c05e71028e19ea36e3079d4"
+  },
+  {
+    "id": "rennes_mb",
+    "path": "signage/icons/rennes_mb.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_mb.png",
+    "sha256": "a8368b3c2f620184cfca7ae46d3fab798021dc26ed4ab4a245fd90177a840ce6"
+  },
+  {
+    "id": "rennes_mb_jaune",
+    "path": "signage/icons/rennes_mb_jaune.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_mb_jaune.png",
+    "sha256": "9d7580eb9e6caffa5847bdddab4bbacb542fdd583165a848339704d15822ee50"
+  },
+  {
+    "id": "rennes_metro",
+    "path": "signage/icons/rennes_metro.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_metro.png",
+    "sha256": "402962cdbf7e34ac004af0198213bd0285b58f223530f0f347968c40d283b2ea"
+  },
+  {
+    "id": "rennes_sortie",
+    "path": "signage/icons/rennes_sortie.png",
+    "width": 600,
+    "height": 600,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_sortie.png",
+    "sha256": "06c2a4e8bd920ab18dc27f5475f540affcd5ed069aec2edb98b0339b707eb906"
+  },
+  {
+    "id": "rennes_star",
+    "path": "signage/icons/rennes_star.png",
+    "width": 960,
+    "height": 957,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_star.png",
+    "sha256": "230c45982fb566cf9555d6134f1b69528550600adc4c5e2de9250f7e0b06b886"
+  },
+  {
+    "id": "rennes_tram",
+    "path": "signage/icons/rennes_tram.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_tram.png",
+    "sha256": "e5c602ef4167126b62f7d248a1bce9dda391e48838e08bc200f261a2357084e8"
+  },
+  {
+    "id": "rennes_velo",
+    "path": "signage/icons/rennes_velo.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/rennes/rennes_velo.png",
+    "sha256": "e24caf0c252d408ef56671c5164a8e379bf4440730b32bc8a777e8188ad28b95"
+  },
+  {
+    "id": "sncf_abonnement",
+    "path": "signage/icons/sncf_abonnement.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_abonnement.png",
+    "sha256": "93b48c779e7aa5bceb5ab6c21d26806cee5cdd1176b1165cd7430e858fa6522e"
+  },
+  {
+    "id": "sncf_aire_jeu",
+    "path": "signage/icons/sncf_aire_jeu.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_aire_jeu.png",
+    "sha256": "97b79b4a22c9e49cd63215d9fbf5b7f50856a4d1ac792ef0928256a42baf86ff"
+  },
+  {
+    "id": "sncf_airport",
+    "path": "signage/icons/sncf_airport.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_airport.png",
+    "sha256": "07c8420e84346fef5e8b77c4bc9c8dc70b86a6cc53da4e6d01963606d518f398"
+  },
+  {
+    "id": "sncf_ascenseur",
+    "path": "signage/icons/sncf_ascenseur.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ascenseur.png",
+    "sha256": "c043f83bfb633d458e931e66172c2424f20bc5418acba1ddb5bfa250e910d65a"
+  },
+  {
+    "id": "sncf_assistance",
+    "path": "signage/icons/sncf_assistance.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_assistance.png",
+    "sha256": "6884674c0ac8e55ad13d9521e895879b271d54663d62da3741c918d7c13b6a5a"
+  },
+  {
+    "id": "sncf_atm",
+    "path": "signage/icons/sncf_atm.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_atm.png",
+    "sha256": "eabe988098f9af57be8d5c0ec04e58b5de0cfbf6dd44ed56082304dc7b7bf453"
+  },
+  {
+    "id": "sncf_attente",
+    "path": "signage/icons/sncf_attente.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_attente.png",
+    "sha256": "c7fce314cb3587e11d2e828b1b57d427c05e50352dd82191b5c33a10cfd90739"
+  },
+  {
+    "id": "sncf_bagages",
+    "path": "signage/icons/sncf_bagages.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bagages.png",
+    "sha256": "4017ca2ece316929878e7e93e0b2f0d09096f9bfd07b7ccf9f9bd56022aa485a"
+  },
+  {
+    "id": "sncf_bar",
+    "path": "signage/icons/sncf_bar.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bar.png",
+    "sha256": "5a751976fa69efc15b879db5648ba67dfbc3b6ff0d4f8ad9da678d13bb1bcc95"
+  },
+  {
+    "id": "sncf_bebe",
+    "path": "signage/icons/sncf_bebe.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bebe.png",
+    "sha256": "bd988c710cf4d90e5ddf01bef7c9914d342ca96d15c45fed4e342b22dbf9c38b"
+  },
+  {
+    "id": "sncf_billetterie",
+    "path": "signage/icons/sncf_billetterie.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_billetterie.png",
+    "sha256": "72d77b595e3e7ea1065141821d6fbc2ca66d24f07c7904dffdb6277b81ed9b5e"
+  },
+  {
+    "id": "sncf_boutique",
+    "path": "signage/icons/sncf_boutique.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_boutique.png",
+    "sha256": "3759b1f72be40b048f4a66135485ce5db4fb2223eebdac45b2e8309ae871e56e"
+  },
+  {
+    "id": "sncf_bus_1",
+    "path": "signage/icons/sncf_bus_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_1.png",
+    "sha256": "462843ea7f7f45bcfe4ecd71afa6a246318555d0603c8d9b6177b7e7b5129d8f"
+  },
+  {
+    "id": "sncf_bus_2",
+    "path": "signage/icons/sncf_bus_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_2.png",
+    "sha256": "b4288894f0780bc296f8e43d905926af07f17ef0d9b8965cbbbe5c14110a30e2"
+  },
+  {
+    "id": "sncf_bus_airport",
+    "path": "signage/icons/sncf_bus_airport.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_airport.png",
+    "sha256": "a80993641963d757dcc2d504d464fe04391581185b25eff0cdb7e592ef3a7bc8"
+  },
+  {
+    "id": "sncf_bus_nuit_1",
+    "path": "signage/icons/sncf_bus_nuit_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_nuit_1.png",
+    "sha256": "82ab7009a31e30a6a4090dcb711da00d7d402998d5ff26af3244a550748d60a5"
+  },
+  {
+    "id": "sncf_bus_nuit_2",
+    "path": "signage/icons/sncf_bus_nuit_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_nuit_2.png",
+    "sha256": "00aa94ef77ca176569ff51ef04f2b45ed0f309464515b065c9ed9aaa85cc98c2"
+  },
+  {
+    "id": "sncf_bus_paris",
+    "path": "signage/icons/sncf_bus_paris.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_paris.png",
+    "sha256": "14b95e085c6bba08752e14e51561a61fd957c3e337d45dd82b262f9b77f490ef"
+  },
+  {
+    "id": "sncf_bus_train",
+    "path": "signage/icons/sncf_bus_train.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_train.png",
+    "sha256": "9190dd62f88b1e52044c8edbf1a0f06c7882ecebab30f16e9195ec4acf885169"
+  },
+  {
+    "id": "sncf_bus_train_voiture",
+    "path": "signage/icons/sncf_bus_train_voiture.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_bus_train_voiture.png",
+    "sha256": "221d9a376a409b5fc24cd77e1be94cbce27216de2a2dd8eb488b15b2f7d46c62"
+  },
+  {
+    "id": "sncf_cafe",
+    "path": "signage/icons/sncf_cafe.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_cafe.png",
+    "sha256": "9ae693cd6363ee07ab01a1370c57778fdfd249aa6273da43577c037e9543877f"
+  },
+  {
+    "id": "sncf_change",
+    "path": "signage/icons/sncf_change.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_change.png",
+    "sha256": "49c7b94afa800e6721036e17de3db3ecfb20d4f5a6c98c006872f369b189500b"
+  },
+  {
+    "id": "sncf_compostage",
+    "path": "signage/icons/sncf_compostage.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_compostage.png",
+    "sha256": "48880ec156e086cc0bed87113681c551225b36d168558cf70658d4d13c05ab0d"
+  },
+  {
+    "id": "sncf_consigne",
+    "path": "signage/icons/sncf_consigne.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_consigne.png",
+    "sha256": "f5eb7b1e5b9ec85850ba8e49155f0c703b906e382885508f3f1c2617472ce9e8"
+  },
+  {
+    "id": "sncf_controle",
+    "path": "signage/icons/sncf_controle.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_controle.png",
+    "sha256": "96c98ebf9ef3093e78cab0490a950f298bab7fa4840588442381cdb97c53d239"
+  },
+  {
+    "id": "sncf_dae_1",
+    "path": "signage/icons/sncf_dae_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_dae_1.png",
+    "sha256": "d05ed429ddbe43c0fc82cfd0dfe52b36a18455ae5f00f34b09ab5c5e12a4a9fd"
+  },
+  {
+    "id": "sncf_dae_2",
+    "path": "signage/icons/sncf_dae_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_dae_2.png",
+    "sha256": "5787bf49250c8bc7b85e9dd45d32dfc4b775b27dd6be865f1f03a88277874745"
+  },
+  {
+    "id": "sncf_depose_minute",
+    "path": "signage/icons/sncf_depose_minute.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_depose_minute.png",
+    "sha256": "8d5f6efdd998afeb5ed4fa7720cd55e3003c0c5e0c41e90ba3744e5c8550cbf6"
+  },
+  {
+    "id": "sncf_embarquement",
+    "path": "signage/icons/sncf_embarquement.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_embarquement.png",
+    "sha256": "c08407e1edab9a8ff7ef65f1e9d298d8879d1136296c0470801f204886970a2f"
+  },
+  {
+    "id": "sncf_escalator_1",
+    "path": "signage/icons/sncf_escalator_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_escalator_1.png",
+    "sha256": "72d7f7f06cd101477548d8194f5fc6dca5e5a30e6f98b88d75843b514a5f9bbe"
+  },
+  {
+    "id": "sncf_escalator_2",
+    "path": "signage/icons/sncf_escalator_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_escalator_2.png",
+    "sha256": "051e8bb5005a4df3303f8d207c8844cbd9e91e6ad58b802de083936128c5bb4f"
+  },
+  {
+    "id": "sncf_escalier_1",
+    "path": "signage/icons/sncf_escalier_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_escalier_1.png",
+    "sha256": "a7b2134a4f45ee7a2f23bc820a2ef850691c05e6678392614290e3d1e284dced"
+  },
+  {
+    "id": "sncf_escalier_2",
+    "path": "signage/icons/sncf_escalier_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_escalier_2.png",
+    "sha256": "75696a4c4245ed2de2e526d42bc2b67ac9e77ab14d1f52f26a90eb2e43f74a85"
+  },
+  {
+    "id": "sncf_est",
+    "path": "signage/icons/sncf_est.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_est.png",
+    "sha256": "cc088aaa4d1089261a6878578b9161f7dedf9ba825306bf066a0754ca7d23b1a"
+  },
+  {
+    "id": "sncf_fastfood",
+    "path": "signage/icons/sncf_fastfood.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_fastfood.png",
+    "sha256": "7b980b43424a332df530a0e25cd39d3d21ac6093d27c7558847409b7f979cde4"
+  },
+  {
+    "id": "sncf_ferry",
+    "path": "signage/icons/sncf_ferry.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ferry.png",
+    "sha256": "c8de8d2ce6f38e447daae9540e9453afdd3e0e9677fb9e146d3b74bc9e5d39be"
+  },
+  {
+    "id": "sncf_garde_enfant",
+    "path": "signage/icons/sncf_garde_enfant.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_garde_enfant.png",
+    "sha256": "97e5fe9a7cf4732313855b396299d1765b0afb9ec66ae90460f5325bc9c404fc"
+  },
+  {
+    "id": "sncf_groupe",
+    "path": "signage/icons/sncf_groupe.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_groupe.png",
+    "sha256": "3b116c3e2c857affab9442ecf92e5126ce37c0d3c0d42079b24cbff5b75d2445"
+  },
+  {
+    "id": "sncf_info",
+    "path": "signage/icons/sncf_info.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_info.png",
+    "sha256": "3c8f6061968961f376473a4862268e6c6e4877229087de5f285c702c158a53c1"
+  },
+  {
+    "id": "sncf_location",
+    "path": "signage/icons/sncf_location.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_location.png",
+    "sha256": "cccee6dcf43c156ca3495efe77f0e9dfcac221d74ddcf760c5526c56f219e36d"
+  },
+  {
+    "id": "sncf_logo",
+    "path": "signage/icons/sncf_logo.png",
+    "width": 213,
+    "height": 214,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_logo.png",
+    "sha256": "17d668db47e46617d94274b4e86fe0e933f0a2145fbaf1f881600b6e6f3f0c90"
+  },
+  {
+    "id": "sncf_metro",
+    "path": "signage/icons/sncf_metro.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_metro.png",
+    "sha256": "a06f4096758e41726f3c1ba7aea157fe6d130215ab8decfc9e925c1be9b699b7"
+  },
+  {
+    "id": "sncf_metro_paris",
+    "path": "signage/icons/sncf_metro_paris.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_metro_paris.png",
+    "sha256": "ddfcbb895082f511c17ea715fc69a84a029f03a012a44b2208d2da3972caea00"
+  },
+  {
+    "id": "sncf_nord",
+    "path": "signage/icons/sncf_nord.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_nord.png",
+    "sha256": "680d2ef102cf9cfc1c4f41b6fdb125b17427ea46b96419079db0181d6a3a7fb9"
+  },
+  {
+    "id": "sncf_objet_trouve",
+    "path": "signage/icons/sncf_objet_trouve.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_objet_trouve.png",
+    "sha256": "eb71f8dd7df23d3bbd48c241d1b86f931f0ae62b36126630304ddf33752572b5"
+  },
+  {
+    "id": "sncf_office_tourisme",
+    "path": "signage/icons/sncf_office_tourisme.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_office_tourisme.png",
+    "sha256": "351ef74842b1d40bd8e2e197933ba48fbb6982ecbf665c55ef8399a249e39890"
+  },
+  {
+    "id": "sncf_ouest",
+    "path": "signage/icons/sncf_ouest.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ouest.png",
+    "sha256": "fe543d0a1a0ca5b3300d81196f4175a040b4b323ec6838f2c82955f54ba2f358"
+  },
+  {
+    "id": "sncf_ouigo",
+    "path": "signage/icons/sncf_ouigo.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ouigo.png",
+    "sha256": "4dde439040fc6f5a57c3badbf31a08f84c6cdc31378fd9c5a575e5553ac305a6"
+  },
+  {
+    "id": "sncf_parking",
+    "path": "signage/icons/sncf_parking.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_parking.png",
+    "sha256": "2255df99d0695b6026fcfbbca5a1f2f64960e0c969004daf48b01c92acc2ec72"
+  },
+  {
+    "id": "sncf_parking_moto",
+    "path": "signage/icons/sncf_parking_moto.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_parking_moto.png",
+    "sha256": "341255868d2d5bee6ede465904cd6a29516c7083803791a62ef9b9ed66ff63b1"
+  },
+  {
+    "id": "sncf_parking_velo_1",
+    "path": "signage/icons/sncf_parking_velo_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_parking_velo_1.png",
+    "sha256": "78a4827eec0b513132b651ae9dfbd99174336651aa9cd926d702510c1230ac53"
+  },
+  {
+    "id": "sncf_parking_velo_2",
+    "path": "signage/icons/sncf_parking_velo_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_parking_velo_2.png",
+    "sha256": "507d8f94eb3313d3dcae2bcfd7461e6531d3fe3984ce0bd89b1eaf1939901da2"
+  },
+  {
+    "id": "sncf_pente",
+    "path": "signage/icons/sncf_pente.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_pente.png",
+    "sha256": "6b86726b5758d003a5d0ed6bf78e73962f6003585cb81adc95101ff68c3542c6"
+  },
+  {
+    "id": "sncf_photocopie",
+    "path": "signage/icons/sncf_photocopie.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_photocopie.png",
+    "sha256": "b6100a88248283738f98bf5150554cfc8be4f51af9ffa25b57ccb7b16987986f"
+  },
+  {
+    "id": "sncf_pmr",
+    "path": "signage/icons/sncf_pmr.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_pmr.png",
+    "sha256": "3e2ae2ee60c325a95057951e7bfde9f7d15c24d3f27c18517d8359d0a7cd79c5"
+  },
+  {
+    "id": "sncf_poste",
+    "path": "signage/icons/sncf_poste.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_poste.png",
+    "sha256": "c434c953e948466f498da4115fd8dbe9796f6e0e6cd344d25a94bef6dfec731d"
+  },
+  {
+    "id": "sncf_rassemblement",
+    "path": "signage/icons/sncf_rassemblement.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_rassemblement.png",
+    "sha256": "b08b59ae1da7a2dacb6373ba09cf3a632c3849c39ddf55f077433ffce0796b42"
+  },
+  {
+    "id": "sncf_recharge",
+    "path": "signage/icons/sncf_recharge.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_recharge.png",
+    "sha256": "aeabbb0029e4bc8f4845e52d0e6fb2bb737f0dded6ccf84e6eb5520fa6175dca"
+  },
+  {
+    "id": "sncf_rer",
+    "path": "signage/icons/sncf_rer.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_rer.png",
+    "sha256": "96d20531ed2dfab51ba4b2a37e17be4e423d2725c987595e6e6602e56fed96c4"
+  },
+  {
+    "id": "sncf_restaurant",
+    "path": "signage/icons/sncf_restaurant.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_restaurant.png",
+    "sha256": "f0cf2f5166eb857d47018b75682bec397c51ee29fb7639f0b61015c0aab66513"
+  },
+  {
+    "id": "sncf_solidarite",
+    "path": "signage/icons/sncf_solidarite.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_solidarite.png",
+    "sha256": "bce7741ea5fc2e9d9b3e98873b5c4473d819d56103685fdcb22a05bcfd0ca486"
+  },
+  {
+    "id": "sncf_sortie",
+    "path": "signage/icons/sncf_sortie.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_sortie.png",
+    "sha256": "3bd6053733344893024bdcc9804084903009784ba2824403b11f98569c159c45"
+  },
+  {
+    "id": "sncf_sortie_secours",
+    "path": "signage/icons/sncf_sortie_secours.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_sortie_secours.png",
+    "sha256": "9bab4a0e820d616c4a6fdcd7cb63758c57ec1e4d3eb563d6bc84cfbc5a089503"
+  },
+  {
+    "id": "sncf_sortie_texte",
+    "path": "signage/icons/sncf_sortie_texte.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_sortie_texte.png",
+    "sha256": "f8391635f0a5d3a713e66493c7a1108ab28286566375ead6d2aacffc8747f7fa"
+  },
+  {
+    "id": "sncf_sud",
+    "path": "signage/icons/sncf_sud.png",
+    "width": 128,
+    "height": 128,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_sud.png",
+    "sha256": "94dcfdffe18f753a0d8fafbf66aaf474e9c53166afe32c63d9ff6f7ab23e92a8"
+  },
+  {
+    "id": "sncf_tabac",
+    "path": "signage/icons/sncf_tabac.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_tabac.png",
+    "sha256": "6de43646fd0e15fc4d16665b9faddfd8bcd9a20c160eddf71aa274922ba4d56a"
+  },
+  {
+    "id": "sncf_tapis",
+    "path": "signage/icons/sncf_tapis.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_tapis.png",
+    "sha256": "14915927f7ee9d3aa4f10b7400684ea80d767acb01d080f90887fca0114d8dd8"
+  },
+  {
+    "id": "sncf_taxi",
+    "path": "signage/icons/sncf_taxi.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_taxi.png",
+    "sha256": "38c06b8b6ca16644adae6c868b17d925fadd879dd46969108afe51fac68cbcfe"
+  },
+  {
+    "id": "sncf_taxi_reserve",
+    "path": "signage/icons/sncf_taxi_reserve.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_taxi_reserve.png",
+    "sha256": "7cebeb1149296abe3e4299bb783b48b898b2686485a02e4cb4e5d03c65df9032"
+  },
+  {
+    "id": "sncf_telephone",
+    "path": "signage/icons/sncf_telephone.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_telephone.png",
+    "sha256": "e78924c83a8add03e61363c53a4800c2f43a481eaa41f0f86573248c34ded283"
+  },
+  {
+    "id": "sncf_ter",
+    "path": "signage/icons/sncf_ter.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ter.png",
+    "sha256": "d1528afc1b9caae544bce9039951799bd3423544d83a7f0ba6a732bf6c2789ce"
+  },
+  {
+    "id": "sncf_tgv",
+    "path": "signage/icons/sncf_tgv.png",
+    "width": 194,
+    "height": 194,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_tgv.png",
+    "sha256": "30fed52e669cf231b2958186ca15e377e63a07f29df8b6c762fd8795efe08e7e"
+  },
+  {
+    "id": "sncf_tgv_inoui",
+    "path": "signage/icons/sncf_tgv_inoui.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_tgv_inoui.png",
+    "sha256": "d35fb8de6bae4466a6a462f5609c8e11b41da7abe4efa35f970fb05ef39f6d7a"
+  },
+  {
+    "id": "sncf_ticket",
+    "path": "signage/icons/sncf_ticket.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_ticket.png",
+    "sha256": "57b05dcee8ea171ef5e577c2004922491b46138c23494b9ca9fab0bad166b796"
+  },
+  {
+    "id": "sncf_train",
+    "path": "signage/icons/sncf_train.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_train.png",
+    "sha256": "7e5dcfc1b2fa4348fc5f4011fdde1d91ee52d787b77f3f3576a3308cc2e8f8b9"
+  },
+  {
+    "id": "sncf_train_voiture",
+    "path": "signage/icons/sncf_train_voiture.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_train_voiture.png",
+    "sha256": "5af1ec27698cb86952e7e7d59c666df284be0de1734dc631c2a5248dce86902d"
+  },
+  {
+    "id": "sncf_tram",
+    "path": "signage/icons/sncf_tram.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_tram.png",
+    "sha256": "11a1424d171beec884d84f3e3e5cb80fd10beb7a167814bac585c50583291671"
+  },
+  {
+    "id": "sncf_travail",
+    "path": "signage/icons/sncf_travail.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_travail.png",
+    "sha256": "9578b4be54b74cd671ec5054cb3aabd8bb4540f8e43ef9390c5e44c77feadf91"
+  },
+  {
+    "id": "sncf_velo",
+    "path": "signage/icons/sncf_velo.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_velo.png",
+    "sha256": "f4b7908a973a9626a6e58981e37d5757cb5da51ff7de9149b10fab9bfb094a45"
+  },
+  {
+    "id": "sncf_velo_libre_service",
+    "path": "signage/icons/sncf_velo_libre_service.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_velo_libre_service.png",
+    "sha256": "a658efb3bd1a04f008e0c538c3fd8026979a99f0e451d392a4486f33567225b5"
+  },
+  {
+    "id": "sncf_velotaxi",
+    "path": "signage/icons/sncf_velotaxi.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_velotaxi.png",
+    "sha256": "4baaec88577c9f915e96b8aebcba2f3ea2e6760cbb441b9a73dadf14c15a32c1"
+  },
+  {
+    "id": "sncf_wc",
+    "path": "signage/icons/sncf_wc.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_wc.png",
+    "sha256": "8841688a9a3a6e61d364a6768803bca90b1ab07c13adda91ea48248fe1e53f94"
+  },
+  {
+    "id": "sncf_wc_pmr",
+    "path": "signage/icons/sncf_wc_pmr.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_wc_pmr.png",
+    "sha256": "93d38a1eceb2edb4b6a82d42f5427d02cec9a9a74739614be2f3c0ae49acef15"
+  },
+  {
+    "id": "sncf_wifi",
+    "path": "signage/icons/sncf_wifi.png",
+    "width": 371,
+    "height": 371,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/sncf_wifi.png",
+    "sha256": "13d968d7b0d8a6d82c140f80499ad64bbe3868985174f5f6aa7f478baa127381"
+  },
+  {
+    "id": "sncf_conj",
+    "path": "signage/icons/sncf_conj.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/sncf_conj.png",
+    "sha256": "322cf0bea642dba99a1f642e0a1ca4ebc7b8d3e23bc91a52f9800256c10852d6"
+  },
+  {
+    "id": "sncf_preposition",
+    "path": "signage/icons/sncf_preposition.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/sncf_preposition.png",
+    "sha256": "be3afd590ae6c777dcbe02cea60ed26254e10ed9f0f6759e69f28b262243c721"
+  },
+  {
+    "id": "voie_0",
+    "path": "signage/icons/voie_0.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_0.png",
+    "sha256": "944fe5c2afdaa3934eae581b9adc2d57feb0f02a0c46e66836437cb0992f1230"
+  },
+  {
+    "id": "voie_1",
+    "path": "signage/icons/voie_1.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_1.png",
+    "sha256": "70afedf376997593a698aa0ede850f6a1c7b594382c460d706f9fda14ca2c38e"
+  },
+  {
+    "id": "voie_10",
+    "path": "signage/icons/voie_10.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_10.png",
+    "sha256": "463a4ec42f91e8b7e3513223283ab68fdb8a23650aa5ef1074bfd05e159d3716"
+  },
+  {
+    "id": "voie_11",
+    "path": "signage/icons/voie_11.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_11.png",
+    "sha256": "62f6fb5d072d7b407fe9fb0a2728b23945a8e40b0eba814b8ff2d58a5537c057"
+  },
+  {
+    "id": "voie_12",
+    "path": "signage/icons/voie_12.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_12.png",
+    "sha256": "563dbfeb259ec3a1a5327a53d6bca31c82a0354fac7eef0695f559e1c12bcc8b"
+  },
+  {
+    "id": "voie_13",
+    "path": "signage/icons/voie_13.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_13.png",
+    "sha256": "ce5f4b6a26af3527afc8e4782fa831c435b01b50f4b386ffbae744e0f51bf517"
+  },
+  {
+    "id": "voie_14",
+    "path": "signage/icons/voie_14.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_14.png",
+    "sha256": "3649327cdc54f4fc71448aef1e0a6f705f5f32474b1f96e6b9334839c323577c"
+  },
+  {
+    "id": "voie_15",
+    "path": "signage/icons/voie_15.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_15.png",
+    "sha256": "6910c1848c054ad5040d87860adff2a18bb450614dcc879913ddc10b4c0e86e3"
+  },
+  {
+    "id": "voie_16",
+    "path": "signage/icons/voie_16.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_16.png",
+    "sha256": "a7dfcad04367cbf0cdb26e92757e1a4a4d7f320eb3ce49cd1e906d237ccb1182"
+  },
+  {
+    "id": "voie_17",
+    "path": "signage/icons/voie_17.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_17.png",
+    "sha256": "21d74a39b602fc548241c018027e0e21d010d7171342fd9d8d4232808db465ca"
+  },
+  {
+    "id": "voie_18",
+    "path": "signage/icons/voie_18.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_18.png",
+    "sha256": "996ae059cd2b2b7ee7aaca62fcf2ba54cee18d60639910278dc883a8979bf990"
+  },
+  {
+    "id": "voie_19",
+    "path": "signage/icons/voie_19.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_19.png",
+    "sha256": "1db2a65284e0e8f61b5271ffb8e6303a6df0c7216975536413c9951dba6308c4"
+  },
+  {
+    "id": "voie_1a",
+    "path": "signage/icons/voie_1a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_1a.png",
+    "sha256": "da6f4f21c57cb0767fdbba5dbbed1815e0c6bc5bd1d78e7dcd482d7a7f286b43"
+  },
+  {
+    "id": "voie_1b",
+    "path": "signage/icons/voie_1b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_1b.png",
+    "sha256": "31eebfa48783b62456ce17ad73590ffaf2787578f711b0f14359e9e3c29f0d16"
+  },
+  {
+    "id": "voie_1c",
+    "path": "signage/icons/voie_1c.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_1c.png",
+    "sha256": "f0a6be87687d7e660312367a933b68c8962a215e774fe4fbad519d12c5ae02a3"
+  },
+  {
+    "id": "voie_2",
+    "path": "signage/icons/voie_2.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_2.png",
+    "sha256": "c3ac945c15c9934814a4eacf77313f36e32fa7b57ea11e616cc5275e9ed0f435"
+  },
+  {
+    "id": "voie_20",
+    "path": "signage/icons/voie_20.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_20.png",
+    "sha256": "f9b7c768f73b6f9a732473c3eb03f4e364d4001f2bf220de576316548f40ee2f"
+  },
+  {
+    "id": "voie_21",
+    "path": "signage/icons/voie_21.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_21.png",
+    "sha256": "ae464a57670343bc2fdcedd6bdd006f74c96aaf82da86b0d716a730f07b8e008"
+  },
+  {
+    "id": "voie_22",
+    "path": "signage/icons/voie_22.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_22.png",
+    "sha256": "54a0fb3c425f1e1fc74710918c0ecc7e8dbc0cf7d76bd6dc5efda2650496b137"
+  },
+  {
+    "id": "voie_23",
+    "path": "signage/icons/voie_23.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_23.png",
+    "sha256": "e5ba7fe54d422e1e99db24f660df0216dac5a08315f3de84b2283213f720258c"
+  },
+  {
+    "id": "voie_24",
+    "path": "signage/icons/voie_24.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_24.png",
+    "sha256": "1f9ad6a702daf869f46651e52d7074b07cf56c19ee502844aee7a36845d2fd85"
+  },
+  {
+    "id": "voie_25",
+    "path": "signage/icons/voie_25.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_25.png",
+    "sha256": "dd81e3515017a16fc52ef09ce35253046205a0f4fbb8dba9730c1671972db4c1"
+  },
+  {
+    "id": "voie_26",
+    "path": "signage/icons/voie_26.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_26.png",
+    "sha256": "257f921fd849c51d11688d39c7077c807bae8410bdf47a85a82394fd6f6eb277"
+  },
+  {
+    "id": "voie_27",
+    "path": "signage/icons/voie_27.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_27.png",
+    "sha256": "36fbda25afcd568407b113e3db91f6944c1c60d7092fb09a9d567fab9bdf8477"
+  },
+  {
+    "id": "voie_28",
+    "path": "signage/icons/voie_28.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_28.png",
+    "sha256": "66a5167322c30155b7ab7e513f0ce053cd043951b0498d2e6b4490bd4797fb49"
+  },
+  {
+    "id": "voie_29",
+    "path": "signage/icons/voie_29.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_29.png",
+    "sha256": "d05ee2c9295c3ab029c381f2f2212eb67ee7da28bdad6c1f72e93b867c566d98"
+  },
+  {
+    "id": "voie_2a",
+    "path": "signage/icons/voie_2a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_2a.png",
+    "sha256": "b3aa889c7e36b5ccecb0de38556c3cbf7ceca2970a2f884dee4705cb5c5bf182"
+  },
+  {
+    "id": "voie_2b",
+    "path": "signage/icons/voie_2b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_2b.png",
+    "sha256": "398475384f031cf4340de1e58089bccdf83462ffb32072563ec742cc81c1472e"
+  },
+  {
+    "id": "voie_2c",
+    "path": "signage/icons/voie_2c.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_2c.png",
+    "sha256": "9f887432f09517147de21421d08f72a3cb1feee9e854b1e9d24b9391c0560a43"
+  },
+  {
+    "id": "voie_3",
+    "path": "signage/icons/voie_3.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_3.png",
+    "sha256": "80e020b2087771a4612ef1f6a5237d969335f74ef05f42b8f942c172e25b00a7"
+  },
+  {
+    "id": "voie_30",
+    "path": "signage/icons/voie_30.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_30.png",
+    "sha256": "0c92efd2c41156e2ffe071d4e7a56ebcdc2c7eb9eb469ab922af1ade6594a140"
+  },
+  {
+    "id": "voie_31",
+    "path": "signage/icons/voie_31.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_31.png",
+    "sha256": "f6a450a997dd5aef5300569c613a50cd9fe30de00ee584ade9348acb9790ef5f"
+  },
+  {
+    "id": "voie_32",
+    "path": "signage/icons/voie_32.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_32.png",
+    "sha256": "0c94ac259ca628980e653a1b0cac155660e5fa233002c1c23886db99072d83ab"
+  },
+  {
+    "id": "voie_33",
+    "path": "signage/icons/voie_33.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_33.png",
+    "sha256": "93c1ca628432b9ef125b9af9850f4978265331b88a308c35a817299a616080a4"
+  },
+  {
+    "id": "voie_34",
+    "path": "signage/icons/voie_34.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_34.png",
+    "sha256": "33f63390f3f3229d4be73931abdde91ee5729967a023f39a0319fa4b504ad08e"
+  },
+  {
+    "id": "voie_35",
+    "path": "signage/icons/voie_35.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_35.png",
+    "sha256": "797e0dfc11dbda055a2d115ccd24d181d2535b36957e72e5ff01e6a3a45d8a0b"
+  },
+  {
+    "id": "voie_36",
+    "path": "signage/icons/voie_36.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_36.png",
+    "sha256": "ef6711a8e194da0bbf6e2aabdf1858c966ae8a485ee0723d85b8b0a2ea51d76d"
+  },
+  {
+    "id": "voie_37",
+    "path": "signage/icons/voie_37.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_37.png",
+    "sha256": "d5bd2f132f312b5077c8fc79513897b183783c184187569c3ef997dd4ce1847b"
+  },
+  {
+    "id": "voie_38",
+    "path": "signage/icons/voie_38.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_38.png",
+    "sha256": "75400904278e114e2202d4869f96735b7777dc538da0f162a729e6e860c26129"
+  },
+  {
+    "id": "voie_39",
+    "path": "signage/icons/voie_39.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_39.png",
+    "sha256": "68d238c1244dc4febc893df774cd8bf536c1bea3f3a97785e68e6e81cf1b9fc3"
+  },
+  {
+    "id": "voie_4",
+    "path": "signage/icons/voie_4.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_4.png",
+    "sha256": "fc29f7ace1bce8f7adef35d9acbb89b6e8082e27fc872f24c40d405fd75d919c"
+  },
+  {
+    "id": "voie_40",
+    "path": "signage/icons/voie_40.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_40.png",
+    "sha256": "860a9e504fcac1d46d29af0a200f58b10166709c438c0c7f1a5b6b1035166d06"
+  },
+  {
+    "id": "voie_41",
+    "path": "signage/icons/voie_41.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_41.png",
+    "sha256": "ac75a4be1eeb1b5990f6cbc11d97eee491a4a45f005b3777a40703bd0edaa9bd"
+  },
+  {
+    "id": "voie_42",
+    "path": "signage/icons/voie_42.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_42.png",
+    "sha256": "36559f76afa738d95460102cc553e8593fe58ff1884558078816bc1c9f0ed422"
+  },
+  {
+    "id": "voie_43",
+    "path": "signage/icons/voie_43.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_43.png",
+    "sha256": "efb029da42b6057aa054636bf36f195525c07c4dffc930723f2cb40f14811664"
+  },
+  {
+    "id": "voie_44",
+    "path": "signage/icons/voie_44.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_44.png",
+    "sha256": "b3283e71aaafc883b486461af1257be7fc0c555b8a63593df0d0b2d679b59a88"
+  },
+  {
+    "id": "voie_45",
+    "path": "signage/icons/voie_45.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_45.png",
+    "sha256": "8853812a9d088f964d2d7dd7c1bce72d7fb954e8782aeb7f516c561759c93fc5"
+  },
+  {
+    "id": "voie_46",
+    "path": "signage/icons/voie_46.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_46.png",
+    "sha256": "3730a5cec447fdd73b153c7154b94e77f25f441632e66c8091db823d462564e3"
+  },
+  {
+    "id": "voie_47",
+    "path": "signage/icons/voie_47.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_47.png",
+    "sha256": "451f870ddf0f4ab4efbc0c38f782e300ce1eb96e04034cb7ee08b9d4435a0807"
+  },
+  {
+    "id": "voie_48",
+    "path": "signage/icons/voie_48.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_48.png",
+    "sha256": "e51f2550ffaef870d5388b0b866c37526a844e6e089b95e0293152c154d010ad"
+  },
+  {
+    "id": "voie_49",
+    "path": "signage/icons/voie_49.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_49.png",
+    "sha256": "03ac284576f376efd7dec266e0fb9211ee0825a644a1c57858071b3760c55cef"
+  },
+  {
+    "id": "voie_5",
+    "path": "signage/icons/voie_5.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_5.png",
+    "sha256": "25ed235c5c53ecaddcf548bb9156358a0bef43c5f907ff26a9f7885ac80a71c0"
+  },
+  {
+    "id": "voie_50",
+    "path": "signage/icons/voie_50.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_50.png",
+    "sha256": "2b0558a6388b00413da384984b6ec8257ced0272524891721e515b93d0c08912"
+  },
+  {
+    "id": "voie_51",
+    "path": "signage/icons/voie_51.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_51.png",
+    "sha256": "6ecd89d9b8344a55b56fa29f0650875170996f8690ea80f82484ed9ed7cc29c4"
+  },
+  {
+    "id": "voie_52",
+    "path": "signage/icons/voie_52.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_52.png",
+    "sha256": "6fc39310be811cd6b64b7fb61f131400e4ece141764cf217abe5272a7d8e52e0"
+  },
+  {
+    "id": "voie_53",
+    "path": "signage/icons/voie_53.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_53.png",
+    "sha256": "43dbe4f3e5602e507ec79aa409157921edb8d321e49019ce4cbaf6331073a333"
+  },
+  {
+    "id": "voie_54",
+    "path": "signage/icons/voie_54.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_54.png",
+    "sha256": "2f156b2901685318a36e48394daace0cf7684c136bdd10205ba18f3875bc21a0"
+  },
+  {
+    "id": "voie_55",
+    "path": "signage/icons/voie_55.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_55.png",
+    "sha256": "eef9c73a6ee8133917f8592930604a0cf5d57b1ec1ef677d51030a2420585ed3"
+  },
+  {
+    "id": "voie_6",
+    "path": "signage/icons/voie_6.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_6.png",
+    "sha256": "34b9f10280a43bc7e10908dcb435385788b334385e495130e2ab1dda1bdc2c26"
+  },
+  {
+    "id": "voie_7",
+    "path": "signage/icons/voie_7.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_7.png",
+    "sha256": "8aa6f744db6af1e790f12be40843a2f466a07cc4d27f87bff57353d11852b27f"
+  },
+  {
+    "id": "voie_8",
+    "path": "signage/icons/voie_8.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_8.png",
+    "sha256": "5a95b335466fd8a7ef9d5ee7999469ff2948f6e5cbefbe9c231d444be830b9c7"
+  },
+  {
+    "id": "voie_9",
+    "path": "signage/icons/voie_9.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_9.png",
+    "sha256": "cfab20a0d3da100a97d358efa0bd188ce72fc33be346a0c34ab616ac91967081"
+  },
+  {
+    "id": "voie_a",
+    "path": "signage/icons/voie_a.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_a.png",
+    "sha256": "20a145cbd874b65a71798296e6d56c30557e6dd6f00b384aaaaba9a03f309c5b"
+  },
+  {
+    "id": "voie_b",
+    "path": "signage/icons/voie_b.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_b.png",
+    "sha256": "2f15a2ca90bbb4572bd97dec11bb0b12a8a5e3d25049d6a2c22afb140b5a7b2e"
+  },
+  {
+    "id": "voie_c",
+    "path": "signage/icons/voie_c.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_c.png",
+    "sha256": "8cd9c43edea524ec09a41284ec0d5e20f927b68b7557db610f42e07a9423af35"
+  },
+  {
+    "id": "voie_d",
+    "path": "signage/icons/voie_d.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_d.png",
+    "sha256": "c84a914e9f712f49c7f35e4282d1a835cd35744c39c227b0e8c7b2cbe3c0e85c"
+  },
+  {
+    "id": "voie_e",
+    "path": "signage/icons/voie_e.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_e.png",
+    "sha256": "15d471d2acf43cb09f84e0d117b211d4ac33135a8178d0b1d7beba05488e37dd"
+  },
+  {
+    "id": "voie_f",
+    "path": "signage/icons/voie_f.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_f.png",
+    "sha256": "25101a90b2e3b1956c7180eccfdb9f33fa6d3797691c5950555343ca1a213193"
+  },
+  {
+    "id": "voie_g",
+    "path": "signage/icons/voie_g.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_g.png",
+    "sha256": "3af581c2e5d65e90f2737847dd6cf8797e9e3ddf7baafe8209b069b196ec7f85"
+  },
+  {
+    "id": "voie_h",
+    "path": "signage/icons/voie_h.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_h.png",
+    "sha256": "f09b607f8298c16047deb5baa9cc873acc7cfcaa1806bbd9ad7e07c765a05199"
+  },
+  {
+    "id": "voie_i",
+    "path": "signage/icons/voie_i.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_i.png",
+    "sha256": "415711f3a23e532c337bf6985f41f9e17c92f704dc4d209997825f5b7d9d1e68"
+  },
+  {
+    "id": "voie_j",
+    "path": "signage/icons/voie_j.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_j.png",
+    "sha256": "712836561f3e99fb2016d9a2f8246b5e08d28afc769ef3557b20301000df58a1"
+  },
+  {
+    "id": "voie_k",
+    "path": "signage/icons/voie_k.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_k.png",
+    "sha256": "23a621e8faa63931634f9524eeec13aba96f05803d7f10ecf8d202487f94e03e"
+  },
+  {
+    "id": "voie_l",
+    "path": "signage/icons/voie_l.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_l.png",
+    "sha256": "e620d91293020772bdacbbab522e82bb7fa7156bcaaef04e328acfb1e46a2d99"
+  },
+  {
+    "id": "voie_m",
+    "path": "signage/icons/voie_m.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_m.png",
+    "sha256": "0ff620c46ce8499a63546c751d137ea34eebc5bf1b93646a1176217734b393b3"
+  },
+  {
+    "id": "voie_n",
+    "path": "signage/icons/voie_n.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_n.png",
+    "sha256": "8772278b78eff532352f6b809566ec7acfe93ab632c4988dcc2a3291ff1807b0"
+  },
+  {
+    "id": "voie_o",
+    "path": "signage/icons/voie_o.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_o.png",
+    "sha256": "7be197f5b1b60323d8fb91fc2d27196a080a66a8de280b76d68ed7667500b919"
+  },
+  {
+    "id": "voie_p",
+    "path": "signage/icons/voie_p.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_p.png",
+    "sha256": "f742b04f089b8d259bc7379210830058befa1a6287987b0856db2916a2f2ab3c"
+  },
+  {
+    "id": "voie_q",
+    "path": "signage/icons/voie_q.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_q.png",
+    "sha256": "423fb1bf5d99455f98a214b33f22abe7f302d3b920a724a375f5ce813d2f84f5"
+  },
+  {
+    "id": "voie_r",
+    "path": "signage/icons/voie_r.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_r.png",
+    "sha256": "0bf495a60f7942ac548056440f4ad247564252b3db7a0359063d22039553ed7f"
+  },
+  {
+    "id": "voie_s",
+    "path": "signage/icons/voie_s.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_s.png",
+    "sha256": "194ffc0761005bc69a9328b8956c38b6924b624a1284d843657cfb0f2e6dfe77"
+  },
+  {
+    "id": "voie_t",
+    "path": "signage/icons/voie_t.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_t.png",
+    "sha256": "0a64a25b10ee2ee3b8f310f78e2d8f1e451f6dd6f57c89922afc5c859e44b6d9"
+  },
+  {
+    "id": "voie_u",
+    "path": "signage/icons/voie_u.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_u.png",
+    "sha256": "790367655a8dd89b0c8a0556f137d1434ba222ea78d38009fce060674ebd8969"
+  },
+  {
+    "id": "voie_v",
+    "path": "signage/icons/voie_v.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_v.png",
+    "sha256": "bc75a33f479ba1beec00c36fd724d88d1e1cda15b6f37af8f249074d06a3ebca"
+  },
+  {
+    "id": "voie_w",
+    "path": "signage/icons/voie_w.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_w.png",
+    "sha256": "a7f23f7e9ca0c13f4475a06d21702a7326421a402feac730abd8490db450f086"
+  },
+  {
+    "id": "voie_x",
+    "path": "signage/icons/voie_x.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_x.png",
+    "sha256": "9fc857e2e142d2aeaab49a98e44c57bd902b8bb38e647151040981972a380a30"
+  },
+  {
+    "id": "voie_y",
+    "path": "signage/icons/voie_y.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_y.png",
+    "sha256": "eb1dd01a836330938252d125ebe5ece8020b08a4ebf18f7fb535de6bb2ebf917"
+  },
+  {
+    "id": "voie_z",
+    "path": "signage/icons/voie_z.png",
+    "width": 500,
+    "height": 500,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/sncf/voies/voie_z.png",
+    "sha256": "cd8ddc0d91e437d1d862935283df256d24feefc9b9f5d95f204a02c97c183879"
+  },
+  {
+    "id": "toulouse_bus",
+    "path": "signage/icons/toulouse_bus.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_bus.png",
+    "sha256": "67f2b7e1b8069b2e9fe5111b7b83509081b2965f8fdd76c0f7b32eb2370dbe78"
+  },
+  {
+    "id": "toulouse_bus2",
+    "path": "signage/icons/toulouse_bus2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_bus2.png",
+    "sha256": "9655312ae3cf91138efd27521792d8d68d39ce88f86080d434289896fed9bf64"
+  },
+  {
+    "id": "toulouse_cable",
+    "path": "signage/icons/toulouse_cable.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_cable.png",
+    "sha256": "171c126ecd196e4ca83dd4e8e30617f5740ce35839b53c2cb102ee1cf3203ec7"
+  },
+  {
+    "id": "toulouse_cable2",
+    "path": "signage/icons/toulouse_cable2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_cable2.png",
+    "sha256": "3ae3779a5c9861a1d7d23140d895202fe42417fee35614344b472c0ec4a40b9c"
+  },
+  {
+    "id": "toulouse_cable_teleo",
+    "path": "signage/icons/toulouse_cable_teleo.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_cable_teleo.png",
+    "sha256": "4d179dd60ed800c228eae46856795c3f46b2a66e45618567f655e3ff111f1636"
+  },
+  {
+    "id": "toulouse_down",
+    "path": "signage/icons/toulouse_down.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_down.png",
+    "sha256": "4d7db9b568dfd038348fee464c6e0551389a94e41f37637335f37da45845b1e4"
+  },
+  {
+    "id": "toulouse_down_left",
+    "path": "signage/icons/toulouse_down_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_down_left.png",
+    "sha256": "6e084bce1e1d467f788017a0d2bbeca4a14916c33d05ca5d2093d9eee92c8376"
+  },
+  {
+    "id": "toulouse_left",
+    "path": "signage/icons/toulouse_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_left.png",
+    "sha256": "0828978e6073b8f7b9a815fad1d6b9c756b924be52c374528a9863da6735d70f"
+  },
+  {
+    "id": "toulouse_lineo",
+    "path": "signage/icons/toulouse_lineo.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_lineo.png",
+    "sha256": "bba468d4161a2128f3fa1bb2af89b9762d59ffc5684099b5eabbeb51cb489b9a"
+  },
+  {
+    "id": "toulouse_lineo2",
+    "path": "signage/icons/toulouse_lineo2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_lineo2.png",
+    "sha256": "a40cff77c5f2bc414478de05497719f4c34b434538fede3a6b50536a009ce73a"
+  },
+  {
+    "id": "toulouse_metro",
+    "path": "signage/icons/toulouse_metro.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_metro.png",
+    "sha256": "bc475390b6bdbeac3f61ca43b97f01656eaa080c9d941ed6e1a275be2f076e42"
+  },
+  {
+    "id": "toulouse_metro2",
+    "path": "signage/icons/toulouse_metro2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_metro2.png",
+    "sha256": "6e99b1ae9a6e46ba29fe590ee2f4e3af55ebf617b93b874159fb1595b1cc6ed8"
+  },
+  {
+    "id": "toulouse_metro_a",
+    "path": "signage/icons/toulouse_metro_a.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_metro_a.png",
+    "sha256": "97b1832c09986f66c238271acbc07fc193629b5c59c93b5c57b63935a89d473a"
+  },
+  {
+    "id": "toulouse_metro_b",
+    "path": "signage/icons/toulouse_metro_b.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_metro_b.png",
+    "sha256": "ae35010bf6dc110fb8a4f64aa3ca60e3e2ffbdb763d0847daa3ec6a56a1b9f07"
+  },
+  {
+    "id": "toulouse_metro_c",
+    "path": "signage/icons/toulouse_metro_c.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_metro_c.png",
+    "sha256": "ef2d01678f3530685501f842481c83f267d74058dbddcc7e9c7e91d51ec92882"
+  },
+  {
+    "id": "toulouse_scol",
+    "path": "signage/icons/toulouse_scol.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_scol.png",
+    "sha256": "f0fe7eafb4b9de5a1fdcab1ea15b6a62a8d3c8b94f2b50c06b7994b10c8d0613"
+  },
+  {
+    "id": "toulouse_scol2",
+    "path": "signage/icons/toulouse_scol2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_scol2.png",
+    "sha256": "8c7d5da91c96b923b90519e2a92b92bc6d81a1e15c97df14f63afaa90c3ea5fd"
+  },
+  {
+    "id": "toulouse_tad",
+    "path": "signage/icons/toulouse_tad.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tad.png",
+    "sha256": "15be5174ae8fa51ead2ffeea3d11410d37b36519ad73939f55a952022b90e41c"
+  },
+  {
+    "id": "toulouse_tad2",
+    "path": "signage/icons/toulouse_tad2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tad2.png",
+    "sha256": "2e55f9833a76fbf2b8a069eb206995697523ea96100d807a9245e54c72e774b9"
+  },
+  {
+    "id": "toulouse_tisseo",
+    "path": "signage/icons/toulouse_tisseo.png",
+    "width": 320,
+    "height": 320,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tisseo.png",
+    "sha256": "fb1a6fb46bef92e97e19f297b472757eec9cc86df658c55f4d562e7f7a29df81"
+  },
+  {
+    "id": "toulouse_train",
+    "path": "signage/icons/toulouse_train.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_train.png",
+    "sha256": "15557f9eff78481892595a615a1382fe264f525d9786c63cee8b2a3ec4e9b2d3"
+  },
+  {
+    "id": "toulouse_train2",
+    "path": "signage/icons/toulouse_train2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_train2.png",
+    "sha256": "cfb3d5bcb433f35ce4ca81875c1e5b33495b92a36a35449735bf9158c8c20f4d"
+  },
+  {
+    "id": "toulouse_tram",
+    "path": "signage/icons/toulouse_tram.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tram.png",
+    "sha256": "f18167638a975375b84013f6bbd70766016f701cea027915f2d55c25873c47e5"
+  },
+  {
+    "id": "toulouse_tram2",
+    "path": "signage/icons/toulouse_tram2.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tram2.png",
+    "sha256": "1e351837651495815f1138ea381b9dae0304d4f359775d295c14f272b728994b"
+  },
+  {
+    "id": "toulouse_tram_air",
+    "path": "signage/icons/toulouse_tram_air.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tram_air.png",
+    "sha256": "b26dc75e8d3e8a6600af8a3ee1eec4b203693d66b357ac9ad290954ea4a18dad"
+  },
+  {
+    "id": "toulouse_tram_t1",
+    "path": "signage/icons/toulouse_tram_t1.png",
+    "width": 250,
+    "height": 250,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_tram_t1.png",
+    "sha256": "a3401ae60246448c77e92078dbc210784a9e2e52048d7c3145862fb0dbcde56b"
+  },
+  {
+    "id": "toulouse_up",
+    "path": "signage/icons/toulouse_up.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_up.png",
+    "sha256": "b25779452ce925082c40153152ce528b310cec093b1c3e9deed9d5249bca0117"
+  },
+  {
+    "id": "toulouse_up_left",
+    "path": "signage/icons/toulouse_up_left.png",
+    "width": 64,
+    "height": 64,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_up_left.png",
+    "sha256": "68b4540cdc2347a4389d1e1fd9178460b5754d3d3b311a75d3001cec21539ccf"
+  },
+  {
+    "id": "toulouse_velo",
+    "path": "signage/icons/toulouse_velo.png",
+    "width": 235,
+    "height": 240,
+    "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_velo.png",
+    "sha256": "82a8fa011b717b392fb9ed87b8e25189cfc0e50cc6a7ba8c4078c28ad818e041"
+  }
+]
