@@ -61,7 +61,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
                 // Pixel dimensions here are world units; only the texture is rasterized.
                 g.createVertexConsumer(spec.illuminated()
                     ?MoreRenderLayers.getLight2(texture):MoreRenderLayers.getExterior(texture));
-                IDrawing.drawTexture(g,0,0,(float)w,(float)h,Direction.NORTH,-1,
+                IDrawing.drawTexture(g,0,0,(float)w,(float)h,0,0,1,1,Direction.NORTH,-1,
                     spec.illuminated()?GraphicsHolder.getDefaultLight():light);
             }finally {g.pop();}
         }
