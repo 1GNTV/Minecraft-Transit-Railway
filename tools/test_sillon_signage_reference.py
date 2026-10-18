@@ -6,10 +6,12 @@ canvas=(root/"fabric/src/main/java/org/mtr/mod/client/SillonSignageCanvas.java")
 layout=(root/"fabric/src/main/java/org/mtr/mod/client/SillonRATPSignageLayouts.java").read_text()
 spec=(root/"fabric/src/main/java/org/mtr/mod/data/SillonSignageSpec.java").read_text()
 assert "if(SillonRATPSignageLayouts.draw(g,s,w,h))return;" in canvas
-assert '"metro","metro_subtitle","rer","direction","transfer","exit","sector"' in spec
+assert '"metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector"' in spec
 assert "Never counterfeit official line pictograms" in canvas
 assert 'center(g,"?"' in canvas
 assert 'case "direction","transfer"' in layout
+assert 'case "interchange"' in layout
+assert 'servicesColor=0x009C94' in layout
 assert 'case "exit"' in layout
 assert 'case "sector"' in layout
 assert 'case "services"' in layout

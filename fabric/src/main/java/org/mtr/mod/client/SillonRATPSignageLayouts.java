@@ -30,6 +30,7 @@ public final class SillonRATPSignageLayouts {
             case "metro","metro_subtitle" -> station(g,spec,w,h);
             case "rer" -> rerStation(g,spec,w,h);
             case "direction","transfer" -> direction(g,spec,w,h);
+            case "interchange" -> interchange(g,spec,w,h);
             case "exit" -> exit(g,spec,w,h);
             case "sector" -> sector(g,spec,w,h);
             case "vertical" -> vertical(g,spec,w,h);
@@ -69,7 +70,7 @@ public final class SillonRATPSignageLayouts {
         boolean subtitle="metro_subtitle".equals(s.style())&&!s.subtitle().isBlank();
         int band=subtitle?px(h,.178f):0;
         if(band>0){
-            g.setColor(new Color(OCHRE));
+            g.setColor(new Color(s.accent()==0?OCHRE:s.accent()));
             g.fillRect(3,h-band,w-6,band-3);
         }
         float usable=h-band;
@@ -87,7 +88,7 @@ public final class SillonRATPSignageLayouts {
         }
         if(lines.isEmpty())lines.add(title);
         if(lines.size()==1){
-            textCenter(g,lines.get(0),true,Math.min(usable*.53f,w*.090f),WHITE,w*.5f,usable*.67f,w*.055f,w*.945f);
+            textCenter(g,lines.get(0),true,usable*.53f,WHITE,w*.5f,usable*.67f,w*.055f,w*.945f);
         }else{
             float size=Math.min(usable*.38f,w*.074f);
             textCenter(g,lines.get(0),true,size,WHITE,w*.5f,usable*.455f,w*.06f,w*.94f);
@@ -161,6 +162,43 @@ public final class SillonRATPSignageLayouts {
             textLeft(g,name,true,Math.min(rowHeight*.74f,w*.043f),white,
                 pad+box+Math.max(10,px(w,.015f)),cy,w-pad*2-box);
         }
+    }
+    /**
+     * Source: RATP Fiches Equipements, Signalétique (p.20 printed; PDF p.19),
+     * illustrated stack: white metro / interchange strip, teal services strip
+     * and blue Sortie. This panel exists as a composition, not three unrelated
+     * blue plaques. All labels are supplied by the sign document.
+     */
+    private static void interchange(Graphics2D g,SillonSignageSpec s,int w,int h){
+        final int servicesColor=0x009C94,pad=px(w,.045f);
+        final int transferH=px(h,.51f),servicesH=px(h,.17f);
+        panel(g,w,h,WHITE,false);
+        SillonSignageCanvas.drawArrow(g,s.arrow(),w*.075f,h*.235f,
+            Math.min(h*.13f,w*.055f),TEXT_DARK);
+        int iconSize=Math.max(22,px(h,.19f));
+        SillonSignageCanvas.drawIcons(g,s.icons(),px(w,.15f),px(h,.058f),
+            iconSize,px(w,.012f),px(w,.93f));
+        String name=s.title().isBlank()?"Correspondances":s.title();
+        textLeft(g,name,true,Math.min(h*.14f,w*.047f),TEXT_DARK,
+            px(w,.15f),h*.43f,w*.78f);
+        g.setColor(new Color(servicesColor));
+        g.fillRect(0,transferH,w,servicesH);
+        textLeft(g,s.subtitle().isBlank()?"Services":s.subtitle(),
+            true,h*.115f,WHITE,pad,transferH+servicesH*.70f,w*.80f);
+        g.setColor(new Color(BLUE));
+        g.fillRect(0,transferH+servicesH,w,h-transferH-servicesH);
+        SillonSignageCanvas.drawArrow(g,s.arrow(),w*.08f,h*.845f,
+            Math.min(h*.12f,w*.048f),WHITE);
+        textLeft(g,"Sortie",true,h*.16f,WHITE,
+            px(w,.15f),h*.85f,w*.37f);
+        // Exit numbers belong to the blue field; never move them into the
+        // transport strip and never fabricate road names.
+        if(!s.body().isBlank()){
+            String shown=s.body().replace('|',' ');
+            textLeft(g,shown,true,h*.09f,WHITE,px(w,.55f),h*.86f,w*.42f);
+        }
+        g.setColor(new Color(0xFFB6BCC9,true));
+        g.drawRect(1,1,w-3,h-3);
     }
     private static void sector(Graphics2D g,SillonSignageSpec s,int w,int h){
         int head=px(h,.34f);

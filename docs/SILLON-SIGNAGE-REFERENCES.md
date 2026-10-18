@@ -43,6 +43,7 @@ not one recolored rectangle:
 - metro / metro_subtitle: dark navy plate; optional ochre subtitle band;
   centered Parisine with one or two lines.
 - direction / transfer: white base, navy copy, native MTR France icons.
+- interchange: RATP official stacked white transport + teal services + navy exit, with separate zones and no fictitious destinations.
 - exit: white transport icon strip + blue Sortie heading, numbered exit rows.
 - sector: grey location header, white mode strip, blue exit field.
 - services: grey ground rather than fake universal navy.

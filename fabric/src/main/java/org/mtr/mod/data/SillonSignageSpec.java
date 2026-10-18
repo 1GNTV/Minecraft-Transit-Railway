@@ -14,7 +14,7 @@ public record SillonSignageSpec(
     float width, float height, float yaw, float pitch, float roll,
     boolean stationAuto, boolean illuminated, boolean doubleSided) {
     public static final List<String> STYLES=List.of(
-        "metro","metro_subtitle","rer","direction","transfer","exit","sector","vertical",
+        "metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical",
         "platform","route","map","services","totem","digital","custom");
     public static final List<String> MOUNTS=List.of("wall","ceiling","hanging","flag","standing");
     public static final SillonSignageSpec DEFAULT=new SillonSignageSpec(
