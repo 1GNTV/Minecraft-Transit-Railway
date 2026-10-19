@@ -38,7 +38,16 @@ public final class SignageReferenceReview {
         samples.put("15-direction-grand-paris",content(base("gpe_direction").withSize(3.5f,.7f).withArrow(7),"Saint-Denis|– Pleyel","",m14,List.of()));
         String[] names={"Saint-Denis – Pleyel","Mairie de Saint-Ouen","Saint-Ouen","Porte de Clichy","Pont Cardinet","Saint-Lazare","Madeleine","Pyramides","Châtelet","Gare de Lyon","Bercy","Cour Saint-Émilion","Bibliothèque François Mitterrand","Olympiades","Maison Blanche","Hôpital Bicêtre","Villejuif – Gustave Roussy","L’Haÿ-les-Roses","Chevilly-Larue","Thiais – Orly","Aéroport d’Orly"};
         Map<Integer,String> connections=Map.ofEntries(Map.entry(0,"ratp_rer,"+badge("rer",0x008B5B,"D")),Map.entry(1,"ratp_metro,"+badge("metro",0x98D5DA,"13")),Map.entry(2,"ratp_rer,"+badge("rer",0xFFCC30,"C")),Map.entry(3,"ratp_rer,"+badge("rer",0xFFCC30,"C")+",ratp_metro,"+badge("metro",0x98D5DA,"13")),Map.entry(4,"idfm_train_2,"+badge("train",0xA989AD,"L")),Map.entry(6,"ratp_metro,"+badge("metro",0xD282BE,"8")+","+badge("metro",0x00814F,"12")),Map.entry(7,"ratp_metro,"+badge("metro",0xFA9ABA,"7")),Map.entry(8,"ratp_rer,"+badge("rer",0xEE1C25,"A")+","+badge("rer",0x5291CE,"B")+","+badge("rer",0x008B5B,"D")+",ratp_metro,"+badge("metro",0xFFCD00,"1")+","+badge("metro",0xCF009E,"4")+","+badge("metro",0xFA9ABA,"7")+","+badge("metro",0x805A2A,"11")),Map.entry(9,"ratp_rer,"+badge("rer",0xEE1C25,"A")+","+badge("rer",0x008B5B,"D")+",ratp_metro,"+badge("metro",0xFFCD00,"1")),Map.entry(10,"ratp_metro,"+badge("metro",0x83C28D,"6")),Map.entry(12,"ratp_rer,"+badge("rer",0xFFCC30,"C")+",idfm_tram_2,"+badge("tram",0xF59242,"T3a")),Map.entry(14,"ratp_metro,"+badge("metro",0xFA9ABA,"7")),Map.entry(19,"ratp_rer,"+badge("rer",0xFFCC30,"C")));
-        List<SillonSignagePlan.Stop> stops=new ArrayList<>();for(int i=0;i<names.length;i++)stops.add(new SillonSignagePlan.Stop(i+1,names[i],i==3?"Tribunal de Paris":i==18?"Marché International":"",connections.getOrDefault(i,""),i*100,i%4*50,true));
+        // Rail correspondences checked against the RATP line 14 PDF linked from ratp.fr/vos-lignes/metro/14 (2025 edition).
+        connections=new HashMap<>(connections);
+        connections.put(0,"ratp_metro,"+badge("metro",0x98D5DA,"13")+",ratp_rer,"+badge("rer",0x008B5B,"D"));
+        connections.put(3,connections.get(3)+",idfm_tram_2,"+badge("tram",0x00814F,"T3b"));
+        connections.put(5,"ratp_metro,"+badge("metro",0x9F9825,"3")+","+badge("metro",0xB6BD00,"9")+","+badge("metro",0x00814F,"12")+","+badge("metro",0x98D5DA,"13")+",ratp_rer,"+badge("rer",0xCF009E,"E")+",idfm_train_2,"+badge("train",0xCDCD00,"J")+","+badge("train",0xA989AD,"L"));
+        connections.put(9,connections.get(9)+",idfm_train_2,"+badge("train",0xF5A23F,"R"));
+        connections.put(14,connections.get(14)+",idfm_tram_2,"+badge("tram",0xF59242,"T3a"));
+        connections.put(18,"idfm_tram_2,"+badge("tram",0x805A2A,"T7"));
+        connections.put(20,"idfm_tram_2,"+badge("tram",0x805A2A,"T7"));
+        List<SillonSignagePlan.Stop> stops=new ArrayList<>();for(int i=0;i<names.length;i++)stops.add(new SillonSignagePlan.Stop(i+1,names[i],i==1?"Région Île-de-France":i==3?"Tribunal de Paris":i==18?"Marché International":"",connections.getOrDefault(i,""),i*100,i%4*50,true));
         for(String layout:List.of("horizontal","vertical")){
             var s=SillonSignagePresets.ALL.stream().map(p->p.document()).filter(p->p.style().equals("route")&&p.binding().layout().equals(layout)).findFirst().orElseThrow().manual();
             var ordered=new ArrayList<>(stops);if(layout.equals("vertical"))Collections.reverse(ordered);
@@ -54,6 +63,6 @@ public final class SignageReferenceReview {
         StringBuilder commands=new StringBuilder();
         for(var e:samples.entrySet()){var image=SillonSignagePainter.render(e.getValue());ImageIO.write(image,"png",out.resolve(e.getKey()+".png").toFile());int x=index%cols*cw,y=index/cols*ch;g.setColor(Color.WHITE);g.fillRoundRect(x+8,y+8,cw-16,ch-16,12,12);SillonSignagePainter.text(g,e.getKey().substring(3).replace('-',' '),new Font("SansSerif",Font.BOLD,20),0x172138,x+20,y+16,cw-40,26,"left");SillonSignagePainter.image(g,image,x+24,y+58,cw-48,ch-80);var tag=new org.mtr.mapping.holder.CompoundTag();e.getValue().write(tag);commands.append("setblock ").append((index%5-2)*7).append(" ").append(5+index/5*4).append(" 0 mtr:sillon_signage[facing=south]").append(tag).append("\n");index++;image.flush();}
         Files.writeString(Path.of("build/signage-qa/reference-commands.txt"),commands.toString());
-        g.dispose();ImageIO.write(atlas,"png",out.resolve("reference-atlas.png").toFile());System.out.println("PASS "+samples.size()+" source-matched photographic review renders");
+        g.dispose();ImageIO.write(atlas,"png",out.resolve("reference-atlas.png").toFile());System.out.println("Rendered "+samples.size()+" reference review fixtures (visual review is separate from automated checks)");
     }
 }

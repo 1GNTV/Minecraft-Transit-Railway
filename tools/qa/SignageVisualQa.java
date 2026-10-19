@@ -61,6 +61,7 @@ public final class SignageVisualQa {
                     Field f=screen.getClass().getDeclaredField("inputs");f.setAccessible(true);
                     Map<?,?> inputs=(Map<?,?>)f.get(screen);
                     ((org.mtr.mapping.mapper.TextFieldWidgetExtension)inputs.get("title")).setText2("Sauvegarde vérifiée");
+                    ((org.mtr.mapping.mapper.TextFieldWidgetExtension)inputs.get("title2")).setText2("");
                     ((org.mtr.mapping.mapper.TextFieldWidgetExtension)inputs.get("width")).setText2("3.25");
                     int w=mc.getWindow().getGuiScaledWidth(),h=mc.getWindow().getGuiScaledHeight();
                     screen.mouseClicked(w-70,h-18,0);
@@ -164,11 +165,15 @@ public final class SignageVisualQa {
         BlockPos pos=new BlockPos(0,64,0);
         BlockState state=new BlockState(Blocks.SILLON_SIGNAGE.get().data.defaultBlockState());
         BlockSillonSignage.BlockEntity entity=new BlockSillonSignage.BlockEntity(pos,state);
-        entity.setDocument(SillonSignagePresets.ALL.get(11).document());
+        entity.setDocument(SillonSignagePresets.ALL.get(9).document().manual().withTitle("Manufacture").withRows(List.of(
+            new org.mtr.mod.data.SillonSignageRow("transport","","Port des Brumes","","ratp_metro,idfm_m14",0),
+            new org.mtr.mod.data.SillonSignageRow("service","","Ascenseur","Quai 2","official_lift",1),
+            new org.mtr.mod.data.SillonSignageRow("exit","2","Rue des Ateliers","Exit · Salida","",1))));
         SillonSignageScreen screen=new SillonSignageScreen(pos,entity);
         mc.setScreen(screen);
         int w=mc.getWindow().getGuiScaledWidth(),tw=(w-24)/7;
         screen.mouseClicked(12+(stage%7)*tw+tw/2.0,52,0);
+        if(stage%7==2){var a=SillonSignageEditorLayout.of(w,mc.getWindow().getGuiScaledHeight()).editor();screen.mouseClicked(a.x()+70,a.y()+10,0);}
         // Exercise visual search using the real text-field input path.
         if(stage%7==3) {
             var a=SillonSignageEditorLayout.of(w,mc.getWindow().getGuiScaledHeight()).editor();
