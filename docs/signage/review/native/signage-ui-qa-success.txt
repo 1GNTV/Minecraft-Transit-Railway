@@ -1,0 +1,1 @@
+21 native editor captures; 5 in-world views; edit sent through real brush packet and synchronized to client; responsive widgets checked.
