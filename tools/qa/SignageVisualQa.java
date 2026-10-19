@@ -38,7 +38,7 @@ public final class SignageVisualQa {
                     Screenshot.grab(mc.gameDirectory,"signage-startup-diagnostic.png",mc.getMainRenderTarget(),message->System.out.println("SIGNAGE_QA_DIAGNOSTIC "+message.getString()));
                     for(var child:mc.screen.children())if(child instanceof net.minecraft.client.gui.components.AbstractWidget widget){
                         String label=widget.getMessage().getString();System.out.println("SIGNAGE_QA_STARTUP_WIDGET "+label);
-                        if(widget instanceof net.minecraft.client.gui.components.Button button&&button.active&&(label.equalsIgnoreCase("Proceed")||label.equalsIgnoreCase("Continuer"))){
+                        if(widget instanceof net.minecraft.client.gui.components.Button button&&button.active&&(label.toLowerCase(Locale.ROOT).startsWith("proceed")||label.toLowerCase(Locale.ROOT).startsWith("continuer"))){
                             System.out.println("SIGNAGE_QA_ACCEPT_FORGE_WARNINGS "+label);button.onPress();return;
                         }
                     }
