@@ -16,10 +16,10 @@ public final class SignageRegression {
         var p1=new SillonSignageNetworkSnapshot.Point(-100,64,-40);var p2=new SillonSignageNetworkSnapshot.Point(0,64,0);var p3=new SillonSignageNetworkSnapshot.Point(80,64,80);
         var exits=List.of(new SillonSignageNetworkSnapshot.Exit("2","Rue des Ateliers","Accès nord"),new SillonSignageNetworkSnapshot.Exit("10","Place des Tilleuls","Accès sud"));
         var stations=List.of(new SillonSignageNetworkSnapshot.Station(1,"Val-des-Bois","",p1,List.of(),List.of()),new SillonSignageNetworkSnapshot.Station(2,changed?"Nouvelle Manufacture":"Manufacture","Quartier des Arts",p2,exits,List.of()),new SillonSignageNetworkSnapshot.Station(3,changed?"Port étendu":"Port des Brumes","",p3,List.of(),List.of()));
-        var platforms=List.of(new SillonSignageNetworkSnapshot.Platform(11,1,"1",p1),new SillonSignageNetworkSnapshot.Platform(22,2,"2",p2),new SillonSignageNetworkSnapshot.Platform(33,3,"3",p3));
+        var platforms=List.of(new SillonSignageNetworkSnapshot.Platform(11,1,"1",p1),new SillonSignageNetworkSnapshot.Platform(22,2,"2",p2),new SillonSignageNetworkSnapshot.Platform(24,2,"4",new SillonSignageNetworkSnapshot.Point(15,64,0)),new SillonSignageNetworkSnapshot.Platform(33,3,"3",p3));
         var stops=List.of(new SillonSignageNetworkSnapshot.Stop(1,11,"Val-des-Bois",changed?"Port étendu":"Port des Brumes"),new SillonSignageNetworkSnapshot.Stop(2,22,changed?"Nouvelle Manufacture":"Manufacture",changed?"Port étendu":"Port des Brumes"),new SillonSignageNetworkSnapshot.Stop(3,33,changed?"Port étendu":"Port des Brumes",""));
-        var lines=List.of(new SillonSignageNetworkSnapshot.Line(101,changed?"Z7":"X42","metro",changed?0xB75609:0x15865A,stops),new SillonSignageNetworkSnapshot.Line(202,"R9","rer",0xC24C9A,List.of(stops.get(1),stops.get(0))));
-        return new SillonSignageNetworkSnapshot(stations,platforms,lines,List.of(new SillonSignageNetworkSnapshot.Service(2,"lift","Ascenseur","Quai 2","idfm_pmr",new SillonSignageNetworkSnapshot.Point(6,70,0))));
+        var lines=List.of(new SillonSignageNetworkSnapshot.Line(101,changed?"Z7":"X42","metro",changed?0xB75609:0x15865A,stops),new SillonSignageNetworkSnapshot.Line(202,"R9","rer",0xC24C9A,List.of(new SillonSignageNetworkSnapshot.Stop(2,24,stops.get(1).name(),"Val-des-Bois"),stops.get(0))));
+        return new SillonSignageNetworkSnapshot(stations,platforms,lines,List.of(new SillonSignageNetworkSnapshot.Service(2,"lift","Ascenseur","Quai 2","official_lift",new SillonSignageNetworkSnapshot.Point(6,70,0))));
     }
     private static SillonSignageSpec preset(String style){return SillonSignagePresets.ALL.stream().map(p->p.document()).filter(s->s.style().equals(style)).findFirst().orElseThrow();}
     private static void automaticChecks(){
@@ -28,6 +28,13 @@ public final class SignageRegression {
         var saved=preset("route").withBinding(binding);CompoundTag tag=new CompoundTag();saved.write(tag);
         check(SillonSignageSpec.read(tag).equals(saved),"Version 3 sticky network IDs");
         check(new SillonSignageEditorModel(saved).spec().equals(saved),"Network binding editor roundtrip");
+        var design=new SillonSignageDesign("gpe","custom","Écluse 😀",false,false,true,1.35f,"é😀".repeat(170),true);
+        check(SillonSignageDesign.decode(design.encode()).equals(design),"Long Unicode notice survives wire serialization");
+        var customized=saved.withDesign(design);var customizedTag=new CompoundTag();customized.write(customizedTag);
+        check(SillonSignageSpec.read(customizedTag).equals(customized),"Version 4 persists custom design");
+        check(new SillonSignageEditorModel(customized).spec().equals(customized),"Editor preserves every visual convention");
+        customizedTag.putInt("sillon_signage_version",3);
+        check(SillonSignageSpec.read(customizedTag).design().equals(SillonSignageDesign.DEFAULT),"Existing v3 signs migrate without invented sector");
         for(String style:SillonSignageSpec.STYLES){
             var template=preset(style).withBinding(new SillonSignageBinding(2,22,101,"auto","full","auto","","auto",true,true)).withBody("STALE PARIS CONTENT");
             var a=SillonSignageAutomatic.resolve(template,network(false),context());
@@ -43,6 +50,7 @@ public final class SignageRegression {
         check(route.plan().lines().get(0).label().equals("X42"),"Actual arbitrary route number");
         check(route.plan().lines().get(0).color()==0x15865A,"Actual arbitrary route colour");
         check(route.plan().lines().get(0).stops().size()==3,"All actual stops");
+        check(route.design().autoSize()&&Math.abs(route.height()-route.width()*(.23f+.066f*3))<.001f,"Vertical support adapts to actual stop count");
         check(route.plan().lines().get(0).stops().get(1).icons().contains(new SillonSignageLineBadge("rer",0xC24C9A,"R9").token()),"Real interchange at actual stop");
         check(route.manual().rows().size()==3,"Manual conversion retains generated stops");
         var remaining=new SillonSignageBinding(2,22,101,"auto","remaining","horizontal","","auto",true,true);
@@ -52,6 +60,14 @@ public final class SignageRegression {
         check(SillonSignageNetworkOrdering.compare("2","10")<0,"Natural exit numbering");
         check(SillonSignageAutomatic.resolve(preset("services"),network(false),context()).document().rows().get(0).text().equals("Ascenseur"),"Actual service");
         for(String mode:SillonSignageBinding.MODES)check(SillonSignagePainter.icon(SillonSignageLineBadge.modeIcon(mode))!=null,"Actual mode asset "+mode);
+        var rerBadge=SillonSignagePainter.icon(new SillonSignageLineBadge("rer",0xC24C9A,"R9").token());
+        check((rerBadge.getRGB(40,256)&0xFFFFFF)==0xC24C9A&&(rerBadge.getRGB(40,256)>>>24)==255,"RER indices use a filled coloured body");
+        var tramBadge=SillonSignagePainter.icon(new SillonSignageLineBadge("tram",0xF59242,"3a").token());
+        check((tramBadge.getRGB(256,20)&0xFFFFFF)==0xF59242&&(tramBadge.getRGB(10,256)>>>24)==0,"Tram indices have bars around an open middle");
+        var totem=preset("totem");var column=preset("vertical");
+        check(totem.mount().equals("standing")&&column.mount().equals("wall"),"Wall columns and floor totems have distinct mounts");
+        check(SillonSignageGeometry.pivotY(totem)==totem.height()/2,"Totem rests on floor without invented legs");
+        check(SillonSignageGeometry.bow(totem,0)>0&&Math.abs(SillonSignageGeometry.bow(totem,totem.width()/2))<.0001,"Bowed totem face meets its body at both edges");
         String token=new SillonSignageLineBadge("metro",0x123456,"é😀".repeat(20)).token();
         check(SillonSignageLineBadge.parse(token)!=null&&SillonSignageRow.normalizeIcons(token).equals(token),"Unicode custom badges stay valid");
         System.out.println("PASS automatic data for all 18 families, arbitrary network edits, IDs, platform scope, exits, services and interchange graph");
@@ -80,9 +96,9 @@ public final class SignageRegression {
             SillonSignageSpec spec=preset.document();families.add(spec.style());
             SillonSignageSpec resolved=SillonSignageAutomatic.resolve(spec,network(false),context()).document();
             BufferedImage im=SillonSignagePainter.render(resolved);
-            int[] dims=SillonSignagePainter.dimensions(spec);
+            int[] dims=SillonSignagePainter.dimensions(resolved);
             check(im.getWidth()==dims[0]&&im.getHeight()==dims[1],"Texture dimensions");
-            double error=Math.abs(im.getWidth()/(double)im.getHeight()-spec.width()/spec.height())/(spec.width()/spec.height());
+            double error=Math.abs(im.getWidth()/(double)im.getHeight()-resolved.width()/resolved.height())/(resolved.width()/resolved.height());
             check(error<.02,"Aspect ratio "+preset.name());
             CompoundTag tag=new CompoundTag();spec.write(tag);
             commands.append("setblock ").append((index%5-2)*7).append(" ").append(5+(index/5)*4).append(" 0 mtr:sillon_signage[facing=south]").append(tag.toString()).append("\n");

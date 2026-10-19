@@ -22,6 +22,7 @@ public final class SignageVisualQa {
     private static int stage=-1,tick;
     private static boolean started,opening;
     private static int waiting;
+    private static int warningTicks;
     private static String lastScreen="";
     private static int worldView=-1,networkPhase=-1;
     private static final int[][] SIZES={{960,540,1},{960,540,2},{640,480,2}};
@@ -32,6 +33,18 @@ public final class SignageVisualQa {
         if(!started) {
             String current=mc.screen==null?"none":mc.screen.getClass().getSimpleName();
             if(!current.equals(lastScreen)){System.out.println("SIGNAGE_QA_STARTUP "+current);lastScreen=current;}
+            if(current.equals("LoadingErrorScreen")&&mc.getOverlay()==null){
+                if(++warningTicks==80){
+                    Screenshot.grab(mc.gameDirectory,"signage-startup-diagnostic.png",mc.getMainRenderTarget(),message->System.out.println("SIGNAGE_QA_DIAGNOSTIC "+message.getString()));
+                    for(var child:mc.screen.children())if(child instanceof net.minecraft.client.gui.components.AbstractWidget widget){
+                        String label=widget.getMessage().getString();System.out.println("SIGNAGE_QA_STARTUP_WIDGET "+label);
+                        if(widget instanceof net.minecraft.client.gui.components.Button button&&button.active&&(label.equalsIgnoreCase("Proceed")||label.equalsIgnoreCase("Continuer"))){
+                            System.out.println("SIGNAGE_QA_ACCEPT_FORGE_WARNINGS "+label);button.onPress();return;
+                        }
+                    }
+                }
+                if(warningTicks>160){System.err.println("SIGNAGE_QA_FATAL_STARTUP No enabled Proceed button on Forge loading screen; inspect diagnostic capture and log");mc.stop();return;}
+            }
             if(!opening&&mc.screen instanceof TitleScreen&&mc.getOverlay()==null&&++waiting>100){opening=true;mc.createWorldOpenFlows().loadLevel(mc.screen,"SignageQA");}
             if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
             started=true;stage=0;tick=0;

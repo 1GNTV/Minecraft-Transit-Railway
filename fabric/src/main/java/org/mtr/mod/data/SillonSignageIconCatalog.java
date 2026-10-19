@@ -13,6 +13,17 @@ public final class SillonSignageIconCatalog {
     }
     public static final List<String> CATEGORIES=List.of("Tout","Métro","RER","Train","Tramway","Services","Flèches","Secteurs","Voies","Autres réseaux");
     public static final List<Entry> ENTRIES=List.of(
+        new Entry("official_lift",768,768),
+        new Entry("official_escalator",768,768),
+        new Entry("official_stairs",768,768),
+        new Entry("official_arrow_0",768,768),
+        new Entry("official_arrow_1",768,768),
+        new Entry("official_arrow_2",768,768),
+        new Entry("official_arrow_3",768,768),
+        new Entry("official_arrow_4",768,768),
+        new Entry("official_arrow_5",768,768),
+        new Entry("official_arrow_6",768,768),
+        new Entry("official_arrow_7",768,768),
         new Entry("ratp_logo_white",500,500),
         new Entry("ratp_assistance_audio",250,250),
         new Entry("ratp_assistance_hearing",250,250),

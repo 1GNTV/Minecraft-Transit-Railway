@@ -30,6 +30,9 @@ public final class SignageWorldQa {
                     throw new IllegalStateException("Dedicated server fixture mismatch "+i);
             }
             System.out.println("SIGNAGE_QA_FIXTURES_PLACED 23 native block entities verified");
+            // After checking every untouched template, place the photographed manual fixtures for visual inspection.
+            for(String command:Files.readAllLines(Path.of("signage-reference-commands.txt")))
+                if(!command.isBlank())server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),command);
         }catch(Exception e){e.printStackTrace();System.exit(2);}
     }
     private static void tick(TickEvent.ServerTickEvent event) {

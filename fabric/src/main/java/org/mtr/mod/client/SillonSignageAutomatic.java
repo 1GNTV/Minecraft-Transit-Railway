@@ -79,7 +79,7 @@ public final class SillonSignageAutomatic {
                 plan=new SillonSignagePlan(drawn,sid,"network");title="Plan du réseau";subtitle="";icons="";
             }
             case "exit","sector" -> {
-                rows.addAll(exits(station,b,input.arrow()));title=rows.size()==1?"Sortie":"Sorties";
+                rows.addAll(exits(station,b,input.arrow()));title="Sortie";
                 subtitle="sector".equals(input.style())?stationName:rows.isEmpty()?"Aucune sortie renseignée dans MTR":"";
                 icons=stationSymbols(serving,b); 
             }
@@ -88,7 +88,7 @@ public final class SillonSignageAutomatic {
                 rows.addAll(services(network,station,c,b,input.arrow()));title=rows.size()==1?rows.get(0).text():"Services";
                 subtitle=rows.isEmpty()?"Aucun service repéré":"";icons="";
             }
-            case "digital" -> {title="Prochains départs";subtitle=platform==null?"Quai à associer":"Quai "+platform.name();}
+            case "digital" -> {title=selected==null?"Prochains départs":destination(selected,pid);subtitle=platform==null?"Quai à associer":"Quai "+platform.name();}
             case "interchange","custom" -> {
                 rows.addAll(destinations(serving,network,c,b,null,input.arrow()));
                 rows.addAll(services(network,station,c,b,input.arrow()));rows.addAll(exits(station,b,input.arrow()));
@@ -98,6 +98,10 @@ public final class SillonSignageAutomatic {
         }
         // No stale text, fixed street, static line logo or old manual list survives automatic mode.
         SillonSignageSpec resolved=input.materialize(title,subtitle,icons,accent,rows,plan);
+        if(input.design().autoSize()&&!plan.lines().isEmpty()&&Set.of("route","platform").contains(input.style())){
+            boolean vertical=b.layout().equals("vertical")||b.layout().equals("auto")&&input.width()/input.height()<2.5f;
+            if(vertical)resolved=resolved.withSize(input.width(),input.width()*(.23f+.066f*plan.lines().get(0).stops().size()));
+        }
         if(b.arrows()&&selectedPlatform!=null&&Set.of("vertical","totem").contains(input.style()))resolved=resolved.withArrow(arrow(c,selectedPlatform.center()));
         if(selected!=null&&atPlatform.size()>1&&b.routeId()==0&&Set.of("route","platform","totem","vertical").contains(input.style()))
             status+=" · plusieurs dessertes : ligne sélectionnable dans Réseau";

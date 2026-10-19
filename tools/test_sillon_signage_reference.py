@@ -15,12 +15,13 @@ for suffix,typ in types.items():
     methods.append(f"public {typ} get{suffix}(String key){{return ({wrapper})values.getOrDefault(key,{defaults[suffix]});}}")
 stub.write_text("package org.mtr.mapping.holder; import java.util.*; public final class CompoundTag {private final Map<String,Object> values=new HashMap<>();"+"".join(methods)+"public String toString(){StringBuilder b=new StringBuilder(\"{\");values.forEach((k,v)->{if(b.length()>1)b.append(\",\");b.append(k).append(\":\");if(v instanceof String)b.append((char)34).append(((String)v).replace(\"\\\\\",\"\\\\\\\\\").replace(\"\\\"\",\"\\\\\\\"\").replace(\"\\n\",\"\\\\n\")).append((char)34);else if(v instanceof Boolean)b.append((Boolean)v?\"1b\":\"0b\");else b.append(v);});return b.append(\"}\").toString();}"+"}",encoding="utf-8")
 base=root/"fabric/src/main/java/org/mtr/mod"
-sources=[stub,root/"tools/signage/SignageRegression.java"]
+sources=[stub,root/"tools/signage/SignageRegression.java",root/"tools/signage/SignageReferenceReview.java"]
 for folder,names in {
-"data":["SillonSignageBinding","SillonSignagePlan","SillonSignageNetworkSnapshot","SillonSignageLineBadge","SillonSignageNetworkOrdering","SillonSignageOptions","SillonSignageRow","SillonSignageSpec","SillonSignagePresets","SillonSignageIconCatalog"],
-"client":["SillonSignageAutomatic","SillonSignagePlanPainter","SillonSignagePainter","SillonRATPSignageLayouts","SillonSignageGeometry"],
+"data":["SillonSignageDesign","SillonSignageBinding","SillonSignagePlan","SillonSignageNetworkSnapshot","SillonSignageLineBadge","SillonSignageNetworkOrdering","SillonSignageOptions","SillonSignageRow","SillonSignageSpec","SillonSignagePresets","SillonSignageIconCatalog"],
+"client":["SillonSignageAutomatic","SillonSignageNetworkMap","SillonSignagePlanPainter","SillonSignagePainter","SillonRATPSignageLayouts","SillonSignageGeometry"],
 "screen":["SillonSignageEditorModel","SillonSignageEditorLayout"]}.items():
     sources.extend(base/folder/(name+".java") for name in names)
 subprocess.run(["javac","--release","17","-encoding","UTF-8","-d",str(out/"classes"),*[str(p) for p in sources]],check=True)
 sep=";" if __import__("os").name=="nt" else ":"
 subprocess.run(["java","-Djava.awt.headless=true","-cp",str(out/"classes")+sep+str(root/"fabric/src/main/resources"),"SignageRegression"],check=True,cwd=root)
+subprocess.run(["java","-Djava.awt.headless=true","-cp",str(out/"classes")+sep+str(root/"fabric/src/main/resources"),"SignageReferenceReview"],check=True,cwd=root)

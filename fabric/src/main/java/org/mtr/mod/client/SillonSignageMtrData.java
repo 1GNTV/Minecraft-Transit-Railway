@@ -46,7 +46,7 @@ public final class SillonSignageMtrData {
         for(var lift:live.lifts)lift.iterateFloors(floor->{
             for(var s:data.stations)if(s.inArea(floor.getPosition())){
                 String description=name(floor.getDescription());if(description.isBlank())description=name(floor.getNumber());
-                services.add(new Service(s.getId(),"lift","Ascenseur",description,"sncf_ascenseur,idfm_pmr",point(floor.getPosition())));break;
+                services.add(new Service(s.getId(),"lift","Ascenseur",description,"official_lift",point(floor.getPosition())));break;
             }
         });
         return new SillonSignageNetworkSnapshot(stations,platforms,lines,services);

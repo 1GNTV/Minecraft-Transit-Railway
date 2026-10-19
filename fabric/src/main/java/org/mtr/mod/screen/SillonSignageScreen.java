@@ -36,7 +36,7 @@ public final class SillonSignageScreen extends ScreenExtension {
     public SillonSignageScreen(BlockPos pos,BlockSillonSignage.BlockEntity entity) {
         this.pos=pos;model=new SillonSignageEditorModel(entity.document());displayPreview=preview=lastRecorded=entity.document();
         for(var f:SillonSignageEditorModel.FIELDS.values()) {
-            Input input=new Input(f.key(),f.label(),128);
+            Input input=new Input(f.key(),f.label(),f.key().equals("notice")?512:f.key().equals("body")?2048:128);
             input.setText2(model.values.getOrDefault(f.key(),""));inputs.put(f.key(),input);
             input.setChangedListener2(value->{if(!loading)model.values.put(f.key(),value);});
         }
@@ -117,7 +117,14 @@ public final class SillonSignageScreen extends ScreenExtension {
         String style=model.values.get("style");
         List<String> base=tab==6?SillonSignageEditorModel.NETWORK:tab==1?SillonSignageEditorModel.TEXT:tab==2?SillonSignageEditorModel.ROW:tab==4?SillonSignageEditorModel.APPEARANCE:SillonSignageEditorModel.POSE;
         return base.stream().filter(key->{
-            if("freePalette".equals(key))return Set.of("interchange","custom","rer","sector","exit").contains(style);
+            if("notice".equals(key))return "digital".equals(style);
+            if("autoSize".equals(key))return Set.of("route","platform").contains(style);
+            if("height".equals(key)&&"Oui".equals(model.values.get("autoSize"))&&"vertical".equals(model.values.get("routeLayout")))return false;
+            if("sectorSymbol".equals(key)||"sectorName".equals(key))return Set.of("rer","sector").contains(style);
+            if("operatorLogo".equals(key))return "rer".equals(style);
+            if("passedStops".equals(key))return Set.of("route","platform").contains(style);
+            if("rowScale".equals(key))return Set.of("exit","sector").contains(style);
+            if("translations".equals(key))return Set.of("services","interchange","custom","map").contains(style);
             if("auto".equals(key))return tab==6;
             if("scope".equals(key)||"routeLayout".equals(key))return Set.of("route","platform").contains(style);
             if("exitFilter".equals(key))return Set.of("exit","sector","interchange","custom").contains(style);
@@ -270,6 +277,7 @@ public final class SillonSignageScreen extends ScreenExtension {
             case "4"->"Haut gauche";case "5"->"Haut droite";case "6"->"Bas gauche";case "7"->"Bas droite";default->"Aucune";
         };
         return switch(value) {
+            case "ratp"->"RATP · réseau historique";case "idfm"->"Île-de-France Mobilités";case "gpe"->"Grand Paris Express";case "custom"->"Personnalisé";case "forum"->"Forum";case "rivoli"->"Rivoli";case "seine"->"Seine";
             case "parisine"->"Parisine - RATP";case "grand_paris"->"Grand Paris - GPE";case "idf_voyageur"->"IDF Voyageur";
             case "auto"->"Détection automatique";case "full"->"Parcours complet";case "remaining"->"Depuis le quai associé";
             case "horizontal"->"Horizontal · noms inclinés";case "vertical"->"Vertical · liste et correspondances";
@@ -277,7 +285,7 @@ public final class SillonSignageScreen extends ScreenExtension {
             case "boat"->"Bateau";case "cable"->"Câble";case "air"->"Avion";
             case "lift"->"Ascenseurs MTR";case "escalator"->"Escalators proches";case "stairs"->"Escaliers proches";case "information"->"Billetterie proche";case "left"->"À gauche";case "center"->"Centré";
             case "wall"->"Mural";case "ceiling"->"Au plafond";case "hanging"->"Suspendu";case "flag"->"En drapeau";case "standing"->"Sur pied";
-            case "none"->"Sans cadre";case "thin"->"Bord fin";case "box"->"Caisson";
+            case "none"->key.equals("sectorSymbol")?"Aucun symbole":"Sans cadre";case "thin"->"Bord fin";case "box"->"Caisson";
             case "transport"->"Transport / correspondance";case "exit"->"Sortie";case "service"->"Service";case "sector"->"Secteur";case "text"->"Texte libre";
             default->value;
         };

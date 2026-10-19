@@ -10,7 +10,7 @@ public record SillonSignageOptions(String font, String align, float textScale, f
     public static final List<String> FRAMES=List.of("none","thin","box");
     public static final List<String> ALIGNS=List.of("auto","left","center");
     public static final SillonSignageOptions DEFAULT=new SillonSignageOptions(
-        "parisine","auto",1,1,1,0,0,0,.04f,.65f,"thin",0x25272C,"",.18f);
+        "parisine","auto",1,1,1,0,0,0,.04f,.65f,"none",0x161616,"",.18f);
     public SillonSignageOptions(String font,String align,float textScale,float iconScale,float padding,
         float offsetX,float offsetY,float offsetZ,float thickness,float suspension,String frame,
         int frameColor,String image,float bandRatio) {

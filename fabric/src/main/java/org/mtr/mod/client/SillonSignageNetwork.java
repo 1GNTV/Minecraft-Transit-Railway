@@ -74,7 +74,7 @@ public final class SillonSignageNetwork {
             if(kind.isEmpty())continue;Point p=new Point(at.getX()+.5,at.getY()+.5,at.getZ()+.5);
             Service previous=found.get(kind);if(previous!=null&&previous.position().distance(context.origin())<=p.distance(context.origin()))continue;
             String text=switch(kind){case "escalator"->"Escalator";case "stairs"->"Escalier";default->"Billetterie";};
-            String icon=kind.equals("escalator")?"sncf_escalator_1":kind.equals("stairs")?"sncf_escalier_1":"sncf_info";
+            String icon=kind.equals("escalator")?"official_escalator":kind.equals("stairs")?"official_stairs":"sncf_info";
             found.put(kind,new Service(sid,kind,text,"",SillonSignageIconCatalog.get(icon)==null?"":icon,p));
         }
         SERVICES.put(cell,new ServiceEntry(now,List.copyOf(found.values())));
@@ -87,7 +87,7 @@ public final class SillonSignageNetwork {
         List<SillonSignageRow> rows=new ArrayList<>();long now=System.currentTimeMillis();
         if(ids.isEmpty())return new SillonSignageAutomatic.Result(s.withRows(List.of(new SillonSignageRow("text","","Quai à associer","","",-1))),result.status(),result.stationId(),result.platformId(),result.routeId());
         var arrivals=new ArrayList<>(ArrivalsCacheClient.INSTANCE.requestArrivals(ids));
-        if(s.binding().routeId()!=0)arrivals.removeIf(a->a.getRouteId()!=s.binding().routeId());
+        if(result.routeId()!=0)arrivals.removeIf(a->a.getRouteId()!=result.routeId());
         for(var a:PanamArrivalSelection.select(arrivals,8,0,i->false)){
             String label=name(a.getRouteNumber());if(label.isBlank())label=name(a.getRouteName());
             String mode=data.lines().stream().filter(l->l.id()==a.getRouteId()).findFirst().map(Line::mode).orElse("metro");
@@ -97,6 +97,8 @@ public final class SillonSignageNetwork {
             rows.add(new SillonSignageRow("transport",time,name(a.getDestination()),name(a.getPlatformName()),new SillonSignageLineBadge(mode,a.getRouteColor(),label).token(),-1));
         }
         if(rows.isEmpty())rows.add(new SillonSignageRow("text","",ids.isEmpty()?"Quai à associer":"Aucun départ annoncé","","",-1));
-        return new SillonSignageAutomatic.Result(s.withRows(rows),result.status(),result.stationId(),result.platformId(),result.routeId());
+        String clock=java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+        var shown=s.materialize(s.title(),clock,s.icons(),s.accent(),rows,s.plan());
+        return new SillonSignageAutomatic.Result(shown,result.status(),result.stationId(),result.platformId(),result.routeId());
     }
 }

@@ -9,7 +9,7 @@ import static org.mtr.mod.client.SillonSignagePainter.*;
 /** Route compositions measured against the attached horizontal and vertical RATP references. */
 public final class SillonSignagePlanPainter {
     private SillonSignagePlanPainter(){}
-    private static Font font(SillonSignageSpec s,boolean strong,float size){return SillonSignagePainter.font(s.options().font(),strong,size*s.options().textScale());}
+    private static Font font(SillonSignageSpec s,boolean strong,float size){return SillonSignagePainter.font(SillonRATPSignageLayouts.family(s),strong,size*s.options().textScale());}
     public static void route(Graphics2D g,SillonSignageSpec s,int w,int h){
         if(s.plan().lines().isEmpty())return;
         var line=s.plan().lines().get(0);var stops=line.stops();if(stops.isEmpty())return;
@@ -22,7 +22,7 @@ public final class SillonSignagePlanPainter {
         float used=icons(g,symbols,x,y,Math.min(w*.38f,h*2.8f),h,h*.8f*s.options().iconScale());
         if(caption)text(g,s.title(),font(s,true,h*.52f),s.foreground(),x+used+h*.2f,y,w-used-h*.2f,h,"left");
     }
-    private static int current(SillonSignageSpec s,List<SillonSignagePlan.Stop> stops){for(int i=0;i<stops.size();i++)if(stops.get(i).stationId()==s.plan().currentStation())return i;return -1;}
+    private static int current(SillonSignageSpec s,List<SillonSignagePlan.Stop> stops){for(int i=0;i<stops.size();i++)if(stops.get(i).stationId()==s.plan().currentStation())return s.design().passed()?i:-1;return -1;}
     private static void vertical(Graphics2D g,SillonSignageSpec s,SillonSignagePlan.Line line,int w,int h,float pad){
         var stops=line.stops();float head=h*.12f;header(g,s,line,pad,pad,w-2*pad,head-pad,true);
         float top=head+h*.025f,bottom=h-pad,step=(bottom-top)/stops.size(),spine=w*.30f;
@@ -31,6 +31,8 @@ public final class SillonSignagePlanPainter {
             g.setColor(new Color(here>=0&&i<here?0xA2A4A8:line.color()));g.setStroke(new BasicStroke(stroke));
             g.draw(new Line2D.Float(spine,top+(i+.5f)*step,spine,top+(i+1.5f)*step));
         }
+        float labelSize=step*.50f;
+        for(var stop:stops){float tw=(float)font(s,true,labelSize).getStringBounds(stop.name(),g.getFontRenderContext()).getWidth();labelSize*=Math.min(1,(w-pad-spine-Math.max(step*.38f,w*.025f))/Math.max(1,tw));}
         for(int i=0;i<stops.size();i++){
             var stop=stops.get(i);float cy=top+(i+.5f)*step,r=Math.min(step*.12f,stroke*.62f),left=spine+Math.max(step*.38f,w*.025f);
             boolean terminus=i==0||i==stops.size()-1;
@@ -39,7 +41,7 @@ public final class SillonSignagePlanPainter {
             if(i==here){g.setStroke(new BasicStroke(2));g.draw(new Ellipse2D.Float(spine-r-3,cy-r-3,r*2+6,r*2+6));}
             int ink=here>=0&&i<here?0x85878B:s.foreground();
             boolean detail=!stop.detail().isBlank();
-            text(g,stop.name(),font(s,true,step*(detail?.43f:.53f)),ink,left,cy-step*(detail?.43f:.38f),w-pad-left,step*(detail?.58f:.76f),"left");
+            text(g,stop.name(),font(s,true,labelSize),ink,left,cy-step*(detail?.43f:.38f),w-pad-left,step*(detail?.58f:.76f),"left");
             if(detail)text(g,stop.detail(),font(s,false,step*.23f),ink,left,cy+step*.14f,w-pad-left,step*.31f,"left");
             g.setColor(new Color(s.foreground(),false));g.setStroke(new BasicStroke(Math.max(.6f,h*.0005f)));
             g.draw(new Line2D.Float(left,top+(i+1)*step,w-pad,top+(i+1)*step));
@@ -78,41 +80,5 @@ public final class SillonSignagePlanPainter {
                 unit,unit,unit*s.options().iconScale());
         }
     }
-    public static void network(Graphics2D g,SillonSignageSpec s,int w,int h){
-        float pad=Math.min(w,h)*.045f; text(g,s.title(),font(s,true,h*.055f),s.foreground(),pad,pad,w-pad*2,h*.08f,"left");
-        Map<Long,SillonSignagePlan.Stop> stops=new LinkedHashMap<>();for(var l:s.plan().lines())for(var p:l.stops())stops.putIfAbsent(p.stationId(),p);
-        if(stops.isEmpty()){text(g,"Aucune ligne MTR renseignée",font(s,false,h*.04f),s.foreground(),pad,h*.4f,w-pad*2,h*.1f,"center");return;}
-        double minX=Double.POSITIVE_INFINITY,maxX=Double.NEGATIVE_INFINITY,minZ=minX,maxZ=maxX;int index=0;
-        Map<Long,double[]> source=new LinkedHashMap<>();
-        for(var p:stops.values()){
-            double x=p.positioned()?p.x():(index%8)*60,z=p.positioned()?p.z():(index/8)*60;index++;
-            source.put(p.stationId(),new double[]{x,z});minX=Math.min(minX,x);maxX=Math.max(maxX,x);minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);
-        }
-        float mapLeft=w*.20f,mapTop=h*.18f,mapW=w*.70f,mapH=h*.70f;
-        double scale=Math.min(mapW/Math.max(40,maxX-minX),mapH/Math.max(40,maxZ-minZ));
-        Map<Long,Point2D.Float> points=new LinkedHashMap<>();
-        for(var entry:source.entrySet())points.put(entry.getKey(),new Point2D.Float((float)(mapLeft+(mapW-(maxX-minX)*scale)/2+(entry.getValue()[0]-minX)*scale),
-            (float)(mapTop+(mapH-(maxZ-minZ)*scale)/2+(entry.getValue()[1]-minZ)*scale)));
-        int legend=0;Set<String> listed=new HashSet<>();
-        for(var l:s.plan().lines()){
-            g.setColor(new Color(l.color()));g.setStroke(new BasicStroke(Math.max(3,Math.min(w,h)*.005f),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));
-            for(int i=1;i<l.stops().size();i++)g.draw(new Line2D.Float(points.get(l.stops().get(i-1).stationId()),points.get(l.stops().get(i).stationId())));
-            String identity=l.label()+"/"+l.color();if(listed.add(identity)){
-                float cy=mapTop+legend++*h*.048f;
-                icons(g,new SillonSignageLineBadge(l.mode(),l.color(),l.label()).token(),pad,cy,w*.12f,h*.038f,h*.038f);
-            }
-        }
-        List<Rectangle2D> labels=new ArrayList<>();float radius=Math.max(3,Math.min(w,h)*.004f);
-        for(var entry:points.entrySet()){
-            var point=entry.getValue();var stop=stops.get(entry.getKey());
-            g.setColor(new Color(s.background()));g.fill(new Ellipse2D.Float(point.x-radius,point.y-radius,2*radius,2*radius));
-            g.setColor(new Color(s.foreground()));g.setStroke(new BasicStroke(entry.getKey()==s.plan().currentStation()?3:1));g.draw(new Ellipse2D.Float(point.x-radius,point.y-radius,2*radius,2*radius));
-            Font face=font(s,entry.getKey()==s.plan().currentStation(),Math.max(8,h*.018f));float tw=(float)face.getStringBounds(stop.name(),g.getFontRenderContext()).getWidth(),th=face.getSize2D()*1.3f;
-            float[][] places={{point.x+radius+3,point.y-th/2},{point.x-tw/2,point.y-th-radius-3},{point.x-tw/2,point.y+radius+3},{point.x-tw-radius-3,point.y-th/2}};
-            for(float[] at:places){Rectangle2D.Float box=new Rectangle2D.Float(at[0],at[1],tw,th);
-                if(box.x<pad||box.getMaxX()>w-pad||box.y<h*.13f||box.getMaxY()>h-pad||labels.stream().anyMatch(b->b.intersects(box)))continue;
-                g.setColor(new Color(s.background()));g.fill(box);text(g,stop.name(),face,s.foreground(),box.x,box.y,box.width,box.height,"left");labels.add(box);break;
-            }
-        }
-    }
+    public static void network(Graphics2D g,SillonSignageSpec s,int w,int h){SillonSignageNetworkMap.draw(g,s,w,h);}
 }

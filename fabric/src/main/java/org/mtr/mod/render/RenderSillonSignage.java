@@ -60,6 +60,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
                         x+.012f,-h/2,z+depth*.5f+.012f,color,light);
                 }
                 case "standing" -> {
+                    if(SillonSignageGeometry.pylon(spec)){box(g,-w*.49f,h/2-.045f,z-.01f,w*.49f,h/2,z+depth,0xFF777C80,light);break;}
                     for(float x:new float[]{-w*.28f,w*.28f})box(g,x-.022f,h/2,z+depth*.5f-.022f,
                         x+.022f,h/2+.8f,z+depth*.5f+.022f,color,light);
                     box(g,-w*.43f,h/2+.76f,z-.16f,w*.43f,h/2+.8f,z+depth+.16f,color,light);
@@ -74,9 +75,25 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
         }finally{g.pop();}
     }
     private static void drawFace(GraphicsHolder g,Identifier texture,Identifier diagram,SillonSignageSpec spec,float x,float y,float z,int light) {
+        if(SillonSignageGeometry.pylon(spec)){
+            g.createVertexConsumer(MoreRenderLayers.getExterior(WHITE));
+            int colour=0xFF000000|spec.background();
+            for(int i=0;i<16;i++){
+                float x1=x+spec.width()*i/16,x2=x+spec.width()*(i+1)/16;
+                float z1=z-SillonSignageGeometry.bow(spec,x1),z2=z-SillonSignageGeometry.bow(spec,x2);
+                IDrawing.drawTexture(g,x1,y,z1,x2,y,z2,x2,y,z,x1,y,z,0,0,1,1,Direction.DOWN,colour,light);
+                IDrawing.drawTexture(g,x1,y+spec.height(),z,x2,y+spec.height(),z,x2,y+spec.height(),z2,x1,y+spec.height(),z1,0,0,1,1,Direction.UP,colour,light);
+            }
+        }
         g.createVertexConsumer(spec.illuminated()?MoreRenderLayers.getLight2(texture):MoreRenderLayers.getExterior(texture));
         int applied=spec.illuminated()?GraphicsHolder.getDefaultLight():light;
-        IDrawing.drawTexture(g,x,y,z,x+spec.width(),y+spec.height(),z,0,0,1,1,Direction.NORTH,-1,applied);
+        if(SillonSignageGeometry.pylon(spec)){
+            for(int i=0;i<16;i++){
+                float x1=x+spec.width()*i/16,x2=x+spec.width()*(i+1)/16;
+                float z1=z-SillonSignageGeometry.bow(spec,x1),z2=z-SillonSignageGeometry.bow(spec,x2);
+                IDrawing.drawTexture(g,x1,y+spec.height(),z1,x2,y+spec.height(),z2,x2,y,z2,x1,y,z1,i/16f,0,(i+1)/16f,1,Direction.NORTH,-1,applied);
+            }
+        }else IDrawing.drawTexture(g,x,y,z,x+spec.width(),y+spec.height(),z,0,0,1,1,Direction.NORTH,-1,applied);
         if(diagram!=null) {
             // Retain the sign header; the MTR diagram occupies the reserved map region.
             g.createVertexConsumer(spec.illuminated()?MoreRenderLayers.getLight2(diagram):MoreRenderLayers.getExterior(diagram));

@@ -12,15 +12,18 @@ with zipfile.ZipFile(jar) as z:
 "org/mtr/mod/screen/SillonSignageEditorModel.class","org/mtr/mod/packet/PacketUpdateSillonSignage.class",
 "org/mtr/mod/render/RenderSillonSignage.class",
 "org/mtr/mod/client/SillonSignageNetwork.class","org/mtr/mod/client/SillonSignageAutomatic.class",
+"org/mtr/mod/client/SillonSignageNetworkMap.class","org/mtr/mod/data/SillonSignageDesign.class",
 "org/mtr/mod/packet/PacketSignageNetwork.class","org/mtr/mod/data/SillonSignageBinding.class",
 "assets/mtr/font/panam/Parisine-Regular.otf","assets/mtr/font/panam/Parisine-Bold.otf",
 "assets/mtr/signage/fonts/GrandParis-Bold.otf","assets/mtr/signage/fonts/IDFVoyageur-Medium.otf",
+"assets/mtr/signage/fonts/IDFVoyageur-Bold.otf","assets/mtr/signage/icons/official_lift.png",
+"assets/mtr/signage/icons/official_arrow_7.png",
 "assets/mtr/signage/maps/metro.png","META-INF/licenses/MTR-France-Addon-MIT.txt",
 "META-INF/licenses/IDFM-signage-resources.txt"]
     missing=[p for p in required if p not in names]
     if missing:raise AssertionError("Missing deliverable resources: "+repr(missing))
     icons=[p for p in names if p.startswith("assets/mtr/signage/icons/") and p.endswith(".png")]
-    if len(icons)!=502:raise AssertionError("Expected 502 bundled icon entries, found "+str(len(icons)))
+    if len(icons)!=513:raise AssertionError("Expected 513 bundled icon entries, found "+str(len(icons)))
     if any(p.startswith("org/sillon/qa/") for p in names):raise AssertionError("Test-only mod leaked into the user JAR")
     spec=z.read("org/mtr/mod/data/SillonSignageSpec.class")
     for style in ["metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical","platform","route","map","services","totem","digital","custom","gpe","gpe_direction"]:

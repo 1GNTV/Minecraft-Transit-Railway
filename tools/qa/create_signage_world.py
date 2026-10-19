@@ -15,6 +15,7 @@ commands=[
 "fill -22 3 -22 22 3 2 minecraft:smooth_quartz"]
 commands+=Path("build/signage-qa/fixtures-commands.txt").read_text().splitlines()
 (run/"signage-world-commands.txt").write_text("\n".join(commands)+"\n",encoding="utf-8")
+(run/"signage-reference-commands.txt").write_text(Path("build/signage-qa/reference-commands.txt").read_text(),encoding="utf-8")
 subprocess.run(["../../gradlew","runServer","-Dorg.gradle.jvmargs=-Xmx3G"],cwd="tools/qa-runtime",check=True,timeout=360)
 if not (run/"signage-world-qa-success.txt").is_file():raise RuntimeError("Dedicated server did not verify the fixture documents")
 destination=run/"saves/SignageQA"

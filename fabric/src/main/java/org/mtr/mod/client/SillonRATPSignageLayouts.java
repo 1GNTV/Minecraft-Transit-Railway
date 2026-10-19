@@ -1,5 +1,4 @@
 package org.mtr.mod.client;
-
 import org.mtr.mod.data.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -8,281 +7,174 @@ import java.util.*;
 import java.util.List;
 import static org.mtr.mod.client.SillonSignagePainter.*;
 
-/** Separate compositions for plaques, corridor wayfinding, sectors, maps and displays. */
+/** Compositions from photographed RATP supports and IDFM V3.1, not a common stretched row. */
 public final class SillonRATPSignageLayouts {
     private SillonRATPSignageLayouts(){}
-    public static boolean draw(Graphics2D g,SillonSignageSpec s,int w,int h) {
+    public static String profile(SillonSignageSpec s){return !s.design().profile().equals("auto")?s.design().profile():s.style().startsWith("gpe")||s.options().font().equals("grand_paris")?"gpe":s.options().font().equals("idf_voyageur")?"idfm":"ratp";}
+    public static String family(SillonSignageSpec s){return s.design().profile().equals("auto")?s.options().font():switch(profile(s)){case "gpe"->"grand_paris";case "idfm"->"idf_voyageur";default->"parisine";};}
+    private static Font face(SillonSignageSpec s,boolean bold,float size){return font(family(s),bold,size*s.options().textScale());}
+    private static float pad(SillonSignageSpec s,int w,int h){return Math.min(w*.045f,h*.10f)*s.options().padding();}
+    private static void ink(Graphics2D g,SillonSignageSpec s,String v,int colour,float x,float y,float w,float h,String align){float scaled=h*s.options().textScale();inkText(g,v,font(family(s),true,scaled*2.1f),colour,x,y+(h-scaled)/2,w,scaled,align);}
+    public static boolean draw(Graphics2D g,SillonSignageSpec s,int w,int h){
         g.setColor(new Color(s.background()));g.fillRect(0,0,w,h);
-        switch(s.style()) {
+        switch(s.style()){
             case "metro","metro_subtitle","gpe"->station(g,s,w,h);
             case "rer"->rer(g,s,w,h);
             case "direction","transfer","gpe_direction"->directions(g,s,w,h);
-            case "exit"->exits(g,s,w,h,false);
-            case "sector"->exits(g,s,w,h,true);
+            case "exit","sector"->exits(g,s,w,h,s.style().equals("sector"));
             case "interchange"->stack(g,s,w,h);
             case "vertical","totem"->vertical(g,s,w,h);
-            case "platform","route"->{
-                SillonSignageSpec drawn=s;
+            case "route","platform"->{
+                var draw=s;
                 if(s.plan().lines().isEmpty()&&!s.effectiveRows("text").isEmpty()){
-                    var badge=ids(s.icons()).stream().map(SillonSignageLineBadge::parse).filter(java.util.Objects::nonNull).findFirst().orElse(new SillonSignageLineBadge("metro",s.accent(),""));
+                    var badge=ids(s.icons()).stream().map(SillonSignageLineBadge::parse).filter(Objects::nonNull).findFirst().orElse(new SillonSignageLineBadge("metro",s.accent(),""));
                     var stops=s.effectiveRows("text").stream().map(r->new SillonSignagePlan.Stop(0,r.text(),r.detail(),r.icons(),0,0,false)).toList();
-                    drawn=s.materialize(s.title(),s.subtitle(),s.icons(),s.accent(),s.rows(),new SillonSignagePlan(List.of(new SillonSignagePlan.Line(0,badge.label(),badge.mode(),badge.color(),stops)),-1,s.binding().layout()));
+                    draw=s.materialize(s.title(),s.subtitle(),s.icons(),s.accent(),s.rows(),new SillonSignagePlan(List.of(new SillonSignagePlan.Line(0,badge.label(),badge.mode(),badge.color(),stops)),-1,s.binding().layout()));
                 }
-                SillonSignagePlanPainter.route(g,drawn,w,h);
+                SillonSignagePlanPainter.route(g,draw,w,h);
             }
             case "map"->{if(s.stationAuto())SillonSignagePlanPainter.network(g,s,w,h);else plan(g,s,w,h);}
             case "services"->services(g,s,w,h);
             case "digital"->digital(g,s,w,h);
-            default->custom(g,s,w,h);
+            default->{if(!s.rows().isEmpty())stack(g,s,w,h);else if(!s.options().image().isBlank())plan(g,s,w,h);else station(g,s,w,h);}
         }
-        if(!"none".equals(s.options().frame())) {
-            float edge=Math.max(1,Math.min(w,h)*.006f);
-            g.setColor(new Color(s.options().frameColor()));g.setStroke(new BasicStroke(edge));
-            g.draw(new Rectangle2D.Float(edge/2,edge/2,w-edge,h-edge));
-        }
+        if(!s.options().frame().equals("none")){float edge=Math.max(1,Math.min(w,h)*.003f);g.setStroke(new BasicStroke(edge));g.setColor(new Color(s.options().frameColor()));g.draw(new Rectangle2D.Float(edge/2,edge/2,w-edge,h-edge));}
         return true;
     }
-    private static float margin(SillonSignageSpec s,int w,int h) {
-        return Math.min(w*.08f,Math.min(w,h)*.1f)*s.options().padding();
+    private static void station(Graphics2D g,SillonSignageSpec s,int w,int h){
+        float pad=pad(s,w,h);boolean band=s.style().equals("metro_subtitle")&&!s.subtitle().isBlank();
+        float bh=band?h*s.options().bandRatio():0,main=h-bh;String name=s.title();
+        float top=main*.20f,cap=main*.58f;
+        if(s.style().equals("gpe")){top=main*.25f;cap=main*.48f;}
+        if(!s.subtitle().isBlank()&&s.style().equals("gpe")){cap=main*.43f;top=main*.17f;}
+        ink(g,s,name,s.foreground(),pad,top,w-2*pad,cap,s.options().align().equals("auto")?"center":s.options().align());
+        if(band){g.setColor(new Color(s.accent()));g.fill(new Rectangle2D.Float(0,h-bh,w,bh));ink(g,s,s.subtitle(),s.foreground(),pad,h-bh+bh*.24f,w-2*pad,bh*.53f,"center");}
+        else if(s.style().equals("gpe")&&!s.subtitle().isBlank())text(g,s.subtitle(),face(s,false,h*.15f),s.foreground(),pad,h*.68f,w-2*pad,h*.21f,"center");
     }
-    private static Font face(SillonSignageSpec s,boolean strong,float size) {
-        return font(s.options().font(),strong,size*s.options().textScale());
+    private static int sectorColour(SillonSignageSpec s){return s.options().freePalette()?s.accent():switch(s.design().sector()){case "forum"->0x92915D;case "seine"->0x007DA5;default->0x6F6760;};}
+    private static void sectorHeader(Graphics2D g,SillonSignageSpec s,String fallback,float x,float y,float w,float h){
+        g.setColor(new Color(sectorColour(s)));g.fill(new Rectangle2D.Float(x,y,w,h));
+        var symbol=sectorSymbol(s.design().symbol());String name=s.design().label(fallback);float bottom=y+h*.73f;
+        if(symbol!=null)image(g,symbol,x+w*.20f,y+h*.10f,w*.60f,h*.43f);else bottom=y+h*.44f;
+        Font regular=face(s,false,h*.17f),strong=face(s,true,h*.23f);
+        float a=(float)regular.getStringBounds("secteur ",g.getFontRenderContext()).getWidth(),b=(float)strong.getStringBounds(name,g.getFontRenderContext()).getWidth();
+        float scale=Math.min(1,w*.88f/Math.max(1,a+b));float left=x+(w-(a+b)*scale)/2;
+        text(g,"secteur ",regular.deriveFont(regular.getSize2D()*scale),WHITE,left,bottom-h*.13f,a*scale,h*.3f,"left");
+        text(g,name,strong.deriveFont(strong.getSize2D()*scale),WHITE,left+a*scale,bottom-h*.13f,b*scale,h*.3f,"left");
     }
-    private static String align(SillonSignageSpec s,String fallback) {
-        return "auto".equals(s.options().align())?fallback:s.options().align();
+    private static void rer(Graphics2D g,SillonSignageSpec s,int w,int h){
+        float pad=pad(s,w,h),left=pad,right=w-pad;
+        if(!s.design().sector().equals("none")){float sw=w*Math.max(.25f,s.options().bandRatio());sectorHeader(g,s,s.subtitle(),0,0,sw,h);left=sw+pad;}
+        if(s.design().operator()){float unit=h*.27f;icons(g,"ratp_logo_white",w-pad-unit,h*.57f,unit,unit,unit);right-=unit+pad;}
+        String name=s.title();if(!name.contains("|")&&name.length()>23)name=wrap(g,s,name,h*.40f,right-left);
+        ink(g,s,name,s.foreground(),left,h*.15f,right-left,h*(name.contains("|")?.68f:.57f),"center");
+        if(!s.subtitle().isBlank()&&s.design().sector().equals("none"))text(g,s.subtitle(),face(s,false,h*.15f),s.foreground(),left,h*.75f,right-left,h*.18f,"center");
     }
-    private static void title(Graphics2D g,SillonSignageSpec s,String text,float size,int color,float x,float y,float w,float h,String alignment) {
-        SillonSignagePainter.text(g,text,face(s,true,size),color,x,y,w,h,align(s,alignment));
+    private static String wrap(Graphics2D g,SillonSignageSpec s,String name,float fontSize,float available){
+        if(name.contains("|")||face(s,true,fontSize).getStringBounds(name,g.getFontRenderContext()).getWidth()<=available)return name;
+        int best=-1;double cost=Double.MAX_VALUE;
+        for(int i=1;i<name.length()-1;i++)if(name.charAt(i)==' '){String a=name.substring(0,i),b=name.substring(i+1);double d=Math.max(a.length(),b.length())+Math.abs(a.length()-b.length())*.2;if(d<cost){cost=d;best=i;}}
+        return best<0?name:name.substring(0,best)+"|"+name.substring(best+1);
     }
-    private static void station(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h);
-        boolean band="metro_subtitle".equals(s.style())&&!s.subtitle().isBlank();
-        float bh=band?h*s.options().bandRatio():0;
-        if(band) {g.setColor(new Color(s.accent()));g.fill(new Rectangle2D.Float(0,h-bh,w,bh));}
-        title(g,s,s.title(),(h-bh)*(s.title().contains("|")?.49f:.66f),s.foreground(),
-            pad,pad*.35f,w-2*pad,h-bh-pad*.7f,"center");
-        if(band)title(g,s,s.subtitle(),bh*.72f,s.foreground(),pad,h-bh,w-pad*2,bh,"center");
-        else if(!s.subtitle().isBlank()&&"gpe".equals(s.style())) {
-            // Secondary text is an explicit second tier; never overprint the station name.
-            g.setColor(new Color(s.background()));g.fill(new Rectangle2D.Float(0,h*.73f,w,h*.27f));
-            title(g,s,s.subtitle(),h*.16f,s.foreground(),pad,h*.73f,w-2*pad,h*.23f,"center");
+    private static List<SillonSignageRow> rows(SillonSignageSpec s){return s.rows().isEmpty()?List.of(new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),s.arrow())):s.rows();}
+    private static void directions(Graphics2D g,SillonSignageSpec s,int w,int h){
+        var rows=rows(s);float unit=h/(float)Math.max(1,rows.size());
+        for(int i=0;i<rows.size();i++)destination(g,s,rows.get(i),0,i*unit,w,unit,s.background(),s.foreground(),true);
+        // Shared arrow column for consecutive destinations in the same direction.
+        for(int i=0;i<rows.size();){int end=i+1;while(end<rows.size()&&rows.get(end).arrow()==rows.get(i).arrow())end++;
+            int direction=rows.get(i).arrow();if(direction>=0){float box=Math.min(unit*.9f,w*.17f),x=direction==1||direction==5||direction==7?w-box:0;
+                g.setColor(new Color(s.background()));g.fill(new Rectangle2D.Float(x,i*unit,box,(end-i)*unit));
+                arrow(g,direction,x+box/2,(i+end)*unit/2,Math.min(box*.70f,unit*.65f),s.foreground());
+                if(profile(s).equals("gpe")){g.setColor(new Color(s.foreground()));g.setStroke(new BasicStroke(Math.max(1,h*.006f)));g.draw(new Rectangle2D.Float(x,i*unit,box,(end-i)*unit));}
+            }i=end;
         }
     }
-    private static void rer(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h),left=0,right=w-pad;
-        String sector=ids(s.icons()).stream().filter(x->Set.of("ratp_forum","ratp_rivoli","ratp_seine").contains(x)).findFirst().orElse("");
-        if(!sector.isEmpty()){
-            float block=w*s.options().bandRatio();
-            BufferedImage image=icon(sector);
-            if(image!=null) {
-                // The source is a complete lockup including "secteur". Do not duplicate its text.
-                g.setColor(new Color(s.options().freePalette()?s.accent():image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,block,h));
-                float scale=s.options().iconScale(),iw=(block-pad*.8f)*scale,ih=(h-pad*.8f)*scale;
-                Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,block,h));
-                image(g,sectorLockup(sector),(block-iw)/2,(h-ih)/2,iw,ih);g.setClip(clip);
-            }
-            left=block+pad;
-        }else left=pad;
-        if(ids(s.icons()).contains("ratp_logo")||ids(s.icons()).contains("ratp_logo_white")) {
-            float side=Math.min(h*.48f,h*.38f*s.options().iconScale());icons(g,"ratp_logo_white",w-pad-side,h*.50f,side,side,side);right-=side+pad;
+    private static void destination(Graphics2D g,SillonSignageSpec s,SillonSignageRow row,float x,float y,float w,float h,int bg,int fg,boolean arrowColumn){
+        g.setColor(new Color(bg));g.fill(new Rectangle2D.Float(x,y,w,h));float pad=Math.min(h*.20f,w*.035f)*s.options().padding(),left=x+pad,right=x+w-pad;
+        int direction=row.arrow();float box=Math.min(h*.9f,w*.17f);
+        if(direction>=0){boolean rtl=direction==1||direction==5||direction==7;float ax=rtl?x+w-box/2:x+box/2;
+            if(!arrowColumn)arrow(g,direction,ax,y+h/2,Math.min(h*.65f,box*.70f),fg);
+            if(rtl)right=x+w-box-pad;else left=x+box+pad*.4f;
         }
-        title(g,s,s.title(),h*(s.title().contains("|")?.42f:.58f),s.foreground(),left,pad*.5f,right-left,h-pad-(s.subtitle().isBlank()?0:h*.2f),"center");
-        if(!s.subtitle().isBlank())text(g,s.subtitle(),face(s,false,h*.15f),s.foreground(),left,h*.77f,right-left,h*.20f,"center");
+        if(!row.number().isBlank()){float unit=h*.59f;g.setColor(new Color(fg));g.setStroke(new BasicStroke(Math.max(1,unit*.035f)));g.draw(new Rectangle2D.Float(left,y+(h-unit)/2,unit,unit));ink(g,s,row.number(),fg,left+unit*.08f,y+(h-unit)/2+unit*.12f,unit*.84f,unit*.76f,"center");left+=unit+pad*.7f;}
+        if(!row.icons().isBlank()){float unit=h*.67f*s.options().iconScale();float used=icons(g,contrastSymbols(row.icons(),bg,fg),left,y+(h-unit)/2,Math.min((right-left)*.43f,h*4),unit,unit);left+=used+pad*.8f;}
+        boolean detail=!row.detail().isBlank();String name=wrap(g,s,row.text(),h*.56f,right-left);
+        String align=direction==1||direction==5||direction==7?"right":"left";
+        if(detail){ink(g,s,name,fg,left,y+h*.19f,right-left,h*.33f,align);text(g,row.detail(),face(s,false,h*.22f),fg,left,y+h*.58f,right-left,h*.25f,align);}
+        else ink(g,s,name,fg,left,y+h*.25f,right-left,h*.49f,align);
+        if(profile(s).equals("gpe")){g.setColor(new Color(fg));g.setStroke(new BasicStroke(Math.max(1,h*.006f)));g.draw(new Rectangle2D.Float(x,y,w,h));}
     }
-    private static List<SillonSignageRow> directionRows(SillonSignageSpec s) {
-        if(!s.rows().isEmpty())return s.rows();
-        List<SillonSignageRow> rows=new ArrayList<>();
-        rows.add(new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),s.arrow()));
-        rows.addAll(SillonSignageRow.legacy(s.body(),"transport"));return rows;
-    }
-    private static void directions(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        List<SillonSignageRow> rows=directionRows(s);
-        float rh=h/(float)Math.max(1,rows.size());
-        for(int i=0;i<rows.size();i++)destination(g,s,rows.get(i),0,i*rh,w,rh,s.background(),s.foreground());
-    }
-    private static void destination(Graphics2D g,SillonSignageSpec s,SillonSignageRow row,float x,float y,float w,float h,int bg,int fg) {
-        g.setColor(new Color(bg));g.fill(new Rectangle2D.Float(x,y,w,h));
-        float pad=Math.min(h*.13f,w*.045f)*s.options().padding();
-        float arrowSize=Math.min(h*.55f,w*.095f),left=x+pad,right=x+w-pad;
-        int direction=row.arrow();
-        boolean arrowRight=direction==1||direction==5||direction==7;
-        if(direction>=0) {
-            float ax=arrowRight?right-arrowSize*.5f:left+arrowSize*.5f;
-            arrow(g,direction,ax,y+h*.5f,arrowSize,fg);
-            if(arrowRight)right-=arrowSize+pad;else left+=arrowSize+pad;
-        }
-        if(!row.number().isBlank()) {
-            float box=Math.min(h*.5f,(right-left)*.14f);
-            g.setColor(new Color(fg));g.setStroke(new BasicStroke(Math.max(1,h*.016f)));
-            g.draw(new Rectangle2D.Float(left,y+(h-box)/2,box,box));
-            text(g,row.number(),face(s,true,box*.69f),fg,left+box*.08f,y+(h-box)/2,box*.84f,box,"center");
-            left+=box+pad;
-        }
-        if(!row.icons().isBlank()) {
-            float height=h*.62f*s.options().iconScale();
-            float maxIconW=Math.min((right-left)*(row.text().isBlank()?.95f:.37f),h*4.8f);
-            float used=icons(g,contrastSymbols(row.icons(),bg,fg),left,y+(h-height)/2,maxIconW,height,height);
-            left+=used+pad;
-        }
-        boolean detail=!row.detail().isBlank();
-        title(g,s,row.text(),h*(detail?.37f:.51f),fg,left,y+h*(detail?.10f:.09f),right-left,h*(detail?.5f:.82f),"left");
-        if(detail)text(g,row.detail(),face(s,false,h*.24f),fg,left,y+h*.57f,right-left,h*.31f,align(s,"left"));
-    }
-    private static void exits(Graphics2D g,SillonSignageSpec s,int w,int h,boolean sector) {
-        float top=0,pad=margin(s,w,h);
-        String sectorIcon=ids(s.icons()).stream().filter(x->Set.of("ratp_rivoli","ratp_forum","ratp_seine").contains(x)).findFirst().orElse("");
-        String modes=String.join(",",ids(s.icons()).stream().filter(x->!x.equals(sectorIcon)).toList());
-        if(sector) {
-            float band=h*(s.stationAuto()?.25f:s.options().bandRatio());
-            BufferedImage image=s.stationAuto()?null:icon(sectorIcon);
-            if(image!=null) {
-                g.setColor(new Color(image.getRGB(image.getWidth()/16,image.getHeight()/16)));g.fill(new Rectangle2D.Float(0,0,w,band));
-                float scale=s.options().iconScale(),iw=(w-pad*2)*scale,ih=band*.82f*scale;
-                Shape clip=g.getClip();g.clip(new Rectangle2D.Float(0,0,w,band));
-                image(g,sectorLockup(sectorIcon),(w-iw)/2,(band-ih)/2,iw,ih);g.setClip(clip);
-            }else {
-                g.setColor(new Color(s.options().freePalette()?s.accent():GREY));g.fill(new Rectangle2D.Float(0,0,w,band));
-                title(g,s,s.subtitle(),band*.53f,WHITE,pad,0,w-pad*2,band,"left");
-            }
-            top+=band;
-        }
-        if(!modes.isBlank()) {
-            float band=Math.min(h*.12f,w*.18f);
-            g.setColor(new Color(s.options().freePalette()?s.accent():WHITE));g.fill(new Rectangle2D.Float(0,top,w,band));
-            icons(g,modes,pad,top+band*.07f,w-pad*2,band*.86f,band*.72f*s.options().iconScale());top+=band;
-        }
-        float remaining=h-top;
-        boolean explicit=!s.rows().isEmpty();
-        List<SillonSignageRow> rows=s.effectiveRows("exit");
-        float heading=remaining*(rows.isEmpty()?.65f:.19f);
-        SillonSignageRow header=new SillonSignageRow("exit","",s.title().isBlank()?"Sortie":s.title(),sector?"":s.subtitle(),"",s.arrow());
-        destination(g,s,header,0,top,w,heading,s.background(),s.foreground());
-        top+=heading;
-        if(rows.isEmpty())return;
-        float rh=Math.min((h-top)/rows.size(),h*.095f);
-        for(int i=0;i<rows.size();i++) {
-            SillonSignageRow row=rows.get(i);
-            // Legacy body rows have no independent arrows; explicit rows retain theirs.
-            destination(g,s,row,0,top+i*rh,w,rh,s.background(),s.foreground());
-        }
-    }
-    private static void stack(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        List<SillonSignageRow> rows=s.rows();
-        if(rows.isEmpty()) {
-            List<SillonSignageRow> build=new ArrayList<>();
-            build.add(new SillonSignageRow("transport","",s.title().isBlank()?"Correspondances":s.title(),"",s.icons(),s.arrow()));
-            if(!s.subtitle().isBlank())build.add(new SillonSignageRow("service","",s.subtitle(),"","",s.arrow()));
-            List<SillonSignageRow> exits=s.effectiveRows("exit");
-            if(exits.isEmpty())build.add(new SillonSignageRow("exit","","Sortie","","",s.arrow()));else build.addAll(exits);
-            rows=build;
-        }
-        float unit=h/(float)rows.size();
-        for(int i=0;i<rows.size();i++) {
-            SillonSignageRow r=rows.get(i);int bg,fg;
-            if(s.options().freePalette()||"custom".equals(s.style())) {
-                bg="service".equals(r.kind())?s.accent():s.background();fg=s.foreground();
-            }else switch(r.kind()) {
-                case "exit"->{bg=s.background();fg=s.foreground();}
-                case "service"->{bg=s.accent();fg=WHITE;}
-                case "sector"->{bg=GREY;fg=WHITE;}
-                default->{bg=WHITE;fg=DARK;}
-            }
-            destination(g,s,r,0,i*unit,w,unit,bg,fg);
-        }
-    }
-    private static void vertical(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h);List<String> symbols=ids(s.icons());
-        String mode=symbols.stream().filter(id->!id.startsWith("line_")).findFirst().orElse("ratp_metro");
-        List<String> lines=symbols.stream().filter(id->id.startsWith("line_")||id.matches("idfm_m[0-9].*")).toList();
-        float diameter=Math.min(w*.96f,h*.27f);
-        icons(g,mode,(w-diameter)/2,h*.035f,diameter,diameter,diameter*s.options().iconScale());
-        float lineTop=h*.35f,unit=Math.min(w*.90f,h*.32f/Math.max(1,lines.size()));
-        for(String id:lines){icons(g,id,(w-unit)/2,lineTop,unit,unit,unit*s.options().iconScale());lineTop+=unit*1.05f;}
-        if(!s.title().isBlank())title(g,s,s.title(),Math.min(h*.09f,w*.25f),s.foreground(),pad,h*.65f,w-pad*2,h*.13f,"center");
-        arrow(g,s.arrow(),w*.5f,h*.86f,Math.min(w*.64f,h*.19f),s.foreground());
-    }
-    private static void route(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h),head=h*.22f;
-        destination(g,s,new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),s.arrow()),
-            0,0,w,head,s.background(),s.foreground());
-        List<SillonSignageRow> stops=s.effectiveRows("text");
-        if(stops.isEmpty())return; // MTR diagram is supplied by the world renderer when auto is enabled.
-        int n=stops.size();float top=head+h*.045f,bottom=h-pad;
-        if(w/(float)h<2.8f) {
-            int cols=w/(float)h>2?2:1,per=(n+cols-1)/cols;
-            for(int c=0;c<cols;c++){
-                int first=c*per,last=Math.min(n,first+per);if(first>=n)break;
-                float x=pad+c*(w-pad*2)/cols+pad*.4f,cy=top;
-                float step=(bottom-top)/Math.max(1,last-first);
-                g.setColor(new Color(s.accent()));g.setStroke(new BasicStroke(Math.max(3,step*.09f)));
-                g.draw(new Line2D.Float(x,cy+step*.5f,x,cy+(last-first-.5f)*step));
-                for(int i=first;i<last;i++){
-                    float y=cy+(i-first+.5f)*step;stop(g,s,x,y,step*.19f);
-                    text(g,stops.get(i).text(),face(s,true,step*.69f),s.foreground(),x+step*.32f,y-step*.4f,
-                        (w-pad*2)/cols-step*.5f,step*.8f,"left");
-                }
-            }
-        }else {
-            float step=(w-2*pad)/Math.max(1,n),xl=pad+step*.5f,xr=w-pad-step*.5f,y=top+(bottom-top)*.22f;
-            g.setColor(new Color(s.accent()));g.setStroke(new BasicStroke(Math.max(3,h*.026f)));
-            g.draw(new Line2D.Float(xl,y,xr,y));
-            Font labels=face(s,false,h*.13f);float widest=1;
-            for(SillonSignageRow stop:stops)for(String line:wrapped(stop.text()).split("\\|"))
-                widest=Math.max(widest,(float)labels.getStringBounds(line,g.getFontRenderContext()).getWidth());
-            labels=labels.deriveFont(labels.getSize2D()*Math.min(1,step*.92f/widest));
-            float lineHeight=labels.getLineMetrics("ÉAgjp",g.getFontRenderContext()).getHeight();
-            for(int i=0;i<n;i++){
-                float x=xl+i*step;stop(g,s,x,y,h*.033f);
-                String name=wrapped(stops.get(i).text());
-                int lines=name.split("\\|",-1).length;
-                text(g,name,labels,s.foreground(),x-step*.46f,y+h*.06f,
-                    step*.92f,Math.min(bottom-y-h*.07f,lineHeight*lines),"center");
-            }
-        }
-    }
-    private static String wrapped(String text) {
-        if(text.length()<15)return text;
-        int middle=text.length()/2,at=-1,best=999;
-        for(int i=2;i<text.length()-2;i++)if(text.charAt(i)==' '&&Math.abs(i-middle)<best){at=i;best=Math.abs(i-middle);}
-        return at<0?text:text.substring(0,at)+"|"+text.substring(at+1);
-    }
-    private static void stop(Graphics2D g,SillonSignageSpec s,float x,float y,float r) {
-        g.setColor(new Color(s.background()));g.fill(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
-        g.setColor(new Color(s.accent()));g.setStroke(new BasicStroke(Math.max(2,r*.30f)));g.draw(new Ellipse2D.Float(x-r,y-r,r*2,r*2));
-    }
-    private static void plan(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float pad=margin(s,w,h),top=h*.18f;
-        destination(g,s,new SillonSignageRow("text","",s.title(),s.subtitle(),"",-1),pad,0,w-pad*2,top,s.background(),s.foreground());
-        BufferedImage im=resource(s.options().image());
-        if(im!=null)image(g,im,pad,top,w-2*pad,h-top-pad);
-        else if(!s.rows().isEmpty()||!s.body().isBlank()) {
-            List<SillonSignageRow> rows=s.effectiveRows("text");float rh=(h-top-pad)/Math.max(1,rows.size());
-            for(int i=0;i<rows.size();i++)destination(g,s,rows.get(i),pad,top+i*rh,w-pad*2,rh,s.background(),s.foreground());
-        }
-    }
-    private static void services(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        if(!s.rows().isEmpty()){directions(g,s,w,h);return;}
-        destination(g,s,new SillonSignageRow("service","",s.title(),s.subtitle(),s.icons(),s.arrow()),0,0,w,h,s.background(),s.foreground());
-    }
-    private static void digital(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        float head=h*.20f;destination(g,s,new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),-1),0,0,w,head,s.background(),s.foreground());
-        List<SillonSignageRow> rows=s.effectiveRows("text");float rh=Math.min(h*.16f,(h-head)/Math.max(1,rows.size()));
+    private static void exits(Graphics2D g,SillonSignageSpec s,int w,int h,boolean sector){
+        float top=0,pad=w*.045f*s.options().padding();
+        if(sector){float band=h*s.options().bandRatio();sectorHeader(g,s,s.subtitle(),0,0,w,band);top=band;}
+        if(!s.icons().isBlank()){float band=h*(sector?.115f:.12f);g.setColor(Color.WHITE);g.fill(new Rectangle2D.Float(0,top,w,band));float unit=band*.76f*s.options().iconScale();icons(g,contrastSymbols(s.icons(),WHITE,s.foreground()==WHITE?NAVY:s.foreground()),pad,top,w-2*pad,band,unit);top+=band;}
+        var rows=s.effectiveRows("exit");float heading=Math.min(h*.14f,(h-top)*.24f);
+        ink(g,s,s.title().isBlank()?"Sortie":s.title(),s.foreground(),pad,top+heading*.14f,w-pad*2,heading*.65f,"left");
+        if(s.arrow()>=0&&!sector)arrow(g,s.arrow(),w-pad-heading*.30f,top+heading*.49f,heading*.60f,s.foreground());
+        top+=heading;float rh=Math.min(h*.067f*s.design().rowScale(),(h-top-h*.06f)/Math.max(1,rows.size()));
         for(int i=0;i<rows.size();i++){
-            var row=rows.get(i);float y=head+i*rh,pad=w*.025f;
-            if(i%2==1){g.setColor(new Color(s.background()).brighter());g.fill(new Rectangle2D.Float(0,y,w,rh));}
-            icons(g,contrastSymbols(row.icons(),s.background(),s.foreground()),pad,y+rh*.12f,w*.14f,rh*.76f,rh*.68f*s.options().iconScale());
-            title(g,s,row.text(),rh*.44f,s.foreground(),w*.19f,y,w*.55f,rh,"left");
-            text(g,row.number(),face(s,true,rh*.39f),s.foreground(),w*.76f,y,w*.21f,rh,"right");
+            var row=rows.get(i);float y=top+i*rh,box=rh*.82f,left=pad;
+            if(!row.number().isBlank()){g.setStroke(new BasicStroke(Math.max(1,box*.027f)));g.setColor(new Color(s.foreground()));g.draw(new Rectangle2D.Float(left,y+rh*.04f,box,box));ink(g,s,row.number(),s.foreground(),left+box*.07f,y+rh*.04f+box*.10f,box*.86f,box*.78f,"center");left+=box+rh*.38f;}
+            boolean detail=!row.detail().isBlank();ink(g,s,row.text(),s.foreground(),left,y+rh*(detail?.03f:.13f),w-pad-left,rh*(detail?.47f:.64f),"left");
+            if(detail)text(g,row.detail(),face(s,false,rh*.22f),s.foreground(),left,y+rh*.56f,w-pad-left,rh*.26f,"left");
         }
     }
-    private static void custom(Graphics2D g,SillonSignageSpec s,int w,int h) {
-        if(!s.options().image().isBlank()){
-            BufferedImage im=resource(s.options().image());if(im!=null){image(g,im,0,0,w,h);return;}
+    private static void stack(Graphics2D g,SillonSignageSpec s,int w,int h){
+        var rows=rows(s);float unit=h/(float)Math.max(1,rows.size());
+        for(int i=0;i<rows.size();i++){var row=rows.get(i);if(row.kind().equals("service"))row=translateService(s,row);boolean exit=row.kind().equals("exit")||row.kind().equals("sector");int bg=exit?s.background():WHITE,fg=exit?s.foreground():profile(s).equals("ratp")?NAVY:0x000000;
+            if(s.options().freePalette()){bg=s.background();fg=s.foreground();}
+            destination(g,s,row,0,i*unit,w,unit,bg,fg,false);
+            if(i>0){g.setColor(new Color(exit?s.foreground():0xA5A5A5));g.setStroke(new BasicStroke(Math.max(1,h*.001f)));g.draw(new Line2D.Float(0,i*unit,w,i*unit));}
         }
-        if(!s.rows().isEmpty()){stack(g,s,w,h);return;}
-        float pad=margin(s,w,h);
-        if(!s.icons().isBlank())icons(g,s.icons(),pad,pad,w-pad*2,h*.24f,h*.20f*s.options().iconScale());
-        title(g,s,s.title(),h*.40f,s.foreground(),pad,h*.28f,w-pad*2,h*.40f,"center");
-        text(g,s.subtitle(),face(s,false,h*.16f),s.foreground(),pad,h*.68f,w-pad*2,h*.22f,align(s,"center"));
+    }
+    private static void vertical(Graphics2D g,SillonSignageSpec s,int w,int h){
+        var symbols=ids(s.icons());String mode=symbols.stream().filter(x->SillonSignagePainter.MODE_ICONS.contains(x)).findFirst().orElse("ratp_metro");
+        var lines=symbols.stream().filter(x->SillonSignageLineBadge.parse(x)!=null||x.matches("idfm_[mrt][0-9a-z_]+" )&&!SillonSignagePainter.MODE_ICONS.contains(x)).toList();
+        float diameter=Math.min(w*1.04f,h*.31f),center=w*.53f;
+        icons(g,contrastSymbols(mode,s.background(),s.foreground()),center-diameter/2,h*.035f,diameter,diameter,diameter*s.options().iconScale());
+        float unit=Math.min(w*1.01f,h*.30f/Math.max(1,lines.size())),top=h*.36f;
+        for(String line:lines){icons(g,contrastSymbols(line,s.background(),s.foreground()),center-unit/2,top,unit,unit,unit*s.options().iconScale());top+=unit*1.12f;}
+        arrow(g,s.arrow(),w*.5f,h*.865f,Math.min(w*.70f,h*.22f),s.foreground());
+    }
+    private static void services(Graphics2D g,SillonSignageSpec s,int w,int h){
+        var data=rows(s);float unit=h/(float)Math.max(1,data.size());
+        for(int i=0;i<data.size();i++){var r=translateService(s,data.get(i));
+            destination(g,s,r,0,i*unit,w,unit,s.background(),s.foreground(),false);
+        }
+    }
+    private static SillonSignageRow translateService(SillonSignageSpec s,SillonSignageRow r){
+        if(!s.design().translations())return r;
+        String translated=switch(r.text().toLowerCase(Locale.ROOT)){case "ascenseur"->"Lift · Ascensore";case "escalator"->"Escalator · Escalera mecánica";case "escalier"->"Stairs · Escalera";default->"";};
+        if(translated.isBlank()||r.detail().contains(translated))return r;
+        return new SillonSignageRow("service",r.number(),r.text(),translated+(r.detail().isBlank()?"":"  /  "+r.detail()),r.icons(),r.arrow());
+    }
+    private static void plan(Graphics2D g,SillonSignageSpec s,int w,int h){float pad=pad(s,w,h);ink(g,s,s.title(),s.foreground(),pad,h*.04f,w-pad*2,h*.10f,"left");var im=resource(s.options().image());if(im!=null)image(g,im,pad,h*.18f,w-pad*2,h*.78f);}
+    private static void digital(Graphics2D g,SillonSignageSpec s,int w,int h){
+        int blue=NAVY,amber=0xFFC334;float edge=Math.min(w,h)*.02f,head=h*.29f;
+        g.setColor(Color.BLACK);g.fillRect(0,0,w,h);g.setColor(Color.WHITE);g.fill(new Rectangle2D.Float(edge,edge,w-2*edge,head-edge));
+        float used=icons(g,contrastSymbols(s.icons(),WHITE,blue),edge*2,edge*1.5f,w*.19f,head-edge*2,h*.22f*s.options().iconScale());
+        ink(g,s,s.title(),blue,edge*2+used+h*.045f,head*.28f,w-used-w*.17f-edge*4,head*.48f,"left");
+        String clock=s.subtitle().matches("[0-9]{2}:[0-9]{2}")?s.subtitle():"";
+        if(!clock.isBlank()){g.setColor(Color.BLACK);g.fill(new RoundRectangle2D.Float(w-w*.15f-edge*2,edge,w*.15f,head*.72f,8,8));ink(g,s,clock,amber,w-w*.145f-edge*2,edge*1.6f,w*.14f,head*.43f,"center");}
+        var arrivals=s.effectiveRows("transport").stream().filter(r->!r.number().isBlank()).toList();float mid=w*.51f,bottom=h*.94f,bodyTop=head+h*.02f;
+        g.setColor(Color.WHITE);g.fill(new RoundRectangle2D.Float(mid,bodyTop,w-mid-edge,bottom-bodyTop,12,12));
+        String mode=ids(s.icons()).stream().map(SillonSignageLineBadge::parse).filter(Objects::nonNull).map(SillonSignageLineBadge::mode).findFirst().orElse("metro");
+        String vehicle=switch(mode){case "metro"->"métro";case "tram"->"tram";case "bus"->"bus";case "boat"->"bateau";case "cable"->"cabine";default->"train";};
+        for(int i=0;i<2;i++){float x=edge+i*(mid-edge)/2,cw=(mid-edge)/2;
+            String ordinal=vehicle.equals("cabine")?(i==0?"1re":"2e"):(i==0?"1er":"2e");
+            text(g,ordinal+" "+vehicle,face(s,false,h*.085f),WHITE,x+cw*.07f,bodyTop+h*.015f,cw*.86f,h*.13f,"left");
+            String wait=i<arrivals.size()?arrivals.get(i).number().replace(" min","").replace("À l’approche","0"):"–";
+            ink(g,s,wait,amber,x+cw*.09f,bodyTop+h*.22f,cw*.82f,h*.34f,"center");
+        }
+        g.setColor(Color.WHITE);g.setStroke(new BasicStroke(Math.max(1,h*.006f)));g.draw(new Line2D.Float(mid/2,bodyTop+h*.24f,mid/2,bottom-h*.08f));
+        float tx=mid+w*.025f,tw=w-mid-w*.05f;icons(g,contrastSymbols(s.icons(),WHITE,blue),tx,bodyTop+h*.045f,tw,h*.16f,h*.14f);
+        String info=!s.design().notice().isBlank()?s.design().notice():!s.body().isBlank()?s.body():arrivals.isEmpty()?"Aucun départ annoncé":arrivals.get(0).text()+(arrivals.get(0).detail().isBlank()?"":"|"+arrivals.get(0).detail());
+        text(g,paragraph(g,info,face(s,false,h*.105f),tw),face(s,false,h*.105f),0x111111,tx,bodyTop+h*.23f,tw,h*.36f,"left");
+        g.setColor(new Color(s.options().freePalette()?s.accent():0xC98B19));g.fill(new Rectangle2D.Float(0,h*.955f,w,h*.045f));
+    }
+    private static String paragraph(Graphics2D g,String value,Font face,float width){
+        List<String> lines=new ArrayList<>();
+        for(String paragraph:value.replace('\n','|').split("\\|",-1)){String line="";for(String word:paragraph.split("\\s+")){String next=line.isBlank()?word:line+" "+word;if(!line.isBlank()&&face.getStringBounds(next,g.getFontRenderContext()).getWidth()>width){lines.add(line);line=word;}else line=next;}lines.add(line);}
+        return String.join("|",lines);
     }
 }

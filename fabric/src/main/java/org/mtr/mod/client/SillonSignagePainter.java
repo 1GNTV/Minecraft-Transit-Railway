@@ -47,7 +47,7 @@ public final class SillonSignagePainter {
     public static Font font(String family,boolean bold,float size) {
         String file=switch(family) {
             case "grand_paris"->"signage/fonts/GrandParis-"+(bold?"Bold":"Regular")+".otf";
-            case "idf_voyageur"->"signage/fonts/IDFVoyageur-"+(bold?"Medium":"Regular")+".otf";
+            case "idf_voyageur"->"signage/fonts/IDFVoyageur-"+(bold?"Bold":"Regular")+".otf";
             default->"font/panam/Parisine-"+(bold?"Bold":"Regular")+".otf";
         };
         Font f=FONTS.computeIfAbsent(file,key->{
@@ -77,28 +77,61 @@ public final class SillonSignagePainter {
     public static BufferedImage icon(String id) {
         if(id!=null&&id.startsWith("ink_")){
             String[] parts=id.split("_",3);
-            if(parts.length==3&&parts[1].matches("[0-9a-f]{6}")&&Set.of("ratp_metro","ratp_rer").contains(parts[2]))return IMAGES.computeIfAbsent(id,key->{
-                BufferedImage source=icon(parts[2]);if(source==null)return Optional.empty();
-                BufferedImage result=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);int colour=Integer.parseInt(parts[1],16);
-                for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)result.setRGB(x,y,(source.getRGB(x,y)&0xFF000000)|colour);
-                return Optional.of(result);
-            }).orElse(null);
+            if(parts.length==3&&parts[1].matches("[0-9a-f]{6}")){
+                var line=SillonSignageLineBadge.parse(parts[2]);int colour=Integer.parseInt(parts[1],16);
+                if(line!=null)return IMAGES.computeIfAbsent(id,key->Optional.of(lineBadge(line,colour))).orElse(null);
+                if(MODE_ICONS.contains(parts[2])){BufferedImage source=icon(parts[2]);if(source==null)return null;return IMAGES.computeIfAbsent(id,key->{
+                    BufferedImage result=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);
+                    for(int y=0;y<source.getHeight();y++)for(int x=0;x<source.getWidth();x++)result.setRGB(x,y,(source.getRGB(x,y)&0xFF000000)|colour);
+                    return Optional.of(result);
+                }).orElse(null);}
+            }
         }
         SillonSignageLineBadge badge=id==null?null:SillonSignageLineBadge.parse(id);
         if(badge!=null)return IMAGES.computeIfAbsent(id,key->Optional.of(lineBadge(badge))).orElse(null);
         if(id==null||!id.matches("[a-zA-Z0-9_/-]+"))return null;
         return resource("signage/icons/"+id.toLowerCase(Locale.ROOT)+".png");
     }
-    private static BufferedImage lineBadge(SillonSignageLineBadge badge) {
-        BufferedImage image=new BufferedImage(256,256,BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();
-        try{quality(g);int colour=badge.color();
-            boolean ring="rer".equals(badge.mode()),square=Set.of("train","bus","air","boat").contains(badge.mode());
-            Shape shape=square?new RoundRectangle2D.Float(8,8,240,240,30,30):new Ellipse2D.Float(8,8,240,240);
-            g.setColor(new Color(ring?0xFFFFFF:colour));g.fill(shape);
-            if(ring){g.setColor(new Color(colour));g.setStroke(new BasicStroke(12));g.draw(shape);}
-            double luminance=(((colour>>>16)&255)*.299+((colour>>>8)&255)*.587+(colour&255)*.114)/255;
-            text(g,badge.label(),font("parisine",true,185),ring?colour:luminance>.58?0x101A28:0xFFFFFF,23,14,210,226,"center");
+    public static final Set<String> MODE_ICONS=Set.of("ratp_metro","ratp_rer","idfm_metro_2","idfm_rer_2","idfm_train_2","idfm_bus_2","idfm_tram_2","idfm_cable_2","idfm_ferry_2");
+    private static BufferedImage lineBadge(SillonSignageLineBadge badge){return lineBadge(badge,0x000000);}
+    private static BufferedImage lineBadge(SillonSignageLineBadge badge,int ink) {
+        boolean surface=Set.of("tram","cable","boat").contains(badge.mode()),bus="bus".equals(badge.mode());
+        int width=bus?806:512;BufferedImage image=new BufferedImage(width,512,BufferedImage.TYPE_INT_ARGB);Graphics2D g=image.createGraphics();
+        try{quality(g);int colour=badge.color();String label=badge.label();
+            if(surface){
+                g.setColor(new Color(colour));g.fill(new RoundRectangle2D.Float(0,0,512,77,52,52));g.fill(new RoundRectangle2D.Float(0,435,512,77,52,52));
+                String prefix=switch(badge.mode()){case "tram"->"T";case "cable"->"C";default->"F";};
+                if(!label.toUpperCase(Locale.ROOT).startsWith(prefix))label=prefix+label;
+                inkText(g,label,font("idf_voyageur",true,400),ink,22,140,468,232,"center");
+            }else{
+                Shape shape="metro".equals(badge.mode())?new Ellipse2D.Float(0,0,512,512):new RoundRectangle2D.Float(0,0,width,512,bus?77:230,bus?77:230);
+                g.setColor(new Color(colour));g.fill(shape);
+                double luminance=.299*((colour>>16)&255)+.587*((colour>>8)&255)+.114*(colour&255);
+                int text=luminance>150?0x000000:0xFFFFFF;
+                inkText(g,label,font("metro".equals(badge.mode())?"parisine":"idf_voyageur",true,400),text,width*.12f,512*.225f,width*.76f,512*.55f,"center");
+            }
         }finally{g.dispose();}return image;
+    }
+    /** Actual ink box, rather than font line-height, for fixed-size symbols and station plaques. */
+    public static void inkText(Graphics2D g,String value,Font face,int color,float x,float y,float w,float h,String align){
+        if(value==null||value.isBlank()||w<=0||h<=0)return;
+        String[] lines=value.replace('\n','|').split("\\|",-1);float gap=lines.length>1?h*.10f:0,lineH=(h-gap*(lines.length-1))/lines.length;
+        float factor=1;java.util.List<Shape> shapes=new ArrayList<>();
+        for(String line:lines){Shape shape=face.createGlyphVector(g.getFontRenderContext(),line.isEmpty()?" ":line).getOutline();shapes.add(shape);Rectangle2D b=shape.getBounds2D();factor=Math.min(factor,(float)Math.min(w/Math.max(1,b.getWidth()),lineH/Math.max(1,b.getHeight())));}
+        Shape clip=g.getClip();g.clip(new Rectangle2D.Float(x,y,w,h));g.setColor(new Color(color));
+        for(int i=0;i<shapes.size();i++){Shape shape=shapes.get(i);Rectangle2D b=shape.getBounds2D();double tw=b.getWidth()*factor,th=b.getHeight()*factor;
+            double left=align.equals("center")?x+(w-tw)/2:align.equals("right")?x+w-tw:x;
+            AffineTransform tx=new AffineTransform();tx.translate(left-b.getX()*factor,y+i*(lineH+gap)+(lineH-th)/2-b.getY()*factor);tx.scale(factor,factor);g.fill(tx.createTransformedShape(shape));}
+        g.setClip(clip);
+    }
+    public static BufferedImage sectorSymbol(String id){
+        if(id==null||id.isBlank())return null;BufferedImage im=icon(id);if(im==null)return null;
+        return LOCKUPS.computeIfAbsent("symbol/"+id,key->{
+            int x1=im.getWidth(),x2=0,y1=im.getHeight(),y2=0;
+            for(int y=0;y<im.getHeight()*.55;y++)for(int x=0;x<im.getWidth();x++){int c=im.getRGB(x,y);if((c>>>24)>128&&(c&255)>210&&((c>>>8)&255)>210&&((c>>>16)&255)>210){x1=Math.min(x1,x);x2=Math.max(x2,x);y1=Math.min(y1,y);y2=Math.max(y2,y);}}
+            if(x2<=x1||y2<=y1)return im;BufferedImage out=new BufferedImage(x2-x1+1,y2-y1+1,BufferedImage.TYPE_INT_ARGB);
+            for(int y=0;y<out.getHeight();y++)for(int x=0;x<out.getWidth();x++){int c=im.getRGB(x+x1,y+y1);int alpha=Math.max(0,Math.min(255,((c&255)-130)*255/125));out.setRGB(x,y,(alpha<<24)|0xFFFFFF);}return out;
+        });
     }
     public static BufferedImage sectorLockup(String id) {
         if(id==null||id.isBlank())return null;
@@ -139,10 +172,13 @@ public final class SillonSignagePainter {
         return Arrays.stream(text.split(",")).map(String::strip).filter(x->!x.isBlank()).limit(16).toList();
     }
     public static String contrastSymbols(String symbols,int background,int foreground){
-        double luminance=.2126*((background>>16)&255)+.7152*((background>>8)&255)+.0722*(background&255);
-        if(luminance>=100)return symbols;
-        return String.join(",",ids(symbols).stream().map(id->Set.of("ratp_metro","ratp_rer").contains(id)?"ink_"+String.format(Locale.ROOT,"%06x",foreground&0xFFFFFF)+"_"+id:id).toList());
+        return String.join(",",ids(symbols).stream().map(id->{
+            if(id.startsWith("ink_"))return id;
+            var badge=SillonSignageLineBadge.parse(id);
+            return MODE_ICONS.contains(id)||badge!=null&&Set.of("tram","cable","boat").contains(badge.mode())?"ink_"+String.format(Locale.ROOT,"%06x",foreground&0xFFFFFF)+"_"+id:id;
+        }).toList());
     }
+
     /** Returns width consumed. Keeps source aspect ratio and fits the entire group. */
     public static float icons(Graphics2D g,String text,float x,float y,float maxW,float maxH,float preferred) {
         List<String> ids=ids(text);if(ids.isEmpty()||maxW<=0||maxH<=0)return 0;
@@ -188,26 +224,14 @@ public final class SillonSignagePainter {
         var m=f.getLineMetrics("ÉAgjp",g.getFontRenderContext());
         return new LineMetricsInfo(m.getHeight(),m.getAscent());
     }
-    /** Use the original RATP arrow raster, rotated for the complete eight-direction set. */
-    public static void arrow(Graphics2D g,int direction,float x,float y,float size,int color) {
-        if(direction<0||size<=0)return;
-        BufferedImage source=icon("ratp_left");
-        Graphics2D a=(Graphics2D)g.create();
-        try{
-            a.translate(x,y);
-            double degrees=switch(direction){case 0->0;case 1->180;case 2->90;case 3->-90;case 4->45;case 5->135;case 6->-45;default->-135;};
-            a.rotate(Math.toRadians(degrees));
-            if(source!=null) {
-                BufferedImage mask=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);
-                Graphics2D tint=mask.createGraphics();tint.drawImage(source,0,0,null);
-                tint.setComposite(AlphaComposite.SrcIn);tint.setColor(new Color(color));tint.fillRect(0,0,mask.getWidth(),mask.getHeight());tint.dispose();
-                image(a,mask,-size/2,-size/2,size,size);mask.flush();
-            }else {
-                a.setColor(new Color(color));
-                a.setStroke(new BasicStroke(size*.12f,BasicStroke.CAP_SQUARE,BasicStroke.JOIN_MITER));
-                Path2D p=new Path2D.Float();p.moveTo(size*.37f,0);p.lineTo(-size*.37f,0);
-                p.moveTo(-size*.02f,-size*.34f);p.lineTo(-size*.37f,0);p.lineTo(-size*.02f,size*.34f);a.draw(p);
-            }
-        }finally{a.dispose();}
+    /** Official vector-derived arrows retain the exact diagonal forms without raster rotation. */
+    public static void arrow(Graphics2D g,int direction,float x,float y,float size,int color){
+        if(direction<0||direction>7||size<=0)return;String key="arrow/"+direction+"/"+color;
+        BufferedImage original=icon("official_arrow_"+direction);if(original==null)return;
+        BufferedImage tinted=IMAGES.computeIfAbsent(key,k->{
+            BufferedImage source=original;
+            BufferedImage mask=new BufferedImage(source.getWidth(),source.getHeight(),BufferedImage.TYPE_INT_ARGB);Graphics2D a=mask.createGraphics();
+            a.drawImage(source,0,0,null);a.setComposite(AlphaComposite.SrcIn);a.setColor(new Color(color));a.fillRect(0,0,mask.getWidth(),mask.getHeight());a.dispose();return Optional.of(mask);
+        }).orElse(null);image(g,tinted,x-size/2,y-size/2,size,size);
     }
 }

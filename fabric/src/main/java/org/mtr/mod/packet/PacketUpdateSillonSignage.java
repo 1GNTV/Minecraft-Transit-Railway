@@ -21,7 +21,7 @@ public final class PacketUpdateSillonSignage extends PacketHandler {
         spec=new SillonSignageSpec(p.readString(),p.readString(),p.readString(),p.readString(),p.readString(),p.readString(),
             p.readInt(),p.readInt(),p.readInt(),p.readInt(),p.readFloat(),p.readFloat(),
             p.readFloat(),p.readFloat(),p.readFloat(),p.readBoolean(),p.readBoolean(),p.readBoolean(),
-            SillonSignageOptions.decode(p.readString()),SillonSignageRow.decode(p.readString())).withBinding(org.mtr.mod.data.SillonSignageBinding.decode(p.readString()));
+            SillonSignageOptions.decode(p.readString()),SillonSignageRow.decode(p.readString())).withBinding(org.mtr.mod.data.SillonSignageBinding.decode(p.readString())).withDesign(org.mtr.mod.data.SillonSignageDesign.decode(p.readString()));
     }
     @Override public void write(PacketBufferSender p){
         p.writeLong(pos.asLong());
@@ -31,7 +31,7 @@ public final class PacketUpdateSillonSignage extends PacketHandler {
         p.writeFloat(spec.width());p.writeFloat(spec.height());p.writeFloat(spec.yaw());
         p.writeFloat(spec.pitch());p.writeFloat(spec.roll());
         p.writeBoolean(spec.stationAuto());p.writeBoolean(spec.illuminated());p.writeBoolean(spec.doubleSided());
-        p.writeString(spec.options().encode());p.writeString(SillonSignageRow.encode(spec.rows()));p.writeString(spec.binding().encode());
+        p.writeString(spec.options().encode());p.writeString(SillonSignageRow.encode(spec.rows()));p.writeString(spec.binding().encode());p.writeString(spec.design().encode());
     }
     @Override public void runServer(MinecraftServer server,ServerPlayerEntity sender){
         World world=sender.getEntityWorld();

@@ -3974,5 +3974,93 @@
     "height": 240,
     "source": "src/main/resources/assets/mtr/mtr_france_sign/toulouse/toulouse_velo.png",
     "sha256": "82a8fa011b717b392fb9ed87b8e25189cfc0e50cc6a7ba8c4078c28ad818e041"
+  },
+  {
+    "id": "official_lift",
+    "path": "signage/icons/official_lift.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Services_espaces_transport/Ascenseurs/Ascenseur/Ascenseur_RVB/Ascenseur_RVB.svg",
+    "sha256": "63a904b2644746999fd80585b96ce3b29072543ea2091b7c481112ddba0f62d5"
+  },
+  {
+    "id": "official_escalator",
+    "path": "signage/icons/official_escalator.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Services_espaces_transport/Escaliers/Escaliers_mecaniques_montee/Escaliers_mecaniques_montee_RVB/Escaliers_mecaniques_montee_RVB.svg",
+    "sha256": "ec441562d75be2db980e85635403d523d5eee100fba3500955250ab4bc329912"
+  },
+  {
+    "id": "official_stairs",
+    "path": "signage/icons/official_stairs.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Services_espaces_transport/Escaliers/Escaliers_montee/Escaliers_montee_RVB/Escaliers_montee_RVB.svg",
+    "sha256": "103c926129c154661c7169b3d403d4a8c682eb7bdcd9b22a9c0c3e5fb8a68889"
+  },
+  {
+    "id": "official_arrow_0",
+    "path": "signage/icons/official_arrow_0.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Gauche/Gauche_RVB/Gauche_RVB.svg",
+    "sha256": "f3e321da1f0d409ca7a60279a208e556e990af733e7d77f2446d150ad727afa1"
+  },
+  {
+    "id": "official_arrow_1",
+    "path": "signage/icons/official_arrow_1.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Droite/Droite_RVB/Droite_RVB.svg",
+    "sha256": "eb1846ae84a67c3633a41036d19fe1f2ea4248ebe499d93a9f0339461a9a6a24"
+  },
+  {
+    "id": "official_arrow_2",
+    "path": "signage/icons/official_arrow_2.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Tout_droit_haut/Tout_droit_haut_RVB/Tout_droit_haut_RVB.svg",
+    "sha256": "0e1ddf8ad33b2d738593c3db419bcf1e37914ba1b7fec6f15b83737fdc254724"
+  },
+  {
+    "id": "official_arrow_3",
+    "path": "signage/icons/official_arrow_3.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Tout_droit_bas/Tout_droit_bas_RVB/Tout_droit_bas_RVB.svg",
+    "sha256": "800636f63330f304a6fe75f219cbc3ef6997ae6d592a309a7ab435c7b2b6dd51"
+  },
+  {
+    "id": "official_arrow_4",
+    "path": "signage/icons/official_arrow_4.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Gauche_monter/Gauche_monter_RVB/Gauche_monter_RVB.svg",
+    "sha256": "f3e390f3bcf15765b423660ceae3610ad92be0bbbfe8abecd3a3fb767a07f78d"
+  },
+  {
+    "id": "official_arrow_5",
+    "path": "signage/icons/official_arrow_5.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Droite_monter/Droite_monter_RVB/Droite_monter_RVB.svg",
+    "sha256": "daa7a316efb1fd42df5b6e8d9e90d30b93308dae98a285d0e47a88cc324ec094"
+  },
+  {
+    "id": "official_arrow_6",
+    "path": "signage/icons/official_arrow_6.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Gauche_descendre/Gauche_descendre_RVB/Gauche_descendre_RVB.svg",
+    "sha256": "611e156f66d389b1c399ba4a500be0464dac4ff641177b73f6f84cb71fa6a057"
+  },
+  {
+    "id": "official_arrow_7",
+    "path": "signage/icons/official_arrow_7.png",
+    "width": 768,
+    "height": 768,
+    "source": "Bibliotheque_objets_graphiques/Fleches/Droite_descendre/Droite_descendre_RVB/Droite_descendre_RVB.svg",
+    "sha256": "769a7957a00b290b6842cf59a36625bc269112673f8c6fd09c2d1d258e58627a"
   }
 ]
