@@ -32,7 +32,16 @@ public final class SignageWorldQa {
             System.out.println("SIGNAGE_QA_FIXTURES_PLACED 23 native block entities verified");
             // After checking every untouched template, place the photographed manual fixtures for visual inspection.
             for(String command:Files.readAllLines(Path.of("signage-reference-commands.txt")))
-                if(!command.isBlank())server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),command);
+                if(!command.isBlank()){
+                    // /setblock may reject an unchanged block state before loading its replacement NBT.
+                    String[] parts=command.split(" ",5);
+                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),"setblock "+parts[1]+" "+parts[2]+" "+parts[3]+" minecraft:air");
+                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),command);
+                }
+            var review=server.overworld().getBlockEntity(new BlockPos(0,5,0));
+            if(!(review instanceof BlockSillonSignage.BlockEntity sign)||sign.document().stationAuto()||!sign.document().title().equals("Saint-Denis|Porte de Paris"))throw new IllegalStateException("Reference scene NBT was not applied");
+            var diagram=server.overworld().getBlockEntity(new BlockPos(-7,17,0));
+            if(!(diagram instanceof BlockSillonSignage.BlockEntity route)||route.document().rows().size()!=21)throw new IllegalStateException("Reference route stops were not persisted");
         }catch(Exception e){e.printStackTrace();System.exit(2);}
     }
     private static void tick(TickEvent.ServerTickEvent event) {

@@ -84,11 +84,12 @@ public final class SignageVisualQa {
             return;
         }
         if(worldView>=0) {
-            if(++tick==35) {
+            int settle=worldView==0?160:60;
+            if(++tick==settle) {
                 String name=String.format(Boolean.getBoolean("sillon.qa.shader")?"signage-shader-world-%02d.png":"signage-world-%02d.png",worldView);
                 Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),message->System.out.println("SIGNAGE_QA_WORLD "+message.getString()));
             }
-            if(tick>=60) {
+            if(tick>=settle+25) {
                 worldView++;tick=0;
                 if(worldView>=5) {
                     if(Boolean.getBoolean("sillon.qa.shader")) {
@@ -145,6 +146,7 @@ public final class SignageVisualQa {
         GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),1280,720);
         mc.options.guiScale().set(1);mc.resizeDisplay();
         mc.getSingleplayerServer().execute(()->{
+            if(worldView==0){var level=mc.getSingleplayerServer().overworld();for(int x=-22;x<=22;x++)for(int y=4;y<=26;y++)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,y,1),net.minecraft.world.level.block.Blocks.QUARTZ_BLOCK.defaultBlockState());}
             if(worldView==4) {
                 var level=mc.getSingleplayerServer().overworld();
                 // Remove the backing wall so the fifth view actually exposes reverse faces.

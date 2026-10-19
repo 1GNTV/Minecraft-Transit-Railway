@@ -7,4 +7,4 @@ shutil.copy2("build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar",maven
 target=Path("tools/qa-runtime/src/main/java/org/sillon/qa");target.mkdir(parents=True,exist_ok=True)
 shutil.copy2("tools/qa/SignageVisualQa.java",target/"SignageVisualQa.java")
 run=Path("forge/run");run.mkdir(parents=True,exist_ok=True)
-(run/"options.txt").write_text("onboardAccessibility:false\nguiScale:2\nfullscreen:false\nmaxFps:30\nrenderDistance:3\n")
+(run/"options.txt").write_text("onboardAccessibility:false\ntutorialStep:none\nguiScale:2\nfullscreen:false\nmaxFps:30\nrenderDistance:3\n")
