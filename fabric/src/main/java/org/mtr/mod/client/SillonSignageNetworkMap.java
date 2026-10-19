@@ -51,8 +51,8 @@ public final class SillonSignageNetworkMap {
                 float elbowY=Math.abs(dx)>Math.abs(dy)?b.y:a.y+Math.copySign(Math.abs(dx),dy);
                 Path2D path=new Path2D.Float();path.moveTo(a.x+ox,a.y+oy);path.lineTo(elbowX+ox,elbowY+oy);path.lineTo(b.x+ox,b.y+oy);
                 g.setColor(new Color(colour));g.setStroke(new BasicStroke(stroke,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND));g.draw(path);
+                if(index==1){segments.add(new Line2D.Float(a.x,a.y,elbowX,elbowY));segments.add(new Line2D.Float(elbowX,elbowY,b.x,b.y));}
             }
-            segments.add(new Line2D.Float(a,b));
         }
         List<Long> order=new ArrayList<>(stops.keySet());order.sort(Comparator.<Long>comparingInt(id->id==s.plan().currentStation()?0:connections.get(id).size()>1?1:termini.contains(id)?2:3));
         float textSize=Math.max(10,Math.min(h*.022f,mapW/(float)Math.max(22,Math.sqrt(stops.size())*7)))*s.options().textScale();List<Rectangle2D.Float> labels=new ArrayList<>();
@@ -62,7 +62,7 @@ public final class SillonSignageNetworkMap {
             Rectangle2D.Float chosen=null;double best=Double.MAX_VALUE;
             for(float[] at:places){var box=new Rectangle2D.Float(Math.max(pad,Math.min(w-pad-tw,at[0])),Math.max(header,Math.min(h-legendH-th,at[1])),tw,th);double cost=0;
                 for(var prior:labels)if(prior.intersects(box)){var intersection=prior.createIntersection(box);cost+=intersection.getWidth()*intersection.getHeight()*10;}
-                for(var line:segments)if(line.intersects(box))cost+=th*2;
+                for(var line:segments)if(line.intersects(box))cost+=th*40;
                 for(var point:points.values())if(box.contains(point))cost+=th*th*2;
                 if(cost<best){chosen=box;best=cost;}
             }

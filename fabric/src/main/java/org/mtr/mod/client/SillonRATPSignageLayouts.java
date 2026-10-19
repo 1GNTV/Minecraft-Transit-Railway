@@ -77,6 +77,15 @@ public final class SillonRATPSignageLayouts {
         return best<0?name:name.substring(0,best)+"|"+name.substring(best+1);
     }
     private static List<SillonSignageRow> rows(SillonSignageSpec s){return s.rows().isEmpty()?List.of(new SillonSignageRow("transport","",s.title(),s.subtitle(),s.icons(),s.arrow())):s.rows();}
+    /** Angular arrow on legacy RATP enamel supports; the current IDFM form is a separate convention. */
+    private static void signArrow(Graphics2D g,SillonSignageSpec s,int direction,float x,float y,float size,int colour){
+        if(direction<0||direction>7)return;
+        if(!profile(s).equals("ratp")){arrow(g,direction,x,y,size,colour);return;}
+        Graphics2D a=(Graphics2D)g.create();
+        try{a.translate(x,y);a.rotate(new double[]{0,Math.PI,Math.PI/2,-Math.PI/2,Math.PI/4,Math.PI*3/4,-Math.PI/4,-Math.PI*3/4}[direction]);a.scale(size,size);
+            Path2D path=new Path2D.Float();path.moveTo(-.5,0);path.lineTo(-.06,-.45);path.lineTo(.07,-.32);path.lineTo(-.17,-.085);path.lineTo(.5,-.085);path.lineTo(.5,.085);path.lineTo(-.17,.085);path.lineTo(.07,.32);path.lineTo(-.06,.45);path.closePath();a.setColor(new Color(colour));a.fill(path);
+        }finally{a.dispose();}
+    }
     private static void directions(Graphics2D g,SillonSignageSpec s,int w,int h){
         var rows=rows(s);float unit=h/(float)Math.max(1,rows.size());
         for(int i=0;i<rows.size();i++)destination(g,s,rows.get(i),0,i*unit,w,unit,s.background(),s.foreground(),true);
@@ -84,7 +93,7 @@ public final class SillonRATPSignageLayouts {
         for(int i=0;i<rows.size();){int end=i+1;while(end<rows.size()&&rows.get(end).arrow()==rows.get(i).arrow())end++;
             int direction=rows.get(i).arrow();if(direction>=0){float box=Math.min(unit*.9f,w*.17f),x=direction==1||direction==5||direction==7?w-box:0;
                 g.setColor(new Color(s.background()));g.fill(new Rectangle2D.Float(x,i*unit,box,(end-i)*unit));
-                arrow(g,direction,x+box/2,(i+end)*unit/2,Math.min(box*.70f,unit*.65f),s.foreground());
+                signArrow(g,s,direction,x+box/2,(i+end)*unit/2,Math.min(box*.70f,unit*.65f),s.foreground());
                 if(profile(s).equals("gpe")){g.setColor(new Color(s.foreground()));g.setStroke(new BasicStroke(Math.max(1,h*.006f)));g.draw(new Rectangle2D.Float(x,i*unit,box,(end-i)*unit));}
             }i=end;
         }
@@ -93,7 +102,7 @@ public final class SillonRATPSignageLayouts {
         g.setColor(new Color(bg));g.fill(new Rectangle2D.Float(x,y,w,h));float pad=Math.min(h*.20f,w*.035f)*s.options().padding(),left=x+pad,right=x+w-pad;
         int direction=row.arrow();float box=Math.min(h*.9f,w*.17f);
         if(direction>=0){boolean rtl=direction==1||direction==5||direction==7;float ax=rtl?x+w-box/2:x+box/2;
-            if(!arrowColumn)arrow(g,direction,ax,y+h/2,Math.min(h*.65f,box*.70f),fg);
+            if(!arrowColumn)signArrow(g,s,direction,ax,y+h/2,Math.min(h*.65f,box*.70f),fg);
             if(rtl)right=x+w-box-pad;else left=x+box+pad*.4f;
         }
         if(!row.number().isBlank()){float unit=h*.59f;g.setColor(new Color(fg));g.setStroke(new BasicStroke(Math.max(1,unit*.035f)));g.draw(new Rectangle2D.Float(left,y+(h-unit)/2,unit,unit));ink(g,s,row.number(),fg,left+unit*.08f,y+(h-unit)/2+unit*.12f,unit*.84f,unit*.76f,"center");left+=unit+pad*.7f;}
@@ -110,7 +119,7 @@ public final class SillonRATPSignageLayouts {
         if(!s.icons().isBlank()){float band=h*(sector?.115f:.12f);g.setColor(Color.WHITE);g.fill(new Rectangle2D.Float(0,top,w,band));float unit=band*.76f*s.options().iconScale();icons(g,contrastSymbols(s.icons(),WHITE,s.foreground()==WHITE?NAVY:s.foreground()),pad,top,w-2*pad,band,unit);top+=band;}
         var rows=s.effectiveRows("exit");float heading=Math.min(h*.14f,(h-top)*.24f);
         ink(g,s,s.title().isBlank()?"Sortie":s.title(),s.foreground(),pad,top+heading*.14f,w-pad*2,heading*.65f,"left");
-        if(s.arrow()>=0&&!sector)arrow(g,s.arrow(),w-pad-heading*.30f,top+heading*.49f,heading*.60f,s.foreground());
+        if(s.arrow()>=0&&!sector)signArrow(g,s,s.arrow(),w-pad-heading*.30f,top+heading*.49f,heading*.60f,s.foreground());
         top+=heading;float rh=Math.min(h*.067f*s.design().rowScale(),(h-top-h*.06f)/Math.max(1,rows.size()));
         for(int i=0;i<rows.size();i++){
             var row=rows.get(i);float y=top+i*rh,box=rh*.82f,left=pad;
@@ -134,7 +143,7 @@ public final class SillonRATPSignageLayouts {
         icons(g,contrastSymbols(mode,s.background(),s.foreground()),center-diameter/2,h*.035f,diameter,diameter,diameter*s.options().iconScale());
         float unit=Math.min(w*1.01f,h*.30f/Math.max(1,lines.size())),top=h*.36f;
         for(String line:lines){icons(g,contrastSymbols(line,s.background(),s.foreground()),center-unit/2,top,unit,unit,unit*s.options().iconScale());top+=unit*1.12f;}
-        arrow(g,s.arrow(),w*.5f,h*.865f,Math.min(w*.70f,h*.22f),s.foreground());
+        signArrow(g,s,s.arrow(),w*.5f,h*.865f,Math.min(w*.70f,h*.22f),s.foreground());
     }
     private static void services(Graphics2D g,SillonSignageSpec s,int w,int h){
         var data=rows(s);float unit=h/(float)Math.max(1,data.size());

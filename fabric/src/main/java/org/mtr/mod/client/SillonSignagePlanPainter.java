@@ -19,7 +19,7 @@ public final class SillonSignagePlanPainter {
     }
     private static void header(Graphics2D g,SillonSignageSpec s,SillonSignagePlan.Line l,float x,float y,float w,float h,boolean caption){
         String symbols=SillonSignageLineBadge.modeIcon(l.mode())+","+new SillonSignageLineBadge(l.mode(),l.color(),l.label()).token();
-        float used=icons(g,symbols,x,y,Math.min(w*.38f,h*2.8f),h,h*.8f*s.options().iconScale());
+        float used=icons(g,contrastSymbols(symbols,s.background(),s.foreground()),x,y,Math.min(w*.38f,h*2.8f),h,h*.8f*s.options().iconScale());
         if(caption)text(g,s.title(),font(s,true,h*.52f),s.foreground(),x+used+h*.2f,y,w-used-h*.2f,h,"left");
     }
     private static int current(SillonSignageSpec s,List<SillonSignagePlan.Stop> stops){for(int i=0;i<stops.size();i++)if(stops.get(i).stationId()==s.plan().currentStation())return s.design().passed()?i:-1;return -1;}
@@ -47,7 +47,7 @@ public final class SillonSignagePlanPainter {
             g.draw(new Line2D.Float(left,top+(i+1)*step,w-pad,top+(i+1)*step));
             int count=ids(stop.icons()).size();float unit=Math.min(step*.48f,(spine-pad*2)/Math.max(1,count*1.15f));
             float group=count*unit*1.15f;
-            icons(g,stop.icons(),Math.max(pad,spine-pad-group),cy-unit/2,spine-pad*2,unit,unit*s.options().iconScale());
+            icons(g,contrastSymbols(stop.icons(),s.background(),s.foreground()),Math.max(pad,spine-pad-group),cy-unit/2,spine-pad*2,unit,unit*s.options().iconScale());
         }
     }
     private static void horizontal(Graphics2D g,SillonSignageSpec s,SillonSignagePlan.Line line,int w,int h,float pad){
@@ -74,7 +74,7 @@ public final class SillonSignagePlanPainter {
                 name.setFont(face);name.setColor(new Color(end?s.background():s.foreground()));name.drawString(stop.name(),0,0);
                 if(!stop.detail().isBlank())text(name,stop.detail(),font(s,false,size*.52f),s.foreground(),0,face.getSize2D()*.20f,max,face.getSize2D()*.8f,"left");
             }finally{name.dispose();}
-            List<String> symbols=ids(stop.icons());int cols=Math.min(4,Math.max(1,symbols.size()));
+            List<String> symbols=ids(contrastSymbols(stop.icons(),s.background(),s.foreground()));int cols=Math.min(4,Math.max(1,symbols.size()));
             float unit=Math.min(h*.071f,step*.83f/cols),gap=unit*.10f;
             for(int j=0;j<symbols.size();j++)icons(g,symbols.get(j),x-(cols*unit+(cols-1)*gap)/2+(j%cols)*(unit+gap),y+r+h*.045f+(j/cols)*unit*1.16f,
                 unit,unit,unit*s.options().iconScale());
