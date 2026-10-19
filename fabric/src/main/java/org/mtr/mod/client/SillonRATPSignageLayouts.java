@@ -139,11 +139,14 @@ public final class SillonRATPSignageLayouts {
     private static void vertical(Graphics2D g,SillonSignageSpec s,int w,int h){
         var symbols=ids(s.icons());String mode=symbols.stream().filter(x->SillonSignagePainter.MODE_ICONS.contains(x)).findFirst().orElse("ratp_metro");
         var lines=symbols.stream().filter(x->SillonSignageLineBadge.parse(x)!=null||x.matches("idfm_[mrt][0-9a-z_]+" )&&!SillonSignagePainter.MODE_ICONS.contains(x)).toList();
-        float diameter=Math.min(w*1.04f,h*.31f),center=w*.53f;
-        icons(g,contrastSymbols(mode,s.background(),s.foreground()),center-diameter/2,h*.035f,diameter,diameter,diameter*s.options().iconScale());
-        float unit=Math.min(w*1.01f,h*.30f/Math.max(1,lines.size())),top=h*.36f;
+        // The right-hand truncation is intentional on these legacy curved columns.
+        // A centred logo is a different support: both M ring and line disk extend past the face.
+        float diameter=Math.min(w*1.06f,h*.32f),center=w*.65f;
+        icons(g,contrastSymbols(mode,s.background(),s.foreground()),center-diameter/2,h*.032f,diameter,diameter,diameter*s.options().iconScale());
+        float unit=Math.min(w*1.04f,h*.32f/Math.max(1,lines.size())),top=h*.36f;
         for(String line:lines){icons(g,contrastSymbols(line,s.background(),s.foreground()),center-unit/2,top,unit,unit,unit*s.options().iconScale());top+=unit*1.12f;}
         signArrow(g,s,s.arrow(),w*.5f,h*.865f,Math.min(w*.70f,h*.22f),s.foreground());
+        g.setColor(new Color(profile(s).equals("ratp")?NAVY:s.foreground()));g.fill(new Rectangle2D.Float(0,0,w,Math.max(2,h*.015f)));
     }
     private static void services(Graphics2D g,SillonSignageSpec s,int w,int h){
         var data=rows(s);float unit=h/(float)Math.max(1,data.size());

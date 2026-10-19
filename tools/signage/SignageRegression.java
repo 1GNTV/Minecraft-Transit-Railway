@@ -68,6 +68,11 @@ public final class SignageRegression {
         check(totem.mount().equals("standing")&&column.mount().equals("wall"),"Wall columns and floor totems have distinct mounts");
         check(SillonSignageGeometry.pivotY(totem)==totem.height()/2,"Totem rests on floor without invented legs");
         check(SillonSignageGeometry.bow(totem,0)>0&&Math.abs(SillonSignageGeometry.bow(totem,totem.width()/2))<.0001,"Bowed totem face meets its body at both edges");
+        var columnFace=column.manual().materialize("","","ratp_metro,"+new SillonSignageLineBadge("metro",0x662D91,"14").token(),0,List.of(),SillonSignagePlan.EMPTY);
+        var columnImage=SillonSignagePainter.render(columnFace);
+        check((columnImage.getRGB(columnImage.getWidth()/2,1)&0xFFFFFF)==SillonSignagePainter.NAVY,"Column retains the photographed blue top strip");
+        long cutRing=java.util.stream.IntStream.range((int)(columnImage.getHeight()*.03),(int)(columnImage.getHeight()*.35)).filter(y->(columnImage.getRGB(columnImage.getWidth()-1,y)&0xFFFFFF)==SillonSignagePainter.NAVY).count();
+        check(cutRing>columnImage.getHeight()*.025,"M ring visibly reaches and is cut by the right edge");columnImage.flush();
         String token=new SillonSignageLineBadge("metro",0x123456,"é😀".repeat(20)).token();
         check(SillonSignageLineBadge.parse(token)!=null&&SillonSignageRow.normalizeIcons(token).equals(token),"Unicode custom badges stay valid");
         System.out.println("PASS automatic data for all 18 families, arbitrary network edits, IDs, platform scope, exits, services and interchange graph");

@@ -81,7 +81,7 @@ public final class RenderSillonSignage extends BlockEntityRenderer<BlockSillonSi
             for(int i=0;i<16;i++){
                 float x1=x+spec.width()*i/16,x2=x+spec.width()*(i+1)/16;
                 float z1=z-SillonSignageGeometry.bow(spec,x1),z2=z-SillonSignageGeometry.bow(spec,x2);
-                IDrawing.drawTexture(g,x1,y,z1,x2,y,z2,x2,y,z,x1,y,z,0,0,1,1,Direction.DOWN,colour,light);
+                IDrawing.drawTexture(g,x1,y,z1,x2,y,z2,x2,y,z,x1,y,z,0,0,1,1,Direction.DOWN,0xFF000000|(org.mtr.mod.client.SillonRATPSignageLayouts.profile(spec).equals("ratp")?org.mtr.mod.client.SillonSignagePainter.NAVY:spec.foreground()),light);
                 IDrawing.drawTexture(g,x1,y+spec.height(),z,x2,y+spec.height(),z,x2,y+spec.height(),z2,x1,y+spec.height(),z1,0,0,1,1,Direction.UP,colour,light);
             }
         }
