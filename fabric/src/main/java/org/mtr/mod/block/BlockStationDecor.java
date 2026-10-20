@@ -12,7 +12,7 @@ import java.util.List;
 public final class BlockStationDecor extends BlockWaterloggable implements DirectionHelper,BlockWithEntity {
     public final DecorKind kind;
     public BlockStationDecor(DecorKind kind){super(org.mtr.mod.Blocks.createDefaultBlockSettings(true,state->kind.light()?12:0).nonOpaque());this.kind=kind;}
-    @Override public BlockState getPlacementState2(ItemPlacementContext ctx){return super.getPlacementState2(ctx).with(new Property<>(FACING.data),ctx.getPlayerFacing().data);}
+    @Override public BlockState getPlacementState2(ItemPlacementContext ctx){return super.getPlacementState2(ctx).with(new Property<>(FACING.data),ctx.getPlayerFacing().getOpposite().data);}
     @Override public void addBlockProperties(List<HolderBase<?>> values){super.addBlockProperties(values);values.add(FACING);}
     @Override public VoxelShape getCollisionShape2(BlockState state,BlockView world,BlockPos pos,ShapeContext context){return VoxelShapes.empty();}
     @Override public VoxelShape getCullingShape2(BlockState state,BlockView world,BlockPos pos){return VoxelShapes.empty();}

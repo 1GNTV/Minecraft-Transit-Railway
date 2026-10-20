@@ -34,7 +34,14 @@ public final class StationDecorVisualQa {
                 for(int xx=x-5;xx<=x+5;xx++)for(int zz=z-4;zz<=z+4;zz++)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(xx,3,zz),net.minecraft.world.level.block.Blocks.SMOOTH_QUARTZ.defaultBlockState());
             }
             level.setBlockAndUpdate(net.minecraft.core.BlockPos.of(TEST.asLong()),org.mtr.mod.Blocks.STATION_DECOR.get(DecorKind.BENCH).get().data.defaultBlockState());
-            var player=server.getPlayerList().getPlayer(mc.player.getUUID());if(player!=null){server.getPlayerList().op(player.getGameProfile());player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));}
+            var player=server.getPlayerList().getPlayer(mc.player.getUUID());if(player!=null){
+                for(DecorKind k:DecorKind.values()){
+                    var block=org.mtr.mod.Blocks.STATION_DECOR.get(k).get().data;
+                    var context=new net.minecraft.world.item.context.BlockPlaceContext(level,player,net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(block),new net.minecraft.world.phys.BlockHitResult(new net.minecraft.world.phys.Vec3(0.5,4,110.5),net.minecraft.core.Direction.UP,new net.minecraft.core.BlockPos(0,3,110),false));
+                    var state=block.getStateForPlacement(context);
+                    if(state==null||state.getValue(org.mtr.mapping.mapper.DirectionHelper.FACING.data)!=player.getDirection().getOpposite())throw new IllegalStateException("Decor placement must face the builder: "+k);
+                }
+                server.getPlayerList().op(player.getGameProfile());player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));}
             mc.execute(()->{stage=0;ticks=0;camera(mc,0);});
         });
     }
