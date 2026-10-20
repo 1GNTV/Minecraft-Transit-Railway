@@ -28,6 +28,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 	private double scale;
 	private java.util.List<org.mtr.mod.builder.MapGeometry.Rect> occupiedLabels = new java.util.ArrayList<>();
 	private Position problemA, problemB;
+    private final java.util.Map<Rail,org.mtr.core.tool.Vector[]> railSamples=new java.util.LinkedHashMap<>(128,.75f,true){protected boolean removeEldestEntry(java.util.Map.Entry<Rail,org.mtr.core.tool.Vector[]> e){return size()>4096;}};
 	private boolean modern(){return org.mtr.mod.builder.BuilderPreferences.enabled("map");}
 	private double centerX;
 	private double centerY;
@@ -413,9 +414,9 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
         if(world!=null){worldMap.tick(World.cast(world),player,delta);worldMap.forEachTile(t->{int x=t.chunkX*16,z=t.chunkZ*16;if(sx(x+16)>=getX2()&&sy(z+16)>=getY2()&&sx(x)<=getX2()+width&&sy(z)<=getY2()+height)drawTextureFromWorldCoords(ui,t.textureId,x,z,x+16,z+16);});}
         ui.beginDrawingRectangle();ui.drawRectangle(getX2(),getY2(),getX2()+width,getY2()+height,0xA0101C27);
         // Physical tracks, not straight station-to-station guesses. Geometry remains entirely MTR-owned.
-        for(Rail rail:data.rails){if(!(rail.getTransportMode()==transportMode))continue;var a=rail.railMath.getPosition(0,false);var b=rail.railMath.getPosition(rail.railMath.getLength(),false);if(Math.max(sx(a.x),sx(b.x))<getX2()-200||Math.min(sx(a.x),sx(b.x))>getX2()+width+200||Math.max(sy(a.z),sy(b.z))<getY2()-200||Math.min(sy(a.z),sy(b.z))>getY2()+height+200)continue;
-            double len=rail.railMath.getLength();int samples=Math.max(1,Math.min(96,(int)(len*scale/8)));org.mtr.core.tool.Vector prev=null;
-            for(int i=0;i<=samples;i++){var p=rail.railMath.getPosition(len*i/samples,false);if(prev!=null){double x1=sx(prev.x),y1=sy(prev.z),x2=sx(p.x),y2=sy(p.z);if(x1>=getX2()&&x1<=getX2()+width&&x2>=getX2()&&x2<=getX2()+width&&y1>=getY2()&&y1<=getY2()+height&&y2>=getY2()&&y2<=getY2()+height)org.mtr.mod.builder.BuilderUi.line(ui,x1,y1,x2,y2,rail.isPlatform()?4:1.5,rail.isPlatform()?0xFF74D8CD:0xFF638091);}prev=p;}
+        for(Rail rail:(data.rails.isEmpty()?MinecraftClientData.getInstance().rails:data.rails)){if(rail.getTransportMode()!=transportMode)continue;var math=rail.railMath;if(sx(math.maxX)<getX2()||sx(math.minX)>getX2()+width||sy(math.maxZ)<getY2()||sy(math.minZ)>getY2()+height)continue;
+            var points=railSamples.computeIfAbsent(rail,r->{double len=r.railMath.getLength();int count=Math.max(2,Math.min(96,(int)Math.ceil(len/2)));var out=new org.mtr.core.tool.Vector[count+1];for(int i=0;i<=count;i++)out[i]=r.railMath.getPosition(len*i/count,false);return out;});org.mtr.core.tool.Vector prev=null;
+            for(var p:points){if(prev!=null){double x1=sx(prev.x),y1=sy(prev.z),x2=sx(p.x),y2=sy(p.z);if(x1>=getX2()&&x1<=getX2()+width&&x2>=getX2()&&x2<=getX2()+width&&y1>=getY2()&&y1<=getY2()+height&&y2>=getY2()&&y2<=getY2()+height)org.mtr.mod.builder.BuilderUi.line(ui,x1,y1,x2,y2,rail.isPlatform()?4:1.5,rail.isPlatform()?0xFF74D8CD:0xFF638091);}prev=p;}
         }
         if(showStations)for(Station station:data.stations){if(AreaBase.validCorners(station)){drawRectangleFromWorldCoords(ui,station.getMinX(),station.getMinZ(),station.getMaxX(),station.getMaxZ(),0x28000000|station.getColor());}}
         else for(Depot depot:data.depots)if(depot.isTransportMode(transportMode)&&AreaBase.validCorners(depot))drawRectangleFromWorldCoords(ui,depot.getMinX(),depot.getMinZ(),depot.getMaxX(),depot.getMaxZ(),0x30000000|depot.getColor());

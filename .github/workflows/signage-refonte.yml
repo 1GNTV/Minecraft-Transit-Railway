@@ -1,4 +1,4 @@
-name: Sillon signage - Forge build and visual checks
+name: Sillon builder - Forge 1.20.1 and native QA
 on:
   push:
     branches: [work/sillon-signage-refonte-forge-1201]
@@ -77,12 +77,13 @@ jobs:
           cp forge/build/libs/*-all.jar build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar
           sha256sum build/signage-delivery/*.jar > build/signage-delivery/SHA256SUMS.txt
           python tools/verify_signage_jar.py
+          python tools/test_builder.py
           javac --release 17 -cp build/signage-headless/classes:build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar -d build/signage-headless/classes tools/signage/SignageMtrIntegration.java
           java -cp build/signage-headless/classes:build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar SignageMtrIntegration
       - uses: actions/upload-artifact@v4
         if: always() && steps.build.outcome == 'success'
         with:
-          name: Sillon-Kit-Gare-Forge-1.20.1
+          name: Sillon-Builder-Forge-1.20.1
           path: build/signage-delivery
           if-no-files-found: error
       - name: Prepare the native Minecraft visual test world
@@ -99,6 +100,7 @@ jobs:
           timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/signage-ui-qa-success.txt
           test -f forge/run/decor-native-qa-success.txt
+          test -f forge/run/builder-native-qa-success.txt
       - name: Capture signs with Oculus and Complementary
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -109,10 +111,13 @@ jobs:
           timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/signage-shader-qa-success.txt
           test -f forge/run/decor-shader-qa-success.txt
+          test -f forge/run/builder-shader-qa-success.txt
       - name: Preserve native captures
         if: always()
         run: |
           mkdir -p build/signage-qa/native docs/signage/review/native
+          cp forge/run/screenshots/builder*.png build/signage-qa/native/ 2>/dev/null || true
+          cp forge/run/builder-*-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/screenshots/decor*.png build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/decor-*-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/screenshots/signage*.png build/signage-qa/native/ 2>/dev/null || true

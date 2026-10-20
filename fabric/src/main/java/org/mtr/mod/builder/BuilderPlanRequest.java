@@ -9,14 +9,14 @@ import org.mtr.mod.mixin.SidingPlanningAccessor;
 import java.util.*;
 
 /** Runs on the transport simulation queue. Only detached vehicles are positioned. */
-public final class BuilderPlanRequest extends SerializedDataBase {
+public final class BuilderPlanRequest implements SerializedDataBase {
     public static final String KEY="sillon/builder/door-plans";
     public double x,y,z;public String mode="doors";
     public BuilderPlanRequest(double x,double y,double z){this.x=x;this.y=y;this.z=z;}
     public BuilderPlanRequest(ReaderBase r){updateData(r);}
     @Override public void updateData(ReaderBase r){r.unpackString("mode",v->mode=v);r.unpackDouble("x",v->x=v);r.unpackDouble("y",v->y=v);r.unpackDouble("z",v->z=v);}
     @Override public void serializeData(WriterBase w){w.writeString("mode",mode);w.writeDouble("x",x);w.writeDouble("y",y);w.writeDouble("z",z);}
-    public static final class Response extends SerializedDataBase {
+    public static final class Response implements SerializedDataBase {
         private final String plan;
         public Response(String plan){this.plan=plan;}
         @Override public void updateData(ReaderBase r){}
@@ -27,7 +27,7 @@ public final class BuilderPlanRequest extends SerializedDataBase {
         void park(double distance,boolean backwards){railProgress=distance;reversed=backwards;}
     }
     public Response collect(Simulator data){
-        if(mode.equals("diagnostics"))return new Response(NetworkDiagnostics.encode(NetworkDiagnostics.inspect(data)).toString());
+        if(mode.equals("diagnostics")){var issues=new java.util.ArrayList<>(NetworkDiagnostics.inspect(data));String json=NetworkDiagnostics.encode(issues).toString();while(json.length()>27000&&!issues.isEmpty()){issues.remove(issues.size()-1);json=NetworkDiagnostics.encode(issues).toString();}return new Response(json);}
         JsonArray plans=new JsonArray();Set<String> seen=new HashSet<>();
         var nearby=new ArrayList<Platform>();for(Platform p:data.platforms){var c=p.getMidPosition();if(p.getTransportMode()==TransportMode.TRAIN&&Math.abs(c.getY()-y)<20&&Math.hypot(c.getX()-x,c.getZ()-z)<96)nearby.add(p);}
         nearby.sort(Comparator.comparingDouble(p->Math.hypot(p.getMidPosition().getX()-x,p.getMidPosition().getZ()-z)));

@@ -16,6 +16,8 @@ public class WorldMap {
 	private final Object2ObjectOpenHashMap<IntIntImmutablePair, MapImage> mapImages = new Object2ObjectOpenHashMap<>();
 	private MapOverlayMode mapOverlayMode;
 	private double updateMapTimer;
+    private final java.util.ArrayDeque<IntIntImmutablePair> pending = new java.util.ArrayDeque<>();
+    private final java.util.Set<IntIntImmutablePair> queued = new java.util.HashSet<>();
 
 	public static final int CHUNK_SIZE = 16;
 	private static final int UPDATE_FREQUENCY = 40;
@@ -39,7 +41,9 @@ public class WorldMap {
 			}
 		}
 
-		updateMapTimer += delta;
+		long budget = System.nanoTime() + 2_000_000L;
+        for (int n=0;n<2&&!pending.isEmpty()&&System.nanoTime()<budget;n++){var at=pending.removeFirst();queued.remove(at);if(world.getChunkManager().isChunkLoaded(at.leftInt(),at.rightInt()))updateTile(world,player,at.leftInt(),at.rightInt());}
+        updateMapTimer += delta;
 	}
 
 	public void forEachTile(Consumer<MapImage> callback) {
@@ -50,20 +54,12 @@ public class WorldMap {
 		});
 	}
 
-	public void updateMap(World world, ClientPlayerEntity player) {
-		final int radius = MinecraftClientHelper.getRenderDistance() + 1;
-		final ChunkManager chunkManager = world.getChunkManager();
-
-		for (int i = -radius; i < radius + 1; i++) {
-			for (int j = -radius; j < radius + 1; j++) {
-				final int posX = player.getBlockPos().getX() + (i * CHUNK_SIZE);
-				final int posZ = player.getBlockPos().getZ() + (j * CHUNK_SIZE);
-				final int chunkX = (int) Math.floor(posX / 16.0);
-				final int chunkZ = (int) Math.floor(posZ / 16.0);
-				if (!chunkManager.isChunkLoaded(chunkX, chunkZ)) {
-					continue;
-				}
-
+    public void updateMap(World world, ClientPlayerEntity player) {
+        if(player==null)return;int radius=MinecraftClientHelper.getRenderDistance()+1,cx=Math.floorDiv(player.getBlockPos().getX(),16),cz=Math.floorDiv(player.getBlockPos().getZ(),16);
+        // Fill near the player first; never scan/upload the entire loaded world in one GUI frame.
+        for(int ring=0;ring<=radius;ring++)for(int dx=-ring;dx<=ring;dx++)for(int dz=-ring;dz<=ring;dz++)if(Math.max(Math.abs(dx),Math.abs(dz))==ring){var at=new IntIntImmutablePair(cx+dx,cz+dz);if(world.getChunkManager().isChunkLoaded(at.leftInt(),at.rightInt())&&queued.add(at))pending.addLast(at);}
+    }
+    private void updateTile(World world,ClientPlayerEntity player,int chunkX,int chunkZ) {
 				final int chunkXStart = chunkX * CHUNK_SIZE;
 				final int chunkZStart = chunkZ * CHUNK_SIZE;
 				final IntIntImmutablePair chunkXZ = new IntIntImmutablePair(chunkX, chunkZ);
@@ -120,9 +116,7 @@ public class WorldMap {
 				}
 
 				mapTexture.texture.upload();
-			}
-		}
-	}
+    }
 
 	private static int convertColorABGR(int rgb) {
 		final int a = 255;
@@ -140,7 +134,7 @@ public class WorldMap {
 	}
 
 	public void setMapOverlayMode(MapOverlayMode overlayMode) {
-		this.mapOverlayMode = overlayMode;
+		this.mapOverlayMode = overlayMode;pending.clear();queued.clear();updateMapTimer=-1;
 	}
 
 	public boolean isMapOverlayMode(MapOverlayMode mapOverlayMode) {
@@ -151,7 +145,7 @@ public class WorldMap {
 		for (MapImage image : mapImages.values()) {
 			image.dispose();
 		}
-		mapImages.clear();
+		mapImages.clear();pending.clear();queued.clear();
 	}
 
 	public static class MapImage {

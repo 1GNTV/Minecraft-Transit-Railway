@@ -86,7 +86,7 @@ public final class StationDecorVisualQa {
             }else if(stage==30&&ticks==35){
                 for(int x:new int[]{3,6})if(!mc.level.getBlockState(new net.minecraft.core.BlockPos(x,4,110)).isAir())throw new IllegalStateException("Undo did not restore air");
                 String file=Boolean.getBoolean("sillon.qa.shader")?"decor-shader-qa-success.txt":"decor-native-qa-success.txt";
-                Files.writeString(Path.of(file),"20 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");System.out.println("DECOR_QA_SUCCESS");active=false;mc.stop();
+                Files.writeString(Path.of(file),"20 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");System.out.println("DECOR_QA_SUCCESS");active=false;BuilderVisualQa.begin(mc);
             }
         }catch(Throwable e){e.printStackTrace();System.exit(2);}
     }

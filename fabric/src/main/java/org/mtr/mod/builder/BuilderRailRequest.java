@@ -8,7 +8,7 @@ import org.mtr.core.tool.Utilities;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 /** Compare-and-set on the simulation queue; only geometry/style fields are replaced. */
-public final class BuilderRailRequest extends SerializedDataBase {
+public final class BuilderRailRequest implements SerializedDataBase {
     public static final String KEY="sillon/builder/rail-edit";
     public String id="",expected="",shape="QUADRATIC",styles="[]",token="";public double radius;
     public BuilderRailRequest(Rail before,Rail after,String token){id=before.getHexId();expected=fingerprint(before);shape=after.railMath.getShape().name();radius=after.railMath.getVerticalRadius();styles=Utilities.getJsonObjectFromData(after).get("styles").toString();this.token=token;}
@@ -29,7 +29,7 @@ public final class BuilderRailRequest extends SerializedDataBase {
             return new Response(token,"Modification enregistrée.",Utilities.getJsonObjectFromData(new UpdateDataRequest(data).addRail(replacement).update()).toString());
         }catch(RuntimeException e){return new Response(token,"Paramètres de voie invalides.","");}
     }
-    public static final class Response extends SerializedDataBase {
+    public static final class Response implements SerializedDataBase {
         final String token,message,update;public Response(String t,String m,String u){token=t;message=m;update=u;}
         @Override public void updateData(ReaderBase r){}
         @Override public void serializeData(WriterBase w){w.writeString("token",token);w.writeString("message",message);w.writeString("update",update);}
