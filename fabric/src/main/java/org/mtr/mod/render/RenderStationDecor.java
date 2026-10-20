@@ -15,6 +15,8 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
     private static final Map<String,Identifier> TEXTURES=new HashMap<>();
     private static final LinkedHashMap<DecorSpec,List<Group>> BAKED=new LinkedHashMap<>(32,.75f,true);
     private static int retainedFaces;
+    private record Retained(DecorSpec spec,List<Group> groups){}
+    private static final Map<BlockStationDecor.BlockEntity,Retained> LOADED=new WeakHashMap<>();
     public RenderStationDecor(Argument dispatcher){super(dispatcher);}
     private static List<Group> prepare(DecorSpec spec){
         List<Group> result=BAKED.get(spec);if(result!=null)return result;
@@ -36,8 +38,9 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
         var it=BAKED.entrySet().iterator();while((BAKED.size()>96||retainedFaces>180000)&&BAKED.size()>1&&it.hasNext()){var old=it.next();retainedFaces-=old.getValue().stream().mapToInt(g->g.quads().size()).sum();it.remove();}
         return result;
     }
-    public static void draw(GraphicsHolder g,DecorSpec spec,int light,int tint){
-        for(Group group:prepare(spec)){
+    public static void draw(GraphicsHolder g,DecorSpec spec,int light,int tint){draw(g,spec,prepare(spec),light,tint);}
+    private static void draw(GraphicsHolder g,DecorSpec spec,List<Group> groups,int light,int tint){
+        for(Group group:groups){
             boolean glass=group.surface().equals("glass"),glow=group.surface().equals("glow")&&spec.illuminated();
             Identifier texture=group.surface().equals("label")?org.mtr.mod.client.DynamicTextureCache.instance.getSignText(spec.label(),org.mtr.mod.data.IGui.HorizontalAlignment.CENTER,0.1f,spec.accent(),0xFFFFFF).identifier:group.texture();
             g.createVertexConsumer(glass||tint!=255?MoreRenderLayers.getExteriorTranslucent(texture):glow?MoreRenderLayers.getLight2(texture):MoreRenderLayers.getExterior(texture));
@@ -50,7 +53,8 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
     @Override public void render(BlockStationDecor.BlockEntity entity,float tick,GraphicsHolder g,int light,int overlay){
         World world=entity.getWorld2();if(world==null)return;DecorSpec s=entity.spec();if(s.kind()==DecorKind.WAYPOINT){var player=MinecraftClient.getInstance().getPlayerMapped();if(player==null||!player.isHolding(org.mtr.mod.Items.BRUSH.get().asItem()))return;}BlockPos pos=entity.getPos2();
         Direction facing=IBlock.getStatePropertySafe(world,pos,BlockStationDecor.FACING);
-        g.push();try{g.translate(.5+s.x(),s.y(),.5+s.z());g.rotateYDegrees(-facing.asRotation()+s.yaw());g.rotateXDegrees(s.pitch());draw(g,s,light,255);}finally{g.pop();}
+        var retained=LOADED.get(entity);if(retained==null||!retained.spec().equals(s)){retained=new Retained(s,prepare(s));LOADED.put(entity,retained);}
+        g.push();try{g.translate(.5+s.x(),s.y(),.5+s.z());g.rotateYDegrees(-facing.asRotation()+s.yaw());g.rotateXDegrees(s.pitch());draw(g,s,retained.groups(),light,255);}finally{g.pop();}
         if(!OptimizedRenderer.renderingShadows())DecorBrushClient.drawGhosts(pos,g,light);
     }
     @Override public boolean rendersOutsideBoundingBox2(BlockStationDecor.BlockEntity entity){return false;}

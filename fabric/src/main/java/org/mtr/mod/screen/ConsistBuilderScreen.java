@@ -30,7 +30,8 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private double pressX,pressY,scroll,mouseX,mouseY;
     private long lastFrame=System.nanoTime(),deletedAt;
     private final IdentityHashMap<VehicleCar,Double> animatedX=new IdentityHashMap<>();
-    private List<VehicleCar> deleted=List.of();
+    private record Removal(VehicleResource resource,int index,int total,double x,double width){}
+    private List<Removal> deleted=List.of();
 
     public ConsistBuilderScreen(Siding siding,ScreenExtension previous){
         this.siding=siding;this.previous=previous;draft.addAll(siding.getVehicleCars());
@@ -65,7 +66,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private void duplicateSelection(){if(edit.selectedItems().stream().anyMatch(c->!byId.containsKey(c.getVehicleId()))){message="Ressource manquante : duplication impossible.";return;}edit.duplicate(siding.getTransportMode().maxLength,c->car(byId.get(c.getVehicleId())));}
     private void add(VehicleResource r){
         if(draft.size()>=siding.getTransportMode().maxLength){message="Nombre maximal de voitures atteint.";return;}
-        edit.add(car(r));message="";scroll=0;
+        edit.add(car(r));message="";double[] p=positions();scroll=Math.max(0,p[p.length-1]+scroll-width+20);
     }
     private static VehicleCar car(VehicleResource r){return new VehicleCar(r.getId(),r.getLength(),r.getWidth(),r.getBogie1Position(),r.getBogie2Position(),r.getCouplingPadding1(),r.getCouplingPadding2());}
     public double length(){return Siding.getTotalVehicleLength(new ObjectArrayList<>(draft));}
@@ -97,7 +98,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private double[] positions(){double[] p=new double[draft.size()+1];p[0]=14-scroll;double scale=pixelsPerMetre();for(int i=0;i<draft.size();i++)p[i+1]=p[i]+Math.max(.1,draft.get(i).getLength())*scale+3;return p;}
     private int hit(double x){double[] p=positions();for(int i=0;i<draft.size();i++)if(x>=p[i]&&x<p[i+1]-3)return i;return -1;}
     private int insertion(double x){double[] p=positions();for(int i=0;i<draft.size();i++)if(x<(p[i]+p[i+1])/2)return i;return draft.size();}
-    private void deleteSelection(){deleted=edit.delete();deletedAt=System.nanoTime();message=deleted.isEmpty()?"":"Voitures supprimées · Ctrl+Z pour rétablir";}
+    private void deleteSelection(){double[] p=positions();var removed=new ArrayList<Removal>();for(int i=0;i<draft.size();i++)if(edit.selected(i))removed.add(new Removal(byId.get(draft.get(i).getVehicleId()),i,draft.size(),p[i],p[i+1]-p[i]-3));edit.delete();deleted=List.copyOf(removed);deletedAt=System.nanoTime();message=deleted.isEmpty()?"":"Voitures supprimées · Ctrl+Z pour rétablir";}
     @Override public void render(GraphicsHolder g,int mx,int my,float dt){
         mouseX=mx;mouseY=my;TrainSilhouetteCache.pump();
         long now=System.nanoTime();double smooth=1-Math.exp(-Math.min(.1,(now-lastFrame)/1e9)*18);lastFrame=now;
@@ -127,7 +128,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         animatedX.keySet().removeIf(c->!draft.contains(c));
         if(draft.isEmpty())BuilderUi.text(g,"Clique sur un train pour commencer ta rame",17,carY()+9,BuilderUi.MUTED);
         if(dragging&&my>=carY()-8&&my<carY()+38){int at=insertion(mx);BuilderUi.rect(g,p[at]-2,carY()-3,2,32,BuilderUi.ACCENT);}
-        if(deletedAt!=0){double t=(now-deletedAt)/280_000_000.0;if(t<1){int alpha=(int)((1-t)*180);BuilderUi.rect(g,12,carY()-t*12,width-24,26*(1-t),(alpha<<24)|0xE75D68);}else{deleted=List.of();deletedAt=0;}}
+        if(deletedAt!=0){double t=(now-deletedAt)/280_000_000.0;if(t<1){int alpha=(int)((1-t)*180);for(var old:deleted){int dw=(int)(old.width()*(1-t)),dh=(int)(26*(1-t));double x=old.x()+(old.width()-dw)/2,y=carY()-t*18;if(x>=12&&x+dw<=width-12){profile(g,old.resource(),old.index(),old.total(),(int)x,(int)y,dw,dh);BuilderUi.rect(g,x,y,dw,dh,(alpha<<24)|0xE75D68);}}}else{deleted=List.of();deletedAt=0;}}
         BuilderUi.text(g,BuilderUi.fit(message.isEmpty()?"Maj : sélection multiple · Glisser · Ctrl+Z : rétablir · Échap : enregistrer":message,width-24),12,height-42,message.isEmpty()?BuilderUi.MUTED:0xFFFFD09A);
         super.render(g,mx,my,dt);
         if(dragging){

@@ -15,7 +15,7 @@ public final class WaypointScreen extends ScreenExtension {
     private final List<Long> links;
     private TextFieldWidgetExtension label;
     private String name,kind,error="";
-    private long platform;
+    private long platform,pending,sent;
     private int mode,page;
     public WaypointScreen(BlockPos pos){
         this.pos=pos;var node=WayfindingClient.graph().get(pos.asLong());
@@ -27,7 +27,7 @@ public final class WaypointScreen extends ScreenExtension {
     private List<SillonSignageNetworkSnapshot.Platform> platforms(){return SillonSignageNetwork.snapshot().platforms().stream().filter(p->Math.hypot(p.center().x()-pos.getX(),p.center().z()-pos.getZ())<192).sorted(Comparator.comparing(SillonSignageNetworkSnapshot.Platform::name)).toList();}
     private String platformName(long id){var data=SillonSignageNetwork.snapshot();var p=data.platforms().stream().filter(q->q.id()==id).findFirst().orElse(null);if(p==null)return id==0?"Aucun quai":"Quai "+id;var s=data.stations().stream().filter(q->q.id()==p.stationId()).findFirst().orElse(null);return (s==null?"":s.name().split("[|]")[0]+" · ")+"quai "+p.name();}
     @Override protected void init2(){
-        super.init2();button(12,height-28,76,"Annuler",()->MinecraftClient.getInstance().openScreen(null)));
+        super.init2();button(12,height-28,76,"Annuler",()->MinecraftClient.getInstance().openScreen(null));
         if(mode!=0){
             int rows=Math.max(1,(height-96)/26);
             if(mode==1){var list=platforms();page=Math.min(page,Math.max(0,(list.size()-1)/rows));for(int n=0;n<rows&&page*rows+n<list.size();n++){var p=list.get(page*rows+n);button(12,42+n*26,width-24,BuilderUi.fit(platformName(p.id()),width-40),()->{platform=p.id();kind="platform";mode=0;refresh();});}}
@@ -43,10 +43,11 @@ public final class WaypointScreen extends ScreenExtension {
         button(width-116,height-28,104,"Enregistrer",this::save);
     }
     private void save(){
+        if(pending!=0)return;
         try{
             if(kind.equals("platform")&&platform==0)throw new IllegalArgumentException("Associe un quai à ce point.");
             WalkGraph update=new WalkGraph();update.put(new WalkGraph.Node(original.id(),original.x(),original.y(),original.z(),platform,name,kind,original.revision(),links));
-            InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketBuilderWayfinding(1,pos.asLong(),0,update.encode()));MinecraftClient.getInstance().openScreen(null);
+            InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketBuilderWayfinding(1,pos.asLong(),pending=System.nanoTime(),update.encode()));sent=System.currentTimeMillis();error="Enregistrement en cours…";
         }catch(RuntimeException failure){error=failure.getMessage();}
     }
     @Override public void render(GraphicsHolder g,int mx,int my,float delta){
@@ -55,7 +56,7 @@ public final class WaypointScreen extends ScreenExtension {
         BuilderUi.text(g,BuilderUi.fit(error.isEmpty()?WayfindingClient.feedback:error,width-24),12,height-45,error.isEmpty()?BuilderUi.MUTED:0xFFFFAD82);super.render(g,mx,my,delta);
     }
     @Override public boolean mouseScrolled2(double x,double y,double amount){if(mode!=0){page=Math.max(0,page+(amount>0?-1:1));refresh();return true;}return super.mouseScrolled2(x,y,amount);}
-    @Override public void tick2(){if(label!=null)label.tick2();}
+    @Override public void tick2(){if(label!=null)label.tick2();if(pending!=0){var receipt=WayfindingClient.take(pending);if(receipt!=null){pending=0;if(receipt.success()){MinecraftClient.getInstance().openScreen(null);return;}error=receipt.message();}else if(System.currentTimeMillis()-sent>10000){pending=0;error="Serveur sans réponse : rouvre le point avant de réessayer.";}}}
     @Override public void onClose2(){if(mode!=0){mode=0;refresh();}else save();}
     @Override public boolean isPauseScreen2(){return false;}
 }

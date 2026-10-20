@@ -101,6 +101,7 @@ jobs:
           test -f forge/run/signage-ui-qa-success.txt
           test -f forge/run/decor-native-qa-success.txt
           test -f forge/run/builder-native-qa-success.txt
+          test -f forge/run/builder-next-native-qa-success.txt
       - name: Capture signs with Oculus and Complementary
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -112,6 +113,7 @@ jobs:
           test -f forge/run/signage-shader-qa-success.txt
           test -f forge/run/decor-shader-qa-success.txt
           test -f forge/run/builder-shader-qa-success.txt
+          test -f forge/run/builder-next-shader-qa-success.txt
       - name: Preserve native captures
         if: always()
         run: |

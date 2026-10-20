@@ -30,7 +30,7 @@ import java.util.*;
 
 /** Separate QA mod: actual delivered jar, real simulation queue, native controls and GPU captures. */
 public final class BuilderVisualQa {
-    private static boolean active,fixtureReady;private static int stage,ticks;private static long sidingId,depotId;private static String railId,originalRail,changedRail;private static VehicleResource resource;private static ConsistBuilderScreen composer;private static BuilderRailScreen editor;private static DashboardScreen dashboard;
+    private static boolean active;private static volatile boolean fixtureReady;private static int stage,ticks;private static long sidingId,depotId;private static String railId,originalRail,changedRail;private static VehicleResource resource;private static ConsistBuilderScreen composer;private static BuilderRailScreen editor;private static DashboardScreen dashboard;
     public static void register(){MinecraftForge.EVENT_BUS.addListener(BuilderVisualQa::tick);}
     private static void check(boolean ok,String message){if(!ok)throw new IllegalStateException(message);}
     private static Object field(Object object,String name)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(object);}
@@ -56,10 +56,12 @@ public final class BuilderVisualQa {
             var server=mc.getSingleplayerServer();var level=server.overworld();for(int x=76;x<=87;x++)for(int z=140;z<=260;z++){level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,3,z),net.minecraft.world.level.block.Blocks.SMOOTH_QUARTZ.defaultBlockState());if(x<=78||x>=82)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,4,z),org.mtr.mod.Blocks.PLATFORM.get().data.defaultBlockState());}
             var player=server.getPlayerList().getPlayer(mc.player.getUUID());player.teleportTo(level,84.5,5,242,175,35);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));
             Init.sendMessageC2S(OperationProcessor.UPDATE_DATA,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),request,response->{
+                Init.sendMessageC2S(OperationProcessor.LIST_DATA,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),new BuilderPlanRequest.Response(""),listed->{
                 try {
-                    var actualSiding=response.getSidings().stream().min(Comparator.comparingDouble(q->Math.hypot(q.getMidPosition().getX()-80,q.getMidPosition().getZ()-50))).orElseThrow();
-                    var actualA=response.getPlatforms().stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-200))).orElseThrow();
-                    var actualB=response.getPlatforms().stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-360))).orElseThrow();
+                    ClientData seeded=new ClientData();new ListDataResponse(new JsonReader(Utilities.getJsonObjectFromData(listed)),seeded).write();
+                    var actualSiding=seeded.sidings.stream().min(Comparator.comparingDouble(q->Math.hypot(q.getMidPosition().getX()-80,q.getMidPosition().getZ()-50))).orElseThrow();
+                    var actualA=seeded.platforms.stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-200))).orElseThrow();
+                    var actualB=seeded.platforms.stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-360))).orElseThrow();
                     actualA.setName("1");actualB.setName("2");actualSiding.setName("Navette · 2 voitures");actualSiding.setVehicleCars(cars);actualSiding.setMaxVehicles(0);sidingId=actualSiding.getId();
                     route.getRoutePlatforms().clear();route.getRoutePlatforms().add(new RoutePlatformData(actualA.getId()));route.getRoutePlatforms().add(new RoutePlatformData(actualB.getId()));route.getRoutePlatforms().add(new RoutePlatformData(actualA.getId()));
                     var finish=new UpdateDataRequest(data).addPlatform(actualA).addPlatform(actualB).addSiding(actualSiding).addRoute(route);
@@ -68,6 +70,7 @@ public final class BuilderVisualQa {
                         var generate=new DepotOperationByIds();generate.addDepotId(depotId);Init.sendMessageC2S(OperationProcessor.GENERATE_BY_DEPOT_IDS,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),generate,null,null);mc.execute(()->fixtureReady=true);
                     },UpdateDataResponse.class);
                 } catch(Throwable failure){failure.printStackTrace();System.exit(2);}
+                },ListDataResponse.class);
             },UpdateDataResponse.class);
         }catch(Throwable error){error.printStackTrace();System.exit(2);}});
     }catch(Throwable error){error.printStackTrace();System.exit(2);}}
@@ -96,6 +99,6 @@ public final class BuilderVisualQa {
         else if(stage==12&&ticks==50){capture(mc,"map-small");resize(mc,false);WidgetMap map=(WidgetMap)field(dashboard,"widgetMap");map.find(new Position(80,4,280));set(map,"scale",.8D);next();}
         else if(stage==13&&ticks==60){capture(mc,"map-large");WidgetMap map=(WidgetMap)field(dashboard,"widgetMap");double scale=(double)field(map,"scale"),cx=(double)field(map,"centerX"),cz=(double)field(map,"centerY");double x=map.getX2()+(80.5-cx)*scale+map.getWidth()/2D,y=map.getY2()+(200.5-cz)*scale+map.getHeight()/2D;map.mouseClicked2(x,y,0);check(mc.screen instanceof SavedRailPickerScreen,"Overlapping floor chooser did not open");next();}
         else if(stage==14&&ticks==35){controls(mc);capture(mc,"floors");mc.setScreen(new BuilderSettingsScreen(new Screen(dashboard)));next();}
-        else if(stage==15&&ticks==35){controls(mc);capture(mc,"settings");String file=Boolean.getBoolean("sillon.qa.shader")?"builder-shader-qa-success.txt":"builder-native-qa-success.txt";Files.writeString(Path.of(file),"Actual planned train door overlays with no active train; brush removal; real GPU silhouettes alpha checked; consist cancel/apply and presets; rail staged preview/apply/server ack/undo/conflict; server diagnostics; anchored map zoom and stacked floor chooser; native controls at 560x360 and 320x240.");System.out.println("BUILDER_QA_SUCCESS");active=false;mc.stop();}
+        else if(stage==15&&ticks==35){controls(mc);capture(mc,"settings");String file=Boolean.getBoolean("sillon.qa.shader")?"builder-shader-qa-success.txt":"builder-native-qa-success.txt";Files.writeString(Path.of(file),"Actual planned train door overlays with no active train; brush removal; real GPU silhouettes alpha checked; consist cancel/apply and presets; rail staged preview/apply/server ack/undo/conflict; server diagnostics; anchored map zoom and stacked floor chooser; native controls at 560x360 and 320x240.");System.out.println("BUILDER_QA_SUCCESS");active=false;BuilderNextVisualQa.begin(mc);}
     }catch(Throwable error){System.err.println("BUILDER_QA_FAILED stage="+stage);error.printStackTrace();System.exit(2);}}
 }

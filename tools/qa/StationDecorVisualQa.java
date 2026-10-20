@@ -92,7 +92,7 @@ public final class StationDecorVisualQa {
             }else if(stage==FAMILIES+10&&ticks==35){
                 for(int x:new int[]{3,6})if(!mc.level.getBlockState(new net.minecraft.core.BlockPos(x,4,110)).isAir())throw new IllegalStateException("Undo did not restore air");
                 String file=Boolean.getBoolean("sillon.qa.shader")?"decor-shader-qa-success.txt":"decor-native-qa-success.txt";
-                Files.writeString(Path.of(file),"22 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");System.out.println("DECOR_QA_SUCCESS");active=false;BuilderVisualQa.begin(mc);
+                Files.writeString(Path.of(file),"22 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");var prepared=org.mtr.mod.render.RenderStationDecor.class.getDeclaredField("BAKED");prepared.setAccessible(true);int faces=0,groups=0;for(var entry:((java.util.Map<DecorSpec,java.util.List<?>>)prepared.get(null)).entrySet()){faces+=DecorMesh.get(entry.getKey()).faces().size();groups+=entry.getValue().size();}if(groups>=faces)throw new IllegalStateException("Decor material grouping did not reduce render-layer submissions");System.out.println("DECOR_QA_BATCHING "+faces+" per-face layer submissions replaced by "+groups+" material groups");System.out.println("DECOR_QA_SUCCESS");active=false;BuilderVisualQa.begin(mc);
             }
         }catch(Throwable e){e.printStackTrace();System.exit(2);}
     }
