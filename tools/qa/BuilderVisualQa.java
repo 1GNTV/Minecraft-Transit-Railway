@@ -81,14 +81,20 @@ public final class BuilderVisualQa {
     private static Siding siding(){return MinecraftClientData.getDashboardInstance().sidingIdMap.get(sidingId);}
     private static void next(){stage++;ticks=0;}
     private static void profilePixels()throws Exception{Field cache=TrainSilhouetteCache.class.getDeclaredField("CACHE");cache.setAccessible(true);int tested=0;for(Object e:((Map<?,?>)cache.get(null)).values()){if(!(boolean)field(e,"ready"))continue;var texture=(NativeImageBackedTexture)field(e,"texture");int old=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D);try{GL33.glBindTexture(GL33.GL_TEXTURE_2D,texture.getGlId());java.nio.ByteBuffer pixels=java.nio.ByteBuffer.allocateDirect(512*128*4);GL33.glGetTexImage(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,pixels);int visible=0;for(int i=3;i<pixels.capacity();i+=4)if((pixels.get(i)&255)>0)visible++;check(visible>200,"GPU train profile is empty");tested++;}finally{GL33.glBindTexture(GL33.GL_TEXTURE_2D,old);}if(tested>=2)break;}check(tested>0,"No GPU profile verified");System.out.println("BUILDER_QA_GPU_ALPHA "+tested+" nonempty real model silhouettes");}
-    private static void doorPixels(Minecraft mc){
-        int old=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D),w=mc.getMainRenderTarget().width,h=mc.getMainRenderTarget().height,visible=0;
-        try{
-            GL33.glBindTexture(GL33.GL_TEXTURE_2D,mc.getMainRenderTarget().getColorTextureId());
-            java.nio.ByteBuffer pixels=java.nio.ByteBuffer.allocateDirect(w*h*4);
-            GL33.glGetTexImage(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,pixels);
-            for(int y=90;y<h-100;y++)for(int x=0;x<w;x++){int i=(y*w+x)*4,r=pixels.get(i)&255,g=pixels.get(i+1)&255,b=pixels.get(i+2)&255;if(r<180&&g>r+25&&g>b+5&&b>r+10)visible++;}
-        }finally{GL33.glBindTexture(GL33.GL_TEXTURE_2D,old);}
+    private static void doorPixels(Minecraft mc)throws Exception{
+        int visible=0,relaxed=0,bright=0;
+        // Use the screenshot API so Oculus can supply its final composited image.
+        try(var image=Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+            int w=image.getWidth(),h=image.getHeight();
+            var directory=mc.gameDirectory.toPath().resolve("screenshots");Files.createDirectories(directory);
+            image.writeToFile(directory.resolve(Boolean.getBoolean("sillon.qa.shader")?"builder-shader-doors-sample.png":"builder-native-doors-sample.png"));
+            for(int y=90;y<h-100;y++)for(int x=0;x<w;x++){
+                int pixel=image.getPixelRGBA(x,y),r=pixel&255,g=(pixel>>>8)&255,b=(pixel>>>16)&255;
+                if(r<180&&g>r+25&&g>b+5&&b>r+10)visible++;
+                if(g>r+8&&g>b+1&&b>r+5){relaxed++;if(r>=180)bright++;}
+            }
+        }
+        System.out.println("BUILDER_QA_DOOR_PIXEL_DIAGNOSTICS strict="+visible+" relativeHue="+relaxed+" bright="+bright);
         check(visible>20,"Door markers exist but are not visible on the platform: "+visible+" colored pixels");
         System.out.println("BUILDER_QA_DOOR_PIXELS "+visible+" colored world pixels, excluding HUD");
     }
