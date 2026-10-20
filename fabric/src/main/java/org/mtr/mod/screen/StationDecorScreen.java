@@ -80,7 +80,7 @@ public final class StationDecorScreen extends ScreenExtension {
     private void send(int action){try{DecorSpec spec=read();count=integer("count",1,32);step=integer("step",1,16);InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketStationDecor(pos,action,spec.encode(),DecorBrushClient.first==null?pos:DecorBrushClient.first,DecorBrushClient.last==null?pos:DecorBrushClient.last,mask,count,axis,step));DecorBrushClient.feedback="Demande envoyée au serveur…";DecorBrushClient.clearGhost();}catch(RuntimeException ex){error="Vérifie les valeurs numériques.";}}
     @Override public void render(GraphicsHolder g,int mx,int my,float delta){
         rect(g,0,0,width,height,0xFF101722);rect(g,7,58,leftW+19,height-35,0xFF1A2432);rect(g,previewX-4,58,width-7,height-35,0xFF1A2432);
-        text(g,kind.title(),12,14,Math.max(90,leftW),0xFFE9EFF7);
+        text(g,kind.title,12,14,Math.max(90,leftW),0xFFE9EFF7);
         for(Input f:inputs.values())if(f.visible)text(g,LABELS.get(f.key),12,f.getY2()-12,leftW,0xFFA5B3C5);
         if(System.currentTimeMillis()-lastPreview>550){try{preview=read();}catch(Exception ignored){}lastPreview=System.currentTimeMillis();}
         int ph=Math.max(30,height-181),pw=previewW;var resource=DynamicTextureCache.instance.getStationDecor(preview,angle);

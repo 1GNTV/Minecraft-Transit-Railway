@@ -10,7 +10,7 @@ public enum DecorKind {
     CORNICE("cornice","Corniche et plinthe",3,.25f,.18f,"Pierre|Béton|Métal|Bois","Droit|Angle intérieur|Angle extérieur|Plinthe"),
     LIGHT_STRIP("light_strip","Bandeau lumineux moderne",3,.13f,.16f,"Métal|Pierre|Béton|Bois","Droit|Angle|Embout|Mural"),
     PENDANT("pendant","Luminaire suspendu",2.4f,.10f,.28f,"Métal|Bois|Béton|Pierre","Linéaire|Double|Ailettes|Cadre"),
-    SCONCE("sconce","Applique murale",.22f,.75f,.14f,"Métal|Pierre|Bois|Béton","Verticale|Horizontale|Double|Déflecteur"),
+    SCONCE("sconce","Applique murale",.22f,.75f,.14f,"Métal|Pierre|Bois|Béton","Verticale|Bandeau central|Double|Déflecteur"),
     BENCH("bench","Banc continu modulaire",2.4f,.82f,.57f,"Bois|Métal|Béton|Pierre","Dossier|Sans dossier|Double face|Accoudoirs"),
     LEANING("leaning","Appui debout",2,1,.22f,"Bois|Métal|Béton|Pierre","Lame|Tube|Double face|Avec pieds"),
     BIN("bin","Poubelle de tri",1.05f,1,.38f,"Métal|Béton|Bois|Pierre","Trois flux|Deux flux|Un flux|Sac transparent"),

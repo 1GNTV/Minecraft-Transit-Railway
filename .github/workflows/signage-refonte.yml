@@ -98,6 +98,7 @@ jobs:
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
           timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/signage-ui-qa-success.txt
+          test -f forge/run/decor-native-qa-success.txt
       - name: Capture signs with Oculus and Complementary
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -107,10 +108,13 @@ jobs:
           cp tools/qa/SignageVisualQa.java tools/qa-runtime/src/main/java/org/sillon/qa/SignageVisualQa.java
           timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/signage-shader-qa-success.txt
+          test -f forge/run/decor-shader-qa-success.txt
       - name: Preserve native captures
         if: always()
         run: |
           mkdir -p build/signage-qa/native docs/signage/review/native
+          cp forge/run/screenshots/decor*.png build/signage-qa/native/ 2>/dev/null || true
+          cp forge/run/decor-*-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/screenshots/signage*.png build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/signage-world-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/signage-ui-qa-success.txt build/signage-qa/native/ 2>/dev/null || true

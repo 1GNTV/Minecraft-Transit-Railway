@@ -20,7 +20,7 @@ import java.util.*;
 /** CI-only helper compiled as a separate mod against the assembled deliverable. */
 public final class SignageVisualQa {
     private static int stage=-1,tick;
-    private static boolean started,opening;
+    private static boolean started,opening,finished;
     private static int waiting;
     private static int warningTicks;
     private static String lastScreen="";
@@ -28,7 +28,7 @@ public final class SignageVisualQa {
     private static final int[][] SIZES={{960,540,1},{960,540,2},{640,480,2}};
     public static void register(){MinecraftForge.EVENT_BUS.addListener(SignageVisualQa::tick);}
     private static void tick(TickEvent.ClientTickEvent event) {
-        if(event.phase!=TickEvent.Phase.END)return;
+        if(event.phase!=TickEvent.Phase.END||finished)return;
         Minecraft mc=Minecraft.getInstance();
         if(!started) {
             String current=mc.screen==null?"none":mc.screen.getClass().getSimpleName();
@@ -78,7 +78,7 @@ public final class SignageVisualQa {
                         throw new IllegalStateException("Edited sign was not synchronized to the client");
                     try{Files.writeString(Path.of("signage-ui-qa-success.txt"),"21 native editor captures; 5 in-world views; edit sent through real brush packet and synchronized to client; responsive widgets checked.");}catch(Exception ignored){}
                     System.out.println("SIGNAGE_QA_SUCCESS");
-                    mc.execute(mc::stop);
+                    mc.execute(()->{finished=true;StationDecorVisualQa.begin(mc);});
                 });
             }
             return;
@@ -108,7 +108,7 @@ public final class SignageVisualQa {
                             }catch(ReflectiveOperationException ignored){}
                             if(!active)throw new IllegalStateException("Shader pack not active");
                             Files.writeString(Path.of("signage-shader-qa-success.txt"),"Oculus 1.8.0 / Embeddium 0.3.31 / Complementary r5.3 active; 5 world captures.");
-                            System.out.println("SIGNAGE_QA_SHADER_SUCCESS");mc.stop();return;
+                            System.out.println("SIGNAGE_QA_SHADER_SUCCESS");finished=true;StationDecorVisualQa.begin(mc);return;
                         }catch(Exception e){e.printStackTrace();System.exit(2);}
                     }
                     networkPhase=0;tick=0;mc.options.hideGui=false;

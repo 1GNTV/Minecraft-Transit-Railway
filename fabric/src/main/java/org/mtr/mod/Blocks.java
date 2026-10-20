@@ -65,7 +65,7 @@ public final class Blocks {
 
 		// Station kit
 		STATION_DECOR = new java.util.EnumMap<>(org.mtr.mod.decor.DecorKind.class);
-		for (var kind : org.mtr.mod.decor.DecorKind.values()) STATION_DECOR.put(kind, registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "sillon_decor_" + kind.id), () -> new Block(new BlockStationDecor(kind)), CreativeModeTabs.STATION_BUILDING_BLOCKS));
+		for (var kind : org.mtr.mod.decor.DecorKind.values()) Blocks.STATION_DECOR.put(kind, registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "sillon_decor_" + kind.id), () -> new Block(new BlockStationDecor(kind)), CreativeModeTabs.STATION_BUILDING_BLOCKS));
 
 		// PIDS projectors
 		PIDS_1 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_1"), () -> new Block(new BlockPIDSHorizontal1()), CreativeModeTabs.RAILWAY_FACILITIES);

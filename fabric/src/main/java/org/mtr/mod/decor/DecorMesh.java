@@ -67,7 +67,7 @@ public final class DecorMesh {
                 if(v==3){int n=count(d,.65,16);for(int j=0;j<=n;j++)for(int i=0;i<24;i++){double q=i*Math.PI/24,Q=(i+1)*Math.PI/24;rail(Math.cos(q)*(w/2-.025),Math.sin(q)*(rise-.025),z+d*j/n,Math.cos(Q)*(w/2-.025),Math.sin(Q)*(rise-.025),z+d*j/n,.025);}}
             }
             case COLUMN -> {
-                if(v==1){int n=32;for(int i=0;i<n;i++){double q=i*Math.PI*2/n,Q=(i+1)*Math.PI*2/n;face(p(Math.cos(q)*w/2,0,Math.sin(q)*d/2),p(Math.cos(Q)*w/2,0,Math.sin(Q)*d/2),p(Math.cos(Q)*w/2,h,Math.sin(Q)*d/2),p(Math.cos(q)*w/2,h,Math.sin(q)*d/2),body(),s.color(),(float)(w*Math.PI/n),(float)h);}
+                if(v==1){int n=32;for(int i=0;i<n;i++){double q=i*Math.PI*2/n,Q=(i+1)*Math.PI*2/n;face(p(Math.cos(q)*w/2,h,Math.sin(q)*d/2),p(Math.cos(Q)*w/2,h,Math.sin(Q)*d/2),p(Math.cos(Q)*w/2,0,Math.sin(Q)*d/2),p(Math.cos(q)*w/2,0,Math.sin(q)*d/2),body(),s.color(),(float)(w*Math.PI/n),(float)h);}
                     for(double yy:new double[]{0,h})for(int i=0;i<n;i++)face(p(0,yy,0),p(Math.cos(i*Math.PI*2/n)*w/2,yy,Math.sin(i*Math.PI*2/n)*d/2),p(Math.cos((i+1)*Math.PI*2/n)*w/2,yy,Math.sin((i+1)*Math.PI*2/n)*d/2),p(0,yy,0),body(),s.color(),1,1);
                 }else {b(a,0,z,c,h,Z);if(v==2){int n=count(w,step,80);for(int i=0;i<n;i++){double x=a+w*i/n;b(x,0,z-.035,x+w/n*.38,h,z);b(x,0,Z,x+w/n*.38,h,Z+.035);}}if(v==3)dark(a-.04,0,z-.04,c+.04,.18,Z+.04);}
                 metal(a-.01,.02,z-.01,c+.01,.07,Z+.01);
@@ -81,11 +81,12 @@ public final class DecorMesh {
             case ACOUSTIC -> {
                 b(a,0,z,c,h,Z);frame(w,h,z-.018,.022,d+.028,0x7B8285);
                 if(v==0){face(p(a+.025,.025,Z+.002),p(a+.025,h-.025,Z+.002),p(c-.025,h-.025,Z+.002),p(c-.025,.025,Z+.002),"perforated",s.color(),(float)(w*4),(float)(h*4));}
-                if(v==1||v==2){int n=count(w,step,70);for(int i=0;i<n;i++)dark(a+(i+.3)*w/n,.08,Z+.002,a+(i+.5)*w/n,h-.08,Z+.004);}
+                if(v==1){int n=count(w,step,70);for(int i=0;i<n;i++)dark(a+(i+.3)*w/n,.08,Z+.002,a+(i+.5)*w/n,h-.08,Z+.004);}
+                if(v==2){int n=count(h,step,70);for(int i=0;i<n;i++)dark(a+.06,(i+.3)*h/n,Z+.002,c-.06,(i+.4)*h/n,Z+.004);}
             }
             case BAFFLE -> {
                 boolean cross=v==1;int n=count(cross?w:d,step,64);for(int i=0;i<n;i++){double t=(cross?w:d)*i/n,T=(cross?w:d)/n*.32;
-                    if(cross)b(a+t,0,z,a+t+T,h,Z);else b(a,0,z+t,c,h,z+t+T);}
+                    if(cross)b(a+t,0,z,a+t+T,h,Z);else b(a,v==2&&i%2==0?h*.38:0,z+t,c,h,z+t+T);}
                 for(double f:new double[]{-.3,.3}){if(cross)dark(a,h,z+d*(f+.5),c,h+.025,z+d*(f+.5)+.035);else dark(w*f,h,z,w*f+.035,h+.025,Z);}
                 if(v==2)for(double xx:new double[]{a,c-.03})metal(xx,-.02,z,xx+.03,h+.04,Z);
                 if(v==3){metal(a,-.02,z,c,.015,z+.03);metal(a,-.02,Z-.03,c,.015,Z);}
@@ -98,8 +99,10 @@ public final class DecorMesh {
             case LIGHT_STRIP,PENDANT -> {
                 b(a,0,z,c,h,Z);box(a+.025,-.006,z+.025,c-.025,.003,Z-.025,"glow",0xFFF2CC);
                 dark(a-.01,0,z-.005,a+.025,h,Z+.005);dark(c-.025,0,z-.005,c+.01,h,Z+.005);
-                if(s.kind()==DecorKind.PENDANT){for(double xx:new double[]{a*.65,c*.65})rail(xx,h,0,xx,h+s.suspension(),0,.008);if(v==1)box(a,0,Z+.1,c,h,Z+.1+d,"glow",0xFFF2CC);if(v==2){int n=count(w,.14,70);for(int i=0;i<n;i++)metal(a+i*w/n,-.02,z,a+i*w/n+.012,.015,Z);}}
+                if(s.kind()==DecorKind.PENDANT){for(double xx:new double[]{a*.65,c*.65})rail(xx,h,0,xx,h+s.suspension(),0,.008);if(v==1)box(a,0,Z+.1,c,h,Z+.1+d,"glow",0xFFF2CC);if(v==3){for(double zz:new double[]{z-d*2,Z+d*2}){b(a,0,zz,c,h,zz+d);box(a+.02,-.006,zz+.025,c-.02,.003,zz+d-.025,"glow",0xFFF2CC);}for(double xx:new double[]{a,c-.06})b(xx,0,z-d*2,xx+.06,h,Z+d*3);}
+                    if(v==2){int n=count(w,.14,70);for(int i=0;i<n;i++)metal(a+i*w/n,-.02,z,a+i*w/n+.012,.015,Z);}}
                 else if(v==1){b(c-d,0,Z,c,h,Z+Math.min(w,2));box(c-d+.025,-.006,Z,c-.025,.003,Z+Math.min(w,2)-.025,"glow",0xFFF2CC);}
+                else if(v==2)dark(c-.06,-.015,z-.015,c+.025,h+.015,Z+.015);
                 else if(v==3)metal(a,h,z,c,h+.08,z+.035);
             }
             case SCONCE -> {
@@ -150,14 +153,14 @@ public final class DecorMesh {
                     metal(-w*.14,h*.66,Z+.005,w*.14,h*.70,Z+.035);rail(w*.16,h*.65,Z+.04,w*.17,h*.27,Z+.04,.012);
                 }
                 box(a+.04,h*.80,Z+.028,c-.04,h*.96,Z+.03,"fire",0xFFFFFF);metal(c-.08,h*.42,Z+.03,c-.05,h*.55,Z+.05);
-                if(v==3)metal(-.012,.04,Z+.03,.012,h-.04,Z+.04);
+                if(v==3){metal(-.012,.04,Z+.03,.012,h-.04,Z+.04);for(double xx:new double[]{-w*.24,w*.24})tube(xx,.14,Z+.016,xx,h*.63,Z+.016,Math.min(w*.15,.07),"metal",0xD63832);}
             }
             case CABINET -> {
                 b(a,0,z,c,h,Z);dark(a+.03,0,z+.03,c-.03,.08,Z-.03);
                 int doors=v==1?1:2;for(int i=0;i<doors;i++){double l=a+i*w/doors+.018,r=a+(i+1)*w/doors-.018;
                     box(l,.09,Z+.002,r,h-.018,Z+.012,body(),s.color());metal(r-.06,h*.47,Z+.015,r-.04,h*.55,Z+.035);
                     for(int j=0;j<(v==2?12:4);j++)dark(l+.04,h*.12+j*.025,Z+.013,r-.04,h*.12+j*.025+.008,Z+.016);}
-                box(a+.07,h*.78,Z+.014,a+.18,h*.84,Z+.018,"hazard",0xFFFFFF);
+                box(a+.07,h*.78,Z+.014,a+.18,h*.84,Z+.018,"hazard",0xFFFFFF);if(v==3)for(double xx:new double[]{a+.06,c-.10})metal(xx,h*.2,z-.04,xx+.04,h*.8,z);
             }
             case VENT -> {
                 dark(a,0,z,c,h,Z);frame(w,h,Z,.035,.025,s.color());int n=count(v==1?w:h,Math.max(.045,step*.4),80);
