@@ -24,11 +24,13 @@ public final class BuilderJourneyRequest implements SerializedDataBase {
         data.directionsFinder.addRequest(new DirectionsRequest(position(start),position(end),data.getCurrentMillis(),response->{
             try{
                 JsonObject result=new JsonObject();JsonArray legs=new JsonArray();result.addProperty("origin",start.getName());result.addProperty("destination",end.getName());result.addProperty("generated",data.getCurrentMillis());
+                String previousStation=start.getName();
                 for(DirectionsConnection connection:response.getDirectionsConnections()){
                     JsonObject leg=Utilities.getJsonObjectFromData(connection);String routeId=leg.get("routeId").getAsString();Route route=data.routes.stream().filter(r->r.getHexId().equalsIgnoreCase(routeId)).findFirst().orElse(null);
                     String startId=leg.get("startStationId").getAsString(),endId=leg.get("endStationId").getAsString();
+                    if(route==null&&startId.equalsIgnoreCase(endId)&&leg.get("walkingDistance").getAsLong()==0&&leg.get("startTime").getAsLong()==leg.get("endTime").getAsLong())continue;
                     Station from=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(startId)).findFirst().orElse(null),to=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(endId)).findFirst().orElse(null);
-                    leg.addProperty("from",from==null?"À pied":from.getName());leg.addProperty("to",to==null?end.getName():to.getName());
+                    leg.addProperty("from",from==null?previousStation:from.getName());leg.addProperty("to",to==null?end.getName():to.getName());previousStation=to==null?end.getName():to.getName();
                     leg.addProperty("line",route==null?"À pied":route.getRouteNumber().isBlank()?route.getName():route.getRouteNumber());leg.addProperty("color",route==null?0x6E8798:route.getColor());
                     int stops=-1,first=-1,last=-1;
                     if(route!=null)for(int i=0;i<route.getRoutePlatforms().size();i++){Platform p=route.getRoutePlatforms().get(i).getPlatform();if(p==null||p.area==null)continue;if(first<0&&p.area.getHexId().equalsIgnoreCase(startId))first=i;else if(first>=0&&p.area.getHexId().equalsIgnoreCase(endId)){last=i;break;}}

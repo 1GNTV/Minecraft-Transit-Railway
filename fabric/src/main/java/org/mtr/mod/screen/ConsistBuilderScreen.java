@@ -89,7 +89,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         if(r==null){BuilderUi.text(g,"?",x,y+4,0xFFFFAD82);return;}
         Identifier id=TrainSilhouetteCache.request(r,index,total);
         if(id!=null){int dw=Math.max(1,Math.min(w,h*4)),dh=Math.max(1,Math.min(h,w/4));GuiDrawing d=new GuiDrawing(g);d.beginDrawingTexture(id);d.drawTexture(x+(w-dw)/2,y+(h-dh)/2,x+(w+dw)/2,y+(h+dh)/2,0,1,1,0);d.finishDrawingTexture();}
-        else if(w>65)BuilderUi.text(g,BuilderUi.fit(TrainSilhouetteCache.status(r,index,total),w),x,y+h/2,BuilderUi.MUTED);
+        else if(w>65)BuilderUi.text(g,BuilderUi.fit(TrainSilhouetteCache.status(r,index,total),w),x,y+Math.max(0,h/2-4),BuilderUi.MUTED);
     }
     private double pixelsPerMetre(){
         double metres=0;for(VehicleCar c:draft)metres+=Math.max(.1,c.getLength());
@@ -113,7 +113,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
             profile(g,r,0,1,x+6,y+15,w-12,22);
             BuilderUi.text(g,String.format(Locale.ROOT,"%.1f m",r.getLength()),x+6,y+34,BuilderUi.MUTED);
         }
-        BuilderUi.text(g,(page+1)+"/"+Math.max(1,(matches.size()+perPage()-1)/perPage())+" · "+matches.size()+" modèles",70,height-138,BuilderUi.MUTED);
+        BuilderUi.text(g,BuilderUi.fit((page+1)+"/"+Math.max(1,(matches.size()+perPage()-1)/perPage())+" · "+matches.size()+" modèles",Math.max(24,width-238)),70,height-138,BuilderUi.MUTED);
         BuilderUi.text(g,draft.size()+" voitures · "+String.format(Locale.ROOT,"%.1f / %.1f m",length(),siding.getRailLength()),12,height-115,length()>siding.getRailLength()?0xFFFFAD82:BuilderUi.TEXT);
         BuilderUi.rect(g,8,carY()-2,width-16,30,BuilderUi.PANEL);
         double[] p=positions();

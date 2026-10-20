@@ -60,7 +60,7 @@ public final class JourneyScreen extends ScreenExtension {
                 JsonArray legs=response.getAsJsonArray("legs");int rows=Math.max(1,(height-142)/58);legPage=Math.min(legPage,Math.max(0,legs.size()-rows));
                 for(int i=0;i<rows&&legPage+i<legs.size();i++){var leg=legs.get(legPage+i).getAsJsonObject();int y=77+i*58;
                     BuilderUi.rect(g,12,y,width-24,53,BuilderUi.PANEL);BuilderUi.rect(g,12,y,4,53,0xFF000000|leg.get("color").getAsInt());
-                    BuilderUi.text(g,BuilderUi.fit(primary(text(leg,"line"))+" · "+primary(text(leg,"direction")),width-42),22,y+6,BuilderUi.ACCENT);
+                    BuilderUi.text(g,BuilderUi.fit(primary(text(leg,"line"))+(text(leg,"direction").isBlank()?"":" · "+primary(text(leg,"direction"))),width-42),22,y+6,BuilderUi.ACCENT);
                     BuilderUi.text(g,BuilderUi.fit(primary(text(leg,"from"))+" → "+primary(text(leg,"to")),width-42),22,y+20,BuilderUi.TEXT);
                     String details="";if(!text(leg,"startPlatformName").isBlank())details="Quai "+text(leg,"startPlatformName")+" · ";int count=leg.has("stops")?leg.get("stops").getAsInt():-1;
                     details+=time(leg,"startTime")+" → "+time(leg,"endTime");if(count>0)details+=" · "+count+" arrêts";else if(leg.has("walkingDistance")&&leg.get("walkingDistance").getAsLong()>0)details+=" · "+leg.get("walkingDistance").getAsLong()+" m à pied";
