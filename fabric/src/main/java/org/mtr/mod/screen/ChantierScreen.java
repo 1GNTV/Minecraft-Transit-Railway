@@ -47,7 +47,7 @@ public final class ChantierScreen extends Screen {
     }
     private void palette(String wall,String floor,String roof){var q=ChantierClient.plan;ChantierClient.checkpoint();ChantierClient.change(new ChantierPlan(q.parts(),wall,floor,roof,q.platform(),q.spacing(),q.pillars()));refresh();}
     private void load(List<String> ids,int direction){if(ids.isEmpty())return;projectIndex=Math.floorMod(projectIndex+direction,ids.size());ChantierClient.selectProject(ids.get(projectIndex));refresh();}
-    private void draw(Kind kind){ChantierClient.mode=kind;ChantierClient.first=null;onClose();}
+    private void draw(Kind kind){ChantierClient.mode=kind;ChantierClient.cancelPoint();onClose();}
     private boolean materials(){if(fields.isEmpty()||ChantierClient.plan==null)return true;try{var q=ChantierClient.plan;var next=new ChantierPlan(q.parts(),fields.get(0).getValue(),fields.get(1).getValue(),fields.get(2).getValue(),fields.get(3).getValue(),q.spacing(),q.pillars());if(!next.equals(q)){ChantierClient.checkpoint();ChantierClient.change(next);}return true;}catch(RuntimeException e){ChantierClient.message=e.getMessage();return false;}}
     @Override public void onClose(){if(!materials())return;ChantierClient.save();minecraft.setScreen(null);}
     @Override public boolean keyPressed(int key,int scan,int modifiers){if(key==org.lwjgl.glfw.GLFW.GLFW_KEY_DELETE&&(tab==0||tab==2)){ChantierClient.remove();refresh();return true;}return super.keyPressed(key,scan,modifiers);}

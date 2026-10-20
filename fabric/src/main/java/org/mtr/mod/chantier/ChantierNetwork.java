@@ -24,7 +24,7 @@ public final class ChantierNetwork implements SerializedDataBase {
     }
     private static JsonObject json(String s){return s==null||s.isEmpty()?new JsonObject():JsonParser.parseString(s).getAsJsonObject();}
     private static JsonArray array(JsonObject j,String key){return j.has(key)?j.getAsJsonArray(key):new JsonArray();}
-    public static List<long[]> nodes(String raw){List<long[]> result=new ArrayList<>();for(var e:array(json(raw),"rails")){Rail rail=new Rail(new JsonReader(e));JsonObject r=Utilities.getJsonObjectFromData(rail);for(String key:List.of("position1","position2")){JsonObject p=r.getAsJsonObject(key);result.add(new long[]{p.get("x").getAsLong(),p.get("y").getAsLong(),p.get("z").getAsLong()});}}return result;}
+    public static List<long[]> nodes(String raw){List<long[]> result=new ArrayList<>();for(var e:array(json(raw),"rails")){Rail rail=new Rail(new JsonReader(e));JsonObject r=Utilities.getJsonObjectFromData(rail);for(String key:List.of("position1","position2")){JsonObject p=r.getAsJsonObject(key);result.add(new long[]{p.get("x").getAsLong(),p.get("y").getAsLong(),p.get("z").getAsLong(),Math.round(rail.getStartAngle(position(p)).angleDegrees*1000)});}}return result;}
     private static JsonObject snapshot(Data data,JsonObject manifest){
         JsonObject out=new JsonObject();if(manifest.has("station")){long id=manifest.getAsJsonObject("station").get("id").getAsLong();Station s=data.stationIdMap.get(id);if(s!=null)out.add("station",Utilities.getJsonObjectFromData(s));}
         JsonArray rails=new JsonArray(),platforms=new JsonArray();Set<String> railIds=new HashSet<>();for(var e:array(manifest,"rails")){Rail requested=new Rail(new JsonReader(e));Rail actual=data.railIdMap.get(requested.getHexId());if(actual!=null){rails.add(Utilities.getJsonObjectFromData(actual));railIds.add(actual.getHexId());}}
@@ -33,6 +33,7 @@ public final class ChantierNetwork implements SerializedDataBase {
     }
     private static Position position(JsonObject p){return new Position(p.get("x").getAsLong(),p.get("y").getAsLong(),p.get("z").getAsLong());}
     private static void unused(Data data,JsonObject manifest){Set<Long> ids=new HashSet<>();for(var p:array(manifest,"platforms"))ids.add(p.getAsJsonObject().get("id").getAsLong());for(Route route:data.routes)for(var p:route.getRoutePlatforms())if(p.getPlatform()!=null&&ids.contains(p.getPlatform().getId()))throw new IllegalArgumentException("Un quai du chantier est maintenant desservi : retire d’abord sa desserte avant de déplacer ou supprimer les voies.");}
+    private static void unattached(Data data,JsonObject manifest){Set<String> owned=new HashSet<>();for(var e:array(manifest,"rails"))owned.add(new Rail(new JsonReader(e)).getHexId());for(long[] n:nodes(manifest.toString())){var edges=data.positionsToRail.get(new Position(n[0],n[1],n[2]));if(edges!=null)for(Rail r:edges.values())if(!owned.contains(r.getHexId()))throw new IllegalArgumentException("Une voie extérieure est raccordée au chantier : déconnecte-la avant de déplacer les quais.");}}
     private static JsonObject generate(Data data,String project,ChantierPlan blueprint,JsonObject old){
         List<Part> stations=blueprint.parts().stream().filter(p->p.kind()==Kind.STATION).toList();
         JsonObject manifest=new JsonObject();JsonArray rails=new JsonArray();Set<String> oldIds=new HashSet<>();for(var e:array(old,"rails"))oldIds.add(new Rail(new JsonReader(e)).getHexId());
@@ -47,7 +48,7 @@ public final class ChantierNetwork implements SerializedDataBase {
         if(stations.isEmpty()){if(!rails.isEmpty())manifest.add("rails",rails);return manifest;}
         long id=UUID.fromString(project).getMostSignificantBits()&Long.MAX_VALUE;if(id==0)id=1;
         if(data.stationIdMap.containsKey(id)&&!old.has("station"))throw new IllegalArgumentException("Identifiant de gare déjà utilisé.");
-        var seed=Utilities.getJsonObjectFromData(new Station(data));seed.addProperty("id",id);Station station=new Station(new JsonReader(seed),data);station.setName("Gare chantier "+project.substring(0,6));station.setColor(0x347D85);
+        var seed=Utilities.getJsonObjectFromData(new Station(data));seed.addProperty("id",id);Station station=new Station(new JsonReader(old.has("station")?old.get("station"):seed),data);if(!old.has("station")){station.setName("Gare chantier "+project.substring(0,6));station.setColor(0x347D85);}
         long minX=Long.MAX_VALUE,minY=Long.MAX_VALUE,minZ=Long.MAX_VALUE,maxX=Long.MIN_VALUE,maxY=Long.MIN_VALUE,maxZ=Long.MIN_VALUE;
         for(Part p:stations){int m=p.width()/2+2;for(Point v:List.of(p.a(),p.b())){minX=Math.min(minX,(long)Math.floor(v.x())-m);maxX=Math.max(maxX,(long)Math.ceil(v.x())+m);minZ=Math.min(minZ,(long)Math.floor(v.z())-m);maxZ=Math.max(maxZ,(long)Math.ceil(v.z())+m);minY=Math.min(minY,(long)v.y()-1);maxY=Math.max(maxY,(long)v.y()+p.height());}}
         station.setCorners(new Position(minX,minY,minZ),new Position(maxX,maxY,maxZ));for(Station other:data.stations)if(other.getId()!=id&&station.intersecting(other))return new JsonObject();
@@ -56,16 +57,18 @@ public final class ChantierNetwork implements SerializedDataBase {
     public Result run(Simulator data){
         try{
             JsonObject old=json(expected),target=json(desired),actual=snapshot(data,old);
+            boolean sameAssets=array(actual,"rails").equals(array(old,"rails"))&&array(actual,"platforms").equals(array(old,"platforms"));
+            if(action==1&&target.has("preserve"))return new Result(target.toString(),actual.toString(),"","","");
+            if(!actual.equals(old)&&action==0&&sameAssets){JsonObject generated=plan.isEmpty()?new JsonObject():generate(data,project,ChantierPlan.decode(plan),old);if(array(generated,"rails").equals(array(old,"rails")))old=actual;}
             if(!actual.equals(old)){
                 // A pending disk journal can refer to either side of a fully applied network update.
                 if((action==2||action==3)&&!target.entrySet().isEmpty()&&snapshot(data,target).has("station")){old=snapshot(data,target);JsonObject clean=new JsonObject();clean.add("station",old.get("station"));clean.add("rails",old.get("rails"));if(!clean.equals(target))throw new IllegalArgumentException("Les voies du chantier interrompu ont changé.");}
                 else throw new IllegalArgumentException("Les données MTR du chantier ont changé : gare ou voies modifiées dans le dashboard.");
             }
+            if(action==0||action==3){JsonObject generated=plan.isEmpty()?new JsonObject():generate(data,project,ChantierPlan.decode(plan),old);if(action==0&&array(generated,"rails").equals(array(old,"rails"))){generated=old.deepCopy();generated.addProperty("preserve",true);}else {unused(data,old);unattached(data,old);}return new Result(generated.toString(),old.toString(),"","","");}
             unused(data,old);
-            if(action==0||action==3){JsonObject generated=plan.isEmpty()?new JsonObject():generate(data,project,ChantierPlan.decode(plan),old);return new Result(generated.toString(),old.toString(),"","","");}
             DeleteDataRequest delete=new DeleteDataRequest();for(var e:array(old,"rails"))delete.addRailId(new Rail(new JsonReader(e)).getHexId());for(var e:array(old,"platforms"))delete.addPlatformId(e.getAsJsonObject().get("id").getAsLong());if(old.has("station"))delete.addStationId(old.getAsJsonObject("station").get("id").getAsLong());
-            // Do not claim ownership of or remove rails attached by another builder after creation.
-            Set<String> ids=new HashSet<>();for(var e:array(old,"rails"))ids.add(new Rail(new JsonReader(e)).getHexId());for(long[] n:nodes(old.toString()))for(Rail r:data.rails)if(!ids.contains(r.getHexId())&&r.closeTo(new Position(n[0],n[1],n[2]),.1))throw new IllegalArgumentException("Une voie extérieure est raccordée au chantier : déconnecte-la avant de déplacer les quais.");
+            unattached(data,old);
             String deleted=Utilities.getJsonObjectFromData(delete.delete(data)).toString();if(action==2||target.entrySet().isEmpty())return new Result("{}","{}","",deleted,"");
             UpdateDataRequest update=new UpdateDataRequest(data);if(target.has("station"))update.addStation(new Station(new JsonReader(target.get("station")),data));for(var e:array(target,"rails"))update.addRail(new Rail(new JsonReader(e)));String updated=Utilities.getJsonObjectFromData(update.update()).toString();data.sync();
             return new Result(target.toString(),snapshot(data,target).toString(),updated,deleted,"");
