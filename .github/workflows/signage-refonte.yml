@@ -82,7 +82,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always() && steps.build.outcome == 'success'
         with:
-          name: Sillon-Signaletique-Forge-1.20.1
+          name: Sillon-Kit-Gare-Forge-1.20.1
           path: build/signage-delivery
           if-no-files-found: error
       - name: Prepare the native Minecraft visual test world

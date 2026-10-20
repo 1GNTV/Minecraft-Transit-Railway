@@ -34,7 +34,7 @@ public final class StationDecorVisualQa {
                 for(int xx=x-5;xx<=x+5;xx++)for(int zz=z-4;zz<=z+4;zz++)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(xx,3,zz),net.minecraft.world.level.block.Blocks.SMOOTH_QUARTZ.defaultBlockState());
             }
             level.setBlockAndUpdate(net.minecraft.core.BlockPos.of(TEST.asLong()),org.mtr.mod.Blocks.STATION_DECOR.get(DecorKind.BENCH).get().data.defaultBlockState());
-            var player=server.getPlayerList().getPlayer(mc.player.getUUID());if(player!=null){player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));}
+            var player=server.getPlayerList().getPlayer(mc.player.getUUID());if(player!=null){server.getPlayerList().op(player.getGameProfile());player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));}
             mc.execute(()->{stage=0;ticks=0;camera(mc,0);});
         });
     }

@@ -12,7 +12,7 @@ public enum DecorKind {
     PENDANT("pendant","Luminaire suspendu",2.4f,.10f,.28f,"Métal|Bois|Béton|Pierre","Linéaire|Double|Ailettes|Cadre"),
     SCONCE("sconce","Applique murale",.22f,.75f,.14f,"Métal|Pierre|Bois|Béton","Verticale|Bandeau central|Double|Déflecteur"),
     BENCH("bench","Banc continu modulaire",2.4f,.82f,.57f,"Bois|Métal|Béton|Pierre","Dossier|Sans dossier|Double face|Accoudoirs"),
-    LEANING("leaning","Appui debout",2,1,.22f,"Bois|Métal|Béton|Pierre","Lame|Tube|Double face|Avec pieds"),
+    LEANING("leaning","Appui debout",2,1,.22f,"Bois|Métal|Béton|Pierre","Lame|Tube|Double face|Repose-pieds"),
     BIN("bin","Poubelle de tri",1.05f,1,.38f,"Métal|Béton|Bois|Pierre","Trois flux|Deux flux|Un flux|Sac transparent"),
     HELP_POINT("help_point","Borne d’appel voyageurs",.36f,1.5f,.23f,"Métal|Pierre|Béton|Bois","Sur pied|Murale|Double bouton|Capot"),
     INTERCOM("intercom","Interphone de quai",.24f,.40f,.055f,"Métal|Pierre|Béton|Bois","Mural|Encastré|Capot|Double bouton"),

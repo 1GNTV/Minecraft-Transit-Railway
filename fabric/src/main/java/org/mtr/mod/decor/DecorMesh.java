@@ -28,7 +28,7 @@ public final class DecorMesh {
     private String body(){return s.kind().materials.split("\\|")[s.material()].equals("Bois")?"wood":s.kind().materials.split("\\|")[s.material()].equals("Métal")?"metal":s.kind().materials.split("\\|")[s.material()].equals("Pierre")?"stone":"concrete";}
     private void box(double x,double y,double z,double X,double Y,double Z,String mat,int color){
         if(X<=x||Y<=y||Z<=z)return;
-        float u=(float)(X-x),v=(float)(Y-y),d=(float)(Z-z);
+        float u=(float)(X-x),v=(float)(Y-y),d=(float)(Z-z);if(mat.equals("fire")||mat.equals("hazard")){u=v=d=1;}
         face(p(x,y,z),p(x,Y,z),p(X,Y,z),p(X,y,z),mat,color,u,v);
         face(p(X,y,Z),p(X,Y,Z),p(x,Y,Z),p(x,y,Z),mat,color,u,v);
         face(p(x,y,Z),p(x,Y,Z),p(x,Y,z),p(x,y,z),mat,color,d,v);
@@ -85,7 +85,7 @@ public final class DecorMesh {
             }
             case ACOUSTIC -> {
                 b(a,0,z,c,h,Z);frame(w,h,z-.018,.022,d+.028,0x7B8285);
-                if(v==0){face(p(a+.025,.025,Z+.002),p(a+.025,h-.025,Z+.002),p(c-.025,h-.025,Z+.002),p(c-.025,.025,Z+.002),"perforated",s.color(),(float)(w/(16*step)),(float)(h/(16*step)));}
+                if(v==0){face(p(a+.025,.025,Z+.002),p(a+.025,h-.025,Z+.002),p(c-.025,h-.025,Z+.002),p(c-.025,.025,Z+.002),"perforated",s.color(),(float)(w*4),(float)(h*4));}
                 if(v==1){int n=count(w,step,70);for(int i=0;i<n;i++)dark(a+(i+.3)*w/n,.08,Z+.002,a+(i+.5)*w/n,h-.08,Z+.004);}
                 if(v==2){int n=count(h,step,70);for(int i=0;i<n;i++)dark(a+.06,(i+.3)*h/n,Z+.002,c-.06,(i+.4)*h/n,Z+.004);}
             }
@@ -130,12 +130,18 @@ public final class DecorMesh {
             case LEANING -> {
                 for(double xx:new double[]{a+.12,c-.12}){rail(xx,.03,0,xx,h-.08,0,.025);metal(xx-.09,0,-.09,xx+.09,.03,.09);}
                 if(v==1)tube(a,h-.1,0,c,h-.1,0,.07,body(),s.color());else b(a,h-.24,z,c,h,Z);
-                if(v==2)b(a,h-.24,-Z-.14,c,h,-Z-.04);if(v==3)metal(a,h-.08,-.02,c,h-.04,.02);
+                if(v==2)b(a,h-.24,-Z-.14,c,h,-Z-.04);if(v==3)metal(a+.12,.12,-.02,c-.12,.16,.02);
             }
             case BIN -> {
                 int n=v==0?3:v==1?2:1;dark(a+.02,0,z+.02,c-.02,.08,Z-.02);
                 for(int i=0;i<n;i++){double l=a+i*w/n+.012,r=a+(i+1)*w/n-.012;
-                    if(v==3){metal(l,.08,z,r,h,Z);box(l+.03,.1,Z+.002,r-.03,h*.68,Z+.004,"glass",0xBDD8DA);}else b(l,.08,z,r,h,Z);
+                    if(v==3){
+                        for(double xx:new double[]{l+.02,r-.02}){rail(xx,.035,0,xx,h-.10,0,.018);metal(xx-.055,.012,-d*.35,xx+.055,.035,d*.35);}
+                        metal(l,h*.75,z,r,h*.82,z+.025);metal(l,h*.75,Z-.025,r,h*.82,Z);metal(l,h*.75,z,l+.025,h*.82,Z);metal(r-.025,h*.75,z,r,h*.82,Z);
+                        Point[] top={p(l+.03,h*.75,z+.03),p(r-.03,h*.75,z+.03),p(r-.03,h*.75,Z-.03),p(l+.03,h*.75,Z-.03)};
+                        Point[] bottom={p(l+(r-l)*.16,.10,z+d*.22),p(r-(r-l)*.16,.10,z+d*.22),p(r-(r-l)*.16,.10,Z-d*.22),p(l+(r-l)*.16,.10,Z-d*.22)};
+                        for(int q=0;q<4;q++){int Q=(q+1)%4;face(bottom[q],bottom[Q],top[Q],top[q],"glass",0xC6DBD8,1,1);}
+                    }else b(l,.08,z,r,h,Z);
                     box(l+.025,h*.76,Z+.002,r-.025,h*.94,Z+.006,"metal",new int[]{0xD8B834,0x477FAC,0x717C72}[i%3]);
                     dark(l+(r-l)*.15,h*.80,Z+.007,r-(r-l)*.15,h*.90,Z+.010);
                     metal(l+.04,h*.18,Z+.004,r-.04,h*.2,Z+.008);
@@ -154,7 +160,7 @@ public final class DecorMesh {
             case FIRE_CABINET -> {
                 b(a,0,z,c,h,Z);frame(w,h,Z,.035,.025,0xB52B32);
                 if(v!=1){box(a+.04,.045,Z+.002,c-.04,h-.045,Z+.004,"glass",0xA8C2C8);
-                    tube(0,.14,Z+.012,0,h*.63,Z+.012,Math.min(w*.20,.10),"metal",0xD63832);
+                    if(v!=3)tube(0,.14,Z+.012,0,h*.63,Z+.012,Math.min(w*.20,.10),"metal",0xD63832);
                     metal(-w*.14,h*.66,Z+.005,w*.14,h*.70,Z+.035);rail(w*.16,h*.65,Z+.04,w*.17,h*.27,Z+.04,.012);
                 }
                 box(a+.04,h*.80,Z+.028,c-.04,h*.96,Z+.03,"fire",0xFFFFFF);metal(c-.08,h*.42,Z+.03,c-.05,h*.55,Z+.05);
@@ -174,7 +180,7 @@ public final class DecorMesh {
             }
             case HANDRAIL,BALUSTRADE -> {
                 boolean guard=s.kind()==DecorKind.BALUSTRADE;double rise=guard?0:v==1?h*.65:v==2?-h*.65:0;double end=h+rise;
-                tube(a,h,0,c,end,0,.028,body(),s.color());int n=count(w,1.25,16);
+                tube(a,h,0,c,end,0,Math.min(.08,Math.max(.012,d/2)),body(),s.color());int n=count(w,1.25,16);
                 for(int i=0;i<=n;i++){double xx=a+w*i/n,yy=h+rise*i/n;
                     if(guard){rail(xx,.025,0,xx,yy-.025,0,.022);metal(xx-.07,0,-.07,xx+.07,.025,.07);}
                     else {rail(xx,yy,0,xx,yy-.12,.09,.014);metal(xx-.035,yy-.17,.08,xx+.035,yy-.1,.10);}
