@@ -12,6 +12,7 @@ import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.ClickableWidgetExtension;
 import org.mtr.mapping.mapper.GraphicsHolder;
 import org.mtr.mapping.mapper.GuiDrawing;
+import org.mtr.mapping.mapper.TextHelper;
 import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.data.IGui;
@@ -25,6 +26,9 @@ import java.util.function.Consumer;
 public class WidgetMap extends ClickableWidgetExtension implements IGui {
 
 	private double scale;
+	private java.util.List<org.mtr.mod.builder.MapGeometry.Rect> occupiedLabels = new java.util.ArrayList<>();
+	private Position problemA, problemB;
+	private boolean modern(){return org.mtr.mod.builder.BuilderPreferences.enabled("map");}
 	private double centerX;
 	private double centerY;
 	private IntIntImmutablePair drawArea1, drawArea2;
@@ -77,6 +81,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 
 	@Override
 	public void render(GraphicsHolder graphicsHolder, int mouseX, int mouseY, float delta) {
+		if(modern()){renderModern(graphicsHolder,mouseX,mouseY,delta);return;}
 		final GuiDrawing guiDrawing = new GuiDrawing(graphicsHolder);
 		final DoubleDoubleImmutablePair mouseWorldPos = coordsToWorldPos((double) mouseX - getX2(), mouseY - getY2());
 		final IntIntImmutablePair topLeft = coordsToWorldPos(0, 0);
@@ -183,6 +188,15 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 	@Override
 	public boolean mouseClicked2(double mouseX, double mouseY, int button) {
 		if (isMouseOver2(mouseX, mouseY)) {
+            if(modern() && MinecraftClientData.hasPermission() && mapState != MapState.EDITING_AREA){
+                var hits=new java.util.ArrayList<SavedRailBase<?,?>>();
+                var source=showStations?flatPositionToPlatformMap:flatPositionToSidingMap;
+                source.forEach((pos,values)->values.forEach(r->{double sx=getX2()+(pos.getX()+.5-centerX)*scale+width/2D, sy=getY2()+(pos.getZ()+.5-centerY)*scale+height/2D;if(Math.hypot(mouseX-sx,mouseY-sy)<=9)hits.add(r);}));
+                java.util.function.Consumer<SavedRailBase<?,?>> action=r->{if(mapState==MapState.EDITING_ROUTE)onClickAddPlatformToRoute.accept(r.getId());else onClickEditSavedRail.accept(r);};
+                if(hits.size()==1)action.accept(hits.get(0));
+                else if(!hits.isEmpty())MinecraftClient.getInstance().openScreen(new Screen(new SavedRailPickerScreen(hits,action,MinecraftClient.getInstance().getCurrentScreenMapped())));
+                return true;
+            }
 			if (MinecraftClientData.hasPermission()) {
 				if (mapState == MapState.EDITING_AREA) {
 					drawArea1 = coordsToWorldPos((int) (mouseX - getX2()), (int) (mouseY - getY2()));
@@ -203,6 +217,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 
 	@Override
 	public boolean mouseScrolled2(double mouseX, double mouseY, double amount) {
+		if(modern()){double before=scale;scale=org.mtr.mod.builder.MapGeometry.zoom(scale,amount);centerX=org.mtr.mod.builder.MapGeometry.anchoredCenter(centerX,mouseX-getX2()-width/2D,before,scale);centerY=org.mtr.mod.builder.MapGeometry.anchoredCenter(centerY,mouseY-getY2()-height/2D,before,scale);return true;}
 		final double oldScale = scale;
 		if (oldScale > SCALE_LOWER_LIMIT && amount < 0) {
 			centerX -= (mouseX - getX2() - width / 2D) / scale;
@@ -271,7 +286,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 	}
 
 	public void scale(double amount) {
-		scale *= Math.pow(2, amount);
+		scale *= Math.pow(modern()?1.25:2, amount);
 		scale = MathHelper.clamp(scale, SCALE_LOWER_LIMIT, SCALE_UPPER_LIMIT);
 	}
 
@@ -283,8 +298,8 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 
 	public void startEditingArea(AreaBase<?, ?> editingArea) {
 		mapState = MapState.EDITING_AREA;
-		drawArea1 = new IntIntImmutablePair((int) editingArea.getMinX(), (int) editingArea.getMinY());
-		drawArea2 = new IntIntImmutablePair((int) editingArea.getMaxX(), (int) editingArea.getMaxY());
+		drawArea1 = new IntIntImmutablePair((int) editingArea.getMinX(), (int) editingArea.getMinZ());
+		drawArea2 = new IntIntImmutablePair((int) editingArea.getMaxX(), (int) editingArea.getMaxZ());
 	}
 
 	public void startEditingRoute() {
@@ -388,6 +403,33 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 			drawFromWorldCoords(position.getX() + 0.5, position.getZ() + (i + 0.5) / savedRailCount, (x1, y1) -> graphicsHolder.drawCenteredText(sortedSavedRails.get(index).getName(), getX2() + x1.intValue(), getY2() + y1.intValue() - TEXT_HEIGHT / 2, ARGB_WHITE));
 		}
 	}
+
+    public void focusProblem(Position a,Position b){problemA=a;problemB=b;find(a);}
+    private double sx(double x){return getX2()+(x-centerX)*scale+width/2D;}
+    private double sy(double z){return getY2()+(z-centerY)*scale+height/2D;}
+    private void renderModern(GraphicsHolder g,int mx,int my,float delta){
+        final var ui=new GuiDrawing(g);var data=MinecraftClientData.getDashboardInstance();
+        org.mtr.mod.builder.BuilderUi.rect(g,getX2(),getY2(),width,height,0xFF13202A);
+        if(world!=null){worldMap.tick(World.cast(world),player,delta);worldMap.forEachTile(t->{int x=t.chunkX*16,z=t.chunkZ*16;if(sx(x+16)>=getX2()&&sy(z+16)>=getY2()&&sx(x)<=getX2()+width&&sy(z)<=getY2()+height)drawTextureFromWorldCoords(ui,t.textureId,x,z,x+16,z+16);});}
+        ui.beginDrawingRectangle();ui.drawRectangle(getX2(),getY2(),getX2()+width,getY2()+height,0xA0101C27);
+        // Physical tracks, not straight station-to-station guesses. Geometry remains entirely MTR-owned.
+        for(Rail rail:data.rails){if(!(rail.getTransportMode()==transportMode))continue;var a=rail.railMath.getPosition(0,false);var b=rail.railMath.getPosition(rail.railMath.getLength(),false);if(Math.max(sx(a.x),sx(b.x))<getX2()-200||Math.min(sx(a.x),sx(b.x))>getX2()+width+200||Math.max(sy(a.z),sy(b.z))<getY2()-200||Math.min(sy(a.z),sy(b.z))>getY2()+height+200)continue;
+            double len=rail.railMath.getLength();int samples=Math.max(1,Math.min(96,(int)(len*scale/8)));org.mtr.core.tool.Vector prev=null;
+            for(int i=0;i<=samples;i++){var p=rail.railMath.getPosition(len*i/samples,false);if(prev!=null){double x1=sx(prev.x),y1=sy(prev.z),x2=sx(p.x),y2=sy(p.z);if(x1>=getX2()&&x1<=getX2()+width&&x2>=getX2()&&x2<=getX2()+width&&y1>=getY2()&&y1<=getY2()+height&&y2>=getY2()&&y2<=getY2()+height)org.mtr.mod.builder.BuilderUi.line(ui,x1,y1,x2,y2,rail.isPlatform()?4:1.5,rail.isPlatform()?0xFF74D8CD:0xFF638091);}prev=p;}
+        }
+        if(showStations)for(Station station:data.stations){if(AreaBase.validCorners(station)){drawRectangleFromWorldCoords(ui,station.getMinX(),station.getMinZ(),station.getMaxX(),station.getMaxZ(),0x28000000|station.getColor());}}
+        else for(Depot depot:data.depots)if(depot.isTransportMode(transportMode)&&AreaBase.validCorners(depot))drawRectangleFromWorldCoords(ui,depot.getMinX(),depot.getMinZ(),depot.getMaxX(),depot.getMaxZ(),0x30000000|depot.getColor());
+        if(mapState==MapState.EDITING_AREA&&drawArea1!=null&&drawArea2!=null)drawRectangleFromWorldCoords(ui,drawArea1,drawArea2,0x7074D8CD);
+        var source=showStations?flatPositionToPlatformMap:flatPositionToSidingMap;
+        source.forEach((pos,rails)->{double x=sx(pos.getX()+.5),y=sy(pos.getZ()+.5);if(x<getX2()+6||x>getX2()+width-6||y<getY2()+6||y>getY2()+height-6)return;boolean hover=Math.hypot(mx-x,my-y)<=9;ui.drawRectangle(x-5,y-5,x+5,y+5,hover?0xFF61D4C4:0xFFDFEDF3);ui.drawRectangle(x-2,y-2,x+2,y+2,0xFF172632);});
+        for(Position p:new Position[]{problemA,problemB})if(p!=null){double x=sx(p.getX()),y=sy(p.getZ());if(x>=getX2()+8&&x<=getX2()+width-8&&y>=getY2()+8&&y<=getY2()+height-8){ui.drawRectangle(x-8,y-8,x+8,y+8,0xFFFFB44E);ui.drawRectangle(x-5,y-5,x+5,y+5,0xFF172632);}}
+        if(player!=null)drawPlayerSymbol(ui,player);ui.finishDrawingRectangle();
+        occupiedLabels.clear();var viewport=new org.mtr.mod.builder.MapGeometry.Rect(getX2()+6,getY2()+31,width-12,height-84);
+        if(showStations)for(Station station:data.stations){var p=station.getCenter();if(p==null)continue;String label=station.getName().split("[|]")[0];int tw=GraphicsHolder.getTextWidth(TextHelper.literal(label));var box=org.mtr.mod.builder.MapGeometry.place(sx(p.getX()),sy(p.getZ()),tw+10,16,occupiedLabels,viewport);if(box!=null){org.mtr.mod.builder.BuilderUi.rect(g,box.x(),box.y(),box.w(),box.h(),0xEC172632);org.mtr.mod.builder.BuilderUi.text(g,label,(int)box.x()+5,(int)box.y()+4,0xFFF0F6FA);}}
+        source.forEach((pos,rails)->{double x=sx(pos.getX()+.5),y=sy(pos.getZ()+.5);if(Math.hypot(mx-x,my-y)<=9){String label=rails.size()>1?rails.size()+" quais superposés · cliquer pour choisir":rails.get(0).getName()+" · Y "+rails.get(0).getMidPosition().getY();int tw=GraphicsHolder.getTextWidth(TextHelper.literal(label));int tx=Math.max(getX2()+5,Math.min(getX2()+width-tw-14,mx+12)),ty=Math.max(34,Math.min(getY2()+height-65,my+12));org.mtr.mod.builder.BuilderUi.rect(g,tx,ty,tw+10,18,0xFA172632);org.mtr.mod.builder.BuilderUi.text(g,label,tx+5,ty+5,0xFFFFFFFF);}});
+        drawMousePositionText(g,coordsToWorldPos((double)mx-getX2(),my-getY2()));
+        if(mapState==MapState.EDITING_ROUTE)org.mtr.mod.builder.BuilderUi.text(g,"Itinéraire : cliquer sur les quais dans l’ordre",getX2()+8,36,0xFF61D4C4);
+    }
 
 	@FunctionalInterface
 	public interface OnDrawCorners {

@@ -32,6 +32,9 @@ public final class VehicleResource extends VehicleResourceSchema {
 
 	public final Supplier<VehicleSoundBase> createVehicleSoundBase;
 	public final boolean shouldPreload;
+    private boolean estimatedDoorways;
+    public boolean hasEstimatedDoorways(){return estimatedDoorways;}
+    public boolean hasContextualModels(){return extraModelsSupplier!=null;}
 	@Nullable
 	private final LegacyVehicleSupplier<ObjectArrayList<VehicleModel>> extraModelsSupplier;
 	private final Int2ObjectAVLTreeMap<Int2ObjectAVLTreeMap<ObjectArrayList<VehicleModel>>> allModels = new Int2ObjectAVLTreeMap<>();
@@ -444,6 +447,7 @@ public final class VehicleResource extends VehicleResourceSchema {
 				forEachNonNull(allModelsList, dynamicVehicleModel -> dynamicVehicleModel.writeFloorsAndDoorways(floors, doorways, materialGroupsModel, materialGroupsModelDoorsClosed, objModelsModel, objModelsModelDoorsClosed), force);
 
 				if (floors.isEmpty() && doorways.isEmpty()) {
+                    estimatedDoorways=true;
 					Init.LOGGER.info("[{}] No floors or doorways found in vehicle models", id);
 					final double x1 = width / 2 + 0.25;
 					final double x2 = width / 2 + 0.5;

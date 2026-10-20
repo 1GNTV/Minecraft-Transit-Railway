@@ -87,7 +87,7 @@ public final class ClientPacketHelper {
 	}
 
 	public static void openRailShapeModifierScreen(String railId) {
-		openScreen(new RailModifierScreen(railId), screenExtension -> screenExtension instanceof RailModifierScreen);
+		openScreen(org.mtr.mod.builder.BuilderPreferences.enabled("railEditor") ? new BuilderRailScreen(railId) : new RailModifierScreen(railId), screenExtension -> screenExtension instanceof RailModifierScreen || screenExtension instanceof BuilderRailScreen);
 	}
 
 	public static void openTicketMachineScreen(int balance) {

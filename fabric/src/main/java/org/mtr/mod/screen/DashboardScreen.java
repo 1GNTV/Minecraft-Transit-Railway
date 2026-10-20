@@ -159,7 +159,9 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 		addChild(new ClickableWidget(textFieldCustomDestination));
 		addChild(new ClickableWidget(colorSelector));
 
-		addSelectableChild(new ClickableWidget(widgetMap));
+		addChild(new ClickableWidget(org.mtr.mod.builder.BuilderUi.button(PANEL_WIDTH+8,6,70,"Sillon…",()->MinecraftClient.getInstance().openScreen(new Screen(new BuilderSettingsScreen(new Screen(this)))))));
+        addChild(new ClickableWidget(org.mtr.mod.builder.BuilderUi.button(PANEL_WIDTH+82,6,84,"Diagnostic",()->MinecraftClient.getInstance().openScreen(new Screen(new BuilderDiagnosticsScreen(new Screen(this),(a,b)->widgetMap.focusProblem(a,b)))))));
+        addSelectableChild(new ClickableWidget(widgetMap));
 	}
 
 	@Override
@@ -169,7 +171,7 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 		graphicsHolder.translate(0, 0, 500);
 		final GuiDrawing guiDrawing = new GuiDrawing(graphicsHolder);
 		guiDrawing.beginDrawingRectangle();
-		guiDrawing.drawRectangle(0, 0, PANEL_WIDTH, height, ARGB_BACKGROUND);
+		guiDrawing.drawRectangle(0, 0, PANEL_WIDTH, height, org.mtr.mod.builder.BuilderPreferences.enabled("map")?0xFF182532:ARGB_BACKGROUND);
 		guiDrawing.finishDrawingRectangle();
 		dashboardList.render(graphicsHolder);
 		super.render(graphicsHolder, mouseX, mouseY, delta);

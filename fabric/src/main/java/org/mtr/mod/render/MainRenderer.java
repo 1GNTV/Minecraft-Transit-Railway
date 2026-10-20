@@ -112,6 +112,7 @@ public class MainRenderer extends EntityRenderer<EntityRendering> implements IGu
 			});
 			lastRenderedMillis = InitClient.getGameMillis();
 			WORKER_THREAD.start();
+            org.mtr.mod.client.DoorGuideClient.render();
 			DynamicTextureCache.instance.tick();
 			// Tick the riding cool down (dismount player if they are no longer riding a vehicle) and store the player offset cache
 			VehicleRidingMovement.tick();

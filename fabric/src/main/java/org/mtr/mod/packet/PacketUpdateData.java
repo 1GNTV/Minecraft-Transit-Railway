@@ -70,7 +70,7 @@ public final class PacketUpdateData extends PacketRequestResponseBase {
 		MinecraftServerHelper.iteratePlayers(serverWorld, serverPlayerEntityNew -> Init.REGISTRY.sendPacketToClient(serverPlayerEntityNew, new PacketUpdateData(Utilities.getJsonObjectFromData(updateDataResponse).toString())));
 	}
 
-	private static void update(JsonReader jsonReader) {
+	public static void update(JsonReader jsonReader) {
 		final MinecraftClientData minecraftClientData = MinecraftClientData.getInstance();
 		new UpdateDataResponse(jsonReader, minecraftClientData).write();
 		new UpdateDataResponse(jsonReader, MinecraftClientData.getDashboardInstance()).write();

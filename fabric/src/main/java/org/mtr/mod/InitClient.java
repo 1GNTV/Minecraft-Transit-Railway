@@ -413,6 +413,7 @@ public final class InitClient {
 		REGISTRY_CLIENT.eventRegistryClient.registerStartClientTick(() -> {
 			ensureInitialCustomResources();
 			JcmPresetRecovery.tick();
+            org.mtr.mod.client.DoorGuideClient.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
 			final long millisElapsed = currentMillis - lastMillis;
@@ -476,6 +477,7 @@ public final class InitClient {
 		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(() -> MinecraftClient.getInstance().execute(RenderPANAMPIDS::reset));
 
 		REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(DrivingGuiRenderer::render);
+        REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(org.mtr.mod.client.DoorGuideClient::hud);
 
 		Config.init(MinecraftClient.getInstance().getRunDirectoryMapped());
 
