@@ -26,9 +26,10 @@ public final class ConsistDraft<T> {
     public void replace(List<T> values) { checkpoint(); items.clear(); items.addAll(values); clearSelection(); }
     public void reverse() { checkpoint(); Collections.reverse(items); clearSelection(); }
     public List<T> selectedItems() { List<T> out = new ArrayList<>(); for (int i = selected.nextSetBit(0); i >= 0 && i < items.size(); i = selected.nextSetBit(i + 1)) out.add(items.get(i)); return out; }
-    public void duplicate(int maximum) {
+    public void duplicate(int maximum) {duplicate(maximum,java.util.function.UnaryOperator.identity());}
+    public void duplicate(int maximum,java.util.function.UnaryOperator<T> copy) {
         if (selected.isEmpty() || items.size() + selected.cardinality() > maximum) return;
-        checkpoint(); var copies = selectedItems(); int at = selected.length();
+        checkpoint(); var copies = selectedItems().stream().map(copy).toList(); int at = selected.length();
         items.addAll(at, copies); selected.clear(); selected.set(at, at + copies.size()); anchor = at;
     }
     public List<T> delete() {

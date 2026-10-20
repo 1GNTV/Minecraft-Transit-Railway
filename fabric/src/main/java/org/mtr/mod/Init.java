@@ -131,6 +131,8 @@ public final class Init implements Utilities {
         // New packets are appended: existing MTR/Sillon discriminator IDs stay stable.
         REGISTRY.registerPacket(org.mtr.mod.packet.PacketBuilderPlan.class, org.mtr.mod.packet.PacketBuilderPlan::new);
         REGISTRY.registerPacket(org.mtr.mod.packet.PacketBuilderRail.class, org.mtr.mod.packet.PacketBuilderRail::new);
+        REGISTRY.registerPacket(PacketBuilderJourney.class, PacketBuilderJourney::new);
+        REGISTRY.registerPacket(PacketBuilderWayfinding.class, PacketBuilderWayfinding::new);
 
 		// Register command
 		REGISTRY.registerCommand("mtr", commandBuilderMtr -> {

@@ -55,7 +55,20 @@ public final class BuilderVisualQa {
         mc.getSingleplayerServer().execute(()->{try{
             var server=mc.getSingleplayerServer();var level=server.overworld();for(int x=76;x<=87;x++)for(int z=140;z<=260;z++){level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,3,z),net.minecraft.world.level.block.Blocks.SMOOTH_QUARTZ.defaultBlockState());if(x<=78||x>=82)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(x,4,z),org.mtr.mod.Blocks.PLATFORM.get().data.defaultBlockState());}
             var player=server.getPlayerList().getPlayer(mc.player.getUUID());player.teleportTo(level,84.5,5,242,175,35);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));
-            Init.sendMessageC2S(OperationProcessor.UPDATE_DATA,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),request,response->{PacketUpdateData.sendDirectlyToClientDepotUpdate(new ServerWorld(level),response);var generate=new DepotOperationByIds();generate.addDepotId(depotId);Init.sendMessageC2S(OperationProcessor.GENERATE_BY_DEPOT_IDS,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),generate,null,null);mc.execute(()->fixtureReady=true);},UpdateDataResponse.class);
+            Init.sendMessageC2S(OperationProcessor.UPDATE_DATA,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),request,response->{
+                try {
+                    var actualSiding=response.getSidings().stream().min(Comparator.comparingDouble(q->Math.hypot(q.getMidPosition().getX()-80,q.getMidPosition().getZ()-50))).orElseThrow();
+                    var actualA=response.getPlatforms().stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-200))).orElseThrow();
+                    var actualB=response.getPlatforms().stream().filter(q->q.getMidPosition().getY()==4).min(Comparator.comparingDouble(q->Math.abs(q.getMidPosition().getZ()-360))).orElseThrow();
+                    actualA.setName("1");actualB.setName("2");actualSiding.setName("Navette · 2 voitures");actualSiding.setVehicleCars(cars);actualSiding.setMaxVehicles(0);sidingId=actualSiding.getId();
+                    route.getRoutePlatforms().clear();route.getRoutePlatforms().add(new RoutePlatformData(actualA.getId()));route.getRoutePlatforms().add(new RoutePlatformData(actualB.getId()));route.getRoutePlatforms().add(new RoutePlatformData(actualA.getId()));
+                    var finish=new UpdateDataRequest(data).addPlatform(actualA).addPlatform(actualB).addSiding(actualSiding).addRoute(route);
+                    Init.sendMessageC2S(OperationProcessor.UPDATE_DATA,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),finish,done->{
+                        PacketUpdateData.sendDirectlyToClientDepotUpdate(new ServerWorld(level),response);PacketUpdateData.sendDirectlyToClientDepotUpdate(new ServerWorld(level),done);
+                        var generate=new DepotOperationByIds();generate.addDepotId(depotId);Init.sendMessageC2S(OperationProcessor.GENERATE_BY_DEPOT_IDS,new org.mtr.mapping.holder.MinecraftServer(server),new World(level),generate,null,null);mc.execute(()->fixtureReady=true);
+                    },UpdateDataResponse.class);
+                } catch(Throwable failure){failure.printStackTrace();System.exit(2);}
+            },UpdateDataResponse.class);
         }catch(Throwable error){error.printStackTrace();System.exit(2);}});
     }catch(Throwable error){error.printStackTrace();System.exit(2);}}
     private static void resize(Minecraft mc,boolean small){GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),small?640:1120,small?480:720);mc.options.guiScale().set(2);mc.resizeDisplay();}
@@ -71,7 +84,7 @@ public final class BuilderVisualQa {
         else if(stage==1&&ticks==10){mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID()).setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY));}
         else if(stage==1&&ticks==35){check(DoorGuideClient.markerCount()==0,"Door guides remain without brush");composer=new ConsistBuilderScreen(siding(),null);mc.setScreen(composer);addCar();check(siding().getVehicleCars().size()==2,"Draft modified live siding");next();}
         else if(stage==2&&TrainSilhouetteCache.readyCount()>0&&ticks>90){controls(mc);profilePixels();capture(mc,"consist-large");set(composer,"name","QA navette");call(composer,"savePreset");check(ConsistPresets.load("TRAIN").get("QA navette").size()==3,"Preset not saved");resize(mc,true);next();}
-        else if(stage==3&&ticks==35){controls(mc);capture(mc,"consist-small");composer.onClose2();check(siding().getVehicleCars().size()==2,"Cancel changed live siding");composer=new ConsistBuilderScreen(siding(),null);mc.setScreen(composer);addCar();call(composer,"apply");next();}
+        else if(stage==3&&ticks==35){controls(mc);capture(mc,"consist-small");call(composer,"discard");check(siding().getVehicleCars().size()==2,"Cancel changed live siding");composer=new ConsistBuilderScreen(siding(),null);mc.setScreen(composer);addCar();call(composer,"apply");next();}
         else if(stage==4&&ticks==60){check(siding().getVehicleCars().size()==3,"Consist not acknowledged by real update packet");resize(mc,false);editor=new BuilderRailScreen(railId);mc.setScreen(editor);Rail draft=(Rail)field(editor,"draft");set(editor,"draft",Rail.copy(draft,new ObjectArrayList<String>()));check(BuilderRailRequest.fingerprint(MinecraftClientData.getInstance().railIdMap.get(railId)).equals(originalRail),"Rail draft mutated network");next();}
         else if(stage==5&&ticks==35){controls(mc);capture(mc,"rail-large");resize(mc,true);next();}
         else if(stage==6&&ticks==35){controls(mc);capture(mc,"rail-small");call(editor,"apply");next();}

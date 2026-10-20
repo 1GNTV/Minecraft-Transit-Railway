@@ -33,7 +33,7 @@ jobs:
         run: python tools/complete_signage_refs.py
       - name: Render and exercise the actual compositor and editor model
         run: python tools/test_sillon_signage_reference.py
-      - name: Exercise all twenty modular station families
+      - name: Exercise all modular station families and navigation equipment
         run: python tools/test_station_decor.py
       - name: Publish QA images for review
         if: always()

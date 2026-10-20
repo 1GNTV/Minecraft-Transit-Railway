@@ -11,7 +11,7 @@ public final class DecorRegression {
     static void check(boolean v,String why){if(!v)throw new AssertionError(why);}
     public static void main(String[] args)throws Exception {
         Path out=Path.of("build/decor-review");Files.createDirectories(out.resolve("models"));Files.createDirectories(out.resolve("images"));
-        check(DecorKind.values().length==20,"20 families");int tested=0;
+        check(DecorKind.values().length==22,"22 families");int tested=0;
         for(DecorKind k:DecorKind.values()){
             DecorSpec original=DecorSpec.defaults(k);check(DecorSpec.decode(original.encode()).equals(original),"wire "+k);
             CompoundTag tag=new CompoundTag();original.write(tag);check(DecorSpec.read(tag,k).equals(original),"NBT "+k);

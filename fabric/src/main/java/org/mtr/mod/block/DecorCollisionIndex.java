@@ -36,7 +36,7 @@ public final class DecorCollisionIndex {
         double ox=entity.getBlockPos().getX()+.5+s.x(),oy=entity.getBlockPos().getY()+s.y(),oz=entity.getBlockPos().getZ()+.5+s.z();
         List<AABB> boxes=new ArrayList<>();
         boolean rotated=Math.abs(rotation%90)>.001||Math.abs(s.pitch())>.001;
-        for(var q:mesh.solids()){
+        for(var q:s.kind()==DecorKind.WAYPOINT?List.<DecorMesh.Solid>of():mesh.solids()){
             double dx=q.X()-q.x(),dy=q.Y()-q.y(),dz=q.Z()-q.z();
             int axis=dx>=dy&&dx>=dz?0:dy>=dz?1:2;
             int n=rotated?Math.min(80,Math.max(1,(int)Math.ceil(Math.max(dx,Math.max(dy,dz))/.2))):1;

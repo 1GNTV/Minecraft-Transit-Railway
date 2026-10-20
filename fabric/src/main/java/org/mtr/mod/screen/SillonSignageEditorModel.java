@@ -13,7 +13,7 @@ public final class SillonSignageEditorModel {
         network("stationId","Station associée");network("platformId","Quai associé");network("routeId","Ligne / desserte associée");
         choice("mode","Symbole du mode",SillonSignageBinding.MODES);choice("scope","Stations affichées",SillonSignageBinding.SCOPES);
         choice("routeLayout","Disposition du plan",SillonSignageBinding.LAYOUTS);string("exitFilter","Filtre de sorties (facultatif)");
-        choice("serviceSource","Services affichés",SillonSignageBinding.SERVICES);
+        choice("serviceSource","Services affichés",SillonSignageBinding.SERVICES);choice("guided","Suivre les cheminements au brush",List.of("Non","Oui"));
         choice("arrowsAuto","Flèches selon la position",List.of("Non","Oui"));choice("lineColors","Couleurs depuis la ligne",List.of("Non","Oui"));
         choice("style","Famille de panneau",SillonSignageSpec.STYLES);
         string("notice","Message voyageurs (facultatif)");choice("autoSize","Hauteur adaptée aux arrêts",List.of("Non","Oui"));
@@ -38,7 +38,7 @@ public final class SillonSignageEditorModel {
         choice("row_kind","Type de ligne",SillonSignageRow.KINDS);
         choice("row_arrow","Flèche de cette ligne",List.of("-1","0","1","2","3","4","5","6","7"));
     }
-    public static final List<String> NETWORK=List.of("auto","stationId","platformId","routeId","mode","scope","routeLayout","exitFilter","serviceSource","arrowsAuto","arrow","lineColors");
+    public static final List<String> NETWORK=List.of("auto","stationId","platformId","routeId","mode","scope","routeLayout","exitFilter","serviceSource","guided","arrowsAuto","arrow","lineColors");
     public static final List<String> TEXT=List.of("title","title2","subtitle","auto","arrow");
     public static final List<String> APPEARANCE=List.of("style","profile","sectorSymbol","sectorName","translations","operatorLogo","passedStops","rowScale","autoSize","notice","font","align","freePalette","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
     public static final List<String> POSE=List.of("width","height","mount","offsetX","offsetY","offsetZ","yaw","pitch","roll","thickness","suspension","lit","double");
@@ -58,7 +58,7 @@ public final class SillonSignageEditorModel {
         values.put("profile",d.profile());values.put("sectorSymbol",d.sector());values.put("sectorName",d.sectorName());values.put("translations",d.translations()?"Oui":"Non");values.put("operatorLogo",d.operator()?"Oui":"Non");values.put("passedStops",d.passed()?"Oui":"Non");put("rowScale",d.rowScale());values.put("notice",d.notice());values.put("autoSize",d.autoSize()?"Oui":"Non");
         values.put("stationId",Long.toString(b.stationId()));values.put("platformId",Long.toString(b.platformId()));values.put("routeId",Long.toString(b.routeId()));
         values.put("mode",b.mode());values.put("scope",b.scope());values.put("routeLayout",b.layout());values.put("exitFilter",b.exitFilter());
-        values.put("serviceSource",b.service());values.put("arrowsAuto",b.arrows()?"Oui":"Non");values.put("lineColors",b.lineColors()?"Oui":"Non");
+        values.put("guided",b.guided()?"Oui":"Non");values.put("serviceSource",b.service());values.put("arrowsAuto",b.arrows()?"Oui":"Non");values.put("lineColors",b.lineColors()?"Oui":"Non");
         String[] name=s.title().split("\\|",2);
         values.put("title",name[0]);values.put("title2",name.length>1?name[1]:"");values.put("subtitle",s.subtitle());values.put("style",s.style());
         values.put("auto",s.stationAuto()?"Oui":"Non");values.put("lit",s.illuminated()?"Oui":"Non");
@@ -124,7 +124,7 @@ public final class SillonSignageEditorModel {
         return new SillonSignageSpec(values.get("title")+(values.get("title2").isBlank()?"":"|"+values.get("title2")),values.get("subtitle"),legacyBody,values.get("style"),headerIcons,
             values.get("mount"),Integer.parseInt(values.get("arrow")),c("bg"),c("fg"),c("accent"),n("width"),n("height"),
             n("yaw"),n("pitch"),n("roll"),"Oui".equals(values.get("auto")),"Oui".equals(values.get("lit")),"Oui".equals(values.get("double")),o,rows,new SillonSignageBinding(Long.parseLong(values.get("stationId")),Long.parseLong(values.get("platformId")),Long.parseLong(values.get("routeId")),
-                values.get("mode"),values.get("scope"),values.get("routeLayout"),values.get("exitFilter"),values.get("serviceSource"),"Oui".equals(values.get("arrowsAuto")),"Oui".equals(values.get("lineColors"))),SillonSignagePlan.EMPTY,new SillonSignageDesign(values.get("profile"),values.get("sectorSymbol"),values.get("sectorName"),"Oui".equals(values.get("translations")),"Oui".equals(values.get("operatorLogo")),"Oui".equals(values.get("passedStops")),n("rowScale"),values.get("notice"),"Oui".equals(values.get("autoSize"))));
+                values.get("mode"),values.get("scope"),values.get("routeLayout"),values.get("exitFilter"),values.get("serviceSource"),"Oui".equals(values.get("arrowsAuto")),"Oui".equals(values.get("lineColors")),"Oui".equals(values.get("guided"))),SillonSignagePlan.EMPTY,new SillonSignageDesign(values.get("profile"),values.get("sectorSymbol"),values.get("sectorName"),"Oui".equals(values.get("translations")),"Oui".equals(values.get("operatorLogo")),"Oui".equals(values.get("passedStops")),n("rowScale"),values.get("notice"),"Oui".equals(values.get("autoSize"))));
     }
     public void saveRow() {
         if(selectedRow>=0&&selectedRow<rows.size())rows.set(selectedRow,new SillonSignageRow(

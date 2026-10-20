@@ -22,6 +22,9 @@ public final class PersistentStateData extends PersistenceStateExtension {
 	private static final String PANAM_ROUTES = "sillon_panam_route_ids";
 	private final TreeMap<Long, String> panamRoutes = new TreeMap<>();
 	private String panamGlobal = "";
+    private org.mtr.mod.builder.WalkGraph walking=new org.mtr.mod.builder.WalkGraph();
+    public org.mtr.mod.builder.WalkGraph walking(){return walking;}
+    public void walkingChanged(){markDirty2();}
 
 	public PersistentStateData() {
 		super(Init.MOD_ID);
@@ -30,6 +33,7 @@ public final class PersistentStateData extends PersistenceStateExtension {
 	@Override
 	public void readNbt(CompoundTag compoundTag) {
 		routeIdsWithDisabledAnnouncements.clear();
+        try{walking=org.mtr.mod.builder.WalkGraph.decode(compoundTag.getString("sillon_walking_paths"));}catch(RuntimeException error){Init.LOGGER.error("Invalid saved Sillon walking graph",error);walking=new org.mtr.mod.builder.WalkGraph();}
 		for (final long routeId : compoundTag.getLongArray(KEY_DATA)) {
 			routeIdsWithDisabledAnnouncements.add(routeId);
 		}
@@ -47,6 +51,7 @@ public final class PersistentStateData extends PersistenceStateExtension {
 	public CompoundTag writeNbt2(CompoundTag compoundTag) {
 		compoundTag.putLongArray(KEY_DATA, routeIdsWithDisabledAnnouncements.toLongArray());
 		compoundTag.putString(PANAM_GLOBAL, panamGlobal);
+        compoundTag.putString("sillon_walking_paths",walking.encode());
 		long[] ids = getPanamRouteIds();
 		compoundTag.putLongArray(PANAM_ROUTES, ids);
 		for (long id : ids) compoundTag.putString("sillon_panam_route_" + id, panamRoutes.get(id));

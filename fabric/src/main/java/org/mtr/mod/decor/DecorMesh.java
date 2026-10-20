@@ -203,6 +203,18 @@ public final class DecorMesh {
                     if(v==3)b(l,.12,-.015,r,h-.08,.015);
                 }}else if(v==3)rail(c,h,0,c,h,Math.min(w,2),.028);
             }
+            case WAYPOINT -> {
+                b(a,0,z,c,.035,Z);double yy=.06+v*.04;b(-w*.12,.035,-d*.12,w*.12,yy,d*.12);box(-w*.35,yy,-d*.35,w*.35,yy+.02,d*.35,"accent",s.accent());
+            }
+            case JOURNEY_KIOSK -> {
+                double low=v==1?0:h*.32,top=v==3?h*.72:h;
+                if(v!=1){b(a*.55,0,z*.6,c*.55,low,Z*.6);metal(a-.08,0,z-.08,c+.08,.04,Z+.08);}
+                b(a,low,z,c,top,Z);box(a+.045,low+.08,Z+.002,c-.045,top-.08,Z+.012,"accent",0x142C42);
+                box(a+.08,low+(top-low)*.48,Z+.013,c-.08,top-.13,Z+.016,"glow",0x61D4C4);
+                box(a+.08,low+.12,Z+.013,c-.08,low+(top-low)*.38,Z+.016,"metal",0xCBD9DF);
+                if(v==2){box(a+.045,low+.08,z-.012,c-.045,top-.08,z-.002,"accent",0x142C42);}
+                if(v==3)metal(a,top,z,c,top+.035,Z+.08);
+            }
             case POSTER -> {
                 double low=v==2?h*.30:0;frame(w,h,Z,.028,.018,s.color());b(a,low,z,c,h,Z);
                 face(p(a+.04,low+.04,Z+.021),p(a+.04,h-.04,Z+.021),p(c-.04,h-.04,Z+.021),p(c-.04,low+.04,Z+.021),"poster",0xFFFFFF,1,1);

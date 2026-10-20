@@ -36,6 +36,11 @@ public final class BlockSillonSignage extends BlockWaterloggable implements Dire
     }
     public static final class BlockEntity extends BlockEntityExtension {
         private SillonSignageSpec document=SillonSignageSpec.DEFAULT;
+        private SillonSignageSpec boundsDocument;
+        private net.minecraft.world.phys.AABB renderBounds;
+        @Override public net.minecraft.world.phys.AABB getRenderBoundingBox(){
+            if(boundsDocument!=document||renderBounds==null){var o=document.options();double h=document.design().autoSize()?8:document.height();double radius=Math.hypot(document.width(),h+o.suspension()+1)+Math.abs(o.offsetX())+Math.abs(o.offsetY())+Math.abs(o.offsetZ())+2;renderBounds=new net.minecraft.world.phys.AABB(getBlockPos()).inflate(radius);boundsDocument=document;}return renderBounds;
+        }
         public BlockEntity(BlockPos pos,BlockState state){super(BlockEntityTypes.SILLON_SIGNAGE.get(),pos,state);}
         public SillonSignageSpec document(){return document;}
         public void setDocument(SillonSignageSpec value){

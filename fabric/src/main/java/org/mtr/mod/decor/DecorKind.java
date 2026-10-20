@@ -21,7 +21,9 @@ public enum DecorKind {
     VENT("vent","Grille de ventilation",1.2f,.6f,.08f,"Métal|Béton|Bois|Pierre","Horizontale|Verticale|Maille|Encastrée"),
     HANDRAIL("handrail","Main courante",3,.9f,.055f,"Métal|Bois|Béton|Pierre","Droit|Montant|Descendant|Angle"),
     BALUSTRADE("balustrade","Garde-corps",3,1.1f,.06f,"Métal|Bois|Béton|Pierre","Vitré|Barreaudé|Câbles|Plein"),
-    POSTER("poster","Cadre d’affiche",.85f,1.25f,.06f,"Métal|Bois|Pierre|Béton","Mural|Éclairé|Sur pied|Double face");
+    POSTER("poster","Cadre d’affiche",.85f,1.25f,.06f,"Métal|Bois|Pierre|Béton","Mural|Éclairé|Sur pied|Double face"),
+    JOURNEY_KIOSK("journey_kiosk","Borne d’itinéraire",.8f,1.8f,.35f,"Métal|Bois|Béton|Pierre","Sur pied|Murale|Double face|Basse"),
+    WAYPOINT("waypoint","Point de cheminement au brush",.3f,.2f,.3f,"Métal|Bois|Béton|Pierre","Passage|Palier|Escalier|Ascenseur");
     public final String id,title,materials,variants;
     public final float width,height,depth;
     DecorKind(String id,String title,float width,float height,float depth,String materials,String variants){this.id=id;this.title=title;this.width=width;this.height=height;this.depth=depth;this.materials=materials;this.variants=variants;}

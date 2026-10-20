@@ -52,7 +52,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         int pagerY=height-144;
         button(12,pagerY,25,"‹",()->page=Math.max(0,page-1));
         button(40,pagerY,25,"›",()->page=Math.min(Math.max(0,(matches.size()-1)/perPage()),page+1));
-        button(width-160,pagerY,46,"↶",edit::undo);button(width-110,pagerY,46,"↷",edit::redo);button(width-60,pagerY,48,"+1",()->edit.duplicate(siding.getTransportMode().maxLength));
+        button(width-160,pagerY,46,"↶",edit::undo);button(width-110,pagerY,46,"↷",edit::redo);button(width-60,pagerY,48,"+1",this::duplicateSelection);
         button(width-82,height-121,70,"Inverser",edit::reverse);
         presetName=new TextFieldWidgetExtension(12,height-68,Math.max(65,width-190),18,64,TextCase.DEFAULT,null,"Nom de la composition");
         presetName.setText2(name);presetName.setChangedListener2(t->name=t);addChild(new ClickableWidget(presetName));
@@ -62,6 +62,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         button(84,height-28,94,"Classique",()->MinecraftClient.getInstance().openScreen(new Screen(new VehicleSelectorScreen(siding,previous))));
         button(width-104,height-28,92,"Appliquer",this::apply);
     }
+    private void duplicateSelection(){if(edit.selectedItems().stream().anyMatch(c->!byId.containsKey(c.getVehicleId()))){message="Ressource manquante : duplication impossible.";return;}edit.duplicate(siding.getTransportMode().maxLength,c->car(byId.get(c.getVehicleId())));}
     private void add(VehicleResource r){
         if(draft.size()>=siding.getTransportMode().maxLength){message="Nombre maximal de voitures atteint.";return;}
         edit.add(car(r));message="";scroll=0;
@@ -164,7 +165,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         if(search.isFocused2()||presetName.isFocused2())return super.keyPressed2(key,scan,modifiers);
         if(hasControlDown2()&&key==90){if(hasShiftDown2())edit.redo();else edit.undo();return true;}
         if(hasControlDown2()&&key==89){edit.redo();return true;}
-        if(hasControlDown2()&&key==68){edit.duplicate(siding.getTransportMode().maxLength);return true;}
+        if(hasControlDown2()&&key==68){duplicateSelection();return true;}
         if(key==261){deleteSelection();return true;}return super.keyPressed2(key,scan,modifiers);
     }
     @Override public void tick2(){search.tick2();presetName.tick2();}

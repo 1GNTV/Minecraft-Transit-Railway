@@ -172,7 +172,7 @@ public final class SillonSignageScreen extends ScreenExtension {
     }
     private SillonSignageSpec templateDocument(SillonSignageSpec template){
         var current=model.spec().binding();var next=template.binding();
-        return template.withBinding(new SillonSignageBinding(current.stationId(),current.platformId(),current.routeId(),current.mode(),next.scope(),next.layout(),current.exitFilter(),current.service(),current.arrows(),current.lineColors()));
+        return template.withBinding(new SillonSignageBinding(current.stationId(),current.platformId(),current.routeId(),current.mode(),next.scope(),next.layout(),current.exitFilter(),current.service(),current.arrows(),current.lineColors(),current.guided()));
     }
     private void models(SillonSignageEditorLayout.Rect area) {
         filter.move(area.x(),area.y(),area.w());filter.visible=true;

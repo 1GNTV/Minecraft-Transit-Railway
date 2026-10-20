@@ -24,6 +24,19 @@ public final class BuilderNextRegression {
         try{RegionPolygon.decode("0,0;5,5;0,5;5,0");throw new AssertionError("Self intersection accepted");}catch(IllegalArgumentException expected){}
         try{RegionPolygon.decode("0,0;NaN,1;2,2");throw new AssertionError("NaN accepted");}catch(IllegalArgumentException expected){}
         check(RegionPolygon.decode("")==null,"Legacy rectangle");
+        var graph=new WalkGraph();
+        graph.put(new WalkGraph.Node(0,0,0,0,0,"Départ","passage",0,List.of()));
+        graph.put(new WalkGraph.Node(1,10,0,0,0,"Couloir","passage",0,List.of()));
+        graph.put(new WalkGraph.Node(2,10,4,0,42,"Quai 2","platform",0,List.of()));
+        graph.put(new WalkGraph.Node(3,0,4,0,0,"Escalier","stairs",0,List.of()));
+        graph.link(0,1,true);graph.link(1,2,true);graph.link(0,3,true);graph.link(3,2,true);
+        check(graph.path(0,42,false).stream().map(WalkGraph.Node::id).toList().equals(List.of(0L,3L,2L)),"Shortest authored walk path");
+        check(graph.path(0,42,true).stream().map(WalkGraph.Node::id).toList().equals(List.of(0L,1L,2L)),"Accessible path avoids stairs");
+        check(WalkGraph.decode(graph.encode()).path(0,42,false).size()==3,"Walking topology round trip");
+        graph.remove(3);check(!graph.get(0).links().contains(3L)&&!graph.get(2).links().contains(3L),"Remove reciprocal links");
+        graph.link(1,2,false);check(graph.path(0,42,false).isEmpty(),"No straight-line fallback through walls");
+        check(graph.pathToNode(0,0,false).size()==1,"Zero node ID supported");
+        System.out.println("PASS walking topology, shortest routes, accessibility, persistence and missing connections");
         System.out.println("PASS grouped editing, undo/redo, deletion, concave areas, boundaries, margins, intersections, persistence and triangulation");
     }
 }

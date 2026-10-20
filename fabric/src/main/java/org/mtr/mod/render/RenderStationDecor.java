@@ -48,7 +48,7 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
         }
     }
     @Override public void render(BlockStationDecor.BlockEntity entity,float tick,GraphicsHolder g,int light,int overlay){
-        World world=entity.getWorld2();if(world==null)return;DecorSpec s=entity.spec();BlockPos pos=entity.getPos2();
+        World world=entity.getWorld2();if(world==null)return;DecorSpec s=entity.spec();if(s.kind()==DecorKind.WAYPOINT){var player=MinecraftClient.getInstance().getPlayerMapped();if(player==null||!player.isHolding(org.mtr.mod.Items.BRUSH.get().asItem()))return;}BlockPos pos=entity.getPos2();
         Direction facing=IBlock.getStatePropertySafe(world,pos,BlockStationDecor.FACING);
         g.push();try{g.translate(.5+s.x(),s.y(),.5+s.z());g.rotateYDegrees(-facing.asRotation()+s.yaw());g.rotateXDegrees(s.pitch());draw(g,s,light,255);}finally{g.pop();}
         if(!OptimizedRenderer.renderingShadows())DecorBrushClient.drawGhosts(pos,g,light);

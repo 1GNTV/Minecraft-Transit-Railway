@@ -43,6 +43,7 @@ public final class SillonSignageNetwork {
         }
         if(scan.cursor>=2601){SERVICES.put(scan.cell,new ServiceEntry(System.currentTimeMillis(),List.copyOf(scan.found.values())));it.remove();}
     }
+    public static void invalidateWayfinding(){CACHE.clear();}
     private SillonSignageNetwork(){}
     public static void accept(JsonReader reader){
         ClientData data=new ClientData();new ListDataResponse(reader,data).write();full=data;serial++;built=0;CACHE.clear();
@@ -69,6 +70,7 @@ public final class SillonSignageNetwork {
         if(world!=null&&Set.of("services","interchange","custom").contains(spec.style()))data=nearbyServices(data,context,spec.binding().stationId(),new World(world.data),pos);
         var result=SillonSignageAutomatic.resolve(spec,data,context);
         if("digital".equals(spec.style()))result=departures(result,data);
+        if(spec.binding().guided())result=SignageWayfinding.resolve(result,data,context);
         CACHE.put(key,new Entry(now,revision,result));return result;
     }
     private static SillonSignageNetworkSnapshot nearbyServices(SillonSignageNetworkSnapshot data,SillonSignageAutomatic.Context context,long boundStation,World world,BlockPos origin){

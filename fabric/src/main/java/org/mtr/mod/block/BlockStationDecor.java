@@ -20,8 +20,14 @@ public final class BlockStationDecor extends BlockWaterloggable implements Direc
     @Override public BlockRenderType getRenderType2(BlockState state){return BlockRenderType.getEntityblockAnimatedMapped();}
     @Override public BlockEntityExtension createBlockEntity(BlockPos pos,BlockState state){return new BlockEntity(pos,state,kind);}
     @Override public ActionResult onUse2(BlockState state,World world,BlockPos pos,PlayerEntity player,Hand hand,BlockHitResult hit){
+        if(kind==DecorKind.JOURNEY_KIOSK&&!player.isHolding(org.mtr.mod.Items.BRUSH.get().asItem())){if(!world.isClient())Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player),new PacketOpenBlockEntityScreen(pos));return ActionResult.SUCCESS;}
+        if(kind==DecorKind.WAYPOINT&&player.isSneaking())return IBlock.checkHoldingBrush(world,player,()->org.mtr.mod.packet.PacketBuilderWayfinding.select(ServerPlayerEntity.cast(player),pos));
         if(player.isSneaking())return ActionResult.PASS;
         return IBlock.checkHoldingBrush(world,player,()->Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player),new PacketOpenBlockEntityScreen(pos)));
+    }
+    @Override public void onStateReplaced2(BlockState before,World world,BlockPos pos,BlockState after,boolean moved){
+        if(kind==DecorKind.WAYPOINT&&!world.isClient()&&before.getBlock().data!=after.getBlock().data){var save=(org.mtr.mod.data.PersistentStateData)org.mtr.mapping.mapper.PersistenceStateExtension.register(new ServerWorld(world.data),org.mtr.mod.data.PersistentStateData::new,Init.MOD_ID);save.walking().remove(pos.asLong());save.walkingChanged();}
+        super.onStateReplaced2(before,world,pos,after,moved);
     }
     public static final class BlockEntity extends BlockEntityExtension {
         private DecorSpec spec;

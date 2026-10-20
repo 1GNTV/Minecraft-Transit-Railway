@@ -20,7 +20,9 @@ public final class ClientPacketHelper {
 	public static void openBlockEntityScreen(BlockPos blockPos) {
 		getBlockEntity(blockPos, blockEntity -> {
 			if (blockEntity.data instanceof BlockStationDecor.BlockEntity decor) {
-                openScreen(new StationDecorScreen(blockPos,decor.spec()), screenExtension -> screenExtension instanceof StationDecorScreen);
+                if(decor.spec().kind()==org.mtr.mod.decor.DecorKind.WAYPOINT){org.mtr.mod.client.WayfindingClient.refresh();openScreen(new WaypointScreen(blockPos),screen->screen instanceof WaypointScreen);}
+                else if(decor.spec().kind()==org.mtr.mod.decor.DecorKind.JOURNEY_KIOSK&&!MinecraftClient.getInstance().getPlayerMapped().isHolding(org.mtr.mod.Items.BRUSH.get().asItem()))openScreen(new JourneyScreen(null),screen->screen instanceof JourneyScreen);
+                else openScreen(new StationDecorScreen(blockPos,decor.spec()), screenExtension -> screenExtension instanceof StationDecorScreen);
             } else if (blockEntity.data instanceof BlockSillonSignage.BlockEntity) {
                 openScreen(new SillonSignageScreen(blockPos,(BlockSillonSignage.BlockEntity)blockEntity.data),
                     screenExtension -> screenExtension instanceof SillonSignageScreen);

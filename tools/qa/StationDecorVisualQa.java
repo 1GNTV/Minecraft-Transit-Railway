@@ -19,6 +19,7 @@ import java.util.*;
 public final class StationDecorVisualQa {
     private static boolean active;
     private static int stage,ticks;
+    private static final int FAMILIES=DecorKind.values().length;
     private static final BlockPos TEST=new BlockPos(0,4,110);
     public static void register(){MinecraftForge.EVENT_BUS.addListener(StationDecorVisualQa::tick);}
     public static void begin(Minecraft mc){
@@ -34,6 +35,11 @@ public final class StationDecorVisualQa {
                 for(int xx=x-5;xx<=x+5;xx++)for(int zz=z-4;zz<=z+4;zz++)level.setBlockAndUpdate(new net.minecraft.core.BlockPos(xx,3,zz),net.minecraft.world.level.block.Blocks.SMOOTH_QUARTZ.defaultBlockState());
             }
             level.setBlockAndUpdate(net.minecraft.core.BlockPos.of(TEST.asLong()),org.mtr.mod.Blocks.STATION_DECOR.get(DecorKind.BENCH).get().data.defaultBlockState());
+            var seat=new net.minecraft.world.phys.AABB(1.25,4.48,110.4,1.45,4.52,110.6);
+            if(!level.getBlockCollisions(null,seat).iterator().hasNext())throw new IllegalStateException("Missing extended bench collision beyond anchor");
+            var gap=new net.minecraft.world.phys.AABB(1.02,4.12,110.45,1.08,4.20,110.55);
+            if(level.getBlockCollisions(null,gap).iterator().hasNext())throw new IllegalStateException("Bench collision fills the space below the seat");
+            System.out.println("DECOR_QA_COLLISIONS extended seat and empty under-seat space verified");
             var player=server.getPlayerList().getPlayer(mc.player.getUUID());if(player!=null){
                 for(DecorKind k:DecorKind.values()){
                     var block=org.mtr.mod.Blocks.STATION_DECOR.get(k).get().data;
@@ -72,21 +78,21 @@ public final class StationDecorVisualQa {
         if(!active||event.phase!=TickEvent.Phase.END||stage<0)return;Minecraft mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;
         try{
             ticks++;
-            if(stage<20){
+            if(stage<FAMILIES){
                 if(ticks==70){String name=String.format(Boolean.getBoolean("sillon.qa.shader")?"decor-shader-%02d.png":"decor-world-%02d.png",stage);Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),message->System.out.println("DECOR_QA_CAPTURE "+message.getString()));}
-                if(ticks>=85){stage++;ticks=0;if(stage<20)camera(mc,stage);else {mc.getSingleplayerServer().execute(()->{var p=mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());if(p!=null)p.teleportTo(mc.getSingleplayerServer().overworld(),.5,5,107,0,0);});setupUi(mc,0);}}
-            }else if(stage<28){
-                if(ticks==30){checkUi(mc);Screenshot.grab(mc.gameDirectory,String.format("decor-ui-%02d.png",stage-20),mc.getMainRenderTarget(),message->System.out.println("DECOR_QA_UI "+message.getString()));}
-                if(ticks>=40){stage++;ticks=0;if(stage<28)setupUi(mc,stage-20);else {mc.setScreen(null);packet(mc,0);}}
-            }else if(stage==28&&ticks==35){
+                if(ticks>=85){stage++;ticks=0;if(stage<FAMILIES)camera(mc,stage);else {mc.getSingleplayerServer().execute(()->{var p=mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID());if(p!=null)p.teleportTo(mc.getSingleplayerServer().overworld(),.5,5,107,0,0);});setupUi(mc,0);}}
+            }else if(stage<FAMILIES+8){
+                if(ticks==30){checkUi(mc);Screenshot.grab(mc.gameDirectory,String.format("decor-ui-%02d.png",stage-FAMILIES),mc.getMainRenderTarget(),message->System.out.println("DECOR_QA_UI "+message.getString()));}
+                if(ticks>=40){stage++;ticks=0;if(stage<FAMILIES+8)setupUi(mc,stage-FAMILIES);else {mc.setScreen(null);packet(mc,0);}}
+            }else if(stage==FAMILIES+8&&ticks==35){
                 var be=mc.level.getBlockEntity(net.minecraft.core.BlockPos.of(TEST.asLong()));if(!(be instanceof BlockStationDecor.BlockEntity d)||d.spec().color()!=0x275E91)throw new IllegalStateException("Decor brush edit not synchronized");packet(mc,2);stage++;ticks=0;
-            }else if(stage==29&&ticks==35){
+            }else if(stage==FAMILIES+9&&ticks==35){
                 for(int x:new int[]{3,6}){var be=mc.level.getBlockEntity(new net.minecraft.core.BlockPos(x,4,110));if(!(be instanceof BlockStationDecor.BlockEntity d)||d.spec().color()!=0x275E91)throw new IllegalStateException("Brush repetition failed");}
                 packet(mc,3);stage++;ticks=0;
-            }else if(stage==30&&ticks==35){
+            }else if(stage==FAMILIES+10&&ticks==35){
                 for(int x:new int[]{3,6})if(!mc.level.getBlockState(new net.minecraft.core.BlockPos(x,4,110)).isAir())throw new IllegalStateException("Undo did not restore air");
                 String file=Boolean.getBoolean("sillon.qa.shader")?"decor-shader-qa-success.txt":"decor-native-qa-success.txt";
-                Files.writeString(Path.of(file),"20 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");System.out.println("DECOR_QA_SUCCESS");active=false;BuilderVisualQa.begin(mc);
+                Files.writeString(Path.of(file),"22 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.");System.out.println("DECOR_QA_SUCCESS");active=false;BuilderVisualQa.begin(mc);
             }
         }catch(Throwable e){e.printStackTrace();System.exit(2);}
     }
