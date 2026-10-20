@@ -42,7 +42,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private void refresh(){MinecraftClient.getInstance().openScreen(new Screen(this));}
     private void button(int x,int y,int w,String text,Runnable action){addChild(new ClickableWidget(BuilderUi.button(x,y,w,text,action)));}
     private int carY(){return height-100;}
-    private int perPage(){return columns*rows;}
+    private int perPage(){return Math.min(columns*rows,TrainSilhouetteCache.MAX_CATALOG_PROFILES);}
     private int cardY(int n){return 50+(n/columns)*48;}
     private int cardX(int n){return 12+(n%columns)*cellWidth;}
     @Override protected void init2(){
@@ -100,7 +100,9 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private int insertion(double x){double[] p=positions();for(int i=0;i<draft.size();i++)if(x<(p[i]+p[i+1])/2)return i;return draft.size();}
     private void deleteSelection(){double[] p=positions();var removed=new ArrayList<Removal>();for(int i=0;i<draft.size();i++)if(edit.selected(i))removed.add(new Removal(byId.get(draft.get(i).getVehicleId()),i,draft.size(),p[i],p[i+1]-p[i]-3));edit.delete();deleted=List.copyOf(removed);deletedAt=System.nanoTime();message=deleted.isEmpty()?"":"Voitures supprimées · Ctrl+Z pour rétablir";}
     @Override public void render(GraphicsHolder g,int mx,int my,float dt){
-        mouseX=mx;mouseY=my;TrainSilhouetteCache.pump();
+        mouseX=mx;mouseY=my;TrainSilhouetteCache.beginFrame();
+        double[] visiblePositions=positions();
+        for(int i=0;i<draft.size();i++){if(visiblePositions[i]<12||visiblePositions[i+1]-3>width-12)continue;VehicleResource r=byId.get(draft.get(i).getVehicleId());if(r!=null)TrainSilhouetteCache.request(r,i,draft.size(),true);}
         long now=System.nanoTime();double smooth=1-Math.exp(-Math.min(.1,(now-lastFrame)/1e9)*18);lastFrame=now;
         BuilderUi.rect(g,0,0,width,height,BuilderUi.BG);
         BuilderUi.text(g,"SILLON  /  COMPOSITION DE RAME",12,11,BuilderUi.ACCENT);
@@ -142,6 +144,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
             for(int i=0;i<visible;i++){var c=chosen.get(i);profile(g,byId.get(c.getVehicleId()),draft.indexOf(c),draft.size(),gx+5+i*(gw-10)/Math.max(1,visible),gy+3,(gw-10)/Math.max(1,visible)-2,23);}
             BuilderUi.text(g,chosen.size()+" voiture(s)",gx+7,gy+31,BuilderUi.TEXT);
         }
+        TrainSilhouetteCache.pump();
     }
     @Override public boolean mouseClicked2(double mx,double my,int button){
         if(super.mouseClicked2(mx,my,button))return true;if(button!=0)return false;
