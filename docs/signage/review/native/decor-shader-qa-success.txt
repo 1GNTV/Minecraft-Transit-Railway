@@ -1,0 +1,1 @@
+20 native object views; 8 editor views at 2 resolutions; real brush packet save, server/client sync, repeat and undo verified.
