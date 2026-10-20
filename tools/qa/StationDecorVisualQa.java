@@ -45,11 +45,13 @@ public final class StationDecorVisualQa {
     }
     private static void setupUi(Minecraft mc,int n)throws Exception {
         GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),n<4?1120:640,n<4?720:480);mc.options.guiScale().set(2);mc.resizeDisplay();mc.options.hideGui=false;
-        StationDecorScreen screen=new StationDecorScreen(TEST,DecorSpec.defaults(DecorKind.BENCH));mc.setScreen(screen);
+        StationDecorScreen screen=n==4&&mc.screen instanceof StationDecorScreen existing?existing:new StationDecorScreen(TEST,DecorSpec.defaults(DecorKind.BENCH));if(mc.screen!=screen)mc.setScreen(screen);
         Field tab=screen.getClass().getDeclaredField("tab");tab.setAccessible(true);tab.setInt(screen,n%4);Method arrange=screen.getClass().getDeclaredMethod("arrange");arrange.setAccessible(true);arrange.invoke(screen);
     }
     private static void checkUi(Minecraft mc)throws Exception {
         var screen=mc.screen;List<net.minecraft.client.gui.components.AbstractWidget> widgets=new ArrayList<>();
+        Field controlField=screen.getClass().getDeclaredField("controls");controlField.setAccessible(true);
+        for(Object control:(List<?>)controlField.get(screen))if(control instanceof net.minecraft.client.gui.components.AbstractWidget widget&&widget.visible&&!screen.children().contains(widget))throw new IllegalStateException("Visible control lost during resize");
         for(var child:screen.children())if(child instanceof net.minecraft.client.gui.components.AbstractWidget w&&w.visible){
             if(w.getX()<0||w.getY()<0||w.getX()+w.getWidth()>screen.width||w.getY()+w.getHeight()>screen.height)throw new IllegalStateException("Decor widget outside viewport");
             for(var b:widgets)if(w.getX()<b.getX()+b.getWidth()&&w.getX()+w.getWidth()>b.getX()&&w.getY()<b.getY()+b.getHeight()&&w.getY()+w.getHeight()>b.getY())throw new IllegalStateException("Decor widgets overlap");widgets.add(w);
