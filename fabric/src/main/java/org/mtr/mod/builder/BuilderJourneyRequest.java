@@ -32,15 +32,33 @@ public final class BuilderJourneyRequest implements SerializedDataBase {
                     Station from=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(startId)).findFirst().orElse(null),to=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(endId)).findFirst().orElse(null);
                     leg.addProperty("from",from==null?previousStation:from.getName());leg.addProperty("to",to==null?end.getName():to.getName());previousStation=to==null?end.getName():to.getName();
                     leg.addProperty("line",route==null?"À pied":route.getRouteNumber().isBlank()?route.getName():route.getRouteNumber());leg.addProperty("color",route==null?0x6E8798:route.getColor());
-                    int stops=-1,first=-1,last=-1;
-                    if(route!=null)for(int i=0;i<route.getRoutePlatforms().size();i++){Platform p=route.getRoutePlatforms().get(i).getPlatform();if(p==null||p.area==null)continue;if(first<0&&p.area.getHexId().equalsIgnoreCase(startId))first=i;else if(first>=0&&p.area.getHexId().equalsIgnoreCase(endId)){last=i;break;}}
-                    if(first>=0&&last>first)stops=last-first;leg.addProperty("stops",stops);leg.addProperty("direction",route!=null&&first>=0?route.getDestination(first):"");legs.add(leg);
+                    var details=routeDetails(route,startId,endId,leg.get("startPlatformName").getAsString(),leg.get("endPlatformName").getAsString());leg.addProperty("stops",details.stops());leg.addProperty("direction",details.direction());legs.add(leg);
                     if(legs.size()>=40)break;
                 }
                 result.add("legs",legs);if(legs.isEmpty())result.addProperty("error","Aucun itinéraire disponible dans les horaires MTR.");String raw=result.toString();callback.accept(raw.length()<27000?raw:error("Itinéraire trop détaillé : choisis une étape intermédiaire."));
             }catch(RuntimeException failure){callback.accept(error("Le calcul MTR n’a pas fourni un itinéraire lisible."));}
         }));
         return new BuilderPlanRequest.Response("");
+    }
+    public record LegDetails(int stops,String direction){}
+    /** The native response identifies station and platform names, not a stop index.
+     * Repeated visits must be disambiguated before reporting a direction or stop count. */
+    public static LegDetails routeDetails(Route route,String from,String to,String fromPlatform,String toPlatform){
+        LegDetails unknown=new LegDetails(-1,"");if(route==null)return unknown;
+        java.util.Set<LegDetails> matches=new java.util.LinkedHashSet<>();
+        var stops=route.getRoutePlatforms();
+        for(int i=0;i<stops.size();i++){
+            Platform start=stops.get(i).getPlatform();
+            if(!matches(start,from,fromPlatform))continue;
+            for(int j=i+1;j<stops.size();j++){
+                Platform end=stops.get(j).getPlatform();if(end==null||end.area==null)break;
+                if(matches(end,to,toPlatform)){matches.add(new LegDetails(j-i,route.getDestination(i)));break;}
+            }
+        }
+        return matches.size()==1?matches.iterator().next():unknown;
+    }
+    private static boolean matches(Platform platform,String station,String name){
+        return platform!=null&&platform.area!=null&&station!=null&&platform.area.getHexId().equalsIgnoreCase(station)&&(name==null||name.isBlank()||platform.getName().equals(name));
     }
     private static Position position(Station station){
         Position center=station.getCenter();if(station.savedRails.isEmpty())return center;

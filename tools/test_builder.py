@@ -5,10 +5,11 @@ root=Path(__file__).resolve().parents[1]
 out=root/'build/builder-headless';out.mkdir(parents=True,exist_ok=True)
 jar=root/'build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar'
 source=root/'fabric/src/main/java/org/mtr/mod/builder'
-subprocess.run(['javac','--release','17','-cp',str(jar),'-d',str(out),*[str(source/(x+'.java')) for x in ['MapGeometry','DoorGuideGeometry','ConsistPresets','ConsistDraft','RegionPolygon','WalkGraph']],str(root/'tools/builder/BuilderRegression.java'),str(root/'tools/builder/BuilderNextRegression.java')],check=True)
+subprocess.run(['javac','--release','17','-cp',str(jar),'-d',str(out),*[str(source/(x+'.java')) for x in ['MapGeometry','DoorGuideGeometry','ConsistPresets','ConsistDraft','RegionPolygon','WalkGraph']],str(root/'tools/builder/BuilderRegression.java'),str(root/'tools/builder/BuilderNextRegression.java'),str(root/'tools/builder/BuilderJourneyRegression.java')],check=True)
 run=out/'run';run.mkdir(exist_ok=True)
 subprocess.run(['java','-cp',str(out)+os.pathsep+str(jar),'BuilderRegression'],cwd=run,check=True)
 subprocess.run(['java','-cp',str(out)+os.pathsep+str(jar),'BuilderNextRegression'],cwd=run,check=True)
+subprocess.run(['java','-cp',str(out)+os.pathsep+str(jar),'BuilderJourneyRegression'],cwd=run,check=True)
 # Existing packet discriminators must retain their exact order.
 import re
 init=(root/'fabric/src/main/java/org/mtr/mod/Init.java').read_text()
