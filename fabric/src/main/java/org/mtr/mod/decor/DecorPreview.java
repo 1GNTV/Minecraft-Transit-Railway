@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 /** Deterministic orthographic renderer of production meshes; used by the editor and audit. */
 public final class DecorPreview {
     private static final Map<String,BufferedImage> TEXTURES=new HashMap<>();
+    private static volatile java.util.function.Function<String,BufferedImage> resolver=path->null;
+    public static void setResourceResolver(java.util.function.Function<String,BufferedImage> f){resolver=f;}
     private record P(double x,double y,double z) {}
     private record Poly(DecorMesh.Face f,P[] p,double z) {}
     private static BufferedImage texture(String key){synchronized(TEXTURES){return TEXTURES.computeIfAbsent(key,k->{try(var in=DecorPreview.class.getResourceAsStream("/assets/mtr/textures/decor/"+k+".png")){return ImageIO.read(in);}catch(Exception e){return new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB);}});}}
@@ -30,7 +32,7 @@ public final class DecorPreview {
             double ny=(f.b().z()-f.a().z())*(f.c().x()-f.a().x())-(f.b().x()-f.a().x())*(f.c().z()-f.a().z());
             double nz=(f.b().x()-f.a().x())*(f.c().y()-f.a().y())-(f.b().y()-f.a().y())*(f.c().x()-f.a().x());double len=Math.sqrt(nx*nx+ny*ny+nz*nz);
             double shade=f.surface().equals("glow")?1:.66+.30*Math.abs((nx*.3+ny*.8+nz*.5)/Math.max(.0001,len));
-            BufferedImage tex=texture(f.surface());
+            BufferedImage tex=texture(f.surface());if(f.surface().equals("poster")&&!s.image().isEmpty()){BufferedImage custom=resolver.apply(s.image());if(custom!=null)tex=custom;}
             if(f.surface().equals("label")){tex=new BufferedImage(512,128,BufferedImage.TYPE_INT_RGB);Graphics2D gg=tex.createGraphics();gg.setColor(new Color(s.accent()));gg.fillRect(0,0,512,128);gg.setColor(Color.WHITE);gg.setFont(new Font("SansSerif",Font.BOLD,44));gg.drawString(s.label(),12,80);gg.dispose();}
             tri(out,tex,depth,z,x,y,new int[]{0,1,2},new double[]{0,0,f.u()},new double[]{f.v(),0,0},f.color(),shade,f.surface().equals("glass")?.28:1);
             tri(out,tex,depth,z,x,y,new int[]{0,2,3},new double[]{0,f.u(),f.u()},new double[]{f.v(),0,f.v()},f.color(),shade,f.surface().equals("glass")?.28:1);

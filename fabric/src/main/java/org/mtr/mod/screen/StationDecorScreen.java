@@ -27,7 +27,7 @@ public final class StationDecorScreen extends ScreenExtension {
     private static final String[] TAB_NAMES={"Dimensions","Finition","Pose","Groupe"};
     private static final Map<String,String> LABELS=new LinkedHashMap<>();
     static {String[][] labels={{"width","Largeur (blocs)"},{"height","Hauteur (blocs)"},{"depth","Profondeur (blocs)"},{"spacing","Pas des lames / nervures"},{"suspension","Suspension (blocs)"},{"color","Couleur principale #RRGGBB"},{"accent","Couleur d’accent #RRGGBB"},{"yaw","Rotation horizontale (°)"},{"pitch","Inclinaison (°)"},{"x","Décalage X monde"},{"y","Décalage Y monde"},{"z","Décalage Z monde"},{"image","Image du resource pack : namespace:…png"},{"label","Identification personnalisée"},{"count","Nombre de copies (1–32)"},{"step","Espacement des ancres (1–16 blocs)"}};for(String[] a:labels)LABELS.put(a[0],a[1]);}
-    public StationDecorScreen(BlockPos pos,DecorSpec spec){this.pos=pos;kind=spec.kind();base=preview=spec;variant=spec.variant();material=spec.material();lit=spec.illuminated();
+    public StationDecorScreen(BlockPos pos,DecorSpec spec){this.pos=pos;kind=spec.kind();base=preview=spec;if(DecorBrushClient.hasGhost(pos)){count=DecorBrushClient.repeatCount;axis=DecorBrushClient.repeatAxis;step=DecorBrushClient.repeatStep;operation=1;tab=3;}variant=spec.variant();material=spec.material();lit=spec.illuminated();
         LABELS.forEach((key,label)->{Input f=new Input(key);inputs.put(key,f);});sync(spec);
         for(int i=0;i<4;i++){final int n=i;tabs[i]=new Btn(TAB_NAMES[i],()->{if(valid()){tab=n;page=0;arrange();}});}
         save=new Btn("Enregistrer",this::apply);close=new Btn("Fermer",()->{DecorBrushClient.clearGhost();super.onClose2();});

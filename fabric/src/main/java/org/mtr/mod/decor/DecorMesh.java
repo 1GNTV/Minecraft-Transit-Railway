@@ -80,7 +80,7 @@ public final class DecorMesh {
             }
             case ACOUSTIC -> {
                 b(a,0,z,c,h,Z);frame(w,h,z-.018,.022,d+.028,0x7B8285);
-                if(v==0){face(p(a+.025,.025,Z+.002),p(a+.025,h-.025,Z+.002),p(c-.025,h-.025,Z+.002),p(c-.025,.025,Z+.002),"perforated",s.color(),(float)(w*4),(float)(h*4));}
+                if(v==0){face(p(a+.025,.025,Z+.002),p(a+.025,h-.025,Z+.002),p(c-.025,h-.025,Z+.002),p(c-.025,.025,Z+.002),"perforated",s.color(),(float)(w/(16*step)),(float)(h/(16*step)));}
                 if(v==1){int n=count(w,step,70);for(int i=0;i<n;i++)dark(a+(i+.3)*w/n,.08,Z+.002,a+(i+.5)*w/n,h-.08,Z+.004);}
                 if(v==2){int n=count(h,step,70);for(int i=0;i<n;i++)dark(a+.06,(i+.3)*h/n,Z+.002,c-.06,(i+.4)*h/n,Z+.004);}
             }

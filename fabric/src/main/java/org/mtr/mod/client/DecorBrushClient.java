@@ -15,6 +15,8 @@ public final class DecorBrushClient {
     private static boolean selecting;
     private static int clicks;
     public static String feedback="";
+    public static int repeatCount=4,repeatAxis,repeatStep=3;
+    public static boolean hasGhost(BlockPos pos){return source!=null&&source.asLong()==pos.asLong()&&!ghosts.isEmpty();}
     private static List<DecorPlacement.Offset> ghosts=List.of();
     public static void select(BlockPos pos,DecorSpec spec){source=pos;document=spec;selecting=true;clicks=0;first=null;last=null;feedback="Maj + clic sur les deux coins de la zone.";}
     public static boolean click(ItemUsageContext context){
@@ -23,7 +25,7 @@ public final class DecorBrushClient {
         else {last=context.getBlockPos();selecting=false;MinecraftClient.getInstance().openScreen(new Screen(new StationDecorScreen(source,document)));}
         return true;
     }
-    public static void ghost(BlockPos pos,DecorSpec spec,int count,int axis,int step){source=pos;document=spec;ghosts=DecorPlacement.repeat(count,axis,step);}
+    public static void ghost(BlockPos pos,DecorSpec spec,int count,int axis,int step){source=pos;document=spec;repeatCount=count;repeatAxis=axis;repeatStep=step;ghosts=DecorPlacement.repeat(count,axis,step);}
     public static void clearGhost(){ghosts=List.of();}
     public static void drawGhosts(BlockPos pos,GraphicsHolder g,int light){
         if(source==null||document==null||source.asLong()!=pos.asLong()||ghosts.isEmpty())return;
