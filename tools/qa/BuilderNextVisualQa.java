@@ -122,7 +122,7 @@ public final class BuilderNextVisualQa {
                 @SuppressWarnings("unchecked") List<VehicleCar> draft=(List<VehicleCar>)field(composer,"draft");check(draft.size()==2,"Grouped trash deletion failed");
                 @SuppressWarnings("unchecked") ConsistDraft<VehicleCar> edit=(ConsistDraft<VehicleCar>)field(composer,"edit");edit.undo();check(draft.size()==4,"Grouped deletion undo failed");
                 call(composer,"discard");String flag=Boolean.getBoolean("sillon.qa.shader")?"builder-next-shader-qa-success.txt":"builder-next-native-qa-success.txt";
-                Files.writeString(Path.of(flag),"Native MTR polygon association, legacy fallback, serialization and real server update; polygon editor at two sizes; real walking node packets and linking, NBT reload and guided panel arrow; native asynchronous MTR journey result and terminal layouts; consist Escape server persistence; grouped drag-to-trash and undo.");System.out.println("BUILDER_NEXT_QA_SUCCESS");active=false;mc.stop();
+                Files.writeString(Path.of(flag),"Native MTR polygon association, legacy fallback, serialization and real server update; polygon editor at two sizes; real walking node packets and linking, NBT reload and guided panel arrow; native asynchronous MTR journey result and terminal layouts; consist Escape server persistence; grouped drag-to-trash and undo.");System.out.println("BUILDER_NEXT_QA_SUCCESS");active=false;ChantierVisualQa.begin(mc);
             }
         }catch(Throwable error){System.err.println("BUILDER_NEXT_QA_FAILED stage="+stage);error.printStackTrace();System.exit(2);}
     }

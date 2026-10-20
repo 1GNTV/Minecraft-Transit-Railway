@@ -7,6 +7,7 @@ import org.mtr.mod.generated.lang.TranslationProvider;
 public final class KeyBindings {
 
 	static {
+        CHANTIER_MENU = InitClient.REGISTRY_CLIENT.registerKeyBinding("key.mtr.chantier", GLFW.GLFW_KEY_G, "key.mtr.category_mtr_keybinding");
 		LIFT_MENU = InitClient.REGISTRY_CLIENT.registerKeyBinding(TranslationProvider.KEY_MTR_LIFT_MENU.key, GLFW.GLFW_KEY_Z, TranslationProvider.CATEGORY_MTR_KEYBINDING.key);
 		TRAIN_ACCELERATE = InitClient.REGISTRY_CLIENT.registerKeyBinding(TranslationProvider.KEY_MTR_TRAIN_ACCELERATE.key, GLFW.GLFW_KEY_UP, TranslationProvider.CATEGORY_MTR_KEYBINDING.key);
 		TRAIN_BRAKE = InitClient.REGISTRY_CLIENT.registerKeyBinding(TranslationProvider.KEY_MTR_TRAIN_BRAKE.key, GLFW.GLFW_KEY_DOWN, TranslationProvider.CATEGORY_MTR_KEYBINDING.key);
@@ -22,6 +23,7 @@ public final class KeyBindings {
 	}
 
 	public static final KeyBinding LIFT_MENU;
+    public static final KeyBinding CHANTIER_MENU;
 	public static final KeyBinding TRAIN_ACCELERATE;
 	public static final KeyBinding TRAIN_BRAKE;
 	public static final KeyBinding TRAIN_TOGGLE_DOORS;

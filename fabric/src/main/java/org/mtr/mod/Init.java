@@ -133,6 +133,7 @@ public final class Init implements Utilities {
         REGISTRY.registerPacket(org.mtr.mod.packet.PacketBuilderRail.class, org.mtr.mod.packet.PacketBuilderRail::new);
         REGISTRY.registerPacket(PacketBuilderJourney.class, PacketBuilderJourney::new);
         REGISTRY.registerPacket(PacketBuilderWayfinding.class, PacketBuilderWayfinding::new);
+        REGISTRY.registerPacket(PacketChantier.class, PacketChantier::new);
 
 		// Register command
 		REGISTRY.registerCommand("mtr", commandBuilderMtr -> {
@@ -272,6 +273,7 @@ public final class Init implements Utilities {
 		});
 
 		REGISTRY.eventRegistry.registerServerStopping(minecraftServer -> {
+            org.mtr.mod.chantier.ChantierServer.stop();
 			if (main != null) {
 				main.stop();
 			}
@@ -280,6 +282,7 @@ public final class Init implements Utilities {
 		});
 
 		REGISTRY.eventRegistry.registerStartServerTick(() -> {
+            org.mtr.mod.chantier.ChantierServer.tick();
 			if (sendWorldTimeUpdate != null && serverTick % (SECONDS_PER_MC_HOUR * 10) == 0) {
 				sendWorldTimeUpdate.run();
 			}
