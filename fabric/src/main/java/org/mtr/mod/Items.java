@@ -12,6 +12,7 @@ public final class Items {
 
 	static {
 		// Brush and dashboards
+        CHANTIER = Init.REGISTRY.registerItem(new Identifier(Init.MOD_ID, "chantier"), settings -> new Item(new ItemChantier(settings)), CreativeModeTabs.CORE);
 		BRUSH = Init.REGISTRY.registerItem(new Identifier(Init.MOD_ID, "brush"), itemSettings -> new Item(new ItemBrush(itemSettings)), CreativeModeTabs.CORE);
 		RAILWAY_DASHBOARD = Init.REGISTRY.registerItem(new Identifier(Init.MOD_ID, "dashboard"), itemSettings -> new Item(new ItemDashboard(TransportMode.TRAIN, itemSettings)), CreativeModeTabs.CORE);
 		BOAT_DASHBOARD = Init.REGISTRY.registerItem(new Identifier(Init.MOD_ID, "dashboard_2"), itemSettings -> new Item(new ItemDashboard(TransportMode.BOAT, itemSettings)), CreativeModeTabs.CORE);
@@ -141,6 +142,7 @@ public final class Items {
 	}
 
 	public static final ItemRegistryObject BRUSH;
+    public static final ItemRegistryObject CHANTIER;
 	public static final ItemRegistryObject AIRPLANE_DASHBOARD;
 	public static final ItemRegistryObject APG_DOOR;
 	public static final ItemRegistryObject APG_GLASS;

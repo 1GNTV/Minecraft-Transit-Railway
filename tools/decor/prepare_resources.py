@@ -15,6 +15,10 @@ for id,title in kinds:
  write(data/f'loot_tables/blocks/{name}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'mtr:'+name}],'conditions':[{'condition':'minecraft:survives_explosion'}]}]})
 for lang in ['fr_fr','en_us']:
  p=assets/f'lang/{lang}.json';value=json.loads(p.read_text()) if p.exists() else {}
+ value['item.mtr.chantier']='Outil Chantier' if lang=='fr_fr' else 'Station Construction Tool'
+ value['key.mtr.chantier']='Réglages du chantier' if lang=='fr_fr' else 'Construction tool settings'
  for id,title in kinds:value['block.mtr.sillon_decor_'+id]='Sillon · '+(title if lang=='fr_fr' else id.replace('_',' ').title())
  write(p,value)
 print('Packaged',len(kinds),'station items, icons and drops')
+
+write(assets/"models/item/chantier.json",{"parent":"minecraft:item/handheld","textures":{"layer0":"minecraft:item/stick","layer1":"mtr:item/brush"}})

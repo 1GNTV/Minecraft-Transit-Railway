@@ -69,6 +69,7 @@ public final class InitClient {
 	}
 
 	public static void init() {
+        org.mtr.mod.client.ChantierClient.register();
 		KeyBindings.init();
 		Init.writeFromClient();
 
@@ -414,6 +415,7 @@ public final class InitClient {
 			ensureInitialCustomResources();
 			JcmPresetRecovery.tick();
             org.mtr.mod.client.DoorGuideClient.tick();
+            org.mtr.mod.client.ChantierClient.tick();
             org.mtr.mod.client.SillonSignageNetwork.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
@@ -479,6 +481,7 @@ public final class InitClient {
 
 		REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(DrivingGuiRenderer::render);
         REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(org.mtr.mod.client.DoorGuideClient::hud);
+        REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(org.mtr.mod.client.ChantierClient::hud);
 
 		Config.init(MinecraftClient.getInstance().getRunDirectoryMapped());
 
