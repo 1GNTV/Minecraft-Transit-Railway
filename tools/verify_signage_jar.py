@@ -6,6 +6,13 @@ with zipfile.ZipFile(jar) as z:
     names=set(z.namelist())
     required=[
 "org/mtr/core/tool/Utilities.class","org/mtr/mod/client/SillonSignagePainter.class",
+"org/mtr/mod/screen/ConsistBuilderScreen.class","org/mtr/mod/screen/PolygonAreaScreen.class",
+"org/mtr/mod/screen/JourneyScreen.class","org/mtr/mod/screen/WaypointScreen.class",
+"org/mtr/mod/builder/ConsistDraft.class","org/mtr/mod/builder/RegionPolygon.class",
+"org/mtr/mod/builder/WalkGraph.class","org/mtr/mod/block/DecorCollisionIndex.class",
+"org/mtr/mod/mixin/DecorCollisionMixin.class","org/mtr/mod/mixin/AreaShapeMixin.class",
+"org/mtr/mod/mixin/AreaShapeSchemaMixin.class",
+"org/mtr/mod/packet/PacketBuilderJourney.class","org/mtr/mod/packet/PacketBuilderWayfinding.class",
 "org/mtr/mod/client/SillonRATPSignageLayouts.class","org/mtr/mod/client/SillonSignageGeometry.class",
 "org/mtr/mod/data/SillonSignageOptions.class","org/mtr/mod/data/SillonSignageRow.class",
 "org/mtr/mod/data/SillonSignageSpec.class","org/mtr/mod/screen/SillonSignageScreen.class",
@@ -25,7 +32,7 @@ with zipfile.ZipFile(jar) as z:
     icons=[p for p in names if p.startswith("assets/mtr/signage/icons/") and p.endswith(".png")]
     if len(icons)!=513:raise AssertionError("Expected 513 bundled icon entries, found "+str(len(icons)))
     if any(p.startswith("org/sillon/qa/") for p in names):raise AssertionError("Test-only mod leaked into the user JAR")
-    decor_ids=["vault","column","ribbed_wall","acoustic","baffle","cornice","light_strip","pendant","sconce","bench","leaning","bin","help_point","intercom","fire_cabinet","cabinet","vent","handrail","balustrade","poster"]
+    decor_ids=["vault","column","ribbed_wall","acoustic","baffle","cornice","light_strip","pendant","sconce","bench","leaning","bin","help_point","intercom","fire_cabinet","cabinet","vent","handrail","balustrade","poster","journey_kiosk","waypoint"]
     for id in decor_ids:
         for path in [f"assets/mtr/blockstates/sillon_decor_{id}.json",f"assets/mtr/models/item/sillon_decor_{id}.json",f"assets/mtr/textures/item/sillon_decor_{id}.png",f"data/mtr/loot_tables/blocks/sillon_decor_{id}.json"]:
             if path not in names:raise AssertionError("Missing station item resource: "+path)
@@ -37,6 +44,6 @@ with zipfile.ZipFile(jar) as z:
         if style.encode() not in spec:raise AssertionError("Missing style "+style)
 report={"jar":jar.name,"bytes":jar.stat().st_size,"sha256":hashlib.sha256(jar.read_bytes()).hexdigest(),
 "bundled_icons":len(icons),"families":18,"presets":23,"real_fonts":["Parisine","Grand Paris","IDF Voyageur"],
-"required_resources_checked":len(required),"test_helpers_in_user_jar":False,"station_decor_families":20,"station_decor_variants":80}
+"required_resources_checked":len(required),"test_helpers_in_user_jar":False,"station_decor_families":len(decor_ids),"station_decor_variants":len(decor_ids)*4}
 (jar.parent/"verification.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
 print("PASS assembled signage JAR",json.dumps(report))

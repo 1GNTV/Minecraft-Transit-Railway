@@ -137,8 +137,10 @@ public final class ConsistBuilderScreen extends ScreenExtension {
             for(int y=0;y<54;y+=2)BuilderUi.rect(g,0,y,width,2,(((int)((1-y/54.0)*(trash?220:140)))<<24)|0xB22F45);
             int tx=width/2-45;BuilderUi.text(g,"Supprimer "+edit.selectedCount(),tx,20,0xFFFFE5E9);
             BuilderUi.rect(g,tx-18,20,10,12,0xFFFFE5E9);BuilderUi.rect(g,tx-20,16,14,2,0xFFFFE5E9);BuilderUi.rect(g,tx-15,13,4,2,0xFFFFE5E9);
-            BuilderUi.rect(g,mx+8,my+8,Math.min(width-24,120),24,0xE841626F);
-            BuilderUi.text(g,edit.selectedCount()+" voiture(s)",mx+14,my+16,BuilderUi.TEXT);
+            var chosen=edit.selectedItems();int visible=Math.min(4,chosen.size()),gw=Math.min(width-24,Math.max(120,visible*64)),gx=Math.max(12,Math.min(width-12-gw,mx+8)),gy=Math.max(4,Math.min(height-50,my+8));
+            BuilderUi.rect(g,gx,gy,gw,44,0xED304F5D);
+            for(int i=0;i<visible;i++){var c=chosen.get(i);profile(g,byId.get(c.getVehicleId()),draft.indexOf(c),draft.size(),gx+5+i*(gw-10)/Math.max(1,visible),gy+3,(gw-10)/Math.max(1,visible)-2,23);}
+            BuilderUi.text(g,chosen.size()+" voiture(s)",gx+7,gy+31,BuilderUi.TEXT);
         }
     }
     @Override public boolean mouseClicked2(double mx,double my,int button){

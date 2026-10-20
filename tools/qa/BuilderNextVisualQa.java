@@ -86,7 +86,7 @@ public final class BuilderNextVisualQa {
         var context=new SillonSignageAutomatic.Context(new SillonSignageNetworkSnapshot.Point(84.5,5.1,242.5),733104,0,0);
         var result=SignageWayfinding.resolve(new SillonSignageAutomatic.Result(spec,"",733104,platformId,0),data,context);
         int expected=SillonSignageAutomatic.arrow(context,new SillonSignageNetworkSnapshot.Point(84.5,5.1,248.5));
-        check(result.status().contains("Guidage")&&result.document().rows().stream().anyMatch(r->r.arrow()==expected),"Panel does not follow authored first edge");
+        check(result.status().contains("Guidage")&&result.document().rows().stream().anyMatch(r->r.arrow()==expected),"Panel does not follow authored first edge: "+result.status()+" rows="+result.document().rows()+" expected="+expected+" graph="+WayfindingClient.graph().encode());
         System.out.println("BUILDER_NEXT_GUIDANCE panel follows walking graph instead of direct platform bearing");
     }
     private static void tick(TickEvent.ClientTickEvent event){
@@ -100,6 +100,8 @@ public final class BuilderNextVisualQa {
                 mc.getSingleplayerServer().execute(()->{var player=new org.mtr.mapping.holder.ServerPlayerEntity(mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID()));PacketBuilderWayfinding.select(player,new org.mtr.mapping.holder.BlockPos(A));PacketBuilderWayfinding.select(player,new org.mtr.mapping.holder.BlockPos(B));});
                 next();
             }else if(stage==4&&!WayfindingClient.graph().path(A.asLong(),platformId,false).isEmpty()&&ticks>30){
+                var network=SillonSignageNetwork.snapshot();
+                if(network.platforms().stream().noneMatch(p->p.id()==platformId)||network.lines().stream().noneMatch(l->l.stops().stream().anyMatch(stop->stop.platformId()==platformId))){if(ticks%40==0)System.out.println("BUILDER_NEXT_WAITING_NETWORK platforms="+network.platforms().size()+" lines="+network.lines().size()+" target="+platformId);return;}
                 mc.getSingleplayerServer().execute(()->{var store=(PersistentStateData)PersistenceStateExtension.register(new org.mtr.mapping.holder.ServerWorld(mc.getSingleplayerServer().overworld()),PersistentStateData::new,Init.MOD_ID);var nbt=new org.mtr.mapping.holder.CompoundTag();store.writeNbt2(nbt);var restored=new PersistentStateData();restored.readNbt(nbt);check(!restored.walking().path(A.asLong(),platformId,false).isEmpty(),"Walking graph NBT reload lost links");graphSaved=true;});
                 guidance();resize(mc,false);mc.setScreen(null);mc.options.hideGui=true;
                 mc.getSingleplayerServer().execute(()->{var level=mc.getSingleplayerServer().overworld();var panel=new net.minecraft.core.BlockPos(84,7,242);level.setBlockAndUpdate(panel,org.mtr.mod.Blocks.SILLON_SIGNAGE.get().data.defaultBlockState().setValue(org.mtr.mapping.mapper.DirectionHelper.FACING.data,net.minecraft.core.Direction.SOUTH));((org.mtr.mod.block.BlockSillonSignage.BlockEntity)level.getBlockEntity(panel)).setDocument(guidedSpec);mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID()).teleportTo(level,84.5,7,237,0,23);});

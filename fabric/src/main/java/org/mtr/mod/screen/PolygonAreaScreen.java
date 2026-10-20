@@ -18,6 +18,7 @@ public final class PolygonAreaScreen extends ScreenExtension {
     private int moving=-1;
     private boolean closed=true,rectangle,pan;
     private String message="";
+    private final Map<Rail,org.mtr.core.tool.Vector[]> railSamples=new WeakHashMap<>();
     public PolygonAreaScreen(AreaBase<?,?> area,ScreenExtension previous){
         this.area=area;this.previous=previous;
         if(AreaBase.validCorners(area)){points.addAll(AreaShape.outline(area).points());centerX=(area.getMinX()+area.getMaxX())/2.0;centerZ=(area.getMinZ()+area.getMaxZ())/2.0;}
@@ -49,16 +50,34 @@ public final class PolygonAreaScreen extends ScreenExtension {
     }
     private void discard(){MinecraftClient.getInstance().openScreen(new Screen(previous));}
     @Override public void onClose2(){save();}
+    private void context(GuiDrawing d){
+        double step=Math.max(1,Math.pow(2,Math.ceil(Math.log(24/scale)/Math.log(2))));
+        double left=centerX+(12-width/2.0)/scale,right=centerX+(width-12-width/2.0)/scale;
+        double top=centerZ+(60-(height-12)/2.0)/scale,bottom=centerZ+(height-66-(height-12)/2.0)/scale;
+        for(double x=Math.ceil(left/step)*step;x<=right;x+=step)PolygonDrawing.line(d,sx(x),60,sx(x),height-66,12,60,width-12,height-66,1,0xFF263B49);
+        for(double z=Math.ceil(top/step)*step;z<=bottom;z+=step)PolygonDrawing.line(d,12,sz(z),width-12,sz(z),12,60,width-12,height-66,1,0xFF263B49);
+        var data=MinecraftClientData.getDashboardInstance();
+        for(var station:data.stations)if(station!=area&&AreaBase.validCorners(station))PolygonDrawing.draw(d,AreaShape.outline(station),this::sx,this::sz,12,60,width-12,height-66,0x102D5664,0xFF486775);
+        for(var depot:data.depots)if(depot!=area&&AreaBase.validCorners(depot))PolygonDrawing.draw(d,AreaShape.outline(depot),this::sx,this::sz,12,60,width-12,height-66,0x107E633B,0xFF75694F);
+        for(Rail rail:data.rails.isEmpty()?MinecraftClientData.getInstance().rails:data.rails){
+            var math=rail.railMath;
+            if(sx(math.maxX)<12||sx(math.minX)>width-12||sz(math.maxZ)<60||sz(math.minZ)>height-66)continue;
+            var samples=railSamples.computeIfAbsent(rail,r->{double length=r.railMath.getLength();int count=Math.max(2,Math.min(96,(int)Math.ceil(length/2)));var out=new org.mtr.core.tool.Vector[count+1];for(int i=0;i<=count;i++)out[i]=r.railMath.getPosition(length*i/count,false);return out;});
+            for(int i=1;i<samples.length;i++){var a=samples[i-1];var b=samples[i];PolygonDrawing.line(d,sx(a.x),sz(a.z),sx(b.x),sz(b.z),12,60,width-12,height-66,rail.isPlatform()?3:rail.isSiding()?2:1.3,rail.isPlatform()?0xFF8CDFD4:rail.isSiding()?0xFFD7B87F:0xFF819CAB);}
+        }
+        var player=MinecraftClient.getInstance().getPlayerMapped();if(player!=null){double x=sx(player.getX()),y=sz(player.getZ());if(inMap(x-3,y-3)&&inMap(x+3,y+3))d.drawRectangle(x-3,y-3,x+3,y+3,0xFFFFC878);}
+    }
     @Override public void render(GraphicsHolder g,int mx,int my,float dt){
         BuilderUi.rect(g,0,0,width,height,BuilderUi.BG);BuilderUi.text(g,"SILLON  /  CONTOUR DE "+BuilderUi.fit(area.getName(),width-170),12,12,BuilderUi.ACCENT);
         BuilderUi.rect(g,12,60,width-24,height-126,BuilderUi.PANEL);
-        var d=new GuiDrawing(g);d.beginDrawingRectangle();
+        var d=new GuiDrawing(g);d.beginDrawingRectangle();context(d);
         for(Platform platform:MinecraftClientData.getDashboardInstance().platforms){var p=platform.getMidPosition();double x=sx(p.getX()),y=sz(p.getZ());if(inMap(x-3,y-3)&&inMap(x+3,y+3))d.drawRectangle(x-3,y-3,x+3,y+3,0xFFCEDEE8);}
         try{if(closed)PolygonDrawing.draw(d,new RegionPolygon(points),this::sx,this::sz,12,60,width-12,height-66,0x403BCAB6,BuilderUi.ACCENT);}catch(RuntimeException ignored){}
         if(!closed)for(int i=1;i<points.size();i++){var a=points.get(i-1);var b=points.get(i);PolygonDrawing.line(d,sx(a.x()),sz(a.z()),sx(b.x()),sz(b.z()),12,60,width-12,height-66,2,BuilderUi.ACCENT);}
         if(!closed&&!points.isEmpty()&&inMap(mx,my)){var p=points.get(points.size()-1);PolygonDrawing.line(d,sx(p.x()),sz(p.z()),mx,my,12,60,width-12,height-66,1,0x889EDAD0);}
         d.finishDrawingRectangle();
-        for(int i=0;i<points.size();i++){var p=points.get(i);double x=sx(p.x()),y=sz(p.z());if(inMap(x-4,y-4)&&inMap(x+4,y+4)){BuilderUi.rect(g,x-4,y-4,8,8,i==hit(mx,my)?0xFFFFFFFF:BuilderUi.ACCENT);if(width>450)BuilderUi.text(g,Integer.toString(i+1),(int)x+6,(int)y-4,BuilderUi.TEXT);}}
+        for(int i=0;i<points.size();i++){var p=points.get(i);double x=sx(p.x()),y=sz(p.z());if(inMap(x-4,y-4)&&inMap(x+4,y+4)){BuilderUi.rect(g,x-4,y-4,8,8,i==hit(mx,my)?0xFFFFFFFF:BuilderUi.ACCENT);if(width>450&&points.stream().allMatch(q->q==p||Math.hypot(sx(q.x())-x,sz(q.z())-y)>20))BuilderUi.text(g,Integer.toString(i+1),(int)x+6,(int)y-4,BuilderUi.TEXT);}}
+        var cursor=world(mx,my);BuilderUi.text(g,BuilderUi.fit(inMap(mx,my)?"X "+(long)cursor.x()+" · Z "+(long)cursor.z()+" · "+points.size()+" sommets":"Voies et quais MTR · grille en blocs · "+points.size()+" sommets",width-36),18,66,BuilderUi.MUTED);
         BuilderUi.text(g,BuilderUi.fit(message.isEmpty()?"Cliquer : tracer · Glisser : point · Clic droit : retirer · Molette : zoom":message,width-24),12,height-55,message.isEmpty()?BuilderUi.MUTED:0xFFFFAD82);
         if(height>300)BuilderUi.text(g,"Maj + clic sur un côté : ajouter un point · Bouton central : déplacer la carte",12,height-42,BuilderUi.MUTED);
         super.render(g,mx,my,dt);

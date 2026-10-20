@@ -15,6 +15,7 @@ Ctrl + Z / Ctrl + Y rétablissent les modifications du brouillon ; Ctrl + D dupl
 Cliquer pour placer les sommets et cliquer sur le premier pour fermer.
 Glisser un sommet pour le déplacer ; clic droit pour le retirer ; Maj + clic sur un côté pour en ajouter un.
 Molette pour zoomer, bouton central pour déplacer la carte.
+Les voies réelles, quais, zones voisines, grille et coordonnées servent de repères.
 Le bouton Rectangle conserve le mode habituel.
 Un contour qui se croise ne peut pas être enregistré.
 
