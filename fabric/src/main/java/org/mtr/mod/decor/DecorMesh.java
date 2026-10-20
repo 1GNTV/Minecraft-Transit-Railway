@@ -75,7 +75,7 @@ public final class DecorMesh {
             }
             case COLUMN -> {
                 if(v==1){int n=32;for(int i=0;i<n;i++){double q=i*Math.PI*2/n,Q=(i+1)*Math.PI*2/n;face(p(Math.cos(q)*w/2,h,Math.sin(q)*d/2),p(Math.cos(Q)*w/2,h,Math.sin(Q)*d/2),p(Math.cos(Q)*w/2,0,Math.sin(Q)*d/2),p(Math.cos(q)*w/2,0,Math.sin(q)*d/2),body(),s.color(),(float)(w*Math.PI/n),(float)h);}
-                    for(double yy:new double[]{0,h})for(int i=0;i<n;i++)face(p(0,yy,0),p(Math.cos(i*Math.PI*2/n)*w/2,yy,Math.sin(i*Math.PI*2/n)*d/2),p(Math.cos((i+1)*Math.PI*2/n)*w/2,yy,Math.sin((i+1)*Math.PI*2/n)*d/2),p(0,yy,0),body(),s.color(),1,1);
+                    for(double yy:new double[]{0,h})for(int i=0;i<n;i++){int A=yy==0?i:i+1,B=yy==0?i+1:i;face(p(0,yy,0),p(Math.cos(A*Math.PI*2/n)*w/2,yy,Math.sin(A*Math.PI*2/n)*d/2),p(Math.cos(B*Math.PI*2/n)*w/2,yy,Math.sin(B*Math.PI*2/n)*d/2),p(0,yy,0),body(),s.color(),1,1);}
                 }else {b(a,0,z,c,h,Z);if(v==2){int n=count(w,step,80);for(int i=0;i<n;i++){double x=a+w*i/n;b(x,0,z-.035,x+w/n*.38,h,z);b(x,0,Z,x+w/n*.38,h,Z+.035);}}if(v==3)dark(a-.04,0,z-.04,c+.04,.18,Z+.04);}
                 metal(a-.01,.02,z-.01,c+.01,.07,Z+.01);
             }
@@ -142,7 +142,7 @@ public final class DecorMesh {
                         metal(l,h*.75,z,r,h*.82,z+.025);metal(l,h*.75,Z-.025,r,h*.82,Z);metal(l,h*.75,z,l+.025,h*.82,Z);metal(r-.025,h*.75,z,r,h*.82,Z);
                         Point[] top={p(l+.03,h*.75,z+.03),p(r-.03,h*.75,z+.03),p(r-.03,h*.75,Z-.03),p(l+.03,h*.75,Z-.03)};
                         Point[] bottom={p(l+(r-l)*.16,.10,z+d*.22),p(r-(r-l)*.16,.10,z+d*.22),p(r-(r-l)*.16,.10,Z-d*.22),p(l+(r-l)*.16,.10,Z-d*.22)};
-                        for(int q=0;q<4;q++){int Q=(q+1)%4;face(bottom[q],bottom[Q],top[Q],top[q],"glass",0xC6DBD8,1,1);}
+                        for(int q=0;q<4;q++){int Q=(q+1)%4;face(bottom[Q],bottom[q],top[q],top[Q],"glass",0xC6DBD8,1,1);}
                     }else b(l,.08,z,r,h,Z);
                     box(l+.025,h*.76,Z+.002,r-.025,h*.94,Z+.006,"metal",new int[]{0xD8B834,0x477FAC,0x717C72}[i%3]);
                     dark(l+(r-l)*.15,h*.80,Z+.007,r-(r-l)*.15,h*.90,Z+.010);
