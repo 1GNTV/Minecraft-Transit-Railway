@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: true
+          cache-read-only: false
       - uses: actions/download-artifact@v4
         with:
           name: Sillon-Builder-Forge-1.20.1
@@ -44,6 +44,8 @@ jobs:
       - name: Prepare the isolated Minecraft shader test
         run: |
           chmod +x gradlew
+          mkdir -p build/signage-qa
+          cp docs/signage/review/fixtures-commands.txt docs/signage/review/reference-commands.txt build/signage-qa/
           python tools/qa/install_signage_visual_qa.py
           python tools/qa/create_signage_world.py
           python tools/qa/install_signage_shader_qa.py
