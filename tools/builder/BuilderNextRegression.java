@@ -36,6 +36,8 @@ public final class BuilderNextRegression {
         graph.remove(3);check(!graph.get(0).links().contains(3L)&&!graph.get(2).links().contains(3L),"Remove reciprocal links");
         graph.link(1,2,false);check(graph.path(0,42,false).isEmpty(),"No straight-line fallback through walls");
         check(graph.pathToNode(0,0,false).size()==1,"Zero node ID supported");
+        var longWalk=new WalkGraph();for(int n=0;n<8;n++){longWalk.put(new WalkGraph.Node(n,n*80,0,0,n==7?99:0,"","passage",0,List.of()));if(n>0)longWalk.link(n-1,n,true);}
+        check(longWalk.near(0,0,0,128).path(0,99,false).size()==8,"Long connected passage retained beyond nearby chunks");
         System.out.println("PASS walking topology, shortest routes, accessibility, persistence and missing connections");
         System.out.println("PASS grouped editing, undo/redo, deletion, concave areas, boundaries, margins, intersections, persistence and triangulation");
     }

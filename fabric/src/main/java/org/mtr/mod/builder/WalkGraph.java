@@ -42,7 +42,8 @@ public final class WalkGraph {
         if(target==null)return List.of();LinkedList<Node> result=new LinkedList<>();long at=target;while(true){result.addFirst(nodes.get(at));if(at==start)break;Long before=previous.get(at);if(before==null)return List.of();at=before;}return List.copyOf(result);
     }
     public WalkGraph near(double x,double y,double z,int limit){
-        WalkGraph out=new WalkGraph();nodes.values().stream().filter(n->Math.hypot(n.x()-x,n.z()-z)<=192&&Math.abs(n.y()-y)<=96).sorted(Comparator.comparingDouble(n->(n.x()-x)*(n.x()-x)+(n.y()-y)*(n.y()-y)+(n.z()-z)*(n.z()-z))).limit(limit).forEach(out::put);return out;
+        WalkGraph out=new WalkGraph();var seeds=nodes.values().stream().filter(n->Math.hypot(n.x()-x,n.z()-z)<=192&&Math.abs(n.y()-y)<=96).sorted(Comparator.comparingDouble(n->(n.x()-x)*(n.x()-x)+(n.y()-y)*(n.y()-y)+(n.z()-z)*(n.z()-z))).toList();
+        for(Node seed:seeds){if(out.nodes.size()>=limit)break;if(out.nodes.containsKey(seed.id()))continue;Deque<Node> pending=new ArrayDeque<>();pending.add(seed);while(!pending.isEmpty()&&out.nodes.size()<limit){Node n=pending.removeFirst();if(out.nodes.containsKey(n.id()))continue;out.put(n);for(long id:n.links()){Node next=nodes.get(id);if(next!=null&&!out.nodes.containsKey(id))pending.addLast(next);}}}return out;
     }
     public String encode(){StringBuilder out=new StringBuilder();for(Node n:nodes.values()){
         out.append(n.id()).append(';').append(n.x()).append(';').append(n.y()).append(';').append(n.z()).append(';').append(n.platform()).append(';').append(Base64.getUrlEncoder().withoutPadding().encodeToString(n.label().getBytes(StandardCharsets.UTF_8))).append(';').append(n.kind()).append(';').append(n.revision()).append(';');

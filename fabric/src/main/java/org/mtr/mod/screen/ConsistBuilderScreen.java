@@ -63,7 +63,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         button(84,height-28,94,"Classique",()->MinecraftClient.getInstance().openScreen(new Screen(new VehicleSelectorScreen(siding,previous))));
         button(width-104,height-28,92,"Appliquer",this::apply);
     }
-    private void duplicateSelection(){if(edit.selectedItems().stream().anyMatch(c->!byId.containsKey(c.getVehicleId()))){message="Ressource manquante : duplication impossible.";return;}edit.duplicate(siding.getTransportMode().maxLength,c->car(byId.get(c.getVehicleId())));}
+    private void duplicateSelection(){if(edit.selectedCount()==0){message="Sélectionne une ou plusieurs voitures à dupliquer.";return;}if(draft.size()+edit.selectedCount()>siding.getTransportMode().maxLength){message="Nombre maximal de voitures atteint.";return;}message="";if(edit.selectedItems().stream().anyMatch(c->!byId.containsKey(c.getVehicleId()))){message="Ressource manquante : duplication impossible.";return;}edit.duplicate(siding.getTransportMode().maxLength,c->car(byId.get(c.getVehicleId())));}
     private void add(VehicleResource r){
         if(draft.size()>=siding.getTransportMode().maxLength){message="Nombre maximal de voitures atteint.";return;}
         edit.add(car(r));message="";double[] p=positions();scroll=Math.max(0,p[p.length-1]+scroll-width+20);
@@ -131,8 +131,9 @@ public final class ConsistBuilderScreen extends ScreenExtension {
         if(deletedAt!=0){double t=(now-deletedAt)/280_000_000.0;if(t<1){int alpha=(int)((1-t)*180);for(var old:deleted){int dw=(int)(old.width()*(1-t)),dh=(int)(26*(1-t));double x=old.x()+(old.width()-dw)/2,y=carY()-t*18;if(x>=12&&x+dw<=width-12){profile(g,old.resource(),old.index(),old.total(),(int)x,(int)y,dw,dh);BuilderUi.rect(g,x,y,dw,dh,(alpha<<24)|0xE75D68);}}}else{deleted=List.of();deletedAt=0;}}
         BuilderUi.text(g,BuilderUi.fit(message.isEmpty()?"Maj : sélection multiple · Glisser · Ctrl+Z : rétablir · Échap : enregistrer":message,width-24),12,height-42,message.isEmpty()?BuilderUi.MUTED:0xFFFFD09A);
         super.render(g,mx,my,dt);
+        if(!dragging&&my>=carY()&&my<carY()+28){int index=hit(mx);if(index>=0){var c=draft.get(index);var r=byId.get(c.getVehicleId());String caption="Voiture "+(index+1)+" · "+(r==null?c.getVehicleId():r.getName().getString())+String.format(Locale.ROOT," · %.1f m",c.getLength());int tw=Math.min(width-24,GraphicsHolder.getTextWidth(caption)+12),tx=Math.max(12,Math.min(width-12-tw,mx+8));BuilderUi.rect(g,tx,carY()-24,tw,19,0xFA30495A);BuilderUi.text(g,BuilderUi.fit(caption,tw-12),tx+6,carY()-18,BuilderUi.TEXT);}}
         if(dragging){
-            boolean trash=my<54;
+            boolean trash=my>=0&&my<54&&mx>=0&&mx<width;
             for(int y=0;y<54;y+=2)BuilderUi.rect(g,0,y,width,2,(((int)((1-y/54.0)*(trash?220:140)))<<24)|0xB22F45);
             int tx=width/2-45;BuilderUi.text(g,"Supprimer "+edit.selectedCount(),tx,20,0xFFFFE5E9);
             BuilderUi.rect(g,tx-18,20,10,12,0xFFFFE5E9);BuilderUi.rect(g,tx-20,16,14,2,0xFFFFE5E9);BuilderUi.rect(g,tx-15,13,4,2,0xFFFFE5E9);
@@ -155,7 +156,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     }
     @Override public boolean mouseDragged2(double x,double y,int button,double dx,double dy){if(pressed&&button==0){if(Math.hypot(x-pressX,y-pressY)>4)dragging=true;return true;}return super.mouseDragged2(x,y,button,dx,dy);}
     @Override public boolean mouseReleased2(double mx,double my,int button){
-        if(pressed&&button==0){if(dragging){if(my<54)deleteSelection();else if(my>=carY()-8&&my<carY()+38)edit.move(insertion(mx));}pressed=dragging=false;return true;}
+        if(pressed&&button==0){if(dragging){if(my>=0&&my<54&&mx>=0&&mx<width)deleteSelection();else if(my>=carY()-8&&my<carY()+38)edit.move(insertion(mx));}pressed=dragging=false;return true;}
         return super.mouseReleased2(mx,my,button);
     }
     @Override public boolean mouseScrolled2(double x,double y,double amount){

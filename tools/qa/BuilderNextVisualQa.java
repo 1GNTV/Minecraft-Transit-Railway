@@ -31,6 +31,7 @@ public final class BuilderNextVisualQa {
     private static JourneyScreen journey;
     private static ConsistBuilderScreen composer;
     private static long platformId,sidingId;
+    private static SillonSignageSpec guidedSpec;
     private static final net.minecraft.core.BlockPos A=new net.minecraft.core.BlockPos(84,5,242),B=new net.minecraft.core.BlockPos(84,5,248);
     public static void register(){MinecraftForge.EVENT_BUS.addListener(BuilderNextVisualQa::tick);}
     private static void check(boolean value,String message){if(!value)throw new IllegalStateException(message);}
@@ -81,6 +82,7 @@ public final class BuilderNextVisualQa {
     private static void saveNode(net.minecraft.core.BlockPos pos,long platform){WalkGraph graph=new WalkGraph();graph.put(new WalkGraph.Node(pos.asLong(),pos.getX()+.5,pos.getY()+.1,pos.getZ()+.5,platform,platform==0?"Couloir des ateliers":"Quai navette",platform==0?"passage":"platform",0,List.of()));InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketBuilderWayfinding(1,pos.asLong(),0,graph.encode()));}
     private static void guidance(){
         var data=SillonSignageNetwork.snapshot();var spec=new SillonSignageSpec("Correspondances","","","direction","","wall",-1,0x101D56,0xFFFFFF,0x347D85,2,.6f,0,0,0,true,false,false).withBinding(new SillonSignageBinding(733104,platformId,0,"auto","full","auto","","auto",true,true,true));
+        guidedSpec=spec;
         var context=new SillonSignageAutomatic.Context(new SillonSignageNetworkSnapshot.Point(84.5,5.1,242.5),733104,0,0);
         var result=SignageWayfinding.resolve(new SillonSignageAutomatic.Result(spec,"",733104,platformId,0),data,context);
         int expected=SillonSignageAutomatic.arrow(context,new SillonSignageNetworkSnapshot.Point(84.5,5.1,248.5));
@@ -99,8 +101,10 @@ public final class BuilderNextVisualQa {
                 next();
             }else if(stage==4&&!WayfindingClient.graph().path(A.asLong(),platformId,false).isEmpty()&&ticks>30){
                 mc.getSingleplayerServer().execute(()->{var store=(PersistentStateData)PersistenceStateExtension.register(new org.mtr.mapping.holder.ServerWorld(mc.getSingleplayerServer().overworld()),PersistentStateData::new,Init.MOD_ID);var nbt=new org.mtr.mapping.holder.CompoundTag();store.writeNbt2(nbt);var restored=new PersistentStateData();restored.readNbt(nbt);check(!restored.walking().path(A.asLong(),platformId,false).isEmpty(),"Walking graph NBT reload lost links");graphSaved=true;});
-                guidance();resize(mc,false);mc.setScreen(new WaypointScreen(new org.mtr.mapping.holder.BlockPos(B)));next();
-            }else if(stage==5&&ticks==30){controls(mc);capture(mc,"waypoint-large");resize(mc,true);next();}
+                guidance();resize(mc,false);mc.setScreen(null);mc.options.hideGui=true;
+                mc.getSingleplayerServer().execute(()->{var level=mc.getSingleplayerServer().overworld();var panel=new net.minecraft.core.BlockPos(84,7,242);level.setBlockAndUpdate(panel,org.mtr.mod.Blocks.SILLON_SIGNAGE.get().data.defaultBlockState().setValue(org.mtr.mapping.mapper.DirectionHelper.FACING.data,net.minecraft.core.Direction.SOUTH));((org.mtr.mod.block.BlockSillonSignage.BlockEntity)level.getBlockEntity(panel)).setDocument(guidedSpec);mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID()).teleportTo(level,84.5,7,237,0,23);});
+                stage=40;ticks=0;
+            }else if(stage==40&&ticks==40){capture(mc,"walking-guidance-world");mc.options.hideGui=false;mc.setScreen(new WaypointScreen(new org.mtr.mapping.holder.BlockPos(B)));stage=5;ticks=0;}else if(stage==5&&ticks==30){controls(mc);capture(mc,"waypoint-large");resize(mc,true);next();}
             else if(stage==6&&ticks==30){controls(mc);capture(mc,"waypoint-small");mc.setScreen(null);resize(mc,false);journey=new JourneyScreen(null);mc.setScreen(journey);next();}
             else if(stage==7&&ticks==60){controls(mc);capture(mc,"journey-search");set(journey,"origin",733104L);set(journey,"destination",733105L);call(journey,"request");next();}
             else if(stage==8&&field(journey,"response")!=null&&ticks>20){

@@ -28,7 +28,7 @@ public final class PolygonAreaScreen extends ScreenExtension {
         int w=(width-36)/3;
         addChild(new ClickableWidget(BuilderUi.button(12,32,w,"Nouveau tracé",()->{points.clear();closed=false;rectangle=false;})));
         addChild(new ClickableWidget(BuilderUi.button(18+w,32,w,"Rectangle",()->{points.clear();closed=false;rectangle=true;})));
-        addChild(new ClickableWidget(BuilderUi.button(24+2*w,32,w,"Retirer point",()->{if(!points.isEmpty()){points.remove(points.size()-1);closed=false;}})));
+        addChild(new ClickableWidget(BuilderUi.button(24+2*w,32,w,"Retirer point",()->{if(!points.isEmpty()){points.remove(points.size()-1);closed=false;rectangle=false;}})));
         addChild(new ClickableWidget(BuilderUi.button(12,height-28,76,"Annuler",this::discard)));
         addChild(new ClickableWidget(BuilderUi.button(width-116,height-28,104,"Enregistrer",this::save)));
     }
@@ -66,7 +66,7 @@ public final class PolygonAreaScreen extends ScreenExtension {
     @Override public boolean mouseClicked2(double x,double y,int button){
         if(super.mouseClicked2(x,y,button))return true;if(!inMap(x,y))return false;
         int at=hit(x,y);if(button==2){pan=true;return true;}
-        if(button==1&&at>=0){points.remove(at);if(points.size()<3)closed=false;return true;}
+        if(button==1&&at>=0){points.remove(at);rectangle=false;if(points.size()<3)closed=false;return true;}
         if(button!=0)return false;
         if(!closed){
             if(at==0&&points.size()>=3){closed=true;message="";return true;}

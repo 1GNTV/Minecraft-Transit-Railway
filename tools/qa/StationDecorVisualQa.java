@@ -25,6 +25,7 @@ public final class StationDecorVisualQa {
     public static void begin(Minecraft mc){
         active=true;stage=-1;ticks=0;mc.setScreen(null);mc.options.hideGui=true;
         mc.getSingleplayerServer().execute(()->{
+            try {
             var server=mc.getSingleplayerServer();var level=server.overworld();
             for(DecorKind k:DecorKind.values()){
                 int i=k.ordinal(),x=(i%4)*8-12,z=34+(i/4)*14;
@@ -49,6 +50,7 @@ public final class StationDecorVisualQa {
                 }
                 server.getPlayerList().op(player.getGameProfile());player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(org.mtr.mod.Items.BRUSH.get().data));}
             mc.execute(()->{stage=0;ticks=0;camera(mc,0);});
+            } catch(Throwable ex){ex.printStackTrace();System.exit(2);}
         });
     }
     private static void camera(Minecraft mc,int index){

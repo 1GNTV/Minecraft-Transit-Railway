@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(CollisionGetter.class)
 public interface DecorCollisionMixin {
     @Inject(method="getBlockCollisions",at=@At("RETURN"),cancellable=true)
-    private void sillon$collisions(Entity entity,AABB bounds,CallbackInfoReturnable<Iterable<VoxelShape>> ci){
+    public default void sillon$collisions(Entity entity,AABB bounds,CallbackInfoReturnable<Iterable<VoxelShape>> ci){
         if((Object)this instanceof Level level)ci.setReturnValue(DecorCollisionIndex.append(level,bounds,ci.getReturnValue()));
     }
 }
