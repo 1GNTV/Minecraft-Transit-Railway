@@ -8,6 +8,8 @@ import org.mtr.mod.block.*;
 public final class BlockEntityTypes {
 
 	static {
+		STATION_DECOR = new java.util.EnumMap<>(org.mtr.mod.decor.DecorKind.class);
+		for (var kind : org.mtr.mod.decor.DecorKind.values()) STATION_DECOR.put(kind, Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "sillon_decor_"+kind.id), (pos,state)->new BlockStationDecor.BlockEntity(pos,state,kind), Blocks.STATION_DECOR.get(kind)::get));
 		APG_DOOR = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "apg_door"), BlockAPGDoor.BlockEntity::new, Blocks.APG_DOOR::get);
 		APG_GLASS = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "apg_glass"), BlockAPGGlass.BlockEntity::new, Blocks.APG_GLASS::get);
 		ARRIVAL_PROJECTOR_1_LARGE = Init.REGISTRY.registerBlockEntityType(new Identifier(Init.MOD_ID, "arrival_projector_1_large"), BlockArrivalProjector1Large.BlockEntity::new, Blocks.ARRIVAL_PROJECTOR_1_LARGE::get);
@@ -97,6 +99,7 @@ public final class BlockEntityTypes {
 	public static final BlockEntityTypeRegistryObject<BlockPANAMPIDS.BlockEntity> PANAM_PIDS;
 	public static final BlockEntityTypeRegistryObject<BlockPANAMScreen.BlockEntity> PANAM_SCREEN;
 	public static final BlockEntityTypeRegistryObject<BlockSillonSignage.BlockEntity> SILLON_SIGNAGE;
+	public static final java.util.Map<org.mtr.mod.decor.DecorKind,BlockEntityTypeRegistryObject<BlockStationDecor.BlockEntity>> STATION_DECOR;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSHorizontal3.BlockEntity> PIDS_HORIZONTAL_3;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVertical1.BlockEntity> PIDS_VERTICAL_1;
 	public static final BlockEntityTypeRegistryObject<BlockPIDSVerticalSingleArrival1.BlockEntity> PIDS_VERTICAL_SINGLE_ARRIVAL_1;

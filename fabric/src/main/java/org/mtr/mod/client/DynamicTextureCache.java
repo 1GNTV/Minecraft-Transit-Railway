@@ -107,6 +107,14 @@ public class DynamicTextureCache implements IGui {
 
 	private final java.util.Map<org.mtr.mod.data.SillonSignageSpec,String> signageKeys =
         java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+    public DynamicResource getStationDecor(org.mtr.mod.decor.DecorSpec spec,int angle) {
+        return getResource("station_decor_"+spec.encode()+"_"+angle,()->{
+            java.awt.image.BufferedImage image=org.mtr.mod.decor.DecorPreview.render(spec,640,480,angle);
+            NativeImage out=new NativeImage(NativeImageFormat.getAbgrMapped(),640,480,false);
+            for(int y=0;y<480;y++)for(int x=0;x<640;x++){int argb=image.getRGB(x,y);out.setPixelColor(x,y,(argb&0xFF00FF00)|((argb>>16)&255)|((argb&255)<<16));}
+            image.flush();return out;
+        },DefaultRenderingColor.WHITE);
+    }
     public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
         String key=signageKeys.computeIfAbsent(spec,org.mtr.mod.data.SillonSignageSpec::visualKey);
         return getResource("sillon_signage_"+key,

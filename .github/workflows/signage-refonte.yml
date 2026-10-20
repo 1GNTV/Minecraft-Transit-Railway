@@ -33,6 +33,8 @@ jobs:
         run: python tools/complete_signage_refs.py
       - name: Render and exercise the actual compositor and editor model
         run: python tools/test_sillon_signage_reference.py
+      - name: Exercise all twenty modular station families
+        run: python tools/test_station_decor.py
       - name: Publish QA images for review
         if: always()
         run: |
@@ -59,6 +61,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew fabric:setupFiles -PminecraftVersion=1.20.1
+          python tools/decor/prepare_resources.py
           ./gradlew forge:setupFiles -PminecraftVersion=1.20.1
       - name: Build Forge 1.20.1
         id: build
@@ -123,4 +126,5 @@ jobs:
           name: Sillon-signage-visual-checks
           path: |
             build/signage-qa
+            build/decor-review
             docs/signage/reference-photos.jpg

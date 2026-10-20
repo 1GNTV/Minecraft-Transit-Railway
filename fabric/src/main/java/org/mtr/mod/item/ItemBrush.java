@@ -24,6 +24,7 @@ public class ItemBrush extends ItemExtension {
 	public ActionResult useOnBlock2(ItemUsageContext context) {
 		final World world = context.getWorld();
 		final PlayerEntity playerEntity = context.getPlayer();
+		if (world.isClient() && org.mtr.mod.client.DecorBrushClient.click(context)) return ActionResult.SUCCESS;
 		if (world.isClient() && playerEntity != null && world.getBlockState(context.getBlockPos()).getBlock().data instanceof BlockNode) {
 			final ObjectObjectImmutablePair<Rail, BlockPos> railAndBlockPos = MinecraftClientData.getInstance().getFacingRailAndBlockPos(false);
 			if (railAndBlockPos != null) {

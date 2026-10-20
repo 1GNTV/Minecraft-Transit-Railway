@@ -63,6 +63,10 @@ public final class Blocks {
 		LIFT_DOOR_EVEN_1 = registerBlock(new Identifier(Init.MOD_ID, "lift_door_1"), () -> new Block(new BlockLiftDoor()));
 		LIFT_DOOR_ODD_1 = registerBlock(new Identifier(Init.MOD_ID, "lift_door_odd_1"), () -> new Block(new BlockLiftDoorOdd()));
 
+		// Station kit
+		STATION_DECOR = new java.util.EnumMap<>(org.mtr.mod.decor.DecorKind.class);
+		for (var kind : org.mtr.mod.decor.DecorKind.values()) STATION_DECOR.put(kind, registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "sillon_decor_" + kind.id), () -> new Block(new BlockStationDecor(kind)), CreativeModeTabs.STATION_BUILDING_BLOCKS));
+
 		// PIDS projectors
 		PIDS_1 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_1"), () -> new Block(new BlockPIDSHorizontal1()), CreativeModeTabs.RAILWAY_FACILITIES);
 		PIDS_2 = registerBlockWithBlockItem(new Identifier(Init.MOD_ID, "pids_2"), () -> new Block(new BlockPIDSHorizontal2()), CreativeModeTabs.RAILWAY_FACILITIES);
@@ -310,6 +314,7 @@ public final class Blocks {
 	public static final BlockRegistryObject PANAM_PIDS;
 	public static final BlockRegistryObject PANAM_SCREEN;
 	public static final BlockRegistryObject SILLON_SIGNAGE;
+	public static final java.util.Map<org.mtr.mod.decor.DecorKind,BlockRegistryObject> STATION_DECOR;
 	public static final BlockRegistryObject PIDS_3;
 	public static final BlockRegistryObject PIDS_4;
 	public static final BlockRegistryObject PIDS_POLE;

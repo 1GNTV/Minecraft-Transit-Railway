@@ -1,5 +1,25 @@
 {
   "block.mtr.sillon_signage": "Panneau de signalétique Sillon",
   "block.mtr.panam_pids": "Écran PANAM",
-  "block.mtr.panam_screen": "PANAM — Écran seul"
+  "block.mtr.panam_screen": "PANAM — Écran seul",
+  "block.mtr.sillon_decor_vault": "Sillon · Voûte de station",
+  "block.mtr.sillon_decor_column": "Sillon · Habillage de pilier",
+  "block.mtr.sillon_decor_ribbed_wall": "Sillon · Parement mural nervuré",
+  "block.mtr.sillon_decor_acoustic": "Sillon · Panneau acoustique",
+  "block.mtr.sillon_decor_baffle": "Sillon · Plafond à lames",
+  "block.mtr.sillon_decor_cornice": "Sillon · Corniche et plinthe",
+  "block.mtr.sillon_decor_light_strip": "Sillon · Bandeau lumineux moderne",
+  "block.mtr.sillon_decor_pendant": "Sillon · Luminaire suspendu",
+  "block.mtr.sillon_decor_sconce": "Sillon · Applique murale",
+  "block.mtr.sillon_decor_bench": "Sillon · Banc continu modulaire",
+  "block.mtr.sillon_decor_leaning": "Sillon · Appui debout",
+  "block.mtr.sillon_decor_bin": "Sillon · Poubelle de tri",
+  "block.mtr.sillon_decor_help_point": "Sillon · Borne d’appel voyageurs",
+  "block.mtr.sillon_decor_intercom": "Sillon · Interphone de quai",
+  "block.mtr.sillon_decor_fire_cabinet": "Sillon · Coffret extincteur",
+  "block.mtr.sillon_decor_cabinet": "Sillon · Armoire technique",
+  "block.mtr.sillon_decor_vent": "Sillon · Grille de ventilation",
+  "block.mtr.sillon_decor_handrail": "Sillon · Main courante",
+  "block.mtr.sillon_decor_balustrade": "Sillon · Garde-corps",
+  "block.mtr.sillon_decor_poster": "Sillon · Cadre d’affiche"
 }

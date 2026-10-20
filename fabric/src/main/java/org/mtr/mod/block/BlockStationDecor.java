@@ -1,0 +1,34 @@
+package org.mtr.mod.block;
+
+import org.mtr.mapping.holder.*;
+import org.mtr.mapping.mapper.*;
+import org.mtr.mapping.tool.HolderBase;
+import org.mtr.mod.*;
+import org.mtr.mod.decor.*;
+import org.mtr.mod.packet.PacketOpenBlockEntityScreen;
+import java.util.List;
+
+/** Brush-editable anchor. Architectural geometry is decorative and does not obstruct paths. */
+public final class BlockStationDecor extends BlockWaterloggable implements DirectionHelper,BlockWithEntity {
+    public final DecorKind kind;
+    public BlockStationDecor(DecorKind kind){super(org.mtr.mod.Blocks.createDefaultBlockSettings(true,state->kind.light()?12:0).nonOpaque());this.kind=kind;}
+    @Override public BlockState getPlacementState2(ItemPlacementContext ctx){return super.getPlacementState2(ctx).with(new Property<>(FACING.data),ctx.getPlayerFacing().data);}
+    @Override public void addBlockProperties(List<HolderBase<?>> values){super.addBlockProperties(values);values.add(FACING);}
+    @Override public VoxelShape getCollisionShape2(BlockState state,BlockView world,BlockPos pos,ShapeContext context){return VoxelShapes.empty();}
+    @Override public VoxelShape getCullingShape2(BlockState state,BlockView world,BlockPos pos){return VoxelShapes.empty();}
+    @Override public VoxelShape getOutlineShape2(BlockState state,BlockView world,BlockPos pos,ShapeContext context){return IBlock.getVoxelShapeByDirection(2,0,2,14,16,14,IBlock.getStatePropertySafe(state,FACING));}
+    @Override public BlockRenderType getRenderType2(BlockState state){return BlockRenderType.getEntityblockAnimatedMapped();}
+    @Override public BlockEntityExtension createBlockEntity(BlockPos pos,BlockState state){return new BlockEntity(pos,state,kind);}
+    @Override public ActionResult onUse2(BlockState state,World world,BlockPos pos,PlayerEntity player,Hand hand,BlockHitResult hit){
+        if(player.isSneaking())return ActionResult.PASS;
+        return IBlock.checkHoldingBrush(world,player,()->Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player),new PacketOpenBlockEntityScreen(pos)));
+    }
+    public static final class BlockEntity extends BlockEntityExtension {
+        private DecorSpec spec;
+        public BlockEntity(BlockPos pos,BlockState state,DecorKind kind){super(BlockEntityTypes.STATION_DECOR.get(kind).get(),pos,state);spec=DecorSpec.defaults(kind);}
+        public DecorSpec spec(){return spec;}
+        public void setSpec(DecorSpec value){if(!spec.equals(value)){spec=value;markDirty2();}}
+        @Override public void readCompoundTag(CompoundTag tag){super.readCompoundTag(tag);spec=DecorSpec.read(tag,spec.kind());}
+        @Override public void writeCompoundTag(CompoundTag tag){super.writeCompoundTag(tag);spec.write(tag);}
+    }
+}

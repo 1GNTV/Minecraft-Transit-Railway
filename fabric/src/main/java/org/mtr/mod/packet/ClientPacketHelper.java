@@ -19,7 +19,9 @@ public final class ClientPacketHelper {
 
 	public static void openBlockEntityScreen(BlockPos blockPos) {
 		getBlockEntity(blockPos, blockEntity -> {
-			if (blockEntity.data instanceof BlockSillonSignage.BlockEntity) {
+			if (blockEntity.data instanceof BlockStationDecor.BlockEntity decor) {
+                openScreen(new StationDecorScreen(blockPos,decor.spec()), screenExtension -> screenExtension instanceof StationDecorScreen);
+            } else if (blockEntity.data instanceof BlockSillonSignage.BlockEntity) {
                 openScreen(new SillonSignageScreen(blockPos,(BlockSillonSignage.BlockEntity)blockEntity.data),
                     screenExtension -> screenExtension instanceof SillonSignageScreen);
             } else if (blockEntity.data instanceof BlockTrainAnnouncer.BlockEntity) {

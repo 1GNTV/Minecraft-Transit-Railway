@@ -114,6 +114,7 @@ public final class Init implements Utilities {
 		REGISTRY.registerPacket(PacketUpdatePIDSConfig.class, PacketUpdatePIDSConfig::new);
 		REGISTRY.registerPacket(PacketUpdatePanamScreen.class, PacketUpdatePanamScreen::new);
 		REGISTRY.registerPacket(PacketUpdateSillonSignage.class, PacketUpdateSillonSignage::new);
+		REGISTRY.registerPacket(PacketStationDecor.class, PacketStationDecor::new);
         REGISTRY.registerPacket(PacketSignageNetwork.class, PacketSignageNetwork::new);
 		REGISTRY.registerPacket(PacketPanamNewsSync.class, PacketPanamNewsSync::new);
 		REGISTRY.registerPacket(PacketPanamNewsRequest.class, PacketPanamNewsRequest::new);
