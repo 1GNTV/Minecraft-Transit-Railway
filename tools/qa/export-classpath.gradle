@@ -1,0 +1,12 @@
+allprojects { p ->
+    p.afterEvaluate {
+        if (p.name == 'forge' && p.extensions.findByName('sourceSets') != null) {
+            p.tasks.register('sillonExportClasspath', org.gradle.api.tasks.bundling.Zip) {
+                from(p.sourceSets.main.compileClasspath)
+                duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
+                archiveFileName = 'forge-compile-classpath.zip'
+                destinationDirectory = p.layout.buildDirectory.dir('sillon-classpath')
+            }
+        }
+    }
+}

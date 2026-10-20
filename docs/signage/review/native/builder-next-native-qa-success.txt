@@ -1,0 +1,1 @@
+Native MTR polygon association, legacy fallback, serialization and real server update; polygon editor at two sizes; real walking node packets and linking, NBT reload and guided panel arrow; native asynchronous MTR journey result and terminal layouts; consist Escape server persistence; grouped drag-to-trash and undo.

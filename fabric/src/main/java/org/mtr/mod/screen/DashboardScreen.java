@@ -25,6 +25,7 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 
 	private SelectedTab selectedTab;
 	private AreaBase<?, ?> editingArea;
+    private ButtonWidgetExtension buttonContour;
 	private Route editingRoute;
 	private int editingRoutePlatformIndex;
 	private boolean isNew;
@@ -159,7 +160,11 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 		addChild(new ClickableWidget(textFieldCustomDestination));
 		addChild(new ClickableWidget(colorSelector));
 
-		addSelectableChild(new ClickableWidget(widgetMap));
+		addChild(new ClickableWidget(org.mtr.mod.builder.BuilderUi.button(PANEL_WIDTH+8,6,70,"Sillon…",()->MinecraftClient.getInstance().openScreen(new Screen(new BuilderSettingsScreen(new Screen(this)))))));
+        addChild(new ClickableWidget(org.mtr.mod.builder.BuilderUi.button(PANEL_WIDTH+82,6,84,"Diagnostic",()->MinecraftClient.getInstance().openScreen(new Screen(new BuilderDiagnosticsScreen(new Screen(this),(a,b)->widgetMap.focusProblem(a,b)))))));
+        buttonContour=org.mtr.mod.builder.BuilderUi.button(PANEL_WIDTH+8,30,Math.min(130,width-PANEL_WIDTH-16),"Tracer le contour…",()->{if(editingArea!=null)MinecraftClient.getInstance().openScreen(new Screen(new PolygonAreaScreen(editingArea,this)));});
+        buttonContour.visible=editingArea!=null;addChild(new ClickableWidget(buttonContour));
+        addSelectableChild(new ClickableWidget(widgetMap));
 	}
 
 	@Override
@@ -169,7 +174,7 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 		graphicsHolder.translate(0, 0, 500);
 		final GuiDrawing guiDrawing = new GuiDrawing(graphicsHolder);
 		guiDrawing.beginDrawingRectangle();
-		guiDrawing.drawRectangle(0, 0, PANEL_WIDTH, height, ARGB_BACKGROUND);
+		guiDrawing.drawRectangle(0, 0, PANEL_WIDTH, height, org.mtr.mod.builder.BuilderPreferences.enabled("map")?0xFF182532:ARGB_BACKGROUND);
 		guiDrawing.finishDrawingRectangle();
 		dashboardList.render(graphicsHolder);
 		super.render(graphicsHolder, mouseX, mouseY, delta);
@@ -388,7 +393,8 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 	}
 
 	private void onDrawCorners(IntIntImmutablePair corner1, IntIntImmutablePair corner2) {
-		editingArea.setCorners(new Position(corner1.leftInt(), Long.MIN_VALUE, corner1.rightInt()), new Position(corner2.leftInt(), Long.MAX_VALUE, corner2.rightInt()));
+		org.mtr.mod.builder.AreaShape.apply(editingArea,null);
+        editingArea.setCorners(new Position(corner1.leftInt(), Long.MIN_VALUE, corner1.rightInt()), new Position(corner2.leftInt(), Long.MAX_VALUE, corner2.rightInt()));
 		toggleButtons();
 	}
 
@@ -459,6 +465,7 @@ public class DashboardScreen extends ScreenExtension implements IGui {
 	}
 
 	private void toggleButtons() {
+        if(buttonContour!=null)buttonContour.visible=editingArea!=null;
 		final boolean hasPermission = MinecraftClientData.hasPermission();
 		final boolean showRouteDestinationFields = isValidRoutePlatformIndex();
 

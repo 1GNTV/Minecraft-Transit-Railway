@@ -1,0 +1,41 @@
+name: Sillon signage - prepare verified visual sources
+on:
+  push:
+    branches: [work/sillon-signage-refonte-forge-1201]
+    paths: [.github/workflows/signage-preparation.yml, tools/prepare_signage_assets.py]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  references:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: pip install pymupdf pillow
+      - name: Pin and prepare authentic icon, font and reference sources
+        run: python tools/prepare_signage_assets.py
+      - name: Inspect the exact mapping API
+        run: |
+          for cls in ScreenExtension TextFieldWidgetExtension ButtonWidgetExtension GraphicsHolder GuiDrawing; do
+            echo "MAPPING $cls"
+            javap -classpath libs/Minecraft-Mappings-common-0.0.1.jar:libs/Minecraft-Mappings-forge-1.20.1-0.0.1-dev.jar org.mtr.mapping.mapper.$cls || true
+          done
+      - name: Save reproducible resources
+        run: |
+          git config user.name "Sillon build"
+          git config user.email "48333136+1GNTV@users.noreply.github.com"
+          git add docs/signage fabric/src/main/resources/assets/mtr/signage fabric/src/main/resources/META-INF/licenses
+          git commit -m "assets(signage): pin MTR France pictograms and official IDFM reference materials"
+          git push origin HEAD:work/sillon-signage-refonte-forge-1201
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Sillon-signage-reference-visuals
+          path: docs/signage

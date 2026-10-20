@@ -1,0 +1,167 @@
+package org.mtr.mod.screen;
+
+import org.mtr.mod.data.*;
+import java.util.*;
+
+/** Pure editor state, validation and row operations. No Minecraft dependency. */
+public final class SillonSignageEditorModel {
+    public record Field(String key,String label,String type,List<String> choices,float min,float max,float step) {}
+    public static final Map<String,Field> FIELDS=new LinkedHashMap<>();
+    static {
+        string("title","Nom / destination");string("title2","Deuxième ligne du nom (facultatif)");string("subtitle","Sous-titre / traduction");
+        choice("auto","Contenu depuis le réseau MTR",List.of("Non","Oui"));
+        network("stationId","Station associée");network("platformId","Quai associé");network("routeId","Ligne / desserte associée");
+        choice("mode","Symbole du mode",SillonSignageBinding.MODES);choice("scope","Stations affichées",SillonSignageBinding.SCOPES);
+        choice("routeLayout","Disposition du plan",SillonSignageBinding.LAYOUTS);string("exitFilter","Filtre de sorties (facultatif)");
+        choice("serviceSource","Services affichés",SillonSignageBinding.SERVICES);choice("guided","Suivre les cheminements au brush",List.of("Non","Oui"));
+        choice("arrowsAuto","Flèches selon la position",List.of("Non","Oui"));choice("lineColors","Couleurs depuis la ligne",List.of("Non","Oui"));
+        choice("style","Famille de panneau",SillonSignageSpec.STYLES);
+        string("notice","Message voyageurs (facultatif)");choice("autoSize","Hauteur adaptée aux arrêts",List.of("Non","Oui"));
+        choice("profile","Charte graphique",SillonSignageDesign.PROFILES);choice("sectorSymbol","Symbole de secteur",SillonSignageDesign.SECTORS);string("sectorName","Nom du secteur (facultatif)");
+        choice("translations","Traductions des services",List.of("Non","Oui"));choice("operatorLogo","Signature RATP",List.of("Non","Oui"));choice("passedStops","Griser les stations précédentes",List.of("Non","Oui"));number("rowScale","Hauteur des lignes",.65f,1.6f,.05f);
+        choice("font","Typographie",SillonSignageOptions.FONTS);choice("align","Alignement",SillonSignageOptions.ALIGNS);
+        choice("freePalette","Couleurs des zones",List.of("Charte d’origine","Palette choisie"));
+        color("bg","Fond");color("fg","Texte");color("accent","Bandeau / ligne");color("frameColor","Couleur du cadre");
+        number("textScale","Taille des caractères",.5f,1.8f,.05f);number("iconScale","Taille des pictogrammes",.5f,1.6f,.05f);
+        number("padding","Marges",.25f,2,.05f);number("bandRatio","Part du bandeau",.1f,.4f,.01f);
+        choice("frame","Cadre",SillonSignageOptions.FRAMES);string("image","Image du pack de ressources");
+        number("width","Largeur (blocs)",.4f,12,.125f);number("height","Hauteur (blocs)",.2f,8,.125f);
+        number("offsetX","Décalage horizontal X",-12,12,.0625f);number("offsetY","Décalage vertical Y",-12,12,.0625f);
+        number("offsetZ","Décalage profondeur Z",-4,4,.0625f);
+        number("yaw","Orientation Y (degrés)",-180,180,5);number("pitch","Inclinaison X (degrés)",-90,90,5);
+        number("roll","Roulis Z (degrés)",-180,180,5);number("thickness","Épaisseur (blocs)",.005f,.35f,.005f);
+        number("suspension","Longueur des tiges",.05f,6,.0625f);
+        choice("mount","Fixation",SillonSignageSpec.MOUNTS);choice("lit","Rétroéclairage",List.of("Non","Oui"));
+        choice("double","Double face",List.of("Non","Oui"));
+        choice("arrow","Flèche générale",List.of("-1","0","1","2","3","4","5","6","7"));
+        string("row_text","Destination / libellé");string("row_detail","Traduction / précision");string("row_number","Numéro de sortie / voie");
+        choice("row_kind","Type de ligne",SillonSignageRow.KINDS);
+        choice("row_arrow","Flèche de cette ligne",List.of("-1","0","1","2","3","4","5","6","7"));
+    }
+    public static final List<String> NETWORK=List.of("auto","stationId","platformId","routeId","mode","scope","routeLayout","exitFilter","serviceSource","guided","arrowsAuto","arrow","lineColors");
+    public static final List<String> TEXT=List.of("title","title2","subtitle","auto","arrow");
+    public static final List<String> APPEARANCE=List.of("style","profile","sectorSymbol","sectorName","translations","operatorLogo","passedStops","rowScale","autoSize","notice","font","align","freePalette","bg","fg","accent","textScale","iconScale","padding","bandRatio","frame","frameColor","image");
+    public static final List<String> POSE=List.of("width","height","mount","offsetX","offsetY","offsetZ","yaw","pitch","roll","thickness","suspension","lit","double");
+    public static final List<String> ROW=List.of("row_text","row_detail","row_number","row_kind","row_arrow");
+    public final Map<String,String> values=new LinkedHashMap<>();
+    public final List<SillonSignageRow> rows=new ArrayList<>();
+    public int selectedRow=-1;
+    private String headerIcons="",rowIcons="",legacyBody="";
+    private static void network(String k,String label){FIELDS.put(k,new Field(k,label,"network",List.of(),0,0,0));}
+    private static void string(String k,String label){FIELDS.put(k,new Field(k,label,"text",List.of(),0,0,0));}
+    private static void color(String k,String label){FIELDS.put(k,new Field(k,label,"color",List.of(),0,0,0));}
+    private static void number(String k,String label,float lo,float hi,float step){FIELDS.put(k,new Field(k,label,"number",List.of(),lo,hi,step));}
+    private static void choice(String k,String label,List<String> list){FIELDS.put(k,new Field(k,label,"choice",list,0,0,0));}
+    public SillonSignageEditorModel(SillonSignageSpec spec){read(spec);}
+    public void read(SillonSignageSpec s) {
+        values.clear();var o=s.options();var b=s.binding();var d=s.design();
+        values.put("profile",d.profile());values.put("sectorSymbol",d.sector());values.put("sectorName",d.sectorName());values.put("translations",d.translations()?"Oui":"Non");values.put("operatorLogo",d.operator()?"Oui":"Non");values.put("passedStops",d.passed()?"Oui":"Non");put("rowScale",d.rowScale());values.put("notice",d.notice());values.put("autoSize",d.autoSize()?"Oui":"Non");
+        values.put("stationId",Long.toString(b.stationId()));values.put("platformId",Long.toString(b.platformId()));values.put("routeId",Long.toString(b.routeId()));
+        values.put("mode",b.mode());values.put("scope",b.scope());values.put("routeLayout",b.layout());values.put("exitFilter",b.exitFilter());
+        values.put("guided",b.guided()?"Oui":"Non");values.put("serviceSource",b.service());values.put("arrowsAuto",b.arrows()?"Oui":"Non");values.put("lineColors",b.lineColors()?"Oui":"Non");
+        String[] name=s.title().split("\\|",2);
+        values.put("title",name[0]);values.put("title2",name.length>1?name[1]:"");values.put("subtitle",s.subtitle());values.put("style",s.style());
+        values.put("auto",s.stationAuto()?"Oui":"Non");values.put("lit",s.illuminated()?"Oui":"Non");
+        values.put("double",s.doubleSided()?"Oui":"Non");values.put("mount",s.mount());values.put("arrow",""+s.arrow());
+        values.put("bg",hex(s.background()));values.put("fg",hex(s.foreground()));values.put("accent",hex(s.accent()));
+        values.put("font",o.font());values.put("align",o.align());values.put("frame",o.frame());values.put("frameColor",hex(o.frameColor()));
+        values.put("image",o.image());values.put("freePalette",o.freePalette()?"Palette choisie":"Charte d’origine");
+        put("width",s.width());put("height",s.height());put("yaw",s.yaw());put("pitch",s.pitch());put("roll",s.roll());
+        put("offsetX",o.offsetX());put("offsetY",o.offsetY());put("offsetZ",o.offsetZ());
+        put("textScale",o.textScale());put("iconScale",o.iconScale());put("padding",o.padding());put("bandRatio",o.bandRatio());
+        put("thickness",o.thickness());put("suspension",o.suspension());
+        headerIcons=s.icons();legacyBody=s.body();rows.clear();rows.addAll(s.rows());selectedRow=-1;
+        loadRow();
+    }
+    private void put(String key,float value){values.put(key,format(value));}
+    public static String format(float value){return new java.math.BigDecimal(Float.toString(value)).stripTrailingZeros().toPlainString();}
+    public static String hex(int value){return String.format(Locale.ROOT,"%06X",value&0xFFFFFF);}
+    public void cycle(String key,int direction) {
+        Field f=FIELDS.get(key);if(f==null||f.choices().isEmpty())return;
+        int at=f.choices().indexOf(values.get(key));
+        values.put(key,f.choices().get(Math.floorMod(at+direction,f.choices().size())));
+        if("style".equals(key)) {
+            SillonSignageSpec preset=SillonSignagePresets.forStyle(values.get(key));
+            values.put("bg",hex(preset.background()));values.put("fg",hex(preset.foreground()));
+            values.put("accent",hex(preset.accent()));values.put("font",preset.options().font());
+            put("bandRatio",preset.options().bandRatio());
+        }
+    }
+    public void adjust(String key,int direction) {
+        Field f=FIELDS.get(key);
+        try {float n=Float.parseFloat(values.get(key).replace(',','.'));
+            put(key,Math.max(f.min(),Math.min(f.max(),Math.round((n+direction*f.step())*10000)/10000f)));
+        }catch(RuntimeException ignored){}
+    }
+    public String error() {
+        String name=values.getOrDefault("title","")+(values.getOrDefault("title2","").isBlank()?"":"|"+values.get("title2"));
+        if(name.length()>128)return "Nom complet : 128 caractères maximum, deux lignes comprises.";
+        for(Field f:FIELDS.values()) {
+            String v=values.getOrDefault(f.key(),"");
+            try {
+                if("network".equals(f.type()))Long.parseLong(v);
+                if("number".equals(f.type())) {
+                    float n=Float.parseFloat(v.trim().replace(',','.'));
+                    if(!Float.isFinite(n)||n<f.min()||n>f.max())return f.label()+" : "+format(f.min())+" à "+format(f.max());
+                }else if("color".equals(f.type())&&!v.matches("#?[0-9a-fA-F]{6}"))return f.label()+" : 6 chiffres hexadécimaux";
+            }catch(RuntimeException e){return f.label()+" : nombre attendu";}
+        }
+        List<SillonSignageRow> pending=new ArrayList<>(rows);
+        if(selectedRow>=0&&selectedRow<pending.size())pending.set(selectedRow,new SillonSignageRow(
+            values.get("row_kind"),values.get("row_number"),values.get("row_text"),values.get("row_detail"),rowIcons,Integer.parseInt(values.getOrDefault("row_arrow","-1"))));
+        if(SillonSignageRow.bounded(pending).size()!=pending.size())return "Document trop volumineux : raccourcir les lignes ou retirer des pictogrammes.";
+        String image=values.getOrDefault("image","");
+        if(image.length()>192||image.contains("..")||!image.matches("[a-z0-9_.:/-]*"))return "Image : utiliser un identifiant du pack, par ex. mtr:signage/maps/metro.png";
+        return "";
+    }
+    private float n(String key){return Float.parseFloat(values.get(key).trim().replace(',','.'));}
+    private int c(String key){return Integer.parseInt(values.get(key).replace("#",""),16);}
+    public SillonSignageSpec spec() {
+        String error=error();if(!error.isEmpty())throw new IllegalArgumentException(error);
+        saveRow();
+        SillonSignageOptions o=new SillonSignageOptions(values.get("font"),values.get("align"),n("textScale"),n("iconScale"),n("padding"),
+            n("offsetX"),n("offsetY"),n("offsetZ"),n("thickness"),n("suspension"),values.get("frame"),c("frameColor"),values.get("image"),n("bandRatio"),"Palette choisie".equals(values.get("freePalette")));
+        return new SillonSignageSpec(values.get("title")+(values.get("title2").isBlank()?"":"|"+values.get("title2")),values.get("subtitle"),legacyBody,values.get("style"),headerIcons,
+            values.get("mount"),Integer.parseInt(values.get("arrow")),c("bg"),c("fg"),c("accent"),n("width"),n("height"),
+            n("yaw"),n("pitch"),n("roll"),"Oui".equals(values.get("auto")),"Oui".equals(values.get("lit")),"Oui".equals(values.get("double")),o,rows,new SillonSignageBinding(Long.parseLong(values.get("stationId")),Long.parseLong(values.get("platformId")),Long.parseLong(values.get("routeId")),
+                values.get("mode"),values.get("scope"),values.get("routeLayout"),values.get("exitFilter"),values.get("serviceSource"),"Oui".equals(values.get("arrowsAuto")),"Oui".equals(values.get("lineColors")),"Oui".equals(values.get("guided"))),SillonSignagePlan.EMPTY,new SillonSignageDesign(values.get("profile"),values.get("sectorSymbol"),values.get("sectorName"),"Oui".equals(values.get("translations")),"Oui".equals(values.get("operatorLogo")),"Oui".equals(values.get("passedStops")),n("rowScale"),values.get("notice"),"Oui".equals(values.get("autoSize"))));
+    }
+    public void saveRow() {
+        if(selectedRow>=0&&selectedRow<rows.size())rows.set(selectedRow,new SillonSignageRow(
+            values.get("row_kind"),values.get("row_number"),values.get("row_text"),values.get("row_detail"),rowIcons,Integer.parseInt(values.getOrDefault("row_arrow","-1"))));
+    }
+    private void loadRow() {
+        SillonSignageRow r=selectedRow>=0&&selectedRow<rows.size()?rows.get(selectedRow):new SillonSignageRow("transport","","","","",-1);
+        values.put("row_text",r.text());values.put("row_detail",r.detail());values.put("row_number",r.number());
+        values.put("row_kind",r.kind());values.put("row_arrow",""+r.arrow());rowIcons=r.icons();
+    }
+    public void selectRow(int index){saveRow();selectedRow=rows.isEmpty()?-1:Math.floorMod(index,rows.size());loadRow();}
+    public void addRow() {
+        saveRow();if(rows.size()>=SillonSignageRow.MAX_ROWS)return;
+        String kind=Set.of("exit","sector").contains(values.get("style"))?"exit":"transport";
+        rows.add(new SillonSignageRow(kind,"","","","",-1));selectedRow=rows.size()-1;loadRow();
+    }
+    public void importLegacyRows() {
+        saveRow();if(!rows.isEmpty())return;
+        String kind=Set.of("exit","sector").contains(values.get("style"))?"exit":"transport";
+        rows.addAll(SillonSignageRow.legacy(legacyBody,kind));legacyBody="";
+        selectedRow=rows.isEmpty()?-1:0;loadRow();
+    }
+    public void removeRow(){if(selectedRow<0)return;rows.remove(selectedRow);selectedRow=Math.min(selectedRow,rows.size()-1);loadRow();}
+    public void moveRow(int direction) {
+        saveRow();int next=selectedRow+direction;
+        if(selectedRow<0||next<0||next>=rows.size())return;
+        Collections.swap(rows,selectedRow,next);selectedRow=next;loadRow();
+    }
+    public String icons(boolean row){return row&&selectedRow>=0?rowIcons:headerIcons;}
+    public void setIcons(boolean row,String value){if(row&&selectedRow>=0)rowIcons=value;else headerIcons=value;}
+    public void toggleIcon(boolean row,String id) {
+        List<String> list=new ArrayList<>(Arrays.asList(icons(row).split(",")));list.removeIf(String::isBlank);
+        if(!list.remove(id)&&list.size()<16)list.add(id);setIcons(row,String.join(",",list));
+    }
+    public void moveIcon(boolean row,int index,int delta) {
+        List<String> list=new ArrayList<>(Arrays.asList(icons(row).split(",")));int next=index+delta;
+        if(index<0||index>=list.size()||next<0||next>=list.size())return;
+        Collections.swap(list,index,next);setIcons(row,String.join(",",list));
+    }
+}

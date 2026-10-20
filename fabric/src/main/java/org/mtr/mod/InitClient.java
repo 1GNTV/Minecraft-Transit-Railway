@@ -157,6 +157,7 @@ public final class InitClient {
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PANAM_PIDS, argument -> new RenderPANAMPIDS<>(argument));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PANAM_SCREEN, argument -> new RenderPANAMPIDS<>(argument));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.SILLON_SIGNAGE, RenderSillonSignage::new);
+		for (var type : BlockEntityTypes.STATION_DECOR.values()) REGISTRY_CLIENT.registerBlockEntityRenderer(type, org.mtr.mod.render.RenderStationDecor::new);
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_HORIZONTAL_3, dispatcher -> new RenderPIDS<>(dispatcher, 2.5F, 7.5F, 6, 6.5F, 27, true, 1.25F));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(BlockEntityTypes.PIDS_VERTICAL_SINGLE_ARRIVAL_1, dispatcher -> new RenderPIDS<>(dispatcher, 2F, 14F, 15, 28F, 12, false, 1));
@@ -412,6 +413,8 @@ public final class InitClient {
 		REGISTRY_CLIENT.eventRegistryClient.registerStartClientTick(() -> {
 			ensureInitialCustomResources();
 			JcmPresetRecovery.tick();
+            org.mtr.mod.client.DoorGuideClient.tick();
+            org.mtr.mod.client.SillonSignageNetwork.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
 			final long millisElapsed = currentMillis - lastMillis;
@@ -475,6 +478,7 @@ public final class InitClient {
 		REGISTRY_CLIENT.eventRegistryClient.registerResourceReloadEvent(() -> MinecraftClient.getInstance().execute(RenderPANAMPIDS::reset));
 
 		REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(DrivingGuiRenderer::render);
+        REGISTRY_CLIENT.eventRegistryClient.registerGuiRendering(org.mtr.mod.client.DoorGuideClient::hud);
 
 		Config.init(MinecraftClient.getInstance().getRunDirectoryMapped());
 

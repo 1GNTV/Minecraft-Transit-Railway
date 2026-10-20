@@ -45,7 +45,7 @@ public class SidingScreen extends SavedRailScreenBase<Siding, Depot> implements 
 
 	public SidingScreen(Siding siding, TransportMode transportMode, ScreenExtension previousScreenExtension) {
 		super(siding, transportMode, previousScreenExtension, SELECTED_TRAIN_TEXT, MAX_TRAINS_TEXT, ACCELERATION_CONSTANT_TEXT, DECELERATION_CONSTANT_TEXT, DELAYED_VEHICLE_SPEED_INCREASE_PERCENTAGE_TEXT, DELAYED_VEHICLE_REDUCE_DWELL_TIME_PERCENTAGE_TEXT, MANUAL_TO_AUTOMATIC_TIME, MAX_MANUAL_SPEED);
-		buttonSelectTrain = new ButtonWidgetExtension(0, 0, 0, SQUARE_SIZE, button -> MinecraftClient.getInstance().openScreen(new Screen(new VehicleSelectorScreen(savedRailBase, this))));
+		buttonSelectTrain = new ButtonWidgetExtension(0, 0, 0, SQUARE_SIZE, button -> MinecraftClient.getInstance().openScreen(new Screen(org.mtr.mod.builder.BuilderPreferences.enabled("composer") ? new ConsistBuilderScreen(savedRailBase,this) : new VehicleSelectorScreen(savedRailBase, this))));
 		buttonSelectTrain.setMessage2(new Text(TextHelper.translatable("selectWorld.edit").data));
 		textFieldMaxTrains = new TextFieldWidgetExtension(0, 0, 0, SQUARE_SIZE, MAX_TRAINS_TEXT_LENGTH, TextCase.DEFAULT, "\\D", null);
 		sliderAccelerationConstant = new WidgetShorterSlider(0, MAX_TRAINS_WIDTH * 2, (int) Math.round((Siding.MAX_ACCELERATION - Siding.MIN_ACCELERATION) * SLIDER_SCALE), SidingScreen::accelerationSliderFormatter, null);

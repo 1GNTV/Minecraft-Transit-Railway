@@ -1,90 +1,45 @@
-# Sillon Signage — reference evidence and fidelity gate
+# Signalétique Sillon : sources et règles visuelles
 
-Updated 2026-10-18. This document defines the historical and operational sources
-for the Forge 1.20.1 signage rebuild. It does not claim operator certification
-or measured 1:1 manufacturer dimensions.
+## Sources examinées
 
-## Official references
-- RATP "Fiches équipements", section **Signalétique**: white directional
-  grounds guide passengers toward transport and standard amenities, navy blue
-  guides toward exits, and grey identifies special services. These are *corridor
-  wayfinding principles*, not rules for heritage station name plaques.
-  https://www.ratp.fr/sites/default/files/inline-files/fiches_equipements_1.pdf
-- RATP "La typographie du métro": pre-1996 historical families vary; Parisine
-  was adopted in 1996. Do not apply it indiscriminately to CMP/Nord-Sud eras.
-  https://www.ratp.fr/decouvrir/patrimoine/la-typographie-du-metro
-- IDFM PRIM signalétique: references for permitted icons, line signs,
-  wayfinding, typefaces Grand Paris and IDF Voyageur and RGB color charts.
-  https://prim.iledefrance-mobilites.fr/fr/chartes-et-prescriptions/prescriptions-signaletiques
-- IDFM ILICO: official generation endpoint for line identification SVGs.
-  https://prim.iledefrance-mobilites.fr/fr/jeux-de-donnees/idfm-signaletique
-- RATP plans: authoritative line stops and interchange relationships:
-  https://www.ratp.fr/plans
-- RATP Renouveau frises / Châtelet sectors Seine (blue), Rivoli (gold),
-  Canopée (silver):
-  https://www.ratp.fr/decouvrir/patrimoine/les-frises-du-metro
-- MTR France: optional at-runtime original line/sign pictograms:
-  https://github.com/MTR-France-Team/MTR-France-Addon/tree/master/src/main/resources/assets/mtr/mtr_france_sign
+| Famille | Référence |
+|---|---|
+| Plaques métro et typographie Parisine | [RATP : la typographie du métro](https://www.ratp.fr/decouvrir/patrimoine/la-typographie-du-metro) |
+| Transport sur fond blanc, sorties bleues, services particuliers gris | [RATP : Fiches équipements, page Signalétique](https://www.ratp.fr/sites/default/files/inline-files/fiches_equipements_1.pdf) |
+| Châtelet, secteurs et fabrication des panneaux | [Girod : réaménagement Châtelet-Les Halles](https://girod-group.com/portfolio/signaletique-email-chatelet-les-halles/) |
+| Plaque RER Châtelet-Les Halles, secteur Forum | [Photographie originale et crédits Commons](https://commons.wikimedia.org/wiki/File:Panneau_Gare_Ch%C3%A2telet_Halles_RER_Paris_Ligne_B_-_Paris_I_(FR75)_-_2022-07-05_-_2.jpg) |
+| Secteur Rivoli | [Photographie de l'accès Rivoli](https://chateletleshalles.com/sortie11/) |
+| Grand Paris, Villejuif-Gustave Roussy | [AREP : signalétique du Grand Paris Express](https://www.arep.fr/nos-projets/signaletique-du-grand-paris-express/) |
+| Indices de lignes, marges, flèches, couleurs et polices actuelles | [IDFM : prescriptions signalétiques V3.1](https://prim.iledefrance-mobilites.fr/fr/chartes-et-prescriptions/prescriptions-signaletiques) |
+| Ordre et noms des stations de la ligne 14 | [Plan officiel RATP](https://www.ratp.fr/en/plans-lignes/metro/14) |
+| Plan régional intégré | [IDFM : plan du réseau 2026](https://eu.ftp.opendatasoft.com/stif/PlansRegion/Plans/PLAN_POCHE_RESEAU.pdf) |
+| Pictogrammes de MTR France | [Source épinglée eaf2a813](https://github.com/1GNTV/MTR-France-Addon/tree/eaf2a8130ac31f12534480a567c9246f35c0463e/src/main/resources/assets/mtr/mtr_france_sign) |
 
-## Reference photos supplied by the player
-- Saint-Sulpice, Monceau, Pigalle: enamel-style navy station plaques, big white name.
-- Saint-Denis Porte de Paris, Rambuteau: navy station names with ochre subtitles.
-- Châtelet–Les Halles: RER station identity and sector differentiation.
-- Châtelet Rivoli: grey sector band, transport icons on white strip,
-  navy exit field with numbered street destinations.
-- Oberkampf / Strasbourg–Saint-Denis: different wayfinding/transfer panel
-  families, multiple icons, dedicated direction arrow.
-- Vertical arrows: white background with colored line badge and dark arrow.
-- Station strips and projected display screens are not ordinary route plaques.
+Les manifestes dans docs/signage conservent les URL, les empreintes des ressources et les éventuels échecs de téléchargement. Les planches pertinentes du référentiel ont été rendues pour examen, notamment les pages 16-17 (polices), 22-28 (couleurs), 35-38 (indices), 85 (flèches) et 88-95 (composition).
 
-## Renderer contract
-SillonRATPSignageLayouts uses separate layouts per real reference family,
-not one recolored rectangle:
-- metro / metro_subtitle: dark navy plate; optional ochre subtitle band;
-  centered Parisine with one or two lines.
-- direction / transfer: white base, navy copy, native MTR France icons.
-- interchange: RATP official stacked white transport + teal services + navy exit, with separate zones and no fictitious destinations.
-- exit: white transport icon strip + blue Sortie heading, numbered exit rows.
-- sector: grey location header, white mode strip, blue exit field.
-- services: grey ground rather than fake universal navy.
-- vertical: white pillar panel, large line icon above and arrow below.
-- platform / route: only real MTR map data or explicitly entered stops.
-- map: no invented spatial graph; clearly state unconfigured plans.
-- missing optional icons: visible neutral question-mark placeholders rather
-  than unofficial colored emulations of operator logos.
-- custom / digital remain separately supported but are NOT automatically
-  asserted to be photographic reproductions.
-- RATP Parisine fonts already loaded from the Sillon bundled font resources.
-  IDFM modern fonts are separate and require their own distribution rights.
+## Ce que le rendu applique
 
-## Fidelity/qualification rules
-Proportions used by the templates are measured estimates from the examples,
-not manufacturer drawings. Color swatches are image-derived starting points,
-not the exact published IDFM RGB/CMYK values. Do NOT label them 1:1 exact.
+- Parisine pour les familles RATP classiques ; Grand Paris pour les modèles GPE ; IDF Voyageur disponible séparément. Les fichiers officiels restent inchangés.
+- Les silhouettes des pictogrammes proviennent des ressources d'origine. Leur rapport largeur/hauteur est conservé.
+- Le catalogue embarque 497 images d'origine et 5 variantes dérivées identifiées : quatre quadrants du tableau d'assistance et le logo RATP blanc.
+- Une plaque de station, un jalonnement blanc, une liste de sorties bleue et un panneau de secteur ont des compositions distinctes.
+- Les éléments de secteur déjà légendés ne reçoivent pas une seconde légende identique.
+- Les couleurs sont éditables. Les compositions conservent par défaut les zones de la charte ; « Palette choisie » permet de les remplacer. Les pictogrammes restent dans leurs couleurs d’origine.
+- Les flèches disposent de huit orientations ; les lignes composées peuvent avoir des flèches et des pictogrammes indépendants.
+- Les marges, l'échelle typographique, l'échelle des pictogrammes, l'alignement et le bandeau sont réglables.
+- Le plan intégré est le plan réel IDFM, pas une topologie inventée. Une image de pack peut le remplacer.
+- Les dessertes automatiques utilisent les données MTR du quai voisin ; les lignes manuelles restent éditables.
+- Les deux faces utilisent le même pivot physique et l'épaisseur choisie, sans séparation artificielle d'un bloc.
+- Les cadres, caissons, tiges de suspension et pieds sont géométriques et suivent la pose du panneau.
 
-The source CI regression validates family selection, text/font wiring, palette
-semantics and removal of fictitious diagrams. Compilation is verified by Forge
-CI, but neither is a visual approval. The release gate requires photographed
-side-by-side comparisons, shader testing, original icon rendering and world
-save/multiplayer checks. No release may claim every panel is fully accurate
-without these tests.
+## Limites de fidélité
 
-## Photo-calibrated editable presets (not licensed official assets)
-Eleven editable scene presets are offered in the in-game brush editor. Based
-on the player's photographed real metro examples, not fictional station names:
-Monceau; Pigalle; Saint-Sulpice; Rambuteau/Centre Georges Pompidou;
-Saint-Denis/Porte de Paris/Stade de France; Châtelet–Les Halles/Forum;
-Châtelet/Rivoli numbered exits; Strasbourg–Saint-Denis; official RATP-style
-multi-band wayfinding; and an information totem.
+Les fichiers graphiques et les polices sont vérifiés à leur source. Les couleurs historiques de plaques RATP et les dimensions des modèles restent des estimations photographiques, éditables dans le jeu : les photos ne constituent pas des plans de fabrication. Le système n'est pas une reproduction certifiée par un opérateur. Les modèles de composition et les contenus d'exemple sont distingués des photographies exactes.
 
-Approximate sampled sRGB values from the supplied compressed photographs:
-- Rambuteau navy #21275B, lower band #51330C;
-- Saint-Denis Porte de Paris navy #2A4078, lower band #875E29.
+## Contrôles reproductibles
 
-Photographic white balance and illumination vary. These are just starting
-settings and must not be represented as official RATP material specifications.
-The presets preserve those background / accent choices and store the title as
-a *fixed* value (stationAuto=false), unless the player enables MTR auto naming.
-
-The in-game renderer preserves two-line explicit titles (pipe character)
-and the per-preset background/accent to reproduce photographed differences.
+- tools/test_sillon_signage_reference.py compile et exécute le vrai compositeur Java : 18 familles, 22 modèles, toutes les images, les trois polices et les règles d'édition.
+- Le même contrôle vérifie la sérialisation des documents et des lignes Unicode, les limites du paquet réseau, les valeurs invalides et la géométrie responsive.
+- Le workflow Forge compile le code contre Minecraft 1.20.1 et vérifie les descripteurs de compatibilité JCM.
+- Les outils dans tools/qa-runtime constituent un mod de test séparé. Celui-ci charge le JAR utilisateur assemblé, après remappage Forge de développement, pour les captures et le contrôle réseau. Les classes de test ne sont pas ajoutées au JAR utilisateur.
+- Le résultat des tests natifs et les captures réellement obtenues sont conservés dans docs/signage/review/native. Une compilation seule ne vaut pas validation visuelle ou validation sous shaders.

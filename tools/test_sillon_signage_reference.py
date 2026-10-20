@@ -1,43 +1,27 @@
 #!/usr/bin/env python3
-"""Source-level guardrails; Forge Java compiler and visual review are separate gates."""
+"""Execute the real Java compositor and editor rules without starting Minecraft."""
 from pathlib import Path
+import subprocess
 root=Path(__file__).resolve().parents[1]
-canvas=(root/"fabric/src/main/java/org/mtr/mod/client/SillonSignageCanvas.java").read_text()
-layout=(root/"fabric/src/main/java/org/mtr/mod/client/SillonRATPSignageLayouts.java").read_text()
-spec=(root/"fabric/src/main/java/org/mtr/mod/data/SillonSignageSpec.java").read_text()
-assert "if(SillonRATPSignageLayouts.draw(g,s,w,h))return;" in canvas
-assert '"metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector"' in spec
-assert "Never counterfeit official line pictograms" in canvas
-assert 'center(g,"?"' in canvas
-assert 'case "direction","transfer"' in layout
-assert 'case "interchange"' in layout
-assert 'servicesColor=0x009C94' in layout
-assert 'case "exit"' in layout
-assert 'case "sector"' in layout
-assert 'case "services"' in layout
-assert 'g.fillRect(0,0,w,stripe)' in layout
-assert '"Sortie"' in layout
-assert '"Sorties à renseigner"' in layout
-assert '"Plan non renseigné"' in layout
-assert '"Station","Correspondance","Terminus"' not in layout
-assert '"Entrée","Billetterie","Quais","Sortie"' not in layout
-assert 'static final int NAVY=0x101B54' in layout
-assert 'BLUE=0x101E5E' in layout
-assert 'GREY=0x666971' in layout
-assert 'OCHRE=0x836130' in layout
-assert 'SillonSignageCanvas.font(' in layout
-assert 'SillonSignageCanvas.drawIcons(' in layout
-assert 'SillonSignageCanvas.drawArrow(' in layout
-assert 'Parisine-Regular.otf' in canvas and 'Parisine-Bold.otf' in canvas
-presets=(root/"fabric/src/main/java/org/mtr/mod/data/SillonSignagePresets.java").read_text()
-screen=(root/"fabric/src/main/java/org/mtr/mod/screen/SillonSignageScreen.java").read_text()
-assert presets.count("new Preset(")>=11
-for sample in ("Monceau","Pigalle","Saint-Sulpice","Rambuteau",
-               "Saint-Denis|Porte de Paris","Châtelet|Les Halles",
-               "secteur Rivoli","Strasbourg|Saint-Denis"):
-    assert sample in presets, sample
-assert 'SillonSignagePresets.at(presetCursor++)' in screen
-assert 'spec.stationAuto()' not in presets
-assert "s.background()==0?NAVY:s.background()" in layout
-assert '"metro_subtitle".equals(s.style())' in layout
-print("PASS: real family-specific RATP layouts and 11 editable photo-based samples")
+out=root/"build/signage-headless"
+stub=out/"src/org/mtr/mapping/holder/CompoundTag.java"
+stub.parent.mkdir(parents=True,exist_ok=True)
+types={"String":"String","Int":"int","Float":"float","Boolean":"boolean"}
+defaults={"String":'""',"Int":"0","Float":"0f","Boolean":"false"}
+methods=[]
+for suffix,typ in types.items():
+    wrapper={"int":"Integer","float":"Float","boolean":"Boolean","String":"String"}[typ]
+    methods.append(f"public void put{suffix}(String key,{typ} value){{values.put(key,value);}}")
+    methods.append(f"public {typ} get{suffix}(String key){{return ({wrapper})values.getOrDefault(key,{defaults[suffix]});}}")
+stub.write_text("package org.mtr.mapping.holder; import java.util.*; public final class CompoundTag {private final Map<String,Object> values=new HashMap<>();"+"".join(methods)+"public String toString(){StringBuilder b=new StringBuilder(\"{\");values.forEach((k,v)->{if(b.length()>1)b.append(\",\");b.append(k).append(\":\");if(v instanceof String)b.append((char)34).append(((String)v).replace(\"\\\\\",\"\\\\\\\\\").replace(\"\\\"\",\"\\\\\\\"\").replace(\"\\n\",\"\\\\n\")).append((char)34);else if(v instanceof Boolean)b.append((Boolean)v?\"1b\":\"0b\");else b.append(v);});return b.append(\"}\").toString();}"+"}",encoding="utf-8")
+base=root/"fabric/src/main/java/org/mtr/mod"
+sources=[stub,root/"tools/signage/SignageRegression.java",root/"tools/signage/SignageReferenceReview.java"]
+for folder,names in {
+"data":["SillonSignageDesign","SillonSignageBinding","SillonSignagePlan","SillonSignageNetworkSnapshot","SillonSignageLineBadge","SillonSignageNetworkOrdering","SillonSignageOptions","SillonSignageRow","SillonSignageSpec","SillonSignagePresets","SillonSignageIconCatalog"],
+"client":["SillonSignageAutomatic","SillonSignageNetworkMap","SillonSignagePlanPainter","SillonSignagePainter","SillonRATPSignageLayouts","SillonSignageGeometry"],
+"screen":["SillonSignageEditorModel","SillonSignageEditorLayout"]}.items():
+    sources.extend(base/folder/(name+".java") for name in names)
+subprocess.run(["javac","--release","17","-encoding","UTF-8","-d",str(out/"classes"),*[str(p) for p in sources]],check=True)
+sep=";" if __import__("os").name=="nt" else ":"
+subprocess.run(["java","-Djava.awt.headless=true","-cp",str(out/"classes")+sep+str(root/"fabric/src/main/resources"),"SignageRegression"],check=True,cwd=root)
+subprocess.run(["java","-Djava.awt.headless=true","-cp",str(out/"classes")+sep+str(root/"fabric/src/main/resources"),"SignageReferenceReview"],check=True,cwd=root)

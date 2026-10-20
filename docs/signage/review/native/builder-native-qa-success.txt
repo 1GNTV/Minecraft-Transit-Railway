@@ -1,0 +1,1 @@
+Actual planned train door overlays with no active train; brush removal; real GPU silhouettes alpha checked; consist cancel/apply and presets; rail staged preview/apply/server ack/undo/conflict; server diagnostics; anchored map zoom and stacked floor chooser; native controls at 560x360 and 320x240.

@@ -50,6 +50,7 @@ public class DynamicTextureCache implements IGui {
 	 * Clear all asset-related cache and mark all dynamic textures to be drawn.
 	 */
 	public synchronized void reload() {
+        SillonSignagePainter.clearCache();
 		font = null;
 		fontCjk = null;
 		refresh();
@@ -104,8 +105,15 @@ public class DynamicTextureCache implements IGui {
 		return getResource(String.format("color_%s", platformId), () -> RouteMapGenerator.generateColorStrip(platformId), DefaultRenderingColor.TRANSPARENT);
 	}
 
-	public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
-        return getResource("sillon_signage_"+spec.toString(),
+	private final java.util.Map<org.mtr.mod.data.SillonSignageSpec,String> signageKeys =
+        java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
+    public DynamicResource getStationDecor(org.mtr.mod.decor.DecorSpec spec,int angle) {
+        return getResource("station_decor_"+spec.encode()+"_"+angle,()->DecorCanvas.generate(spec,angle),DefaultRenderingColor.WHITE);
+    }
+
+    public DynamicResource getSillonSignage(org.mtr.mod.data.SillonSignageSpec spec) {
+        String key=signageKeys.computeIfAbsent(spec,org.mtr.mod.data.SillonSignageSpec::visualKey);
+        return getResource("sillon_signage_"+key,
             () -> SillonSignageCanvas.generate(spec), DefaultRenderingColor.BLACK);
     }
 

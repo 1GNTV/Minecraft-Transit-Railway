@@ -1,0 +1,7 @@
+Source: Ile-de-France Mobilités, Prescriptions signalétiques V3.1 (2024).
+https://prim.iledefrance-mobilites.fr/fr/chartes-et-prescriptions/prescriptions-signaletiques
+Font files are preserved unchanged from Bibliotheque_polices.zip.
+Published licence: CC BY-NC-ND 3.0 FR
+https://creativecommons.org/licenses/by-nc-nd/3.0/fr/
+Prepared for the user's personal Sillon build. No operator endorsement is implied.
+The existing Parisine fonts were already present in this repository.

@@ -114,6 +114,8 @@ public final class Init implements Utilities {
 		REGISTRY.registerPacket(PacketUpdatePIDSConfig.class, PacketUpdatePIDSConfig::new);
 		REGISTRY.registerPacket(PacketUpdatePanamScreen.class, PacketUpdatePanamScreen::new);
 		REGISTRY.registerPacket(PacketUpdateSillonSignage.class, PacketUpdateSillonSignage::new);
+		REGISTRY.registerPacket(PacketStationDecor.class, PacketStationDecor::new);
+        REGISTRY.registerPacket(PacketSignageNetwork.class, PacketSignageNetwork::new);
 		REGISTRY.registerPacket(PacketPanamNewsSync.class, PacketPanamNewsSync::new);
 		REGISTRY.registerPacket(PacketPanamNewsRequest.class, PacketPanamNewsRequest::new);
         REGISTRY.registerPacket(PacketPanamBulletinEdit.class, PacketPanamBulletinEdit::new);
@@ -125,6 +127,12 @@ public final class Init implements Utilities {
 		REGISTRY.registerPacket(PacketUpdateTrainSensorConfig.class, PacketUpdateTrainSensorConfig::new);
 		REGISTRY.registerPacket(PacketUpdateVehiclesLifts.class, PacketUpdateVehiclesLifts::new);
 		REGISTRY.registerPacket(PacketUpdateVehicleRidingEntities.class, PacketUpdateVehicleRidingEntities::new);
+
+        // New packets are appended: existing MTR/Sillon discriminator IDs stay stable.
+        REGISTRY.registerPacket(org.mtr.mod.packet.PacketBuilderPlan.class, org.mtr.mod.packet.PacketBuilderPlan::new);
+        REGISTRY.registerPacket(org.mtr.mod.packet.PacketBuilderRail.class, org.mtr.mod.packet.PacketBuilderRail::new);
+        REGISTRY.registerPacket(PacketBuilderJourney.class, PacketBuilderJourney::new);
+        REGISTRY.registerPacket(PacketBuilderWayfinding.class, PacketBuilderWayfinding::new);
 
 		// Register command
 		REGISTRY.registerCommand("mtr", commandBuilderMtr -> {

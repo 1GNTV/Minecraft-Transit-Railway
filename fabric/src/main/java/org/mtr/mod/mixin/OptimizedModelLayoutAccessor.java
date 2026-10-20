@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Pseudo
 @Mixin(targets = "org.mtr.mapping.mapper.OptimizedModel", remap = false)
 public interface OptimizedModelLayoutAccessor {
+    @Accessor("uploadedParts")
+    java.util.List<org.mtr.mapping.render.object.VertexArray> sillon$parts();
     @Accessor("DEFAULT_MAPPING")
     static VertexAttributeMapping mtr$getDefaultMapping() { throw new UnsupportedOperationException("Mixin accessor not applied"); }
 }
