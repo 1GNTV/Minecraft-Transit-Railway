@@ -1,4 +1,4 @@
-"""Package models, inventory icons, localized names and survival drops for all 20 anchors."""
+"""Package models, inventory icons, localized names and survival drops for all station anchors."""
 from pathlib import Path
 from PIL import Image
 import json,re
@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parents[2];assets=root/'fabric/src/main/resources/
 source=(root/'fabric/src/main/java/org/mtr/mod/decor/DecorKind.java').read_text()
 kinds=re.findall(r'^    [A-Z_]+\("([a-z_]+)","([^"]+)"',source,re.M)
 def write(path,value):path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n')
-write(assets/'models/block/decor_anchor.json',{'textures':{'particle':'mtr:decor/metal'},'elements':[]})
+write(assets/'models/block/decor_anchor.json',{'textures':{'particle':'minecraft:block/iron_block'},'elements':[]})
 for id,title in kinds:
  name='sillon_decor_'+id
  write(assets/f'blockstates/{name}.json',{'variants':{'':{'model':'mtr:block/decor_anchor'}}})
