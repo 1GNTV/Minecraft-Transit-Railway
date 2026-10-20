@@ -73,6 +73,7 @@ public final class Init implements Utilities {
 	private static final Object2ObjectAVLTreeMap<UUID, Runnable> RIDING_PLAYERS = new Object2ObjectAVLTreeMap<>();
 
 	public static void init() {
+        org.mtr.mod.chantier.ChantierServer.register();
 		LOGGER.info("Starting Minecraft with arguments:\n{}", String.join("\n", ManagementFactory.getRuntimeMXBean().getInputArguments()));
 		AsciiArt.print();
 		Blocks.init();

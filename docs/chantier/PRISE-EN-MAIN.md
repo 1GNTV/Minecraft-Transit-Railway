@@ -24,7 +24,7 @@ L’onglet **Volumes** permet d’ajouter une station, un tunnel, une salle ou u
 - **Suppr** dans les onglets Dimensions ou Volumes retire le volume sélectionné.
 - Les volumes peuvent avoir un plafond plat, une voûte ou un profil arrondi. Les quais peuvent être latéraux ou centraux. L’éclairage et les piliers sont réglables.
 
-L’aperçu est un hologramme de surfaces, visible à travers le terrain. Ses couleurs distinguent la structure, les quais et l’éclairage ; les textures définitives apparaissent après construction. Il est possible de se déplacer dans le futur intérieur.
+L’aperçu est un hologramme de surfaces, visible à travers le terrain. Ses couleurs distinguent la structure, les quais et l’éclairage ; les textures définitives apparaissent après construction. Le bouton **Visiter l’aperçu** passe temporairement en spectateur pour traverser le terrain sans le modifier. **G**, puis **Quitter la visite**, rend le mode créatif et ramène au point de départ. Un retour est aussi prévu à la reconnexion si la visite a été interrompue.
 
 ## Matériaux
 

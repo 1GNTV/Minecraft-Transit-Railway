@@ -41,6 +41,7 @@ public final class ChantierScreen extends Screen {
             pair(y+24,confirmUndo?"Confirmer la restauration":"Restaurer le terrain initial",()->{if(confirmUndo){ChantierClient.send(1);confirmUndo=false;}else confirmUndo=true;refresh();},"Nouveau chantier",()->{if(!ChantierClient.busy){ChantierClient.newProject();tab=0;refresh();}});
             List<String> saved=ChantierClient.projects();pair(y+48,"Projet précédent",()->load(saved,-1),"Projet suivant · "+saved.size(),()->load(saved,1));
             pair(y+72,"Annuler le dernier réglage",()->{ChantierClient.undoDraft(false);refresh();},"Rétablir le réglage",()->{ChantierClient.undoDraft(true);refresh();});
+            button(12,y+96,width-24,ChantierClient.visiting?"Quitter la visite · retour au départ":"Visiter l’aperçu · sans creuser",()->{ChantierClient.send(4);onClose();});
             var v=ChantierClient.preview();if(v!=null&&v.error().isEmpty())ChantierClient.message=v.cells()+" blocs dans l’enveloppe. Blocs techniques et constructions protégés.";
         }
         button(12,height-26,width-24,"Revenir dans le monde · Échap conserve le plan",this::onClose);
