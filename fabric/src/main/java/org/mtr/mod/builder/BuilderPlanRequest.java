@@ -33,8 +33,8 @@ public final class BuilderPlanRequest implements SerializedDataBase {
         nearby.sort(Comparator.comparingDouble(p->Math.hypot(p.getMidPosition().getX()-x,p.getMidPosition().getZ()-z)));
         for(Platform platform:nearby.subList(0,Math.min(4,nearby.size())))for(Siding siding:data.sidings){
             if(plans.size()>=12)break;
-            if(siding.getTransportMode()!=TransportMode.TRAIN||siding.area==null||siding.getVehicleCars().isEmpty()||siding.getVehicleCars().size()>64||!((Object)siding instanceof SidingPlanningAccessor))continue;
-            var a=(SidingPlanningAccessor)(Object)siding;var depot=(Depot)siding.area;
+            if(siding.getTransportMode()!=TransportMode.TRAIN||siding.area==null||siding.getVehicleCars().isEmpty()||!((Object)siding instanceof SidingPlanningAccessor))continue;
+            var a=(SidingPlanningAccessor)(Object)siding;var depot=(Depot)siding.area;if(depot.getPath().stream().noneMatch(path->path.getSavedRailBaseId()==platform.getId()))continue;
             if(a.sillon$defaultPath()==null||a.sillon$main().isEmpty()||a.sillon$approach().isEmpty())continue;
             var extra=VehicleExtraData.create(depot.getId(),siding.getId(),siding.getRailLength(),siding.getVehicleCars(),a.sillon$approach(),a.sillon$main(),a.sillon$return(),a.sillon$defaultPath(),depot.getRepeatInfinitely(),siding.getAcceleration(),siding.getDeceleration(),siding.getIsManual(),siding.getMaxManualSpeed(),siding.getManualToAutomaticTime());
             boolean reversed=false;PathData prev=null;
@@ -46,9 +46,10 @@ public final class BuilderPlanRequest implements SerializedDataBase {
                 if(!seen.add(key))continue;
                 Parked preview=new Parked(extra,siding,data);preview.park(path.getEndDistance(),reversed);
                 JsonObject plan=new JsonObject();plan.addProperty("platform",platform.getId());plan.addProperty("siding",siding.getId());plan.addProperty("label",(platform.area==null?"":platform.area.getName()+" · ")+platform.getName()+" · "+siding.getName());
-                JsonArray cars=new JsonArray();
+                JsonArray cars=new JsonArray();int carIndex=0;plan.addProperty("total",siding.getVehicleCars().size());
                 for(var car:preview.getVehicleCarsAndPositions()){
-                    JsonObject entry=new JsonObject();entry.add("car",Utilities.getJsonObjectFromData(car.left()));JsonArray bogies=new JsonArray();
+                    int index=carIndex++;if(car.right().isEmpty())continue;var anchor=car.right().get(0).left();if(Math.hypot(anchor.x-x,anchor.z-z)>130||Math.abs(anchor.y-y)>32)continue;
+                    JsonObject entry=new JsonObject();entry.addProperty("index",index);entry.add("car",Utilities.getJsonObjectFromData(car.left()));JsonArray bogies=new JsonArray();
                     for(var bogie:car.right()){JsonArray points=new JsonArray();for(var v:new org.mtr.core.tool.Vector[]{bogie.left(),bogie.right()}){points.add(v.x);points.add(v.y);points.add(v.z);}bogies.add(points);}entry.add("bogies",bogies);cars.add(entry);
                 }
                 plan.add("cars",cars);if(plans.toString().length()+plan.toString().length()>27000)break;plans.add(plan);

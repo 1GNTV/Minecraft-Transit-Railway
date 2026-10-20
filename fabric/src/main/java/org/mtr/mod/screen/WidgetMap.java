@@ -294,7 +294,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 	public void find(Position position) {
 		centerX = position.getX();
 		centerY = position.getZ();
-		scale = Math.max(8, scale);
+		scale = Math.max(modern()?1.25:8, scale);
 	}
 
 	public void startEditingArea(AreaBase<?, ?> editingArea) {
@@ -405,7 +405,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 		}
 	}
 
-    public void focusProblem(Position a,Position b){problemA=a;problemB=b;find(a);}
+    public void focusProblem(Position a,Position b){problemA=a;problemB=b;find(a);if(b!=null){centerX=(a.getX()+b.getX())/2D;centerY=(a.getZ()+b.getZ())/2D;scale=Math.max(SCALE_LOWER_LIMIT,Math.min(8,Math.min(Math.max(20,width-50)/Math.max(1D,Math.abs(a.getX()-b.getX())),Math.max(20,height-120)/Math.max(1D,Math.abs(a.getZ()-b.getZ())))));}}
     private double sx(double x){return getX2()+(x-centerX)*scale+width/2D;}
     private double sy(double z){return getY2()+(z-centerY)*scale+height/2D;}
     private void renderModern(GraphicsHolder g,int mx,int my,float delta){
