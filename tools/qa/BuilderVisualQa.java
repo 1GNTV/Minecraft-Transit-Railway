@@ -30,8 +30,9 @@ import java.util.*;
 
 /** Separate QA mod: actual delivered jar, real simulation queue, native controls and GPU captures. */
 public final class BuilderVisualQa {
-    private static boolean active;private static volatile boolean fixtureReady;private static int stage,ticks,doorVisibleTicks;private static long sidingId,depotId;private static String railId,originalRail,changedRail;private static VehicleResource resource;private static ConsistBuilderScreen composer;private static BuilderRailScreen editor;private static DashboardScreen dashboard;
-    public static void register(){MinecraftForge.EVENT_BUS.addListener(BuilderVisualQa::tick);}
+    private static boolean active;private static volatile boolean fixtureReady;private static int stage,ticks;private static long renderedFrames,markerFrame=-1;private static long sidingId,depotId;private static String railId,originalRail,changedRail;private static VehicleResource resource;private static ConsistBuilderScreen composer;private static BuilderRailScreen editor;private static DashboardScreen dashboard;
+    public static void register(){MinecraftForge.EVENT_BUS.addListener(BuilderVisualQa::tick);MinecraftForge.EVENT_BUS.addListener(BuilderVisualQa::frame);}
+    private static void frame(TickEvent.RenderTickEvent event){if(event.phase==TickEvent.Phase.END)renderedFrames++;}
     private static void check(boolean ok,String message){if(!ok)throw new IllegalStateException(message);}
     private static Object field(Object object,String name)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);return f.get(object);}
     private static void set(Object object,String name,Object value)throws Exception{Field f=object.getClass().getDeclaredField(name);f.setAccessible(true);f.set(object,value);}
@@ -39,7 +40,7 @@ public final class BuilderVisualQa {
     private static JsonReader id(NameColorDataBase value,long id){var json=Utilities.getJsonObjectFromData(value);json.addProperty("id",id);return new JsonReader(json);}
     private static Rail rail(Position a,Position b,int type){return type==1?Rail.newSidingRail(a,Angle.S,b,Angle.N,Rail.Shape.QUADRATIC,0,new ObjectArrayList<>(List.of(CustomResourceLoader.DEFAULT_RAIL_ID)),TransportMode.TRAIN):type==2?Rail.newPlatformRail(a,Angle.S,b,Angle.N,Rail.Shape.QUADRATIC,0,new ObjectArrayList<>(List.of(CustomResourceLoader.DEFAULT_RAIL_ID)),TransportMode.TRAIN):Rail.newRail(a,Angle.S,b,Angle.N,Rail.Shape.QUADRATIC,0,new ObjectArrayList<>(List.of(CustomResourceLoader.DEFAULT_RAIL_ID)),80,80,false,false,true,false,true,TransportMode.TRAIN);}
     public static void begin(Minecraft mc){try{
-        active=true;stage=0;ticks=doorVisibleTicks=0;fixtureReady=false;resize(mc,false);mc.setScreen(null);mc.options.hideGui=false;
+        active=true;stage=0;ticks=0;markerFrame=-1;fixtureReady=false;resize(mc,false);mc.setScreen(null);mc.options.hideGui=false;
         List<VehicleResource> all=new ArrayList<>();CustomResourceLoader.iterateVehicles(TransportMode.TRAIN,all::add);check(!all.isEmpty(),"No real vehicle resources");resource=all.stream().filter(v->v.getId().contains("cm_stock")&&v.getLength()<25).findFirst().orElseGet(()->all.stream().filter(v->v.getLength()<24).findFirst().orElse(all.get(0)));
         ClientData data=new ClientData();UpdateDataRequest request=new UpdateDataRequest(data);
         Position a=new Position(80,4,0),b=new Position(80,4,100),c=new Position(80,4,140),d=new Position(80,4,260),e=new Position(80,4,300),f=new Position(80,4,420);
@@ -81,20 +82,26 @@ public final class BuilderVisualQa {
     private static Siding siding(){return MinecraftClientData.getDashboardInstance().sidingIdMap.get(sidingId);}
     private static void next(){stage++;ticks=0;}
     private static void profilePixels()throws Exception{Field cache=TrainSilhouetteCache.class.getDeclaredField("CACHE");cache.setAccessible(true);int tested=0;for(Object e:((Map<?,?>)cache.get(null)).values()){if(!(boolean)field(e,"ready"))continue;var texture=(NativeImageBackedTexture)field(e,"texture");int old=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D);try{GL33.glBindTexture(GL33.GL_TEXTURE_2D,texture.getGlId());java.nio.ByteBuffer pixels=java.nio.ByteBuffer.allocateDirect(512*128*4);GL33.glGetTexImage(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,pixels);int visible=0;for(int i=3;i<pixels.capacity();i+=4)if((pixels.get(i)&255)>0)visible++;check(visible>200,"GPU train profile is empty");tested++;}finally{GL33.glBindTexture(GL33.GL_TEXTURE_2D,old);}if(tested>=2)break;}check(tested>0,"No GPU profile verified");System.out.println("BUILDER_QA_GPU_ALPHA "+tested+" nonempty real model silhouettes");}
-    private static void doorPixels(Minecraft mc){
-        int old=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D),w=mc.getMainRenderTarget().width,h=mc.getMainRenderTarget().height,visible=0;
-        try{
-            GL33.glBindTexture(GL33.GL_TEXTURE_2D,mc.getMainRenderTarget().getColorTextureId());
-            java.nio.ByteBuffer pixels=java.nio.ByteBuffer.allocateDirect(w*h*4);
-            GL33.glGetTexImage(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,pixels);
-            for(int y=90;y<h-100;y++)for(int x=0;x<w;x++){int i=(y*w+x)*4,r=pixels.get(i)&255,g=pixels.get(i+1)&255,b=pixels.get(i+2)&255;if(r<180&&g>r+25&&g>b+5&&b>r+10)visible++;}
-        }finally{GL33.glBindTexture(GL33.GL_TEXTURE_2D,old);}
+    private static void doorPixels(Minecraft mc)throws Exception{
+        int visible=0,relaxed=0,bright=0;
+        // Use the screenshot API so Oculus can supply its final composited image.
+        try(var image=Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+            int w=image.getWidth(),h=image.getHeight();
+            var directory=mc.gameDirectory.toPath().resolve("screenshots");Files.createDirectories(directory);
+            image.writeToFile(directory.resolve(Boolean.getBoolean("sillon.qa.shader")?"builder-shader-doors-sample.png":"builder-native-doors-sample.png"));
+            for(int y=90;y<h-100;y++)for(int x=0;x<w;x++){
+                int pixel=image.getPixelRGBA(x,y),r=pixel&255,g=(pixel>>>8)&255,b=(pixel>>>16)&255;
+                if(r<180&&g>r+25&&g>b+5&&b>r+10)visible++;
+                if(g>r+8&&g>b+1&&b>r+5){relaxed++;if(r>=180)bright++;}
+            }
+        }
+        System.out.println("BUILDER_QA_DOOR_PIXEL_DIAGNOSTICS strict="+visible+" relativeHue="+relaxed+" bright="+bright);
         check(visible>20,"Door markers exist but are not visible on the platform: "+visible+" colored pixels");
         System.out.println("BUILDER_QA_DOOR_PIXELS "+visible+" colored world pixels, excluding HUD");
     }
     private static void tick(TickEvent.ClientTickEvent event){if(!active||event.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;try{
         ticks++;if(ticks>650)throw new IllegalStateException("Builder stage timeout "+stage+" markers="+DoorGuideClient.markerCount()+" fixture="+fixtureReady);
-        if(stage==0&&fixtureReady&&ticks>100){check(siding()!=null,"Actual siding update not received");if(DoorGuideClient.markerCount()>0){if(++doorVisibleTicks>=6){doorPixels(mc);capture(mc,"doors");next();}}else{doorVisibleTicks=0;if(ticks%100==0)System.out.println("BUILDER_QA_WAITING_DOOR_PLANS "+ticks);}}
+        if(stage==0&&fixtureReady&&ticks>100){check(siding()!=null,"Actual siding update not received");if(DoorGuideClient.markerCount()>0){if(markerFrame<0)markerFrame=renderedFrames;if(renderedFrames>=markerFrame+2){doorPixels(mc);capture(mc,"doors");next();}}else{markerFrame=-1;if(ticks%100==0)System.out.println("BUILDER_QA_WAITING_DOOR_PLANS "+ticks);}}
         else if(stage==1&&ticks==10){mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().getPlayerList().getPlayer(mc.player.getUUID()).setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY));}
         else if(stage==1&&ticks==35){check(DoorGuideClient.markerCount()==0,"Door guides remain without brush");composer=new ConsistBuilderScreen(siding(),null);mc.setScreen(composer);addCar();check(siding().getVehicleCars().size()==2,"Draft modified live siding");next();}
         else if(stage==2&&TrainSilhouetteCache.readyCount()>0&&ticks>90){controls(mc);profilePixels();capture(mc,"consist-large");set(composer,"name","QA navette");call(composer,"savePreset");check(ConsistPresets.load("TRAIN").get("QA navette").size()==3,"Preset not saved");resize(mc,true);next();}

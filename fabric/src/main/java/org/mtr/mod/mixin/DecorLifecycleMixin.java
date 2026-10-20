@@ -7,8 +7,9 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BlockEntity.class)
 public abstract class DecorLifecycleMixin {
-    @Inject(method={"setLevel","clearRemoved","setBlockState"},at=@At("RETURN"))
+    // Forge production uses SRG names; the QA/development runtime uses Mojmap.
+    @Inject(method={"setLevel","m_142339_","clearRemoved","m_6339_","setBlockState","m_155250_"},at=@At("RETURN"),remap=false)
     private void sillon$load(CallbackInfo ci){if((Object)this instanceof BlockStationDecor.BlockEntity decor)DecorCollisionIndex.update(decor);}
-    @Inject(method="setRemoved",at=@At("HEAD"))
+    @Inject(method={"setRemoved","m_7651_"},at=@At("HEAD"),remap=false)
     private void sillon$remove(CallbackInfo ci){if((Object)this instanceof BlockStationDecor.BlockEntity decor)DecorCollisionIndex.remove(decor);}
 }
