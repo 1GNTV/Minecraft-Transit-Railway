@@ -5,7 +5,7 @@ import random,math
 root=Path(__file__).resolve().parents[2]
 out=root/'fabric/src/main/resources/assets/mtr/textures/decor';out.mkdir(parents=True,exist_ok=True)
 r=random.Random(841)
-for mat in ['concrete','stone','metal','wood','accent','glass','glow','perforated','fire','hazard','poster','label']:
+for mat in ['concrete','stone','tile','metal','wood','accent','glass','glow','perforated','fire','hazard','poster','label']:
     im=Image.new('RGBA',(256,256),(255,255,255,255));p=im.load()
     if mat in ('concrete','stone','metal','wood','perforated'):
         for y in range(256):
@@ -21,6 +21,16 @@ for mat in ['concrete','stone','metal','wood','accent','glass','glow','perforate
             for y in range(8,256,16):
                 for x in range(8,256,16):d.ellipse((x-3,y-3,x+3,y+3),fill=(45,49,51))
     d=ImageDraw.Draw(im)
+    if mat=='tile':
+        d.rectangle((0,0,255,255),fill='#edf0eb')
+        for row in range(8):
+            for col in range(-1,5):
+                x=col*64+(row%2)*32;y=row*32
+                d.rectangle((x,y,x+63,y+31),fill='#b7bcb7')
+                d.rectangle((x+2,y+2,x+61,y+29),fill='#e1e5df')
+                d.line((x+3,y+3,x+60,y+3),fill='#ffffff',width=2)
+                d.line((x+3,y+3,x+3,y+28),fill='#f9faf5',width=2)
+                d.line((x+4,y+28,x+60,y+28),fill='#ced3ce',width=2)
     if mat=='glass':
         im=Image.new('RGBA',(256,256),(225,245,249,255));d=ImageDraw.Draw(im);d.line((0,200,200,0),fill=(245,255,255),width=8)
     if mat=='fire':
@@ -33,4 +43,4 @@ for mat in ['concrete','stone','metal','wood','accent','glass','glow','perforate
         font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',27);small=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',12)
         d.text((20,24),'SILLON',font=font,fill='#f2eee4');d.text((21,62),'EXPLORER LE RÉSEAU',font=small,fill='#a6c7cc');d.ellipse((20,95,55,130),outline='#d2b26c',width=3)
     im.save(out/(mat+'.png'))
-print('12 original materials generated')
+print('13 original materials generated')

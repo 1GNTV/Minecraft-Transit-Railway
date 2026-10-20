@@ -35,8 +35,11 @@ public final class DecorPreview {
             double shade=f.surface().equals("glow")?1:.66+.30*Math.abs((nx*.3+ny*.8+nz*.5)/Math.max(.0001,len));
             BufferedImage tex=texture(f.surface());if(f.surface().equals("poster")&&!s.image().isEmpty()){BufferedImage custom=resolver.apply(s.image());if(custom!=null)tex=custom;}
             if(f.surface().equals("label")){tex=new BufferedImage(512,128,BufferedImage.TYPE_INT_RGB);Graphics2D gg=tex.createGraphics();gg.setColor(new Color(s.accent()));gg.fillRect(0,0,512,128);gg.setColor(Color.WHITE);gg.setFont(new Font("SansSerif",Font.BOLD,44));gg.drawString(s.label(),12,80);gg.dispose();}
-            tri(out,tex,depth,z,x,y,new int[]{0,1,2},new double[]{0,0,f.u()},new double[]{f.v(),0,0},f.color(),shade,f.surface().equals("glass")?.28:1);
-            tri(out,tex,depth,z,x,y,new int[]{0,2,3},new double[]{0,f.u(),f.u()},new double[]{f.v(),0,f.v()},f.color(),shade,f.surface().equals("glass")?.28:1);
+            boolean plane=f.surface().equals("poster")||f.surface().equals("perforated")||f.surface().equals("label");
+            double[] U=f.boxUv()?new double[]{f.u(),f.u(),0,0}:plane?new double[]{0,0,f.u(),f.u()}:new double[]{0,f.u(),f.u(),0};
+            double[] V=plane||f.boxUv()?new double[]{f.v(),0,0,f.v()}:new double[]{f.v(),f.v(),0,0};
+            tri(out,tex,depth,z,x,y,new int[]{0,1,2},new double[]{U[0],U[1],U[2]},new double[]{V[0],V[1],V[2]},f.color(),shade,f.surface().equals("glass")?.28:1);
+            tri(out,tex,depth,z,x,y,new int[]{0,2,3},new double[]{U[0],U[2],U[3]},new double[]{V[0],V[2],V[3]},f.color(),shade,f.surface().equals("glass")?.28:1);
         }
         return out;
     }

@@ -5,7 +5,7 @@ import java.util.*;
 /** Game-independent geometry. The exact same quads feed Minecraft and the review renderer. */
 public final class DecorMesh {
     public record Point(float x,float y,float z) {}
-    public record Face(Point a,Point b,Point c,Point d,String surface,int color,float u,float v) {}
+    public record Face(Point a,Point b,Point c,Point d,String surface,int color,float u,float v,boolean boxUv) {}
     private final List<Face> faces=new ArrayList<>();
     private final DecorSpec s;
     public float minX=Float.POSITIVE_INFINITY,minY=Float.POSITIVE_INFINITY,minZ=Float.POSITIVE_INFINITY,maxX=Float.NEGATIVE_INFINITY,maxY=Float.NEGATIVE_INFINITY,maxZ=Float.NEGATIVE_INFINITY;
@@ -15,26 +15,28 @@ public final class DecorMesh {
     public DecorMesh(DecorSpec s){this.s=s;build();
         if((s.kind()==DecorKind.INTERCOM&&s.variant()==1)||(s.kind()==DecorKind.FIRE_CABINET&&s.variant()==2)||(s.kind()==DecorKind.VENT&&s.variant()==3)){
             var original=new ArrayList<>(faces);faces.clear();minX=minY=minZ=Float.POSITIVE_INFINITY;maxX=maxY=maxZ=Float.NEGATIVE_INFINITY;
-            for(var f:original)face(inset(f.a()),inset(f.b()),inset(f.c()),inset(f.d()),f.surface(),f.color(),f.u(),f.v());
+            for(var f:original)face(inset(f.a()),inset(f.b()),inset(f.c()),inset(f.d()),f.surface(),f.color(),f.u(),f.v(),f.boxUv());
         }
         if(!s.label().isBlank() && (s.kind()==DecorKind.CABINET||s.kind()==DecorKind.HELP_POINT||s.kind()==DecorKind.INTERCOM)) face(p(-s.width()*.40,s.height()*.82,s.depth()/2+.015),p(-s.width()*.40,s.height()*.95,s.depth()/2+.015),p(s.width()*.40,s.height()*.95,s.depth()/2+.015),p(s.width()*.40,s.height()*.82,s.depth()/2+.015),"label",0xFFFFFF,1,1);}
     private Point inset(Point p){return new Point(p.x(),p.y(),p.z()*.35f-s.depth()*.25f);}
     private Point p(double x,double y,double z){return new Point((float)x,(float)y,(float)z);}
-    private void face(Point a,Point b,Point c,Point d,String material,int color,float u,float v){
+    private void face(Point a,Point b,Point c,Point d,String material,int color,float u,float v){face(a,b,c,d,material,color,u,v,false);}
+    private void boxFace(Point a,Point b,Point c,Point d,String material,int color,float u,float v){face(a,b,c,d,material,color,u,v,true);}
+    private void face(Point a,Point b,Point c,Point d,String material,int color,float u,float v,boolean boxUv){
         if(faces.size()>=14000)throw new IllegalStateException("Decoration mesh budget exceeded");
         for(Point p:List.of(a,b,c,d)){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);minZ=Math.min(minZ,p.z);maxZ=Math.max(maxZ,p.z);}
-        faces.add(new Face(a,b,c,d,material,0xFF000000|color,u,v));
+        faces.add(new Face(a,b,c,d,material,0xFF000000|color,u,v,boxUv));
     }
-    private String body(){return s.kind().materials.split("\\|")[s.material()].equals("Bois")?"wood":s.kind().materials.split("\\|")[s.material()].equals("Métal")?"metal":s.kind().materials.split("\\|")[s.material()].equals("Pierre")?"stone":"concrete";}
+    private String body(){if(s.kind().materials.split("\\|")[s.material()].equals("Carrelage"))return "tile";return s.kind().materials.split("\\|")[s.material()].equals("Bois")?"wood":s.kind().materials.split("\\|")[s.material()].equals("Métal")?"metal":s.kind().materials.split("\\|")[s.material()].equals("Pierre")?"stone":"concrete";}
     private void box(double x,double y,double z,double X,double Y,double Z,String mat,int color){
         if(X<=x||Y<=y||Z<=z)return;
         float u=(float)(X-x),v=(float)(Y-y),d=(float)(Z-z);if(mat.equals("fire")||mat.equals("hazard")){u=v=d=1;}
-        face(p(x,y,z),p(x,Y,z),p(X,Y,z),p(X,y,z),mat,color,u,v);
-        face(p(X,y,Z),p(X,Y,Z),p(x,Y,Z),p(x,y,Z),mat,color,u,v);
-        face(p(x,y,Z),p(x,Y,Z),p(x,Y,z),p(x,y,z),mat,color,d,v);
-        face(p(X,y,z),p(X,Y,z),p(X,Y,Z),p(X,y,Z),mat,color,d,v);
-        face(p(x,Y,z),p(x,Y,Z),p(X,Y,Z),p(X,Y,z),mat,color,u,d);
-        face(p(x,y,Z),p(x,y,z),p(X,y,z),p(X,y,Z),mat,color,u,d);
+        boxFace(p(x,y,z),p(x,Y,z),p(X,Y,z),p(X,y,z),mat,color,u,v);
+        boxFace(p(X,y,Z),p(X,Y,Z),p(x,Y,Z),p(x,y,Z),mat,color,u,v);
+        boxFace(p(x,y,Z),p(x,Y,Z),p(x,Y,z),p(x,y,z),mat,color,d,v);
+        boxFace(p(X,y,z),p(X,Y,z),p(X,Y,Z),p(X,y,Z),mat,color,d,v);
+        boxFace(p(x,Y,z),p(x,Y,Z),p(X,Y,Z),p(X,Y,z),mat,color,u,d);
+        boxFace(p(x,y,Z),p(x,y,z),p(X,y,z),p(X,y,Z),mat,color,u,d);
     }
     private void arch(Point a,Point b,Point c,Point d,String mat,int color,float u,float v){face(d,c,b,a,mat,color,u,v);}
     private void b(double x,double y,double z,double X,double Y,double Z){box(x,y,z,X,Y,Z,body(),s.color());}

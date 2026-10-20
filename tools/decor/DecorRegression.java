@@ -31,6 +31,7 @@ public final class DecorRegression {
                 if(v==0){for(var f:mesh.faces()){for(var p:java.util.List.of(f.a(),f.b(),f.c(),f.d()))obj.append("v ").append(p.x()).append(' ').append(p.y()).append(' ').append(p.z()).append('\n');obj.append("f ").append(vertex).append(' ').append(vertex+1).append(' ').append(vertex+2).append(' ').append(vertex+3).append('\n');vertex+=4;}}
                 tested++;
             }
+            Set<String> materials=new HashSet<>();for(int m=0;m<4;m++){var t=new DecorSpec(k,original.width(),original.height(),original.depth(),original.spacing(),original.suspension(),0,0,0,0,0,original.color(),original.accent(),m,0,original.illuminated(),"","");materials.add(new DecorMesh(t).faces().toString());}check(materials.size()==4,"Every finish must visibly change the production mesh: "+k);
             check(variants.size()==4,"Each variant must have distinct production geometry: "+k);
             g.setFont(new Font("SansSerif",Font.PLAIN,15));g.setColor(new Color(0x51616B));g.drawString("Base : "+k.width+" × "+k.height+" × "+k.depth+" blocs  •  "+k.materials.replace("|"," / "),40,962);g.dispose();
             ImageIO.write(board,"jpg",out.resolve(String.format("%02d-",k.ordinal()+1)+k.id+".jpg").toFile());Files.writeString(out.resolve("models/"+k.id+".obj"),obj,StandardCharsets.UTF_8);

@@ -31,7 +31,7 @@ with zipfile.ZipFile(jar) as z:
             if path not in names:raise AssertionError("Missing station item resource: "+path)
     for name in ["DecorKind","DecorSpec","DecorMesh","DecorPlacement","DecorPreview"]:
         if f"org/mtr/mod/decor/{name}.class" not in names:raise AssertionError("Missing station class "+name)
-    if len([p for p in names if p.startswith("assets/mtr/textures/decor/") and p.endswith(".png")])!=12:raise AssertionError("Expected twelve original station materials")
+    if len([p for p in names if p.startswith("assets/mtr/textures/decor/") and p.endswith(".png")])!=13:raise AssertionError("Expected thirteen original station materials")
     spec=z.read("org/mtr/mod/data/SillonSignageSpec.class")
     for style in ["metro","metro_subtitle","rer","direction","transfer","interchange","exit","sector","vertical","platform","route","map","services","totem","digital","custom","gpe","gpe_direction"]:
         if style.encode() not in spec:raise AssertionError("Missing style "+style)
