@@ -7,13 +7,19 @@ public final class DecorMesh {
     public record Point(float x,float y,float z) {}
     public record Face(Point a,Point b,Point c,Point d,String surface,int color,float u,float v,boolean boxUv) {}
     private final List<Face> faces=new ArrayList<>();
+    public record Solid(double x,double y,double z,double X,double Y,double Z) {}
+    private final List<Solid> solids=new ArrayList<>();
+    private List<Face> faceView;
+    public List<Solid> solids(){return Collections.unmodifiableList(solids);}
+    private void solid(double x,double y,double z,double X,double Y,double Z){if(X>x&&Y>y&&Z>z)solids.add(new Solid(x,y,z,X,Y,Z));}
     private final DecorSpec s;
     public float minX=Float.POSITIVE_INFINITY,minY=Float.POSITIVE_INFINITY,minZ=Float.POSITIVE_INFINITY,maxX=Float.NEGATIVE_INFINITY,maxY=Float.NEGATIVE_INFINITY,maxZ=Float.NEGATIVE_INFINITY;
     private static final Map<DecorSpec,DecorMesh> CACHE=Collections.synchronizedMap(new LinkedHashMap<>(32,.75f,true){protected boolean removeEldestEntry(Map.Entry<DecorSpec,DecorMesh> e){return size()>96;}});
     public static DecorMesh get(DecorSpec s){synchronized(CACHE){DecorMesh mesh=CACHE.get(s);if(mesh!=null)return mesh;mesh=new DecorMesh(s);CACHE.put(s,mesh);int weight=CACHE.values().stream().mapToInt(m->m.faces.size()).sum();var it=CACHE.entrySet().iterator();while(weight>180000&&CACHE.size()>1&&it.hasNext()){var e=it.next();weight-=e.getValue().faces.size();it.remove();}return mesh;}}
-    public List<Face> faces(){return Collections.unmodifiableList(faces);}
+    public List<Face> faces(){return faceView==null?(faceView=Collections.unmodifiableList(faces)):faceView;}
     public DecorMesh(DecorSpec s){this.s=s;build();
         if((s.kind()==DecorKind.INTERCOM&&s.variant()==1)||(s.kind()==DecorKind.FIRE_CABINET&&s.variant()==2)||(s.kind()==DecorKind.VENT&&s.variant()==3)){
+            for(int i=0;i<solids.size();i++){var q=solids.get(i);solids.set(i,new Solid(q.x(),q.y(),q.z()*.35-s.depth()*.25,q.X(),q.Y(),q.Z()*.35-s.depth()*.25));}
             var original=new ArrayList<>(faces);faces.clear();minX=minY=minZ=Float.POSITIVE_INFINITY;maxX=maxY=maxZ=Float.NEGATIVE_INFINITY;
             for(var f:original)face(inset(f.a()),inset(f.b()),inset(f.c()),inset(f.d()),f.surface(),f.color(),f.u(),f.v(),f.boxUv());
         }
@@ -29,7 +35,7 @@ public final class DecorMesh {
     }
     private String body(){if(s.kind().materials.split("\\|")[s.material()].equals("Carrelage"))return "tile";return s.kind().materials.split("\\|")[s.material()].equals("Bois")?"wood":s.kind().materials.split("\\|")[s.material()].equals("Métal")?"metal":s.kind().materials.split("\\|")[s.material()].equals("Pierre")?"stone":"concrete";}
     private void box(double x,double y,double z,double X,double Y,double Z,String mat,int color){
-        if(X<=x||Y<=y||Z<=z)return;
+        if(X<=x||Y<=y||Z<=z)return;solid(x,y,z,X,Y,Z);
         float u=(float)(X-x),v=(float)(Y-y),d=(float)(Z-z);if(mat.equals("fire")||mat.equals("hazard")){u=v=d=1;}
         boxFace(p(x,y,z),p(x,Y,z),p(X,Y,z),p(X,y,z),mat,color,u,v);
         boxFace(p(X,y,Z),p(X,Y,Z),p(x,Y,Z),p(x,y,Z),mat,color,u,v);
@@ -43,7 +49,8 @@ public final class DecorMesh {
     private void metal(double x,double y,double z,double X,double Y,double Z){box(x,y,z,X,Y,Z,"metal",0x788086);}
     private void dark(double x,double y,double z,double X,double Y,double Z){box(x,y,z,X,Y,Z,"metal",0x252D32);}
     private void tube(double ax,double ay,double az,double bx,double by,double bz,double r,String mat,int color){
-        double dx=bx-ax,dy=by-ay,dz=bz-az,len=Math.sqrt(dx*dx+dy*dy+dz*dz);if(len<1e-6)return;dx/=len;dy/=len;dz/=len;
+        double dx=bx-ax,dy=by-ay,dz=bz-az,len=Math.sqrt(dx*dx+dy*dy+dz*dz);if(len<1e-6)return;int pieces=Math.abs(dx)<1e-6&&Math.abs(dz)<1e-6||Math.abs(dy)<1e-6&&(Math.abs(dx)<1e-6||Math.abs(dz)<1e-6)?1:Math.min(64,Math.max(1,(int)Math.ceil(len/.2)));for(int k=0;k<pieces;k++){double t=(double)k/pieces,T=(double)(k+1)/pieces;solid(Math.min(ax+dx*t,ax+dx*T)-r,Math.min(ay+dy*t,ay+dy*T)-r,Math.min(az+dz*t,az+dz*T)-r,Math.max(ax+dx*t,ax+dx*T)+r,Math.max(ay+dy*t,ay+dy*T)+r,Math.max(az+dz*t,az+dz*T)+r);}
+        dx/=len;dy/=len;dz/=len;
         double ux=-dz,uy=0,uz=dx;double ul=Math.sqrt(ux*ux+uz*uz);if(ul<.01){ux=1;uz=0;ul=1;}ux/=ul;uz/=ul;
         double vx=dy*uz,vy=dz*ux-dx*uz,vz=-dy*ux;
         Point[] a=new Point[12],b=new Point[12];for(int i=0;i<12;i++){double angle=i*Math.PI/6,c=Math.cos(angle)*r,t=Math.sin(angle)*r;
@@ -66,6 +73,7 @@ public final class DecorMesh {
                 for(int i=0;i<40;i++){double t0=i*Math.PI/40,t1=(i+1)*Math.PI/40;
                     double x0=Math.cos(t0)*w/2,y0=Math.sin(t0)*rise,x1=Math.cos(t1)*w/2,y1=Math.sin(t1)*rise;
                     double X0=Math.cos(t0)*(w/2+t),Y0=Math.sin(t0)*(rise+t),X1=Math.cos(t1)*(w/2+t),Y1=Math.sin(t1)*(rise+t);
+                    solid(Math.min(Math.min(x0,x1),Math.min(X0,X1)),Math.min(y0,y1),z,Math.max(Math.max(x0,x1),Math.max(X0,X1)),Math.max(Y0,Y1),Z);
                     arch(p(x0,y0,z),p(x1,y1,z),p(x1,y1,Z),p(x0,y0,Z),v==3?"concrete":body(),s.color(),(float)(w*Math.PI/80),(float)d);
                     arch(p(X0,Y0,Z),p(X1,Y1,Z),p(X1,Y1,z),p(X0,Y0,z),body(),s.color(),(float)(w*Math.PI/80),(float)d);
                     arch(p(x0,y0,z),p(X0,Y0,z),p(X1,Y1,z),p(x1,y1,z),body(),s.color(),.2f,.2f);
@@ -74,7 +82,8 @@ public final class DecorMesh {
                 if(v==3){int n=count(d,.65,16);for(int j=0;j<=n;j++)for(int i=0;i<24;i++){double q=i*Math.PI/24,Q=(i+1)*Math.PI/24;rail(Math.cos(q)*(w/2-.025),Math.sin(q)*(rise-.025),z+d*j/n,Math.cos(Q)*(w/2-.025),Math.sin(Q)*(rise-.025),z+d*j/n,.025);}}
             }
             case COLUMN -> {
-                if(v==1){int n=32;for(int i=0;i<n;i++){double q=i*Math.PI*2/n,Q=(i+1)*Math.PI*2/n;face(p(Math.cos(q)*w/2,h,Math.sin(q)*d/2),p(Math.cos(Q)*w/2,h,Math.sin(Q)*d/2),p(Math.cos(Q)*w/2,0,Math.sin(Q)*d/2),p(Math.cos(q)*w/2,0,Math.sin(q)*d/2),body(),s.color(),(float)(w*Math.PI/n),(float)h);}
+                if(v==1){for(int strip=0;strip<24;strip++){double xx=a+w*strip/24,XX=a+w*(strip+1)/24,nearest=Math.min(Math.abs(xx),Math.abs(XX));if(xx<=0&&XX>=0)nearest=0;double radius=d/2*Math.sqrt(Math.max(0,1-4*nearest*nearest/(w*w)));solid(xx,0,-radius,XX,h,radius);}
+                    int n=32;for(int i=0;i<n;i++){double q=i*Math.PI*2/n,Q=(i+1)*Math.PI*2/n;face(p(Math.cos(q)*w/2,h,Math.sin(q)*d/2),p(Math.cos(Q)*w/2,h,Math.sin(Q)*d/2),p(Math.cos(Q)*w/2,0,Math.sin(Q)*d/2),p(Math.cos(q)*w/2,0,Math.sin(q)*d/2),body(),s.color(),(float)(w*Math.PI/n),(float)h);}
                     for(double yy:new double[]{0,h})for(int i=0;i<n;i++){int A=yy==0?i:i+1,B=yy==0?i+1:i;face(p(0,yy,0),p(Math.cos(A*Math.PI*2/n)*w/2,yy,Math.sin(A*Math.PI*2/n)*d/2),p(Math.cos(B*Math.PI*2/n)*w/2,yy,Math.sin(B*Math.PI*2/n)*d/2),p(0,yy,0),body(),s.color(),1,1);}
                 }else {b(a,0,z,c,h,Z);if(v==2){int n=count(w,step,80);for(int i=0;i<n;i++){double x=a+w*i/n;b(x,0,z-.035,x+w/n*.38,h,z);b(x,0,Z,x+w/n*.38,h,Z+.035);}}if(v==3)dark(a-.04,0,z-.04,c+.04,.18,Z+.04);}
                 metal(a-.01,.02,z-.01,c+.01,.07,Z+.01);

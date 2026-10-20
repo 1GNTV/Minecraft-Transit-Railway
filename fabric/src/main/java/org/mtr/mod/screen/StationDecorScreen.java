@@ -30,7 +30,7 @@ public final class StationDecorScreen extends ScreenExtension {
     public StationDecorScreen(BlockPos pos,DecorSpec spec){this.pos=pos;kind=spec.kind();base=preview=spec;if(DecorBrushClient.hasGhost(pos)){count=DecorBrushClient.repeatCount;axis=DecorBrushClient.repeatAxis;step=DecorBrushClient.repeatStep;operation=1;tab=3;}variant=spec.variant();material=spec.material();lit=spec.illuminated();
         LABELS.forEach((key,label)->{Input f=new Input(key);inputs.put(key,f);});sync(spec);
         for(int i=0;i<4;i++){final int n=i;tabs[i]=new Btn(TAB_NAMES[i],()->{if(valid()){tab=n;page=0;arrange();}});}
-        save=new Btn("Enregistrer",this::apply);close=new Btn("Fermer",()->{DecorBrushClient.clearGhost();super.onClose2();});
+        save=new Btn("Enregistrer",this::apply);close=new Btn("Annuler",()->{DecorBrushClient.clearGhost();super.onClose2();});
         previous=new Btn("<",()->{page=Math.max(0,page-1);arrange();});next=new Btn(">",()->{page=Math.min(pages-1,page+1);arrange();});
         copy=new Btn("Copier",()->{if(valid()){clipboard=read();DecorBrushClient.feedback="Réglages copiés.";}});
         paste=new Btn("Coller",()->{if(clipboard!=null){base=base.patch(clipboard,31);sync(base);variant=base.variant();material=base.material();lit=base.illuminated();arrange();}});
@@ -100,6 +100,6 @@ public final class StationDecorScreen extends ScreenExtension {
         void caption(String text){setMessage2(new Text(TextHelper.literal(text).data));}
         void move(int x,int y,int w){setX2(x);setY2(y);setWidth2(w);visible=true;}
     }
-    @Override public void onClose2(){DecorBrushClient.clearGhost();super.onClose2();}
+    @Override public void onClose2(){if(!valid())return;send(0);DecorBrushClient.clearGhost();super.onClose2();}
     @Override public boolean isPauseScreen2(){return false;}
 }

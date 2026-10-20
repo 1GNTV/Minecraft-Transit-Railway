@@ -315,7 +315,7 @@ public final class SillonSignageScreen extends ScreenExtension {
         InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketUpdateSillonSignage(pos,model.spec()));
         closed=true;super.onClose2();
     }
-    @Override public void onClose2(){closed=true;super.onClose2();}
+    @Override public void onClose2(){save();}
     @Override public void tick2() {
         for(Input f:inputs.values())if(f.visible)f.tick2();if(filter.visible)filter.tick2();
         String error=model.error();save.enabled(error.isBlank());

@@ -8,7 +8,7 @@ import org.mtr.mod.decor.*;
 import org.mtr.mod.packet.PacketOpenBlockEntityScreen;
 import java.util.List;
 
-/** Brush-editable anchor. Architectural geometry is decorative and does not obstruct paths. */
+/** Brush-editable anchor. Extended collisions are supplied by the spatial index, including parts outside this anchor. */
 public final class BlockStationDecor extends BlockWaterloggable implements DirectionHelper,BlockWithEntity {
     public final DecorKind kind;
     public BlockStationDecor(DecorKind kind){super(org.mtr.mod.Blocks.createDefaultBlockSettings(true,state->kind.light()?12:0).nonOpaque());this.kind=kind;}
@@ -27,8 +27,9 @@ public final class BlockStationDecor extends BlockWaterloggable implements Direc
         private DecorSpec spec;
         public BlockEntity(BlockPos pos,BlockState state,DecorKind kind){super(BlockEntityTypes.STATION_DECOR.get(kind).get(),pos,state);spec=DecorSpec.defaults(kind);}
         public DecorSpec spec(){return spec;}
-        public void setSpec(DecorSpec value){if(!spec.equals(value)){spec=value;markDirty2();}}
-        @Override public void readCompoundTag(CompoundTag tag){super.readCompoundTag(tag);spec=DecorSpec.read(tag,spec.kind());}
+        @Override public net.minecraft.world.phys.AABB getRenderBoundingBox(){return DecorCollisionIndex.bounds(this); }
+        public void setSpec(DecorSpec value){if(!spec.equals(value)){spec=value;DecorCollisionIndex.update(this);markDirty2();}}
+        @Override public void readCompoundTag(CompoundTag tag){super.readCompoundTag(tag);spec=DecorSpec.read(tag,spec.kind());DecorCollisionIndex.update(this);}
         @Override public void writeCompoundTag(CompoundTag tag){super.writeCompoundTag(tag);spec.write(tag);}
     }
 }

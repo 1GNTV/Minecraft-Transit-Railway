@@ -28,6 +28,8 @@
   },
   "mixins": [
     "SidingPlanningAccessor",
-    "BuilderOperationMixin"
+    "BuilderOperationMixin",
+    "DecorCollisionMixin",
+    "DecorLifecycleMixin"
   ]
 }
