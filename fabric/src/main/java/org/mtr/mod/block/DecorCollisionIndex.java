@@ -64,6 +64,11 @@ public final class DecorCollisionIndex {
         if(entry==null){update(entity);index=world==null?null:WORLDS.get(world);entry=index==null?null:index.anchors.get(entity.getBlockPos().asLong());}
         return entry==null?new AABB(entity.getBlockPos()):entry.bounds();
     }
+    public static Iterable<VoxelShape> collisions(Level world,net.minecraft.world.entity.Entity entity,AABB query){
+        // Keep the native context, iterator, chunk filtering and per-block shape hooks.
+        Iterable<VoxelShape> vanilla=()->new net.minecraft.world.level.BlockCollisions<>(world,entity,query,false,(pos,shape)->shape);
+        return append(world,query,vanilla);
+    }
     public static Iterable<VoxelShape> append(Level world,AABB query,Iterable<VoxelShape> vanilla){
         Index index=WORLDS.get(world);if(index==null||index.anchors.isEmpty())return vanilla;
         Set<Long> keys=new HashSet<>();for(Cell cell:cells(query)){var bucket=index.cells.get(cell);if(bucket!=null)keys.addAll(bucket);}
