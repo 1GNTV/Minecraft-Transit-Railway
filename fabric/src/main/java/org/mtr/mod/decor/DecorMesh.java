@@ -213,7 +213,7 @@ public final class DecorMesh {
                 box(a+.08,low+(top-low)*.48,Z+.013,c-.08,top-.13,Z+.016,"glow",s.accent());
                 face(p(a+.09,low+(top-low)*.50,Z+.018),p(a+.09,top-.15,Z+.018),p(c-.09,top-.15,Z+.018),p(c-.09,low+(top-low)*.50,Z+.018),"journey",0xFFFFFF,1,1);
                 box(a+.08,low+.12,Z+.013,c-.08,low+(top-low)*.38,Z+.016,"metal",0xCBD9DF);
-                if(v==2){box(a+.045,low+.08,z-.012,c-.045,top-.08,z-.002,"accent",0x142C42);}
+                if(v==2){box(a+.045,low+.08,z-.012,c-.045,top-.08,z-.002,"accent",0x142C42);box(a+.08,low+(top-low)*.48,z-.016,c-.08,top-.13,z-.013,"glow",s.accent());box(a+.08,low+.12,z-.016,c-.08,low+(top-low)*.38,z-.013,"metal",0xCBD9DF);face(p(c-.09,low+(top-low)*.50,z-.018),p(c-.09,top-.15,z-.018),p(a+.09,top-.15,z-.018),p(a+.09,low+(top-low)*.50,z-.018),"journey",0xFFFFFF,1,1);}
                 if(v==3)metal(a,top,z,c,top+.035,Z+.08);
             }
             case POSTER -> {

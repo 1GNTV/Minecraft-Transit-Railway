@@ -5,6 +5,7 @@ import org.mtr.mapping.mapper.TextHelper;
 import org.mtr.mapping.registry.PacketHandler;
 import org.mtr.mapping.tool.*;
 import org.mtr.mod.*;
+import org.mtr.mod.Items;
 import org.mtr.mod.block.BlockStationDecor;
 import org.mtr.mod.builder.WalkGraph;
 import org.mtr.mod.data.PersistentStateData;
@@ -21,7 +22,7 @@ public final class PacketBuilderWayfinding extends PacketHandler {
     public PacketBuilderWayfinding(PacketBufferReceiver p){action=p.readInt();id=p.readLong();sequence=p.readLong();raw=p.readString();}
     @Override public void write(PacketBufferSender p){p.writeInt(action);p.writeLong(id);p.writeLong(sequence);p.writeString(raw);}
     @Override public void runClient(){if(action==100)org.mtr.mod.client.WayfindingClient.accept(sequence,raw);else if(action==101)org.mtr.mod.client.WayfindingClient.feedback=raw;else if(action==102||action==103)org.mtr.mod.client.WayfindingClient.receipt(sequence,action==102,raw);}
-    private static PersistentStateData store(ServerPlayerEntity p){return (PersistentStateData)PersistenceStateExtension.register(new ServerWorld(p.getEntityWorld().data),PersistentStateData::new,Init.MOD_ID);}
+    private static PersistentStateData store(ServerPlayerEntity p){return (PersistentStateData)PersistenceStateExtension.register(ServerWorld.cast(p.getEntityWorld()),PersistentStateData::new,Init.MOD_ID);}
     private static boolean marker(World w,BlockPos p){var be=w.getBlockEntity(p);return be!=null&&be.data instanceof BlockStationDecor.BlockEntity d&&d.spec().kind()==DecorKind.WAYPOINT;}
     private static WalkGraph.Node node(BlockPos p){return new WalkGraph.Node(p.asLong(),p.getX()+.5,p.getY()+.1,p.getZ()+.5,0,"","passage",0,List.of());}
     private static void feedback(ServerPlayerEntity p,String text){Init.REGISTRY.sendPacketToClient(p,new PacketBuilderWayfinding(101,0,0,text));p.sendMessage(new Text(TextHelper.literal(text).data),true);}

@@ -25,6 +25,10 @@ public final class SignageRegression {
     private static void automaticChecks(){
         var binding=new SillonSignageBinding(2,22,101,"auto","full","vertical","é","lift",true,true);
         check(SillonSignageBinding.decode(binding.encode()).equals(binding),"Binding roundtrip");
+        String legacy=binding.encode().substring(0,binding.encode().lastIndexOf(';'));check(SillonSignageBinding.decode(legacy).equals(binding),"Old ten-field binding remains readable");
+        var guided=new SillonSignageBinding(2,22,101,"auto","full","vertical","é","lift",true,true,true);
+        check(SillonSignageBinding.decode(guided.encode()).equals(guided),"Guidance binding survives serialization");
+        check(new SillonSignageEditorModel(preset("direction").withBinding(guided)).spec().binding().guided(),"Editor preserves authored guidance mode");
         var saved=preset("route").withBinding(binding);CompoundTag tag=new CompoundTag();saved.write(tag);
         check(SillonSignageSpec.read(tag).equals(saved),"Version 3 sticky network IDs");
         check(new SillonSignageEditorModel(saved).spec().equals(saved),"Network binding editor roundtrip");

@@ -42,6 +42,6 @@ public final class DecorRegression {
         }
         check(DecorPlacement.repeat(32,0,16).size()==3,"repetition distance budget");check(DecorPlacement.validBox(31,31,31),"volume boundary");check(!DecorPlacement.validBox(48,48,48),"volume cap");
         check(DecorSpec.decode("broken").kind()==DecorKind.BENCH,"malformed packet");check(DecorSpec.defaults(DecorKind.BENCH).patch(DecorSpec.defaults(DecorKind.VAULT),31).kind()==DecorKind.BENCH,"family preserved");
-        System.out.println("PASS "+tested+" variants, 80 extreme meshes, serialization, selective patches and bounded placement");
+        System.out.println("PASS "+tested+" variants, "+tested+" extreme meshes, serialization, selective patches and bounded placement");
     }
 }
