@@ -28,7 +28,7 @@ public final class BuilderJourneyRequest implements SerializedDataBase {
                 for(DirectionsConnection connection:response.getDirectionsConnections()){
                     JsonObject leg=Utilities.getJsonObjectFromData(connection);String routeId=leg.get("routeId").getAsString();Route route=data.routes.stream().filter(r->r.getHexId().equalsIgnoreCase(routeId)).findFirst().orElse(null);
                     String startId=leg.get("startStationId").getAsString(),endId=leg.get("endStationId").getAsString();
-                    if(route==null&&startId.equalsIgnoreCase(endId)&&leg.get("walkingDistance").getAsLong()==0&&leg.get("startTime").getAsLong()==leg.get("endTime").getAsLong())continue;
+                    if(route==null&&leg.get("walkingDistance").getAsLong()==0&&leg.get("startTime").getAsLong()==leg.get("endTime").getAsLong())continue;
                     Station from=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(startId)).findFirst().orElse(null),to=data.stations.stream().filter(s->s.getHexId().equalsIgnoreCase(endId)).findFirst().orElse(null);
                     leg.addProperty("from",from==null?previousStation:from.getName());leg.addProperty("to",to==null?end.getName():to.getName());previousStation=to==null?end.getName():to.getName();
                     leg.addProperty("line",route==null?"À pied":route.getRouteNumber().isBlank()?route.getName():route.getRouteNumber());leg.addProperty("color",route==null?0x6E8798:route.getColor());
