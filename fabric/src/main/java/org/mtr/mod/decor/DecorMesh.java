@@ -10,10 +10,15 @@ public final class DecorMesh {
     private final DecorSpec s;
     public float minX=Float.POSITIVE_INFINITY,minY=Float.POSITIVE_INFINITY,minZ=Float.POSITIVE_INFINITY,maxX=Float.NEGATIVE_INFINITY,maxY=Float.NEGATIVE_INFINITY,maxZ=Float.NEGATIVE_INFINITY;
     private static final Map<DecorSpec,DecorMesh> CACHE=Collections.synchronizedMap(new LinkedHashMap<>(32,.75f,true){protected boolean removeEldestEntry(Map.Entry<DecorSpec,DecorMesh> e){return size()>96;}});
-    public static DecorMesh get(DecorSpec s){synchronized(CACHE){return CACHE.computeIfAbsent(s,DecorMesh::new);}}
+    public static DecorMesh get(DecorSpec s){synchronized(CACHE){DecorMesh mesh=CACHE.get(s);if(mesh!=null)return mesh;mesh=new DecorMesh(s);CACHE.put(s,mesh);int weight=CACHE.values().stream().mapToInt(m->m.faces.size()).sum();var it=CACHE.entrySet().iterator();while(weight>180000&&CACHE.size()>1&&it.hasNext()){var e=it.next();weight-=e.getValue().faces.size();it.remove();}return mesh;}}
     public List<Face> faces(){return Collections.unmodifiableList(faces);}
     public DecorMesh(DecorSpec s){this.s=s;build();
+        if((s.kind()==DecorKind.INTERCOM&&s.variant()==1)||(s.kind()==DecorKind.FIRE_CABINET&&s.variant()==2)||(s.kind()==DecorKind.VENT&&s.variant()==3)){
+            var original=new ArrayList<>(faces);faces.clear();minX=minY=minZ=Float.POSITIVE_INFINITY;maxX=maxY=maxZ=Float.NEGATIVE_INFINITY;
+            for(var f:original)face(inset(f.a()),inset(f.b()),inset(f.c()),inset(f.d()),f.surface(),f.color(),f.u(),f.v());
+        }
         if(!s.label().isBlank() && (s.kind()==DecorKind.CABINET||s.kind()==DecorKind.HELP_POINT||s.kind()==DecorKind.INTERCOM)) face(p(-s.width()*.40,s.height()*.82,s.depth()/2+.015),p(-s.width()*.40,s.height()*.95,s.depth()/2+.015),p(s.width()*.40,s.height()*.95,s.depth()/2+.015),p(s.width()*.40,s.height()*.82,s.depth()/2+.015),"label",0xFFFFFF,1,1);}
+    private Point inset(Point p){return new Point(p.x(),p.y(),p.z()*.35f-s.depth()*.25f);}
     private Point p(double x,double y,double z){return new Point((float)x,(float)y,(float)z);}
     private void face(Point a,Point b,Point c,Point d,String material,int color,float u,float v){
         if(faces.size()>=14000)throw new IllegalStateException("Decoration mesh budget exceeded");

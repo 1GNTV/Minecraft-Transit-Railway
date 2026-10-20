@@ -17,9 +17,10 @@ public final class DecorPreview {
     public static BufferedImage render(DecorSpec s,int width,int height,double angle){
         DecorMesh mesh=DecorMesh.get(s);var out=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);Graphics2D g=out.createGraphics();
         g.dispose();
-        double yaw=Math.toRadians(angle),pitch=Math.toRadians(s.kind().light()||s.kind()==DecorKind.BAFFLE?-18:23);var polys=new ArrayList<Poly>();double minx=1e6,miny=1e6,maxx=-1e6,maxy=-1e6;
+        double yaw=Math.toRadians(angle+s.yaw()),pitch=Math.toRadians(s.kind().light()||s.kind()==DecorKind.BAFFLE?-18:23);var polys=new ArrayList<Poly>();double minx=1e6,miny=1e6,maxx=-1e6,maxy=-1e6;
         for(var f:mesh.faces()){P[] pp=new P[4];int i=0;double zz=0;for(var p:List.of(f.a(),f.b(),f.c(),f.d())){
-            double x=p.x()*Math.cos(yaw)+p.z()*Math.sin(yaw),z=-p.x()*Math.sin(yaw)+p.z()*Math.cos(yaw),y=p.y()*Math.cos(pitch)-z*Math.sin(pitch);z=p.y()*Math.sin(pitch)+z*Math.cos(pitch);
+            double mp=Math.toRadians(s.pitch()),py=p.y()*Math.cos(mp)-p.z()*Math.sin(mp),pz=p.y()*Math.sin(mp)+p.z()*Math.cos(mp);
+            double x=p.x()*Math.cos(yaw)+pz*Math.sin(yaw),z=-p.x()*Math.sin(yaw)+pz*Math.cos(yaw),y=py*Math.cos(pitch)-z*Math.sin(pitch);z=py*Math.sin(pitch)+z*Math.cos(pitch);
             pp[i++]=new P(x,-y,z);zz+=z;minx=Math.min(minx,x);maxx=Math.max(maxx,x);miny=Math.min(miny,-y);maxy=Math.max(maxy,-y);
         }polys.add(new Poly(f,pp,zz/4));}
         double scale=Math.min((width-48)/Math.max(.01,maxx-minx),(height-48)/Math.max(.01,maxy-miny));

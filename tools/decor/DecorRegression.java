@@ -18,10 +18,11 @@ public final class DecorRegression {
             var changed=new DecorSpec(k,7,2,1,.2f,.5f,45,12,1,2,3,0x223344,0xDDBB22,2,3,true,"mtr:textures/decor/poster.png","Quai é – 東京");
             check(original.patch(changed,2).width()==original.width(),"appearance preserves size");check(original.patch(changed,2).variant()==original.variant(),"appearance preserves variant");check(original.patch(changed,2).label().equals(original.label()),"appearance preserves label");
             BufferedImage board=new BufferedImage(1200,980,BufferedImage.TYPE_INT_RGB);Graphics2D g=board.createGraphics();g.setColor(new Color(0xF1F2EE));g.fillRect(0,0,1200,980);g.setColor(new Color(0x18343E));g.setFont(new Font("SansSerif",Font.BOLD,33));g.drawString(String.format("%02d",k.ordinal()+1)+"  "+k.title,38,55);g.setFont(new Font("SansSerif",Font.PLAIN,16));g.drawString("Modèle Sillon • géométrie utilisée par le mod • dimensions et finitions réglables",40,86);
+            Set<String> variants=new HashSet<>();
             StringBuilder obj=new StringBuilder("# Sillon original geometry - "+k.title+"\n");int vertex=1;
             for(int v=0;v<4;v++){
                 DecorSpec spec=new DecorSpec(k,original.width(),original.height(),original.depth(),original.spacing(),original.suspension(),0,0,0,0,0,original.color(),original.accent(),original.material(),v,original.illuminated(),"",k==DecorKind.HELP_POINT?"INFORMATION":"");
-                DecorMesh mesh=new DecorMesh(spec);check(!mesh.faces().isEmpty(),"empty mesh");check(mesh.faces().size()<14000,"budget");
+                DecorMesh mesh=new DecorMesh(spec);variants.add(mesh.faces().toString());check(!mesh.faces().isEmpty(),"empty mesh");check(mesh.faces().size()<14000,"budget");
                 for(var face:mesh.faces())for(var p:java.util.List.of(face.a(),face.b(),face.c(),face.d()))check(Float.isFinite(p.x())&&Float.isFinite(p.y())&&Float.isFinite(p.z()),"finite mesh");
                 // Every default and extreme variant must generate within the bounded geometry budget.
                 var huge=new DecorSpec(k,16,12,8,.08f,8,180,60,8,8,8,0xFFFFFF,0,3,v,true,"","");new DecorMesh(huge);
@@ -30,6 +31,7 @@ public final class DecorRegression {
                 if(v==0){for(var f:mesh.faces()){for(var p:java.util.List.of(f.a(),f.b(),f.c(),f.d()))obj.append("v ").append(p.x()).append(' ').append(p.y()).append(' ').append(p.z()).append('\n');obj.append("f ").append(vertex).append(' ').append(vertex+1).append(' ').append(vertex+2).append(' ').append(vertex+3).append('\n');vertex+=4;}}
                 tested++;
             }
+            check(variants.size()==4,"Each variant must have distinct production geometry: "+k);
             g.setFont(new Font("SansSerif",Font.PLAIN,15));g.setColor(new Color(0x51616B));g.drawString("Base : "+k.width+" × "+k.height+" × "+k.depth+" blocs  •  "+k.materials.replace("|"," / "),40,962);g.dispose();
             ImageIO.write(board,"jpg",out.resolve(String.format("%02d-",k.ordinal()+1)+k.id+".jpg").toFile());Files.writeString(out.resolve("models/"+k.id+".obj"),obj,StandardCharsets.UTF_8);
             System.out.println("PASS "+k.id+" 4 variants • "+DecorMesh.get(original).faces().size()+" default quads");
