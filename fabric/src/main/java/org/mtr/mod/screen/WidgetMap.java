@@ -113,7 +113,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 			flatPositionToPlatformMap.forEach((position, platforms) -> drawRectangleFromWorldCoords(guiDrawing, position.getX(), position.getZ(), position.getX() + 1, position.getZ() + 1, ARGB_WHITE));
 			for (final Station station : MinecraftClientData.getDashboardInstance().stations) {
 				if (AreaBase.validCorners(station)) {
-					drawRectangleFromWorldCoords(guiDrawing, station.getMinX(), station.getMinZ(), station.getMaxX(), station.getMaxZ(), ARGB_BLACK_TRANSLUCENT + station.getColor());
+					drawAreaContour(guiDrawing,station,ARGB_BLACK_TRANSLUCENT + station.getColor());
 				}
 			}
 			mouseOnSavedRail(mouseWorldPos, (savedRail, x1, z1, x2, z2) -> drawRectangleFromWorldCoords(guiDrawing, x1, z1, x2, z2, ARGB_WHITE), true);
@@ -121,7 +121,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 			flatPositionToSidingMap.forEach((position, sidings) -> drawRectangleFromWorldCoords(guiDrawing, position.getX(), position.getZ(), position.getX() + 1, position.getZ() + 1, ARGB_WHITE));
 			for (final Depot depot : MinecraftClientData.getDashboardInstance().depots) {
 				if (depot.isTransportMode(transportMode) && AreaBase.validCorners(depot)) {
-					drawRectangleFromWorldCoords(guiDrawing, depot.getMinX(), depot.getMinZ(), depot.getMaxX(), depot.getMaxZ(), ARGB_BLACK_TRANSLUCENT + depot.getColor());
+					drawAreaContour(guiDrawing,depot,ARGB_BLACK_TRANSLUCENT + depot.getColor());
 				}
 			}
 			mouseOnSavedRail(mouseWorldPos, (savedRail, x1, z1, x2, z2) -> drawRectangleFromWorldCoords(guiDrawing, x1, z1, x2, z2, ARGB_WHITE), false);
@@ -301,6 +301,7 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
 		mapState = MapState.EDITING_AREA;
 		drawArea1 = new IntIntImmutablePair((int) editingArea.getMinX(), (int) editingArea.getMinZ());
 		drawArea2 = new IntIntImmutablePair((int) editingArea.getMaxX(), (int) editingArea.getMaxZ());
+        if(org.mtr.mod.builder.AreaShape.polygon(editingArea)!=null){drawArea1=null;drawArea2=null;}
 	}
 
 	public void startEditingRoute() {
@@ -408,6 +409,11 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
     public void focusProblem(Position a,Position b){problemA=a;problemB=b;find(a);if(b!=null){centerX=(a.getX()+b.getX())/2D;centerY=(a.getZ()+b.getZ())/2D;scale=Math.max(SCALE_LOWER_LIMIT,Math.min(8,Math.min(Math.max(20,width-50)/Math.max(1D,Math.abs(a.getX()-b.getX())),Math.max(20,height-120)/Math.max(1D,Math.abs(a.getZ()-b.getZ())))));}}
     private double sx(double x){return getX2()+(x-centerX)*scale+width/2D;}
     private double sy(double z){return getY2()+(z-centerY)*scale+height/2D;}
+    private void drawAreaContour(GuiDrawing d,AreaBase<?,?> area,int color){
+        var polygon=org.mtr.mod.builder.AreaShape.polygon(area);
+        if(polygon==null){drawRectangleFromWorldCoords(d,area.getMinX(),area.getMinZ(),area.getMaxX(),area.getMaxZ(),color);return;}
+        org.mtr.mod.builder.PolygonDrawing.draw(d,polygon,this::sx,this::sy,getX2(),getY2(),getX2()+width,getY2()+height,color,(color&0xFFFFFF)|0xAA000000);
+    }
     private void renderModern(GraphicsHolder g,int mx,int my,float delta){
         final var ui=new GuiDrawing(g);var data=MinecraftClientData.getDashboardInstance();
         org.mtr.mod.builder.BuilderUi.rect(g,getX2(),getY2(),width,height,0xFF13202A);
@@ -418,8 +424,8 @@ public class WidgetMap extends ClickableWidgetExtension implements IGui {
             var points=railSamples.computeIfAbsent(rail,r->{double len=r.railMath.getLength();int count=Math.max(2,Math.min(96,(int)Math.ceil(len/2)));var out=new org.mtr.core.tool.Vector[count+1];for(int i=0;i<=count;i++)out[i]=r.railMath.getPosition(len*i/count,false);return out;});org.mtr.core.tool.Vector prev=null;
             for(var p:points){if(prev!=null){double x1=sx(prev.x),y1=sy(prev.z),x2=sx(p.x),y2=sy(p.z);if(x1>=getX2()&&x1<=getX2()+width&&x2>=getX2()&&x2<=getX2()+width&&y1>=getY2()&&y1<=getY2()+height&&y2>=getY2()&&y2<=getY2()+height)org.mtr.mod.builder.BuilderUi.line(ui,x1,y1,x2,y2,rail.isPlatform()?4:1.5,rail.isPlatform()?0xFF74D8CD:0xFF638091);}prev=p;}
         }
-        if(showStations)for(Station station:data.stations){if(AreaBase.validCorners(station)){drawRectangleFromWorldCoords(ui,station.getMinX(),station.getMinZ(),station.getMaxX(),station.getMaxZ(),0x28000000|station.getColor());}}
-        else for(Depot depot:data.depots)if(depot.isTransportMode(transportMode)&&AreaBase.validCorners(depot))drawRectangleFromWorldCoords(ui,depot.getMinX(),depot.getMinZ(),depot.getMaxX(),depot.getMaxZ(),0x30000000|depot.getColor());
+        if(showStations)for(Station station:data.stations){if(AreaBase.validCorners(station)){drawAreaContour(ui,station,0x28000000|station.getColor());}}
+        else for(Depot depot:data.depots)if(depot.isTransportMode(transportMode)&&AreaBase.validCorners(depot))drawAreaContour(ui,depot,0x30000000|depot.getColor());
         if(mapState==MapState.EDITING_AREA&&drawArea1!=null&&drawArea2!=null)drawRectangleFromWorldCoords(ui,drawArea1,drawArea2,0x7074D8CD);
         var source=showStations?flatPositionToPlatformMap:flatPositionToSidingMap;
         source.forEach((pos,rails)->{double x=sx(pos.getX()+.5),y=sy(pos.getZ()+.5);if(x<getX2()+6||x>getX2()+width-6||y<getY2()+6||y>getY2()+height-6)return;boolean hover=Math.hypot(mx-x,my-y)<=9;ui.drawRectangle(x-5,y-5,x+5,y+5,hover?0xFF61D4C4:0xFFDFEDF3);ui.drawRectangle(x-2,y-2,x+2,y+2,0xFF172632);});

@@ -1,4 +1,5 @@
-package org.mtr.mod.decor;
+package org.mtr.mod.block;
+import org.mtr.mod.decor.*;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;

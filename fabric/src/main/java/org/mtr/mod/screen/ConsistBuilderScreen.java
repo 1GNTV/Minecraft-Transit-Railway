@@ -42,7 +42,7 @@ public final class ConsistBuilderScreen extends ScreenExtension {
     private void button(int x,int y,int w,String text,Runnable action){addChild(new ClickableWidget(BuilderUi.button(x,y,w,text,action)));}
     private int carY(){return height-100;}
     private int perPage(){return columns*rows;}
-    private int cardY(int n){return 54+(n/columns)*48;}
+    private int cardY(int n){return 50+(n/columns)*48;}
     private int cardX(int n){return 12+(n%columns)*cellWidth;}
     @Override protected void init2(){
         super.init2();columns=Math.max(1,(width-24)/145);cellWidth=(width-24)/columns;

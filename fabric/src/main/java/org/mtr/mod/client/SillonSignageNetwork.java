@@ -32,13 +32,24 @@ public final class SillonSignageNetwork {
     private static final Map<ServiceCell,ServiceEntry> SERVICES=new LinkedHashMap<>(){
         @Override protected boolean removeEldestEntry(Map.Entry<ServiceCell,ServiceEntry> e){return size()>128;}
     };
+    private static final class ServiceScan {final ServiceCell cell;final BlockPos origin;final World world;final Map<String,Service> found=new LinkedHashMap<>();int cursor;ServiceScan(ServiceCell c,BlockPos p,World w){cell=c;origin=p;world=w;}}
+    private static final LinkedHashMap<ServiceCell,ServiceScan> SCANS=new LinkedHashMap<>();
+    public static void tick(){
+        var clientWorld=MinecraftClient.getInstance().getWorldMapped();if(clientWorld==null){SCANS.clear();return;}
+        int budget=192;var it=SCANS.values().iterator();if(!it.hasNext())return;var scan=it.next();
+        if(scan.world.data!=clientWorld.data){it.remove();return;}
+        while(budget-->0&&scan.cursor<2601){int n=scan.cursor++,x=n%17-8,z=(n/17)%17-8,y=n/(17*17)-4;BlockPos at=new BlockPos(scan.origin.getX()+x,scan.origin.getY()+y,scan.origin.getZ()+z);if(!Init.isChunkLoaded(scan.world,at))continue;
+            String type=scan.world.getBlockState(at).getBlock().data.getClass().getSimpleName().toLowerCase(Locale.ROOT);String kind=type.contains("escalator")?"escalator":type.contains("stair")?"stairs":type.contains("ticketmachine")?"information":"";if(kind.isEmpty())continue;Point point=new Point(at.getX()+.5,at.getY()+.5,at.getZ()+.5);Point origin=new Point(scan.origin.getX()+.5,scan.origin.getY()+.5,scan.origin.getZ()+.5);Service previous=scan.found.get(kind);if(previous!=null&&previous.position().distance(origin)<=point.distance(origin))continue;String text=kind.equals("escalator")?"Escalator":kind.equals("stairs")?"Escalier":"Billetterie";String icon=kind.equals("escalator")?"official_escalator":kind.equals("stairs")?"official_stairs":"sncf_info";scan.found.put(kind,new Service(scan.cell.station(),kind,text,"",SillonSignageIconCatalog.get(icon)==null?"":icon,point));
+        }
+        if(scan.cursor>=2601){SERVICES.put(scan.cell,new ServiceEntry(System.currentTimeMillis(),List.copyOf(scan.found.values())));it.remove();}
+    }
     private SillonSignageNetwork(){}
     public static void accept(JsonReader reader){
         ClientData data=new ClientData();new ListDataResponse(reader,data).write();full=data;serial++;built=0;CACHE.clear();
     }
     public static SillonSignageNetworkSnapshot snapshot(){
         MinecraftClientData live=MinecraftClientData.getInstance();long now=System.currentTimeMillis();
-        if(owner!=live){owner=live;full=null;requested=built=0;serial++;clientRevision=-1;CACHE.clear();SERVICES.clear();}
+        if(owner!=live){owner=live;full=null;requested=built=0;serial++;clientRevision=-1;CACHE.clear();SERVICES.clear();SCANS.clear();}
         if(now-requested>10000&&MinecraftClient.getInstance().getPlayerMapped()!=null){
             requested=now;InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketSignageNetwork());
         }
@@ -64,23 +75,11 @@ public final class SillonSignageNetwork {
         long sid=boundStation==0?context.stationHint():boundStation;if(sid==0||sid!=context.stationHint())return data;
         ServiceCell cell=new ServiceCell(sid,origin.getX()>>4,origin.getY()>>3,origin.getZ()>>4);
         long now=System.currentTimeMillis();ServiceEntry cached=SERVICES.get(cell);
-        if(cached!=null&&now-cached.time()<8000){List<Service> merged=new ArrayList<>(data.services());merged.addAll(cached.services());return new SillonSignageNetworkSnapshot(data.stations(),data.platforms(),data.lines(),merged);}
-        Map<String,Service> found=new LinkedHashMap<>();
-        for(int x=-8;x<=8;x++)for(int z=-8;z<=8;z++)for(int y=-4;y<=4;y++){
-            BlockPos at=new BlockPos(origin.getX()+x,origin.getY()+y,origin.getZ()+z);
-            if(!Init.isChunkLoaded(world,at))continue;
-            String type=world.getBlockState(at).getBlock().data.getClass().getSimpleName().toLowerCase(Locale.ROOT);
-            String kind=type.contains("escalator")?"escalator":type.contains("stair")?"stairs":type.contains("ticketmachine")?"information":"";
-            if(kind.isEmpty())continue;Point p=new Point(at.getX()+.5,at.getY()+.5,at.getZ()+.5);
-            Service previous=found.get(kind);if(previous!=null&&previous.position().distance(context.origin())<=p.distance(context.origin()))continue;
-            String text=switch(kind){case "escalator"->"Escalator";case "stairs"->"Escalier";default->"Billetterie";};
-            String icon=kind.equals("escalator")?"official_escalator":kind.equals("stairs")?"official_stairs":"sncf_info";
-            found.put(kind,new Service(sid,kind,text,"",SillonSignageIconCatalog.get(icon)==null?"":icon,p));
-        }
-        SERVICES.put(cell,new ServiceEntry(now,List.copyOf(found.values())));
-        List<Service> services=new ArrayList<>(data.services());services.addAll(found.values());
-        return new SillonSignageNetworkSnapshot(data.stations(),data.platforms(),data.lines(),services);
+        if((cached==null||now-cached.time()>8000)&&SCANS.size()<32)SCANS.computeIfAbsent(cell,c->new ServiceScan(c,origin,world));
+        if(cached==null)return data;
+        List<Service> merged=new ArrayList<>(data.services());merged.addAll(cached.services());return new SillonSignageNetworkSnapshot(data.stations(),data.platforms(),data.lines(),merged);
     }
+
     private static SillonSignageAutomatic.Result departures(SillonSignageAutomatic.Result result,SillonSignageNetworkSnapshot data){
         SillonSignageSpec s=result.document();LongAVLTreeSet ids=new LongAVLTreeSet();
         if(result.platformId()!=0)ids.add(result.platformId());else for(Platform p:data.platforms())if(p.stationId()==result.stationId())ids.add(p.id());

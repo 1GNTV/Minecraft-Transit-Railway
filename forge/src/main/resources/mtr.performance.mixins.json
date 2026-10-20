@@ -30,6 +30,8 @@
     "SidingPlanningAccessor",
     "BuilderOperationMixin",
     "DecorCollisionMixin",
-    "DecorLifecycleMixin"
+    "DecorLifecycleMixin",
+    "AreaShapeSchemaMixin",
+    "AreaShapeMixin"
   ]
 }

@@ -1,7 +1,7 @@
 package org.mtr.mod.mixin;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.mtr.mod.block.BlockStationDecor;
-import org.mtr.mod.decor.DecorCollisionIndex;
+import org.mtr.mod.block.DecorCollisionIndex;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

@@ -414,6 +414,7 @@ public final class InitClient {
 			ensureInitialCustomResources();
 			JcmPresetRecovery.tick();
             org.mtr.mod.client.DoorGuideClient.tick();
+            org.mtr.mod.client.SillonSignageNetwork.tick();
 			org.mtr.mod.render.pixel.PixelAtlasCache.INSTANCE.tick();
 			final long currentMillis = System.currentTimeMillis();
 			final long millisElapsed = currentMillis - lastMillis;
