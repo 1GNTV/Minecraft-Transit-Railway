@@ -11,7 +11,7 @@ public record ChantierPlan(List<Part> parts,String wall,String floor,String roof
         public Point {if(!Double.isFinite(x)||!Double.isFinite(y)||!Double.isFinite(z)||Math.abs(x)>29999000||Math.abs(z)>29999000||Math.abs(y)>2048)throw new IllegalArgumentException("Coordonnées invalides.");}
         public Point move(double x,double y,double z){return new Point(this.x+x,this.y+y,this.z+z);}
     }
-    /** width is the clear inner width, base Y is the track plane; layout 0 lateral, 1 island. */
+    /** width is the clear inner width, base Y is the track plane; station layout 0 lateral, 1 island; tunnel layout 1 preserves an existing railway. */
     public record Part(Kind kind,Point a,Point b,int width,int height,int profile,int layout) {
         public Part {
             Objects.requireNonNull(kind);Objects.requireNonNull(a);Objects.requireNonNull(b);
@@ -24,7 +24,7 @@ public record ChantierPlan(List<Part> parts,String wall,String floor,String roof
         public Part dimensions(int w,int h){return new Part(kind,a,b,w,h,profile,layout);}
         public Part moved(double x,double y,double z){return new Part(kind,a.move(x,y,z),b.move(x,y,z),width,height,profile,layout);}
         public Part end(Point point){return new Part(kind,a,point,width,height,profile,layout);}
-        public double trackOffset(){return layout==0?2.5:width/2.0-3;}
+        public double trackOffset(){return layout==0?2:Math.floor(width/2.0)-3;}
     }
     public ChantierPlan {
         parts=List.copyOf(parts);if(parts.isEmpty()||parts.size()>MAX_PARTS)throw new IllegalArgumentException("Un chantier contient 1 à 32 volumes.");

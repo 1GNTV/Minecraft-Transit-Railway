@@ -25,7 +25,7 @@ public final class ChantierScreen extends Screen {
                 pair(y+24,"Largeur − · "+p.width()+" m",()->alter(q->q.dimensions(q.width()-1,q.height())),"Largeur +",()->alter(q->q.dimensions(q.width()+1,q.height())));
                 pair(y+48,"Hauteur − · "+p.height()+" m",()->alter(q->q.dimensions(q.width(),q.height()-1)),"Hauteur +",()->alter(q->q.dimensions(q.width(),q.height()+1)));
                 pair(y+72,"Niveau − · Y "+(int)p.a().y(),()->alter(q->q.moved(0,-1,0)),"Niveau +",()->alter(q->q.moved(0,1,0)));
-                pair(y+96,"Plafond : "+new String[]{"Plat","Voûté","Rond"}[p.profile()],()->alter(q->new Part(q.kind(),q.a(),q.b(),q.width(),q.height(),(q.profile()+1)%3,q.layout())),p.layout()==0?"Quais latéraux":"Quai central",()->alter(q->new Part(q.kind(),q.a(),q.b(),q.width(),q.height(),q.profile(),1-q.layout())));
+                pair(y+96,"Plafond : "+new String[]{"Plat","Voûté","Rond"}[p.profile()],()->alter(q->new Part(q.kind(),q.a(),q.b(),q.width(),q.height(),(q.profile()+1)%3,q.layout())),p.kind()==Kind.STATION?(p.layout()==0?"Quais latéraux":"Quai central"):p.kind()==Kind.TUNNEL?(p.layout()==0?"Créer la voie MTR":"Voie existante"):"Disposition automatique",()->{if(p.kind()==Kind.STATION||p.kind()==Kind.TUNNEL)alter(q->new Part(q.kind(),q.a(),q.b(),q.width(),q.height(),q.profile(),1-q.layout()));});
             }
         }else if(tab==1){
             if(ChantierClient.plan==null){ChantierClient.message="Dessine d’abord un volume.";}

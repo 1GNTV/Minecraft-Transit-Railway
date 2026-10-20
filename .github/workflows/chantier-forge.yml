@@ -57,6 +57,12 @@ jobs:
           ./gradlew fabric:setupWebsiteFiles -PminecraftVersion=1.20.1
           npm ci --prefix website
           npm run build --prefix website
+      - name: Retain the unchanged web resources even if a later QA scenario fails
+        uses: actions/cache/save@v4
+        if: steps.website.outputs.cache-hit != 'true'
+        with:
+          path: website/dist
+          key: sillon-signage-website-1201-20261018
       - name: Prepare Forge sources
         run: |
           chmod +x gradlew

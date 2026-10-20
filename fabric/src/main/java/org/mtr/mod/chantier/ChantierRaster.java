@@ -11,12 +11,13 @@ public final class ChantierRaster {
     private final ChantierPlan plan;
     private final Set<Cell> inside=new HashSet<>();
     private final Map<Cell,Role> furniture=new HashMap<>();
+    private final Set<Cell> stairClearance=new HashSet<>(),stairTreads=new HashSet<>();
     private final Map<Cell,Role> result=new HashMap<>();
     private int partIndex,x,y,z,minX,minY,minZ,maxX,maxY,maxZ;
     private Iterator<Cell> boundary;
     private boolean done;
     public ChantierRaster(ChantierPlan plan){this.plan=plan;beginPart();}
-    private void beginPart(){Part p=plan.parts().get(partIndex);int margin=p.width()/2+3;minX=(int)Math.floor(Math.min(p.a().x(),p.b().x()))-margin;maxX=(int)Math.ceil(Math.max(p.a().x(),p.b().x()))+margin;minZ=(int)Math.floor(Math.min(p.a().z(),p.b().z()))-margin;maxZ=(int)Math.ceil(Math.max(p.a().z(),p.b().z()))+margin;minY=(int)Math.floor(Math.min(p.a().y(),p.b().y()))-(p.profile()==2?1:0);maxY=(int)Math.ceil(Math.max(p.a().y(),p.b().y()))+p.height();x=minX;y=minY;z=minZ;
+    private void beginPart(){Part p=plan.parts().get(partIndex);int margin=p.width()/2+3;minX=(int)Math.floor(Math.min(p.a().x(),p.b().x()))-margin;maxX=(int)Math.ceil(Math.max(p.a().x(),p.b().x()))+margin;minZ=(int)Math.floor(Math.min(p.a().z(),p.b().z()))-margin;maxZ=(int)Math.ceil(Math.max(p.a().z(),p.b().z()))+margin;minY=(int)Math.floor(Math.min(p.a().y(),p.b().y()))-(p.profile()==2||p.kind()==Kind.HALL?1:0);maxY=(int)Math.ceil(Math.max(p.a().y(),p.b().y()))+p.height();x=minX;y=minY;z=minZ;
         long tests=(long)(maxX-minX+1)*(maxY-minY+1)*(maxZ-minZ+1);if(tests>12000000)throw new IllegalArgumentException("Volume trop diagonal : fractionne le tracé.");}
     /** Bounded CPU work, also used by the client to avoid a preview freeze. */
     public boolean step(int budget){
@@ -28,7 +29,7 @@ public final class ChantierRaster {
         if(partIndex<plan.parts().size())return false;
         if(boundary==null)boundary=inside.iterator();
         while(budget-->0&&boundary.hasNext()){
-            Cell c=boundary.next();result.put(c,furniture.getOrDefault(c,Role.AIR));for(int[] d:NEIGHBOURS){Cell n=c.add(d[0],d[1],d[2]);if(!inside.contains(n)){
+            Cell c=boundary.next();result.put(c,stairTreads.contains(c)?Role.STAIR:stairClearance.contains(c)?Role.AIR:furniture.getOrDefault(c,Role.AIR));for(int[] d:NEIGHBOURS){Cell n=c.add(d[0],d[1],d[2]);if(!inside.contains(n)){
                 Role r=d[1]<0?Role.FLOOR:d[1]>0?Role.ROOF:Role.WALL;
                 if(r==Role.ROOF&&Math.floorMod(c.x()+c.z(),plan.spacing())==0)r=Role.LIGHT;
                 result.putIfAbsent(n,r);
@@ -40,13 +41,13 @@ public final class ChantierRaster {
         double dx=p.b().x()-p.a().x(),dz=p.b().z()-p.a().z(),len=p.length();double px=cell.x()+.5-p.a().x(),pz=cell.z()+.5-p.a().z();double along=(px*dx+pz*dz)/len;if(along<0||along>len)return;
         double across=(-px*dz+pz*dx)/len,half=p.width()/2.0;if(Math.abs(across)>half)return;double base=p.a().y()+(p.b().y()-p.a().y())*along/len;
         // Stair treads are horizontal one-block steps, rather than an unusable smooth ramp.
-        base=Math.floor(base);
-        double h=cell.y()-base;if(h<(p.profile()==2?-1:0))return;
+        base=Math.floor(base);if(p.kind()==Kind.STAIRS&&p.b().y()<p.a().y())base--;
+        double h=cell.y()-base;if(p.kind()==Kind.HALL&&h==-1){furniture.put(cell,Role.FLOOR);return;}if(p.kind()==Kind.STAIRS&&along>=len-.001)return;if(h<(p.profile()==2?-1:0))return;
         double top=p.height();if(p.profile()==1)top=p.height()*.55+p.height()*.45*Math.sqrt(Math.max(0,1-across*across/(half*half)));else if(p.profile()==2){double centre=p.height()/2.0-1,radius=p.height()/2.0;double horizontal=across/half,vertical=(h+.5-centre)/radius;if(horizontal*horizontal+vertical*vertical>1)return;top=centre+radius*Math.sqrt(Math.max(0,1-horizontal*horizontal));}
         if(h>=top)return;inside.add(cell);if(inside.size()>MAX_CELLS)throw new IllegalArgumentException("Chantier trop grand.");
-        if(p.kind()==Kind.STAIRS&&h<1&&along<len-2)furniture.put(cell,Role.STAIR);
-        if(p.kind()==Kind.STATION&&h>=0&&h<1){double track=p.trackOffset();boolean railway=Math.abs(across-track)<1.65||Math.abs(across+track)<1.65;if(!railway)furniture.put(cell,Role.PLATFORM);}
-        if(p.kind()==Kind.STATION&&plan.pillars()&&h>=1&&h<top-1&&Math.abs(across)<.55&&Math.floorMod((int)Math.floor(along),plan.spacing())==0&&p.layout()==1)furniture.put(cell,Role.PILLAR);
+        if(p.kind()==Kind.STAIRS){stairClearance.add(cell);if(h<1)stairTreads.add(cell);}
+        if(p.kind()==Kind.STATION&&h>=0&&h<1){double track=p.trackOffset();boolean onPlatform=p.layout()==0?Math.abs(across)>track+1.65:Math.abs(across)<track-1.65;if(onPlatform)furniture.put(cell,Role.PLATFORM);}
+        boolean stationColumn=p.kind()==Kind.STATION&&h>=1&&(p.layout()==1?Math.abs(across)<.55:Math.abs(Math.abs(across)-(half-1.5))<.55);boolean hallColumn=p.kind()==Kind.HALL&&p.width()>=13&&h>=0&&Math.abs(across)<.55;if(plan.pillars()&&h<top&&(stationColumn||hallColumn)&&Math.floorMod((int)Math.floor(along),plan.spacing())==0)furniture.put(cell,Role.PILLAR);
     }
     public boolean done(){return done;}
     public Map<Cell,Role> cells(){if(!done)throw new IllegalStateException("Plan encore en calcul.");return Collections.unmodifiableMap(result);}
