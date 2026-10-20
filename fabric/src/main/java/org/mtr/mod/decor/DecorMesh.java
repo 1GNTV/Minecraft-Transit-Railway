@@ -210,7 +210,8 @@ public final class DecorMesh {
                 double low=v==1?0:h*.32,top=v==3?h*.72:h;
                 if(v!=1){b(a*.55,0,z*.6,c*.55,low,Z*.6);metal(a-.08,0,z-.08,c+.08,.04,Z+.08);}
                 b(a,low,z,c,top,Z);box(a+.045,low+.08,Z+.002,c-.045,top-.08,Z+.012,"accent",0x142C42);
-                box(a+.08,low+(top-low)*.48,Z+.013,c-.08,top-.13,Z+.016,"glow",0x61D4C4);
+                box(a+.08,low+(top-low)*.48,Z+.013,c-.08,top-.13,Z+.016,"glow",s.accent());
+                face(p(a+.09,low+(top-low)*.50,Z+.018),p(a+.09,top-.15,Z+.018),p(c-.09,top-.15,Z+.018),p(c-.09,low+(top-low)*.50,Z+.018),"journey",0xFFFFFF,1,1);
                 box(a+.08,low+.12,Z+.013,c-.08,low+(top-low)*.38,Z+.016,"metal",0xCBD9DF);
                 if(v==2){box(a+.045,low+.08,z-.012,c-.045,top-.08,z-.002,"accent",0x142C42);}
                 if(v==3)metal(a,top,z,c,top+.035,Z+.08);

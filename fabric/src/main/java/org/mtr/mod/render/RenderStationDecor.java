@@ -24,7 +24,7 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
         for(var f:DecorMesh.get(spec).faces()){
             var a=f.a();var b=f.b();var c=f.c();var d=f.d();
             if(f.boxUv()){a=f.d();b=f.a();c=f.b();d=f.c();}
-            else if(f.surface().equals("poster")||f.surface().equals("perforated")||f.surface().equals("label")){b=f.d();d=f.b();}
+            else if(f.surface().equals("poster")||f.surface().equals("perforated")||f.surface().equals("label")||f.surface().equals("journey")){b=f.d();d=f.b();}
             float nx=(b.y()-a.y())*(c.z()-a.z())-(b.z()-a.z())*(c.y()-a.y());
             float ny=(b.z()-a.z())*(c.x()-a.x())-(b.x()-a.x())*(c.z()-a.z());
             float nz=(b.x()-a.x())*(c.y()-a.y())-(b.y()-a.y())*(c.x()-a.x());
@@ -41,8 +41,8 @@ public final class RenderStationDecor extends BlockEntityRenderer<BlockStationDe
     public static void draw(GraphicsHolder g,DecorSpec spec,int light,int tint){draw(g,spec,prepare(spec),light,tint);}
     private static void draw(GraphicsHolder g,DecorSpec spec,List<Group> groups,int light,int tint){
         for(Group group:groups){
-            boolean glass=group.surface().equals("glass"),glow=group.surface().equals("glow")&&spec.illuminated();
-            Identifier texture=group.surface().equals("label")?org.mtr.mod.client.DynamicTextureCache.instance.getSignText(spec.label(),org.mtr.mod.data.IGui.HorizontalAlignment.CENTER,0.1f,spec.accent(),0xFFFFFF).identifier:group.texture();
+            boolean glass=group.surface().equals("glass"),glow=(group.surface().equals("glow")||group.surface().equals("journey"))&&spec.illuminated();
+            Identifier texture=group.surface().equals("journey")?org.mtr.mod.client.DynamicTextureCache.instance.getSignText(spec.label().isBlank()?"ITINÉRAIRE|Choisir une destination":spec.label(),org.mtr.mod.data.IGui.HorizontalAlignment.CENTER,0.1f,0x142C42,0xFFFFFF).identifier:group.surface().equals("label")?org.mtr.mod.client.DynamicTextureCache.instance.getSignText(spec.label(),org.mtr.mod.data.IGui.HorizontalAlignment.CENTER,0.1f,spec.accent(),0xFFFFFF).identifier:group.texture();
             g.createVertexConsumer(glass||tint!=255?MoreRenderLayers.getExteriorTranslucent(texture):glow?MoreRenderLayers.getLight2(texture):MoreRenderLayers.getExterior(texture));
             for(Quad q:group.quads()){
                 var a=q.a();var b=q.b();var c=q.c();var d=q.d();int color=q.rgb()|((glass?Math.min(tint,96):tint)<<24);

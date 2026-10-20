@@ -66,6 +66,15 @@ jobs:
       - name: Build Forge 1.20.1
         id: build
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
+      - name: Preserve the exact compile dependencies for local checks
+        if: always() && steps.build.outcome != 'skipped'
+        run: ./gradlew -I tools/qa/export-classpath.gradle forge:sillonExportClasspath -PminecraftVersion=1.20.1
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.build.outcome != 'skipped'
+        with:
+          name: Sillon-Forge-compile-dependencies
+          path: forge/build/sillon-classpath/forge-compile-classpath.zip
+          retention-days: 3
       - name: Preserve addon ABI compatibility
         run: |
           python tools/patch_sillon_jcm_abi.py

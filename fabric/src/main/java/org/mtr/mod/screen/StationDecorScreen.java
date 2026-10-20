@@ -40,7 +40,7 @@ public final class StationDecorScreen extends ScreenExtension {
     @Override protected void init2(){super.init2();for(Input f:inputs.values())addChild(new ClickableWidget(f));for(Btn b:tabs)addChild(new ClickableWidget(b));for(Btn b:List.of(save,close,previous,next,copy,paste,turn))addChild(new ClickableWidget(b));if(controls.isEmpty())for(int i=0;i<16;i++)controls.add(new Btn("",()->{}));for(Btn b:controls)addChild(new ClickableWidget(b));arrange();}
     private List<String> fields(){return switch(tab){
         case 0 -> {var f=new ArrayList<>(List.of("width","height","depth"));if(Set.of(DecorKind.RIBBED_WALL,DecorKind.BAFFLE,DecorKind.VENT).contains(kind)||(kind==DecorKind.ACOUSTIC&&(variant==1||variant==2)))f.add("spacing");if(kind==DecorKind.PENDANT)f.add("suspension");yield f;}
-        case 1 -> {var f=new ArrayList<>(List.of("material","color"));if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET).contains(kind))f.add("accent");if(kind.light()||(kind==DecorKind.POSTER&&variant==1))f.add("lit");if(kind==DecorKind.POSTER)f.add("image");if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET).contains(kind))f.add("label");yield f;}
+        case 1 -> {var f=new ArrayList<>(List.of("material","color"));if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET,DecorKind.JOURNEY_KIOSK).contains(kind))f.add("accent");if(kind.light()||(kind==DecorKind.POSTER&&variant==1))f.add("lit");if(kind==DecorKind.POSTER)f.add("image");if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET,DecorKind.JOURNEY_KIOSK).contains(kind))f.add("label");yield f;}
         case 2 -> List.of("yaw","pitch","x","y","z");
         default -> operation==1?List.of("operation","axis","count","step","ghost"):operation==2?List.of("operation","select","axis"):List.of("operation","select","mask1","mask2","mask4","mask8","mask16");
     };}
@@ -74,10 +74,11 @@ public final class StationDecorScreen extends ScreenExtension {
     private int color(String key){String value=inputs.get(key).getText2().replace("#","").trim();if(!value.matches("[0-9A-Fa-f]{6}"))throw new IllegalArgumentException("Couleur attendue : 6 chiffres hexadécimaux");return Integer.parseInt(value,16);}
     private DecorSpec read(){return new DecorSpec(kind,number("width"),number("height"),number("depth"),number("spacing"),number("suspension"),number("yaw"),number("pitch"),number("x"),number("y"),number("z"),color("color"),color("accent"),material,variant,lit,inputs.get("image").getText2(),inputs.get("label").getText2());}
     private boolean valid(){try{DecorSpec s=read();if(s.width()!=number("width")||s.height()!=number("height")||s.depth()!=number("depth"))throw new IllegalArgumentException("Dimensions : largeur 0,25–16 ; hauteur 0,1–12 ; profondeur 0,035–8.");
+        if(s.spacing()!=number("spacing")||s.suspension()!=number("suspension")||s.yaw()!=number("yaw")||s.pitch()!=number("pitch")||s.x()!=number("x")||s.y()!=number("y")||s.z()!=number("z"))throw new IllegalArgumentException("Pose : décalages ±8 ; rotation ±180° ; inclinaison ±60° ; pas 0,08–2 ; suspension 0–8.");
         if(!inputs.get("image").getText2().isEmpty()&&s.image().isEmpty())throw new IllegalArgumentException("Image : namespace:chemin/texture.png");error="";return true;
     }catch(RuntimeException ex){error=ex.getMessage()==null?"Vérifie les valeurs saisies.":ex.getMessage();return false;}}
     private void apply(){if(!valid())return;if(tab==3&&operation==1){try{if(integer("count",1,32)*integer("step",1,16)>48){error="La dernière copie doit rester à 48 blocs maximum de l’ancre.";return;}}catch(RuntimeException ex){error="Vérifie le nombre et l’espacement.";return;}}if(tab==3&&operation!=1&&(DecorBrushClient.first==null||DecorBrushClient.last==null||DecorBrushClient.source==null||DecorBrushClient.source.asLong()!=pos.asLong())){error="Choisis d’abord les deux coins de la sélection.";return;}if(tab==3&&operation==0&&mask==0){error="Choisis au moins une propriété à modifier.";return;}send(tab==3?operation==1?2:operation==2?4:1:0);}
-    private void send(int action){try{DecorSpec spec=read();count=integer("count",1,32);step=integer("step",1,16);InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketStationDecor(pos,action,spec.encode(),DecorBrushClient.first==null?pos:DecorBrushClient.first,DecorBrushClient.last==null?pos:DecorBrushClient.last,mask,count,axis,step));DecorBrushClient.feedback="Demande envoyée au serveur…";DecorBrushClient.clearGhost();}catch(RuntimeException ex){error="Vérifie les valeurs numériques.";}}
+    private boolean send(int action){try{DecorSpec spec=read();if(action==2){count=integer("count",1,32);step=integer("step",1,16);}InitClient.REGISTRY_CLIENT.sendPacketToServer(new PacketStationDecor(pos,action,spec.encode(),DecorBrushClient.first==null?pos:DecorBrushClient.first,DecorBrushClient.last==null?pos:DecorBrushClient.last,mask,count,axis,step));DecorBrushClient.feedback="Demande envoyée au serveur…";DecorBrushClient.clearGhost();return true;}catch(RuntimeException ex){error="Vérifie les valeurs numériques.";return false;}}
     @Override public void render(GraphicsHolder g,int mx,int my,float delta){
         rect(g,0,0,width,height,0xFF101722);rect(g,7,58,leftW+19,height-35,0xFF1A2432);rect(g,previewX-4,58,width-7,height-35,0xFF1A2432);
         text(g,kind.title,12,14,Math.max(90,leftW),0xFFE9EFF7);
@@ -100,6 +101,6 @@ public final class StationDecorScreen extends ScreenExtension {
         void caption(String text){setMessage2(new Text(TextHelper.literal(text).data));}
         void move(int x,int y,int w){setX2(x);setY2(y);setWidth2(w);visible=true;}
     }
-    @Override public void onClose2(){if(!valid())return;send(0);DecorBrushClient.clearGhost();super.onClose2();}
+    @Override public void onClose2(){if(!valid()||!send(0))return;DecorBrushClient.clearGhost();super.onClose2();}
     @Override public boolean isPauseScreen2(){return false;}
 }

@@ -33,7 +33,8 @@ public final class PersistentStateData extends PersistenceStateExtension {
 	@Override
 	public void readNbt(CompoundTag compoundTag) {
 		routeIdsWithDisabledAnnouncements.clear();
-        try{walking=org.mtr.mod.builder.WalkGraph.decode(compoundTag.getString("sillon_walking_paths"));}catch(RuntimeException error){Init.LOGGER.error("Invalid saved Sillon walking graph",error);walking=new org.mtr.mod.builder.WalkGraph();}
+        walking=new org.mtr.mod.builder.WalkGraph();
+        long[] nodes=compoundTag.getLongArray("sillon_walking_nodes");for(int index=0;index<Math.min(4096,nodes.length);index++){long id=nodes[index];try{var loaded=org.mtr.mod.builder.WalkGraph.decode(compoundTag.getString("sillon_walking_node_"+id));var node=loaded.get(id);if(node!=null)walking.put(node);}catch(RuntimeException error){Init.LOGGER.error("Invalid saved Sillon walking node "+id,error);}}
 		for (final long routeId : compoundTag.getLongArray(KEY_DATA)) {
 			routeIdsWithDisabledAnnouncements.add(routeId);
 		}
@@ -51,7 +52,8 @@ public final class PersistentStateData extends PersistenceStateExtension {
 	public CompoundTag writeNbt2(CompoundTag compoundTag) {
 		compoundTag.putLongArray(KEY_DATA, routeIdsWithDisabledAnnouncements.toLongArray());
 		compoundTag.putString(PANAM_GLOBAL, panamGlobal);
-        compoundTag.putString("sillon_walking_paths",walking.encode());
+        compoundTag.putLongArray("sillon_walking_nodes",walking.nodes().stream().mapToLong(org.mtr.mod.builder.WalkGraph.Node::id).toArray());
+        for(var node:walking.nodes()){var single=new org.mtr.mod.builder.WalkGraph();single.put(node);compoundTag.putString("sillon_walking_node_"+node.id(),single.encode());}
 		long[] ids = getPanamRouteIds();
 		compoundTag.putLongArray(PANAM_ROUTES, ids);
 		for (long id : ids) compoundTag.putString("sillon_panam_route_" + id, panamRoutes.get(id));

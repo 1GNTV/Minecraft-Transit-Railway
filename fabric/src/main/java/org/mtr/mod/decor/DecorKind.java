@@ -28,5 +28,5 @@ public enum DecorKind {
     public final float width,height,depth;
     DecorKind(String id,String title,float width,float height,float depth,String materials,String variants){this.id=id;this.title=title;this.width=width;this.height=height;this.depth=depth;this.materials=materials;this.variants=variants;}
     public static DecorKind of(String id){for(var k:values())if(k.id.equals(id))return k;return BENCH;}
-    public boolean light(){return this==LIGHT_STRIP||this==PENDANT||this==SCONCE;}
+    public boolean light(){return this==LIGHT_STRIP||this==PENDANT||this==SCONCE||this==JOURNEY_KIOSK;}
 }

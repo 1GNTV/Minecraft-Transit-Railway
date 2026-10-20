@@ -1,6 +1,8 @@
 package org.mtr.mod.builder;
 import org.mtr.core.data.*;
-import org.mtr.core.map.*;
+import org.mtr.core.data.Station;
+import org.mtr.core.map.DirectionsRequest;
+import org.mtr.core.map.DirectionsConnection;
 import org.mtr.core.serializer.*;
 import org.mtr.core.simulation.Simulator;
 import org.mtr.core.tool.Utilities;
