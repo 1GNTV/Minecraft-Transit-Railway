@@ -131,7 +131,7 @@ public final class DecorMesh {
             }
             case LEANING -> {
                 for(double xx:new double[]{a+.12,c-.12}){rail(xx,.03,0,xx,h-.08,0,.025);metal(xx-.09,0,-.09,xx+.09,.03,.09);}
-                if(v==1)tube(a,h-.1,0,c,h-.1,0,.07,body(),s.color());else b(a,h-.24,z,c,h,Z);
+                if(v==1)tube(a,h-.1,0,c,h-.1,0,Math.min(.12,d*.32),body(),s.color());else b(a,h-.24,z,c,h,Z);
                 if(v==2)b(a,h-.24,-Z-.14,c,h,-Z-.04);if(v==3)metal(a+.12,.12,-.02,c-.12,.16,.02);
             }
             case BIN -> {

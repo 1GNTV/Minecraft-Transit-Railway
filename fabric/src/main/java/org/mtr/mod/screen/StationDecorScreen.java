@@ -40,7 +40,7 @@ public final class StationDecorScreen extends ScreenExtension {
     @Override protected void init2(){super.init2();for(Input f:inputs.values())addChild(new ClickableWidget(f));for(Btn b:tabs)addChild(new ClickableWidget(b));for(Btn b:List.of(save,close,previous,next,copy,paste,turn))addChild(new ClickableWidget(b));if(controls.isEmpty())for(int i=0;i<16;i++)controls.add(new Btn("",()->{}));for(Btn b:controls)addChild(new ClickableWidget(b));arrange();}
     private List<String> fields(){return switch(tab){
         case 0 -> {var f=new ArrayList<>(List.of("width","height","depth"));if(Set.of(DecorKind.RIBBED_WALL,DecorKind.BAFFLE,DecorKind.VENT).contains(kind)||(kind==DecorKind.ACOUSTIC&&(variant==1||variant==2)))f.add("spacing");if(kind==DecorKind.PENDANT)f.add("suspension");yield f;}
-        case 1 -> {var f=new ArrayList<>(List.of("material","color","accent","lit"));if(kind==DecorKind.POSTER)f.add("image");if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET).contains(kind))f.add("label");yield f;}
+        case 1 -> {var f=new ArrayList<>(List.of("material","color"));if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET).contains(kind))f.add("accent");if(kind.light()||(kind==DecorKind.POSTER&&variant==1))f.add("lit");if(kind==DecorKind.POSTER)f.add("image");if(Set.of(DecorKind.HELP_POINT,DecorKind.INTERCOM,DecorKind.CABINET).contains(kind))f.add("label");yield f;}
         case 2 -> List.of("yaw","pitch","x","y","z");
         default -> operation==1?List.of("operation","axis","count","step","ghost"):operation==2?List.of("operation","select","axis"):List.of("operation","select","mask1","mask2","mask4","mask8","mask16");
     };}
