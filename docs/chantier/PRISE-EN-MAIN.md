@@ -11,6 +11,8 @@ Le même JAR est nécessaire sur le client et le serveur. L’outil est réserv�
 5. **G** ouvre le petit panneau de réglages. Cette touche est modifiable dans les commandes Minecraft.
 6. Dans **Chantier**, choisir **Construire / mettre à jour**. Échap enregistre le brouillon et revient dans le monde ; il ne déclenche jamais une excavation.
 
+Après construction, sélectionner une case vide de la barre rapide masque l’hologramme pour voir uniquement les blocs construits. Reprendre l’outil retrouve le plan modifiable.
+
 Le point choisi représente le niveau de la voie. Le sol porteur se trouve au-dessous ; les quais de station sont un bloc plus haut que la voie.
 
 ## Composer les volumes
