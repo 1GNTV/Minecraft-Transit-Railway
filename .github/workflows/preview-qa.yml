@@ -1,0 +1,106 @@
+name: Sillon train previews - full-page GPU regression
+on:
+  push:
+    branches: [work/sillon-preview-fix-forge-1201]
+    paths-ignore: [docs/**]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: sillon-preview-qa
+  cancel-in-progress: true
+jobs:
+  forge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      # Only the separate QA mod changes here; reuse the exact already-compiled user JAR.
+      - name: Refuse stale production binaries
+        run: |
+          git fetch --no-tags --depth=1 origin 4d83cefe2ba50096457a47d3001000a96ad2cdae
+          git diff --exit-code 4d83cefe2ba50096457a47d3001000a96ad2cdae HEAD -- fabric forge build.gradle settings.gradle gradle.properties buildSrc tools/decor/prepare_resources.py tools/patch_sillon_jcm_abi.py tools/patch_sillon_jcm_rail_stats.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: Sillon-Chantier-Forge-1.20.1
+          repository: ${{ github.repository }}
+          run-id: 39519926812
+          github-token: ${{ github.token }}
+          path: build/signage-delivery
+      - uses: actions/download-artifact@v4
+        with:
+          name: Sillon-Chantier-visual-checks
+          repository: ${{ github.repository }}
+          run-id: 39519926812
+          github-token: ${{ github.token }}
+          path: build/qa-snapshot
+      - name: Verify exact JAR and prepare existing world fixtures
+        run: |
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          jar=Path('build/signage-delivery/Sillon-Signaletique-Forge-1.20.1.jar')
+          assert hashlib.sha256(jar.read_bytes()).hexdigest()=='8c0b9bd2b28edaf35c69893b9cfc0db545b545bb51e348eaa1e84df95cff1f05'
+          PY
+          mkdir -p build/signage-qa
+          cp build/qa-snapshot/build/signage-qa/fixtures-commands.txt build/signage-qa/
+          cp build/qa-snapshot/build/signage-qa/reference-commands.txt build/signage-qa/
+          chmod +x gradlew
+          python tools/qa/install_signage_visual_qa.py
+          python tools/qa/create_signage_world.py
+      - name: Real 1920x1200 composer and construction checks
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 'true'
+          ALSOFT_DRIVERS: 'null'
+          JAVA_TOOL_OPTIONS: '-Dsillon.qa.previewOnly=true -Dfml.earlyprogresswindow=false'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
+          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          test -f forge/run/preview-native-qa-success.txt
+          test -f forge/run/chantier-native-qa-success.txt
+      - name: Same scenario with Oculus Embeddium and Complementary
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 'true'
+          ALSOFT_DRIVERS: 'null'
+          JAVA_TOOL_OPTIONS: '-Dsillon.qa.previewOnly=true -Dfml.earlyprogresswindow=false'
+        run: |
+          python tools/qa/install_signage_shader_qa.py
+          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          test -f forge/run/preview-shader-qa-success.txt
+          test -f forge/run/chantier-shader-qa-success.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Sillon-PreviewFix-Forge-1.20.1
+          path: build/signage-delivery
+      - name: Preserve exact native evidence
+        if: always()
+        run: |
+          mkdir -p build/preview-review docs/signage/review/native
+          cp forge/run/screenshots/preview*.png build/preview-review/ 2>/dev/null || true
+          cp forge/run/screenshots/chantier*.png build/preview-review/ 2>/dev/null || true
+          cp forge/run/preview-*-qa-success.txt build/preview-review/ 2>/dev/null || true
+          cp forge/run/chantier-*-qa-success.txt build/preview-review/ 2>/dev/null || true
+          cp forge/run/logs/latest.log build/preview-review/minecraft-latest.log 2>/dev/null || true
+          cp -r build/preview-review/* docs/signage/review/native/ 2>/dev/null || true
+          git config user.name "Sillon build"
+          git config user.email "48333136+1GNTV@users.noreply.github.com"
+          git add docs/signage/review/native
+          git diff --cached --quiet || git commit -m "qa(builder): capture the complete train preview pages"
+          git push origin HEAD:${{ github.ref_name }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Sillon-PreviewFix-visual-checks
+          path: build/preview-review

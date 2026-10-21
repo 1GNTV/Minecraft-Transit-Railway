@@ -1,7 +1,7 @@
 name: Sillon Chantier - Forge 1.20.1 and real construction QA
 on:
   push:
-    branches: [work/sillon-chantier-forge-1201, work/sillon-preview-fix-forge-1201]
+    branches: [work/sillon-chantier-forge-1201]
     paths-ignore: [docs/**, .github/workflows/signage-preparation.yml, tools/prepare_signage_assets.py]
   workflow_dispatch:
 permissions:
