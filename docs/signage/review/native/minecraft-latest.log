@@ -1,8 +1,8 @@
-[21Oct2026 00:10:51.157] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, MOD_DEV, --assetIndex, 5, --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --gameDir, ., --fml.forgeVersion, 47.4.28, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --quickPlaySingleplayer, SignageQA]
-[21Oct2026 00:10:51.160] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.20.1 by Eclipse Adoptium; OS Linux arch amd64 version 7.0.0-1017-azure
-[21Oct2026 00:10:51.234] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[21Oct2026 00:10:51.373] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[21Oct2026 00:10:51.374] [main/INFO] [EARLYDISPLAY/]: If this message is the only thing at the bottom of your log before a crash, you probably have a driver issue.
+[21Oct2026 00:18:30.873] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, MOD_DEV, --assetIndex, 5, --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --gameDir, ., --fml.forgeVersion, 47.4.28, --fml.mcVersion, 1.20.1, --fml.forgeGroup, net.minecraftforge, --fml.mcpVersion, 20230612.114412, --quickPlaySingleplayer, SignageQA]
+[21Oct2026 00:18:30.878] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.9+10.0.9+main.dcd20f30 starting: java version 17.0.20.1 by Eclipse Adoptium; OS Linux arch amd64 version 6.17.0-1022-azure
+[21Oct2026 00:18:30.995] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[21Oct2026 00:18:31.200] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[21Oct2026 00:18:31.201] [main/INFO] [EARLYDISPLAY/]: If this message is the only thing at the bottom of your log before a crash, you probably have a driver issue.
 
 Possible solutions:
 A) Make sure Minecraft is set to prefer high performance graphics in the OS and/or driver control panel
@@ -11,28 +11,28 @@ C) Try reinstalling your graphics drivers
 D) If still not working after trying all of the above, ask for further help on the Forge forums or Discord
 
 You can safely ignore this message if the game starts up successfully.
-[21Oct2026 00:10:51.672] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.5
-[21Oct2026 00:10:52.822] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.5 got version 4.5
-[21Oct2026 00:10:52.881] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23116!/ Service=ModLauncher Env=CLIENT
-[21Oct2026 00:10:52.887] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: llvmpipe (LLVM 20.1.2, 256 bits) GL version 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4, Mesa
-[21Oct2026 00:10:53.162] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.28/2f0765ea31561e9dfaf8eb8b54ac0548cd857559/javafmllanguage-1.20.1-47.4.28.jar is missing mods.toml file
-[21Oct2026 00:10:53.163] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.28/4e54a5f415a61888bd9c5d61b140ae5f86bf665f/lowcodelanguage-1.20.1-47.4.28.jar is missing mods.toml file
-[21Oct2026 00:10:53.164] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.28/4d3efb7da0466927cc5b1e4487c3d3c33ba842d0/mclanguage-1.20.1-47.4.28.jar is missing mods.toml file
-[21Oct2026 00:10:53.165] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.28/99808794b6f9f27ca527ad9db1203409fb8552f8/fmlcore-1.20.1-47.4.28.jar is missing mods.toml file
-[21Oct2026 00:10:53.244] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[21Oct2026 00:10:54.626] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
-[21Oct2026 00:10:54.629] [main/ERROR] [mixin/]: Mixin config mtr.text.performance.mixins.json does not specify "minVersion" property
-[21Oct2026 00:10:54.632] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, MOD_DEV, --gameDir, ., --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --assetIndex, 5, --quickPlaySingleplayer, SignageQA]
-[21Oct2026 00:10:55.071] [main/INFO] [mixin/]: Remapping refMap mtr.refmap.json using /home/runner/work/Minecraft-Transit-Railway/Minecraft-Transit-Railway/tools/qa-runtime/build/createSrgToMcp/output.srg
-[21Oct2026 00:10:58.162] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 188 Datafixer optimizations took 197 milliseconds
-[21Oct2026 00:10:59.577] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/assets/.mcassetsroot' uses unexpected schema
-[21Oct2026 00:10:59.577] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/data/.mcassetsroot' uses unexpected schema
-[21Oct2026 00:10:59.590] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[21Oct2026 00:10:59.597] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[21Oct2026 00:10:59.718] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.1 build 7
-[21Oct2026 00:11:00.119] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.28, for MC 1.20.1 with MCP 20230612.114412
-[21Oct2026 00:11:00.120] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: MinecraftForge v47.4.28 Initialized
-[21Oct2026 00:11:00.378] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Starting Minecraft with arguments:
+[21Oct2026 00:18:34.526] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.5
+[21Oct2026 00:18:35.822] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.5 got version 4.5
+[21Oct2026 00:18:35.919] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: llvmpipe (LLVM 20.1.2, 256 bits) GL version 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4, Mesa
+[21Oct2026 00:18:35.931] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/home/runner/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23116!/ Service=ModLauncher Env=CLIENT
+[21Oct2026 00:18:36.320] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/javafmllanguage/1.20.1-47.4.28/2f0765ea31561e9dfaf8eb8b54ac0548cd857559/javafmllanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[21Oct2026 00:18:36.322] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/lowcodelanguage/1.20.1-47.4.28/4e54a5f415a61888bd9c5d61b140ae5f86bf665f/lowcodelanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[21Oct2026 00:18:36.323] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/mclanguage/1.20.1-47.4.28/4d3efb7da0466927cc5b1e4487c3d3c33ba842d0/mclanguage-1.20.1-47.4.28.jar is missing mods.toml file
+[21Oct2026 00:18:36.325] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file /home/runner/.gradle/caches/modules-2/files-2.1/net.minecraftforge/fmlcore/1.20.1-47.4.28/99808794b6f9f27ca527ad9db1203409fb8552f8/fmlcore-1.20.1-47.4.28.jar is missing mods.toml file
+[21Oct2026 00:18:36.428] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[21Oct2026 00:18:38.420] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[21Oct2026 00:18:38.423] [main/ERROR] [mixin/]: Mixin config mtr.text.performance.mixins.json does not specify "minVersion" property
+[21Oct2026 00:18:38.428] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, MOD_DEV, --gameDir, ., --assetsDir, /home/runner/.gradle/caches/forge_gradle/assets, --assetIndex, 5, --quickPlaySingleplayer, SignageQA]
+[21Oct2026 00:18:38.987] [main/INFO] [mixin/]: Remapping refMap mtr.refmap.json using /home/runner/work/Minecraft-Transit-Railway/Minecraft-Transit-Railway/tools/qa-runtime/build/createSrgToMcp/output.srg
+[21Oct2026 00:18:43.354] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 188 Datafixer optimizations took 267 milliseconds
+[21Oct2026 00:18:45.224] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/assets/.mcassetsroot' uses unexpected schema
+[21Oct2026 00:18:45.225] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/runner/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.4.28_mapped_official_1.20.1/forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/data/.mcassetsroot' uses unexpected schema
+[21Oct2026 00:18:45.240] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[21Oct2026 00:18:45.245] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[21Oct2026 00:18:45.390] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.1 build 7
+[21Oct2026 00:18:45.843] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: Forge mod loading, version 47.4.28, for MC 1.20.1 with MCP 20230612.114412
+[21Oct2026 00:18:45.844] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: MinecraftForge v47.4.28 Initialized
+[21Oct2026 00:18:46.201] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Starting Minecraft with arguments:
 -Dsillon.qa.previewOnly=true
 -Dfml.earlyprogresswindow=false
 -Dforge.enableGameTest=true
@@ -54,36 +54,35 @@ You can safely ignore this message if the game starts up successfully.
 -Duser.country
 -Duser.language=en
 -Duser.variant
-[21Oct2026 00:11:00.379] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :  __  __ _                            __ _    
-[21Oct2026 00:11:00.380] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |  \/  (_)                          / _| |   
-[21Oct2026 00:11:00.380] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | \  / |_ _ __   ___  ___ _ __ __ _| |_| |_  
-[21Oct2026 00:11:00.380] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | |\/| | | '_ \ / _ \/ __| '__/ _` |  _| __| 
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | |  | | | | | |  __/ (__| | | (_| | | | |_  
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |_|__|_|_|_| |_|\___|\___|_|_ \__,_|_|  \__| 
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |__   __|                (_) |               
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    | |_ __ __ _ _ __  ___ _| |_              
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    | | '__/ _` | '_ \/ __| | __|             
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    | | | | (_| | | | \__ \ | |_              
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    |_|_|  \__,_|_| |_|___/_|\__|             
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :  _____       _ _                             
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |  __ \     (_) |                            
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | |__) |__ _ _| |_      ____ _ _   _         
-[21Oct2026 00:11:00.381] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |  _  // _` | | \ \ /\ / / _` | | | |        
-[21Oct2026 00:11:00.382] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | | \ \ (_| | | |\ V  V / (_| | |_| |        
-[21Oct2026 00:11:00.382] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |_|  \_\__,_|_|_| \_/\_/ \__,_|\__, |        
-[21Oct2026 00:11:00.382] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :                                 __/ |        
-[21Oct2026 00:11:00.382] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :                                |___/ (4.0.5+1.20.1) 
-[21Oct2026 00:11:00.382] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :                                              
-[21Oct2026 00:11:00.490] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway blocks
-[21Oct2026 00:11:00.514] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway items
-[21Oct2026 00:11:00.554] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway block entity types
-[21Oct2026 00:11:00.561] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway entity types
-[21Oct2026 00:11:00.561] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway creative mode tabs
-[21Oct2026 00:11:00.562] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway sound events
-[21Oct2026 00:11:00.563] [modloading-worker-0/INFO] [MinecraftMappings/]: Minecraft Mappings logging enabled
-[21Oct2026 00:11:00.651] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway key bindings
-[21Oct2026 00:11:01.491] [Render thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: []
-[21Oct2026 00:11:01.733] [Render thread/ERROR] [com.mojang.text2speech.Narrator/]: Error while loading the narrator
+[21Oct2026 00:18:46.204] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :  __  __     _                                                __    _     
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |  \/  |   (_)    _ _      ___     __       _ _   __ _      / _|  | |_   
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : | |\/| |   | |   | ' \    / -_)   / _|     | '_| / _` |    |  _|  |  _|  
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : |_|__|_|  _|_|_  |_||_|   \___|   \__|_   _|_|_  \__,_|   _|_|_   _\__|  
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| 
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' 
+[21Oct2026 00:18:46.207] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :   _____                                     _      _                     
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :  |_   _|    _ _   __ _    _ _      ___     (_)    | |_                   
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    | |     | '_| / _` |  | ' \    (_-<     | |    |  _|                  
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :   _|_|_   _|_|_  \__,_|  |_||_|   /__/_   _|_|_   _\__|                  
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|                 
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'                 
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :    ___              _       _                      _  _                  
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :   | _ \   __ _     (_)     | |   __ __ __ __ _    | || |                 
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :   |   /  / _` |    | |     | |   \ V  V // _` |    \_, |                 
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :   |_|_\  \__,_|   _|_|_   _|_|_   \_/\_/ \__,_|   _|__/                  
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_| """"|                 
+[21Oct2026 00:18:46.208] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: : "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' (4.0.5+1.20.1) 
+[21Oct2026 00:18:46.209] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: :                                                                          
+[21Oct2026 00:18:46.368] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway blocks
+[21Oct2026 00:18:46.400] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway items
+[21Oct2026 00:18:46.451] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway block entity types
+[21Oct2026 00:18:46.459] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway entity types
+[21Oct2026 00:18:46.459] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway creative mode tabs
+[21Oct2026 00:18:46.460] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway sound events
+[21Oct2026 00:18:46.460] [modloading-worker-0/INFO] [MinecraftMappings/]: Minecraft Mappings logging enabled
+[21Oct2026 00:18:46.575] [modloading-worker-0/INFO] [MinecraftTransitRailway/]: Registering Minecraft Transit Railway key bindings
+[21Oct2026 00:18:47.699] [Render thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: []
+[21Oct2026 00:18:47.986] [Render thread/ERROR] [com.mojang.text2speech.Narrator/]: Error while loading the narrator
 com.mojang.text2speech.Narrator$InitializeException: Failed to load library flite
 	at com.mojang.text2speech.NarratorLinux$FliteLibrary.loadNative(NarratorLinux.java:69) ~[text2speech-1.17.9.jar:?]
 	at com.mojang.text2speech.NarratorLinux.<init>(NarratorLinux.java:18) ~[text2speech-1.17.9.jar:?]
@@ -197,44 +196,44 @@ Native library (linux-x86-64/libflite.so) not found in resource path (/home/runn
 		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
 		at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
 		at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
-[21Oct2026 00:11:01.753] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources
-[21Oct2026 00:11:01.785] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/Minecraft-Transit-Railway/Minecraft-Transit-Railway/forge/run/config/forge-client.toml is not correct. Correcting
-[21Oct2026 00:11:01.787] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
-[21Oct2026 00:11:01.788] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.alwaysSetupTerrainOffThread was corrected from null to its default, false. 
-[21Oct2026 00:11:01.788] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.experimentalForgeLightPipelineEnabled was corrected from null to its default, false. 
-[21Oct2026 00:11:01.788] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.showLoadWarnings was corrected from null to its default, true. 
-[21Oct2026 00:11:01.789] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.useCombinedDepthStencilAttachment was corrected from null to its default, false. 
-[21Oct2026 00:11:01.789] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.compressLanIPv6Addresses was corrected from null to its default, true. 
-[21Oct2026 00:11:01.789] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.calculateAllNormals was corrected from null to its default, false. 
-[21Oct2026 00:11:01.789] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.stabilizeDirectionGetNearest was corrected from null to its default, true. 
-[21Oct2026 00:11:01.789] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.allowMipmapLowering was corrected from null to its default, false. 
-[21Oct2026 00:11:01.791] [Render thread/ERROR] [net.minecraft.Util/]: Invalid path in pack: mtr:font/panam/Parisine-Regular.otf, ignoring
-[21Oct2026 00:11:01.792] [Render thread/ERROR] [net.minecraft.Util/]: Invalid path in pack: mtr:font/panam/Parisine-Bold.otf, ignoring
-[21Oct2026 00:11:01.942] [Worker-Main-2/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.0.06.hex, loading
-[21Oct2026 00:11:02.310] [Worker-Main-1/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/loop.ogg does not exist, cannot add it to event mtr:minecart_loop
-[21Oct2026 00:11:02.311] [Worker-Main-1/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/motor4.ogg does not exist, cannot add it to event mtr:minecart_motor4
-[21Oct2026 00:11:02.311] [Worker-Main-1/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/motor3.ogg does not exist, cannot add it to event mtr:minecart_motor3
-[21Oct2026 00:11:03.020] [Worker-Main-1/WARN] [net.minecraft.client.renderer.texture.SpriteLoader/]: Texture mtr:block/psd_door_bottom_right_1 with size 72x36 limits mip level from 4 to 2
-[21Oct2026 00:11:03.172] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
-[21Oct2026 00:11:03.563] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Found status: AHEAD Current: 47.4.28 Target: null
-[21Oct2026 00:11:07.256] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[21Oct2026 00:11:07.256] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[21Oct2026 00:11:07.263] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device No Output
-[21Oct2026 00:11:07.264] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[21Oct2026 00:11:07.492] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 4096x2048x4 minecraft:textures/atlas/blocks.png-atlas
-[21Oct2026 00:11:07.540] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[21Oct2026 00:11:07.541] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[21Oct2026 00:11:07.543] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[21Oct2026 00:11:07.545] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[21Oct2026 00:11:07.553] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[21Oct2026 00:11:07.554] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[21Oct2026 00:11:07.554] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[21Oct2026 00:11:07.555] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[21Oct2026 00:11:07.750] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[21Oct2026 00:11:07.927] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
-[21Oct2026 00:11:07.929] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
-[21Oct2026 00:11:07.930] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[21Oct2026 00:11:09.793] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:mtr:blocks/train_cargo_unloader
+[21Oct2026 00:18:48.015] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources
+[21Oct2026 00:18:48.066] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Configuration file /home/runner/work/Minecraft-Transit-Railway/Minecraft-Transit-Railway/forge/run/config/forge-client.toml is not correct. Correcting
+[21Oct2026 00:18:48.067] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
+[21Oct2026 00:18:48.073] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.alwaysSetupTerrainOffThread was corrected from null to its default, false. 
+[21Oct2026 00:18:48.073] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.experimentalForgeLightPipelineEnabled was corrected from null to its default, false. 
+[21Oct2026 00:18:48.073] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.showLoadWarnings was corrected from null to its default, true. 
+[21Oct2026 00:18:48.073] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.useCombinedDepthStencilAttachment was corrected from null to its default, false. 
+[21Oct2026 00:18:48.074] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.compressLanIPv6Addresses was corrected from null to its default, true. 
+[21Oct2026 00:18:48.074] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.calculateAllNormals was corrected from null to its default, false. 
+[21Oct2026 00:18:48.074] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.stabilizeDirectionGetNearest was corrected from null to its default, true. 
+[21Oct2026 00:18:48.074] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.allowMipmapLowering was corrected from null to its default, false. 
+[21Oct2026 00:18:48.076] [Render thread/ERROR] [net.minecraft.Util/]: Invalid path in pack: mtr:font/panam/Parisine-Regular.otf, ignoring
+[21Oct2026 00:18:48.076] [Render thread/ERROR] [net.minecraft.Util/]: Invalid path in pack: mtr:font/panam/Parisine-Bold.otf, ignoring
+[21Oct2026 00:18:48.250] [Worker-Main-2/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.0.06.hex, loading
+[21Oct2026 00:18:48.762] [Worker-Main-3/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/loop.ogg does not exist, cannot add it to event mtr:minecart_loop
+[21Oct2026 00:18:48.764] [Worker-Main-3/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/motor4.ogg does not exist, cannot add it to event mtr:minecart_motor4
+[21Oct2026 00:18:48.764] [Worker-Main-3/WARN] [net.minecraft.client.sounds.SoundManager/]: File mtr:sounds/minecart/motor3.ogg does not exist, cannot add it to event mtr:minecart_motor3
+[21Oct2026 00:18:49.385] [Worker-Main-3/WARN] [net.minecraft.client.renderer.texture.SpriteLoader/]: Texture mtr:block/psd_door_bottom_right_1 with size 72x36 limits mip level from 4 to 2
+[21Oct2026 00:18:49.908] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Starting version check at https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json
+[21Oct2026 00:18:50.313] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Found status: AHEAD Current: 47.4.28 Target: null
+[21Oct2026 00:18:55.180] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[21Oct2026 00:18:55.180] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[21Oct2026 00:18:55.200] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device No Output
+[21Oct2026 00:18:55.203] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[21Oct2026 00:18:55.457] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 4096x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[21Oct2026 00:18:55.484] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[21Oct2026 00:18:55.485] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[21Oct2026 00:18:55.486] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[21Oct2026 00:18:55.488] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[21Oct2026 00:18:55.491] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[21Oct2026 00:18:55.492] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[21Oct2026 00:18:55.492] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[21Oct2026 00:18:55.492] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[21Oct2026 00:18:55.734] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[21Oct2026 00:18:55.900] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
+[21Oct2026 00:18:55.902] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
+[21Oct2026 00:18:55.903] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[21Oct2026 00:18:58.495] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:mtr:blocks/train_cargo_unloader
 com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown string 'mtr:train_cargo_unloader'
 	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:145) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/:?]
 	at java.util.Optional.orElseThrow(Optional.java:403) ~[?:?]
@@ -286,7 +285,7 @@ com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown st
 	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?]
 	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?]
 	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?]
-[21Oct2026 00:11:09.944] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:mtr:blocks/train_cargo_loader
+[21Oct2026 00:18:58.696] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:mtr:blocks/train_cargo_loader
 com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown string 'mtr:train_cargo_loader'
 	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:145) ~[forge-1.20.1-47.4.28_mapped_official_1.20.1.jar%23181!/:?]
 	at java.util.Optional.orElseThrow(Optional.java:403) ~[?:?]
@@ -338,59 +337,66 @@ com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown st
 	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?]
 	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?]
 	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?]
-[21Oct2026 00:11:10.015] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
-[21Oct2026 00:11:10.102] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1271 advancements
-[21Oct2026 00:11:11.095] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.20.1
-[21Oct2026 00:11:11.096] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
-[21Oct2026 00:11:11.435] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
-[21Oct2026 00:11:13.586] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[21Oct2026 00:11:13.587] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[21Oct2026 00:11:13.587] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[21Oct2026 00:11:13.587] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[21Oct2026 00:11:13.587] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[21Oct2026 00:11:13.959] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 2%
-[21Oct2026 00:11:14.478] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 89%
-[21Oct2026 00:11:14.560] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
-[21Oct2026 00:11:14.562] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 3112 ms
-[21Oct2026 00:11:14.563] [Server thread/INFO] [MinecraftTransitRailway/]: Found available port: 8888
-[21Oct2026 00:11:14.564] [Server thread/INFO] [TransportSimulationCore/]: Loading files...
-[21Oct2026 00:11:14.592] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/overworld in 0.013 second(s)
-[21Oct2026 00:11:14.616] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/the_nether in 0.0 second(s)
-[21Oct2026 00:11:14.617] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/the_end in 0.0 second(s)
-[21Oct2026 00:11:14.633] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.util.log/]: Logging initialized @25148ms to org.mtr.libraries.org.eclipse.jetty.util.log.Slf4jLog
-[21Oct2026 00:11:14.739] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.Server/]: jetty-9.4.54.v20240208; built: 2024-02-08T19:42:39.027Z; git: cef3fbd6d736a21e7d541a5db490381d95a2047d; jvm 17.0.20.1+1
-[21Oct2026 00:11:14.776] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.handler.ContextHandler/]: Started o.m.l.o.e.j.s.ServletContextHandler@e314f7f{/,null,AVAILABLE}
-[21Oct2026 00:11:14.791] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.AbstractConnector/]: Started ServerConnector@6c54533f{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
-[21Oct2026 00:11:14.791] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.Server/]: Started @25306ms
-[21Oct2026 00:11:14.791] [Server thread/INFO] [TransportSimulationCore/]: Server started with dimensions [minecraft/overworld, minecraft/the_nether, minecraft/the_end]
-[21Oct2026 00:11:14.792] [Server thread/INFO] [MinecraftTransitRailway/]: Starting server as a non-dedicated server
-[21Oct2026 00:11:14.956] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 3, from 10
-[21Oct2026 00:11:14.963] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
-[21Oct2026 00:11:15.035] [Render thread/WARN] [io.netty.util.internal.SystemPropertyUtil/]: Unable to parse the boolean system property 'java.net.preferIPv6Addresses':system - using the default value: false
-[21Oct2026 00:11:15.457] [Netty Local Client IO #0/INFO] [net.minecraftforge.network.NetworkHooks/]: Connected to a modded server.
-[21Oct2026 00:11:15.519] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:d9c89e84] logged in with entity id 1 at (-4.5, 4.0, -5.5)
-[21Oct2026 00:11:15.551] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
-[21Oct2026 00:11:15.684] [Render thread/INFO] [MinecraftTransitRailway/]: Open the Transport System Map at http://localhost:8888
-[21Oct2026 00:11:15.684] [Render thread/INFO] [MinecraftTransitRailway/]: Open the Resource Pack Creator at http://localhost:8888/creator/
-[21Oct2026 00:11:15.941] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 2 advancements
-[21Oct2026 00:11:16.242] [Server thread/INFO] [TransportSimulationCore/]: Stopping...
-[21Oct2026 00:11:16.248] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.AbstractConnector/]: Stopped ServerConnector@6c54533f{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
-[21Oct2026 00:11:16.249] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.handler.ContextHandler/]: Stopped o.m.l.o.e.j.s.ServletContextHandler@e314f7f{/,null,STOPPED}
-[21Oct2026 00:11:16.252] [Server thread/INFO] [TransportSimulationCore/]: Starting full save...
-[21Oct2026 00:11:16.256] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/overworld in 0.003 second(s)
-[21Oct2026 00:11:16.257] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
-[21Oct2026 00:11:16.258] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/the_nether in 0.001 second(s)
-[21Oct2026 00:11:16.258] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
-[21Oct2026 00:11:16.259] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/the_end in 0.001 second(s)
-[21Oct2026 00:11:16.259] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
-[21Oct2026 00:11:16.259] [Server thread/INFO] [TransportSimulationCore/]: Stopped
-[21Oct2026 00:11:16.259] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
-[21Oct2026 00:11:16.260] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
-[21Oct2026 00:11:16.267] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
-[21Oct2026 00:11:17.195] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:overworld
-[21Oct2026 00:11:17.331] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:the_nether
-[21Oct2026 00:11:17.332] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:the_end
-[21Oct2026 00:11:17.360] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (SignageQA): All chunks are saved
-[21Oct2026 00:11:17.361] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
-[21Oct2026 00:11:17.361] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
-[21Oct2026 00:11:17.361] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[21Oct2026 00:18:58.800] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
+[21Oct2026 00:18:58.950] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1271 advancements
+[21Oct2026 00:19:00.411] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Starting integrated minecraft server version 1.20.1
+[21Oct2026 00:19:00.411] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[21Oct2026 00:19:00.814] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[21Oct2026 00:19:03.504] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.505] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.506] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.506] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.506] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.506] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[21Oct2026 00:19:03.885] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 1%
+[21Oct2026 00:19:04.396] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 81%
+[21Oct2026 00:19:04.558] [Render thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 3683 ms
+[21Oct2026 00:19:04.558] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[21Oct2026 00:19:04.631] [Server thread/INFO] [MinecraftTransitRailway/]: Found available port: 8888
+[21Oct2026 00:19:04.634] [Server thread/INFO] [TransportSimulationCore/]: Loading files...
+[21Oct2026 00:19:04.672] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/overworld in 0.021 second(s)
+[21Oct2026 00:19:04.702] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/the_nether in 0.0 second(s)
+[21Oct2026 00:19:04.703] [Server thread/INFO] [TransportSimulationCore/]: Data loading complete for minecraft/the_end in 0.0 second(s)
+[21Oct2026 00:19:04.720] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.util.log/]: Logging initialized @36151ms to org.mtr.libraries.org.eclipse.jetty.util.log.Slf4jLog
+[21Oct2026 00:19:04.829] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.Server/]: jetty-9.4.54.v20240208; built: 2024-02-08T19:42:39.027Z; git: cef3fbd6d736a21e7d541a5db490381d95a2047d; jvm 17.0.20.1+1
+[21Oct2026 00:19:04.900] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.handler.ContextHandler/]: Started o.m.l.o.e.j.s.ServletContextHandler@7900536d{/,null,AVAILABLE}
+[21Oct2026 00:19:04.920] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.AbstractConnector/]: Started ServerConnector@5ae84da8{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+[21Oct2026 00:19:04.920] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.Server/]: Started @36351ms
+[21Oct2026 00:19:04.920] [Server thread/INFO] [TransportSimulationCore/]: Server started with dimensions [minecraft/overworld, minecraft/the_nether, minecraft/the_end]
+[21Oct2026 00:19:04.921] [Server thread/INFO] [MinecraftTransitRailway/]: Starting server as a non-dedicated server
+[21Oct2026 00:19:05.059] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing view distance to 3, from 10
+[21Oct2026 00:19:05.062] [Server thread/INFO] [net.minecraft.client.server.IntegratedServer/]: Changing simulation distance to 12, from 0
+[21Oct2026 00:19:05.173] [Render thread/WARN] [io.netty.util.internal.SystemPropertyUtil/]: Unable to parse the boolean system property 'java.net.preferIPv6Addresses':system - using the default value: false
+[21Oct2026 00:19:05.600] [Netty Local Client IO #0/INFO] [net.minecraftforge.network.NetworkHooks/]: Connected to a modded server.
+[21Oct2026 00:19:05.666] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[local:E:8cad3d9d] logged in with entity id 1 at (3.5, 4.0, -13.5)
+[21Oct2026 00:19:05.701] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[21Oct2026 00:19:05.851] [Render thread/INFO] [MinecraftTransitRailway/]: Open the Transport System Map at http://localhost:8888
+[21Oct2026 00:19:05.851] [Render thread/INFO] [MinecraftTransitRailway/]: Open the Resource Pack Creator at http://localhost:8888/creator/
+[21Oct2026 00:19:06.135] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 2 advancements
+[21Oct2026 00:19:07.926] [Render thread/WARN] [MinecraftTransitRailway/]: Sillon: missing initial resource reload; recovering models, rails and addon resources
+[21Oct2026 00:19:09.712] [Render thread/INFO] [MinecraftTransitRailway/]: Loaded 423 vehicles and completed door movement validation in 0.0 ms
+[21Oct2026 00:19:09.712] [Render thread/INFO] [MinecraftTransitRailway/]: Loaded 142 signs
+[21Oct2026 00:19:09.712] [Render thread/INFO] [MinecraftTransitRailway/]: Loaded 3 rails
+[21Oct2026 00:19:09.712] [Render thread/INFO] [MinecraftTransitRailway/]: Loaded 1 objects
+[21Oct2026 00:19:09.713] [Render thread/INFO] [MinecraftTransitRailway/]: Loaded 1 lifts
+[21Oct2026 00:19:09.771] [Server thread/INFO] [TransportSimulationCore/]: Stopping...
+[21Oct2026 00:19:09.779] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.AbstractConnector/]: Stopped ServerConnector@5ae84da8{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+[21Oct2026 00:19:09.782] [Server thread/INFO] [org.mtr.libraries.org.eclipse.jetty.server.handler.ContextHandler/]: Stopped o.m.l.o.e.j.s.ServletContextHandler@7900536d{/,null,STOPPED}
+[21Oct2026 00:19:09.789] [Server thread/INFO] [TransportSimulationCore/]: Starting full save...
+[21Oct2026 00:19:09.793] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/overworld in 0.004 second(s)
+[21Oct2026 00:19:09.795] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
+[21Oct2026 00:19:09.795] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/the_nether in 0.0 second(s)
+[21Oct2026 00:19:09.795] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
+[21Oct2026 00:19:09.796] [Server thread/INFO] [TransportSimulationCore/]: Save complete for minecraft/the_end in 0.0 second(s)
+[21Oct2026 00:19:09.797] [Server thread/INFO] [TransportSimulationCore/]: - Changed settings: 1
+[21Oct2026 00:19:09.797] [Server thread/INFO] [TransportSimulationCore/]: Stopped
+[21Oct2026 00:19:09.797] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[21Oct2026 00:19:09.798] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[21Oct2026 00:19:09.806] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[21Oct2026 00:19:10.654] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:overworld
+[21Oct2026 00:19:10.670] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:the_nether
+[21Oct2026 00:19:10.671] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[signage-qa-world]'/minecraft:the_end
+[21Oct2026 00:19:10.689] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (SignageQA): All chunks are saved
+[21Oct2026 00:19:10.689] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21Oct2026 00:19:10.689] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[21Oct2026 00:19:10.689] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
