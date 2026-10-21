@@ -67,7 +67,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
-          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          timeout 2400s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/preview-native-qa-success.txt
           test -f forge/run/chantier-native-qa-success.txt
       - name: Same scenario with Oculus Embeddium and Complementary
@@ -77,7 +77,7 @@ jobs:
           JAVA_TOOL_OPTIONS: '-Dsillon.qa.previewOnly=true -Dfml.earlyprogresswindow=false'
         run: |
           python tools/qa/install_signage_shader_qa.py
-          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          timeout 2400s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/preview-shader-qa-success.txt
           test -f forge/run/chantier-shader-qa-success.txt
       - uses: actions/upload-artifact@v4

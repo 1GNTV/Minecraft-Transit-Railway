@@ -21,7 +21,8 @@ import java.util.*;
 public final class PreviewVisualQa {
     private static boolean active;
     private static int stage,ticks;
-    private static long frames,readyAt=-1;
+    private static long frames,readyAt=-1,stageStarted,lastProgress;
+    private static int lastReady=-1;
     private static ConsistBuilderScreen screen;
     private static List<VehicleResource> cars;
     private static Map<TrainSilhouetteCache.Key,Object> baseline;
@@ -43,15 +44,19 @@ public final class PreviewVisualQa {
         int old=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D);try{for(var e:expected.entrySet()){var texture=(NativeImageBackedTexture)field(e.getValue(),"texture");GL33.glBindTexture(GL33.GL_TEXTURE_2D,texture.getGlId());var rgba=java.nio.ByteBuffer.allocateDirect(512*128*4);GL33.glGetTexImage(GL33.GL_TEXTURE_2D,0,GL33.GL_RGBA,GL33.GL_UNSIGNED_BYTE,rgba);int visible=0;for(int i=3;i<rgba.capacity();i+=4)if((rgba.get(i)&255)>0)visible++;check(visible>200,"Empty GPU thumbnail: "+e.getKey()+" pixels="+visible);}}finally{GL33.glBindTexture(GL33.GL_TEXTURE_2D,old);}System.out.println("PREVIEW_QA_NONEMPTY "+expected.size());
     }
     private static void capture(Minecraft mc,String name){Screenshot.grab(mc.gameDirectory,"preview-"+(Boolean.getBoolean("sillon.qa.shader")?"shader-":"native-")+name+".png",mc.getMainRenderTarget(),m->System.out.println("PREVIEW_CAPTURE "+m.getString()));}
-    private static void next(){stage++;ticks=0;readyAt=-1;}
+    private static void next(){stage++;ticks=0;readyAt=-1;stageStarted=lastProgress=System.nanoTime();lastReady=-1;}
     public static void begin(Minecraft mc){try{
-        active=true;stage=-1;ticks=0;readyAt=-1;mc.options.hideGui=false;GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),1920,1200);mc.options.guiScale().set(2);mc.resizeDisplay();TrainSilhouetteCache.clear();
+        active=true;stage=-1;ticks=0;readyAt=-1;stageStarted=lastProgress=System.nanoTime();lastReady=-1;mc.options.hideGui=false;GLFW.glfwSetWindowSize(mc.getWindow().getWindow(),1920,1200);mc.options.guiScale().set(2);mc.resizeDisplay();TrainSilhouetteCache.clear();
         List<VehicleResource> all=new ArrayList<>();CustomResourceLoader.iterateVehicles(TransportMode.TRAIN,all::add);all.sort(Comparator.comparing(r->r.getName().getString()));check(all.size()>110,"Need real train catalogue");
         cars=new ArrayList<>();for(VehicleResource r:all.subList(48,all.size()))if(r.getId().contains("cm_stock")&&cars.size()<5)cars.add(r);for(int n=70;cars.size()<5;n++)if(!cars.contains(all.get(n)))cars.add(all.get(n));
         var siding=new Siding(new Position(0,4,0),new Position(0,4,150),150,TransportMode.TRAIN,new ClientData());var consist=new ObjectArrayList<VehicleCar>();for(var r:cars)consist.add(new VehicleCar(r.getId(),r.getLength(),r.getWidth(),r.getBogie1Position(),r.getBogie2Position(),r.getCouplingPadding1(),r.getCouplingPadding2()));siding.setVehicleCars(consist);screen=new ConsistBuilderScreen(siding,null);
     }catch(Throwable e){e.printStackTrace();System.exit(2);}}
     private static void tick(TickEvent.ClientTickEvent event){if(!active||event.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();try{
-        if(++ticks>6000)throw new IllegalStateException("Preview regression timeout stage="+stage+" ready="+TrainSilhouetteCache.readyCount());
+        ticks++;long now=System.nanoTime();int loaded=TrainSilhouetteCache.readyCount();
+        if(loaded!=lastReady){lastReady=loaded;lastProgress=now;System.out.println("PREVIEW_QA_PROGRESS stage="+stage+" ready="+loaded+" frames="+frames);}
+        // Queue advancement is frame driven; shader software rendering can run far below tick rate.
+        // Retain both an inactivity deadline and an absolute deadline, with identical pixel assertions.
+        if(now-lastProgress>120_000_000_000L||now-stageStarted>900_000_000_000L)throw new IllegalStateException("Preview regression timeout stage="+stage+" ready="+loaded+" frames="+frames);
         if(stage==-1){if(mc.getWindow().getWidth()!=1920||mc.getWindow().getHeight()!=1200)return;mc.options.guiScale().set(2);mc.resizeDisplay();mc.setScreen(screen);check(perPage()==48,"Did not reproduce user viewport: "+perPage());next();return;}
         if(stage==3&&(mc.getWindow().getWidth()!=640||mc.getWindow().getHeight()!=480))return;
         var wanted=expected();boolean ready=ready(wanted);if(ready&&readyAt<0)readyAt=frames;
