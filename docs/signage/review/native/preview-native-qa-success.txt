@@ -1,0 +1,1 @@
+All 48 visible catalogue thumbnails plus five different consist resources are ready, have nonempty GPU pixels and remain cached across page navigation; second page and compact view verified; large catalogue pagination capped at 96. Actual assembled Forge JAR.
