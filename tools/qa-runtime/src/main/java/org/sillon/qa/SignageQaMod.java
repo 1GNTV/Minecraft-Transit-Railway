@@ -6,5 +6,5 @@ import net.minecraftforge.api.distmarker.Dist;
 
 @Mod("signageqa")
 public final class SignageQaMod {
-    public SignageQaMod(){SignageWorldQa.register();DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->{ChantierVisualQa.register();SignageVisualQa.register();StationDecorVisualQa.register();BuilderVisualQa.register();BuilderNextVisualQa.register();});}
+    public SignageQaMod(){SignageWorldQa.register();DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->{PreviewVisualQa.register();ChantierVisualQa.register();SignageVisualQa.register();StationDecorVisualQa.register();BuilderVisualQa.register();BuilderNextVisualQa.register();});}
 }

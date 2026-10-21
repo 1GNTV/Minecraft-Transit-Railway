@@ -13,3 +13,5 @@ run=Path("forge/run");run.mkdir(parents=True,exist_ok=True)
 (run/"options.txt").write_text("onboardAccessibility:false\ntutorialStep:none\nguiScale:2\nfullscreen:false\nmaxFps:30\nrenderDistance:3\n")
 
 shutil.copy2("tools/qa/ChantierVisualQa.java",target/"ChantierVisualQa.java")
+
+shutil.copy2("tools/qa/PreviewVisualQa.java",target/"PreviewVisualQa.java")

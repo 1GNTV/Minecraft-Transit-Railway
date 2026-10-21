@@ -22,7 +22,7 @@ public final class SignageVisualQa {
     private static int stage=-1,tick;
     private static boolean started,opening,finished;
     private static int waiting;
-    private static int warningTicks;
+    private static int warningTicks,resourceWait;
     private static String lastScreen="";
     private static int worldView=-1,networkPhase=-1;
     private static final int[][] SIZES={{960,540,1},{960,540,2},{640,480,2}};
@@ -47,7 +47,9 @@ public final class SignageVisualQa {
             }
             if(!opening&&mc.screen instanceof TitleScreen&&mc.getOverlay()==null&&++waiting>100){opening=true;mc.createWorldOpenFlows().loadLevel(mc.screen,"SignageQA");}
             if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
+            if(Boolean.getBoolean("sillon.qa.previewOnly")){int[] count={0};org.mtr.mod.client.CustomResourceLoader.iterateVehicles(org.mtr.core.data.TransportMode.TRAIN,r->count[0]++);if(count[0]<=110){if(++resourceWait>1200){System.err.println("PREVIEW_QA_STARTUP_TIMEOUT catalogue="+count[0]);System.exit(2);}return;}}
             started=true;stage=0;tick=0;
+            if(Boolean.getBoolean("sillon.qa.previewOnly")){finished=true;PreviewVisualQa.begin(mc);return;}
             if(Boolean.getBoolean("sillon.qa.chantierOnly")){finished=true;ChantierVisualQa.begin(mc);return;}
             if(Boolean.getBoolean("sillon.qa.shader")){worldView=0;mc.options.hideGui=true;world(mc);}else setup(mc);return;
         }

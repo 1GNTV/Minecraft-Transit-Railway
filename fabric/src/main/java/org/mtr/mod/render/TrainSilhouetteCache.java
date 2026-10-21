@@ -13,15 +13,22 @@ import java.util.*;
 /** GPU-only profile textures, bounded queue and cache. No framebuffer readback or live train rendering. */
 public final class TrainSilhouetteCache {
     public record Key(String resource,int car,int total){}
-    private static final int W=512,H=128,LIMIT=48,INDICES_PER_FRAME=8190;
+    public static final int MAX_CATALOG_PROFILES=96;
+    private static final int W=512,H=128,LIMIT=160,INDICES_PER_FRAME=8190;
     private record Part(VertexArray array,float z){}
-    private static final class Entry {final Key key;final VehicleResource resource;Identifier id;NativeImageBackedTexture texture;List<Part> parts;int part,index;boolean ready,failed;float[] bounds;long requested=System.nanoTime();Entry(Key k,VehicleResource r){key=k;resource=r;}}
+    private static final class Entry {final Key key;final VehicleResource resource;Identifier id;NativeImageBackedTexture texture;List<Part> parts;int part,index;boolean ready,failed;float[] bounds;long lastFrame,started;boolean priority;Entry(Key k,VehicleResource r){key=k;resource=r;}}
     private static final LinkedHashMap<Key,Entry> CACHE=new LinkedHashMap<>(32,.75f,true);
-    private static int framebuffer,depth,program;private static Entry current;private static boolean broken;
+    private static int framebuffer,depth,program;private static Entry current,preparing;private static long frame;private static boolean broken;
     private TrainSilhouetteCache(){}
-    public static Identifier request(VehicleResource resource,int car,int total){Key key=new Key(resource.getId(),resource.hasContextualModels()?car:0,resource.hasContextualModels()?total:1);Entry e=CACHE.get(key);if(e==null){if(CACHE.size()>=LIMIT){var i=CACHE.entrySet().iterator();while(i.hasNext()){Entry old=i.next().getValue();if(old==current)continue;i.remove();dispose(old);break;}}e=new Entry(key,resource);CACHE.put(key,e);}return e.ready?e.id:null;}
+    public static void beginFrame(){frame++;}
+    public static Identifier request(VehicleResource resource,int car,int total){return request(resource,car,total,false);}
+    public static Identifier request(VehicleResource resource,int car,int total,boolean priority){
+        Key key=new Key(resource.getId(),resource.hasContextualModels()?car:0,resource.hasContextualModels()?total:1);Entry e=CACHE.get(key);
+        if(e==null){if(CACHE.size()>=LIMIT){var i=CACHE.entrySet().iterator();while(i.hasNext()){Entry old=i.next().getValue();if(old==current||old==preparing||old.lastFrame==frame)continue;i.remove();dispose(old);break;}if(CACHE.size()>=LIMIT)return null;}e=new Entry(key,resource);CACHE.put(key,e);}
+        e.priority=e.lastFrame==frame?e.priority||priority:priority;e.lastFrame=frame;return e.ready?e.id:null;
+    }
     public static int readyCount(){return (int)CACHE.values().stream().filter(e->e.ready).count();}
-    public static String status(VehicleResource resource,int car,int total){Entry e=CACHE.get(new Key(resource.getId(),resource.hasContextualModels()?car:0,resource.hasContextualModels()?total:1));return broken||e!=null&&e.failed?"Aperçu indisponible":"Préparation de l’aperçu…";}
+    public static String status(VehicleResource resource,int car,int total){Entry e=CACHE.get(new Key(resource.getId(),resource.hasContextualModels()?car:0,resource.hasContextualModels()?total:1));return broken||e!=null&&e.failed?"Aperçu indisponible":e!=null&&(e==preparing||e==current)?"Préparation de l’aperçu…":"Aperçu en attente…";}
     private static int shader(int type,String source){int s=GL33.glCreateShader(type);GL33.glShaderSource(s,source);GL33.glCompileShader(s);if(GL33.glGetShaderi(s,GL33.GL_COMPILE_STATUS)==0)throw new IllegalStateException(GL33.glGetShaderInfoLog(s));return s;}
     private static void initialize(){if(program!=0)return;int v=0,f=0;try{
         v=shader(GL33.GL_VERTEX_SHADER,"#version 150\nin vec3 Position;in vec2 UV;uniform vec4 Bounds;uniform float Depth;uniform float OffsetZ;out vec2 uv;void main(){uv=UV;gl_Position=vec4((Position.z+OffsetZ-Bounds.x)/Bounds.z*1.90-0.95,0.95-(Position.y-Bounds.y)/Bounds.w*1.90,Position.x/Depth,1);}");
@@ -31,19 +38,27 @@ public final class TrainSilhouetteCache {
     }finally{if(v!=0)GL33.glDeleteShader(v);if(f!=0)GL33.glDeleteShader(f);}}
     private static void parts(java.util.Map<PartCondition,OptimizedModelWrapper> models,float z,List<Part> out){for(var condition:models.entrySet()){if(condition.getKey()!=PartCondition.NORMAL&&condition.getKey()!=PartCondition.ON_ROUTE_FORWARDS&&condition.getKey()!=PartCondition.DOORS_CLOSED)continue;var model=condition.getValue().getModel();if(model!=null)for(var a:((OptimizedModelLayoutAccessor)(Object)model).sillon$parts())out.add(new Part(a,z));}}
     private static boolean prepare(Entry e){e.resource.prepareModels(e.key.car,e.key.total);var cache=e.resource.getCachedVehicleResource(e.key.car,e.key.total,false);if(cache==null)return false;List<Part> parts=new ArrayList<>();parts(cache.optimizedModelsDoorsClosed,0,parts);parts(cache.optimizedModelsBogie1,(float)e.resource.getBogie1Position(),parts);parts(cache.optimizedModelsBogie2,(float)e.resource.getBogie2Position(),parts);float[] bounds={Float.POSITIVE_INFINITY,Float.POSITIVE_INFINITY,Float.POSITIVE_INFINITY,Float.NEGATIVE_INFINITY,Float.NEGATIVE_INFINITY,Float.NEGATIVE_INFINITY};for(var part:parts){float[] b=ModelPartVisibility.gpuBounds(part.array);if(b==null)continue;for(int i=0;i<3;i++){float offset=i==2?part.z:0;bounds[i]=Math.min(bounds[i],b[i]+16+offset);bounds[i+3]=Math.max(bounds[i+3],b[i+3]-16+offset);}}if(parts.isEmpty()||!Float.isFinite(bounds[0]+bounds[1]+bounds[2]+bounds[3]+bounds[4]+bounds[5])){e.failed=true;return false;}e.bounds=bounds;e.parts=parts;return true;}
-    public static void pump(){if(broken)return;if(current==null){for(Entry e:new ArrayList<>(CACHE.values()))if(!e.ready&&!e.failed){if(System.nanoTime()-e.requested>30_000_000_000L){e.failed=true;continue;}try{if(prepare(e)){current=e;break;}}catch(RuntimeException error){e.failed=true;Init.LOGGER.warn("Sillon could not prepare profile "+e.key.resource,error);}}}if(current==null)return;
-        State saved=new State();try{initialize();Entry e=current;boolean first=e.texture==null;
+    public static void pump(){
+        if(broken)return;
+        if(current!=null&&current.lastFrame!=frame){resetPartial(current);current=null;}
+        if(preparing!=null&&preparing.lastFrame!=frame){preparing.started=0;preparing=null;}
+        if(current==null&&preparing==null){for(Entry e:CACHE.values())if(e.lastFrame==frame&&!e.ready&&!e.failed&&(preparing==null||e.priority&&!preparing.priority))preparing=e;if(preparing!=null)preparing.started=System.nanoTime();}
+        if(current==null&&preparing==null)return;
+        State saved=new State();try{
+            if(current==null){Entry e=preparing;if(System.nanoTime()-e.started>30_000_000_000L){e.failed=true;preparing=null;Init.LOGGER.warn("Sillon profile model preparation timed out: {}",e.key.resource);return;}if(!prepare(e)){if(e.failed)preparing=null;return;}current=e;preparing=null;}
+            initialize();Entry e=current;boolean first=e.texture==null;
             if(first){e.texture=new NativeImageBackedTexture(W,H,true);e.texture.setFilter(true,false);e.id=MinecraftClient.getInstance().getTextureManager().registerDynamicTexture("sillon_train_profile",e.texture);}
             GL33.glBindFramebuffer(GL33.GL_FRAMEBUFFER,framebuffer);GL33.glFramebufferTexture2D(GL33.GL_FRAMEBUFFER,GL33.GL_COLOR_ATTACHMENT0,GL33.GL_TEXTURE_2D,e.texture.getGlId(),0);GL33.glFramebufferRenderbuffer(GL33.GL_FRAMEBUFFER,GL33.GL_DEPTH_ATTACHMENT,GL33.GL_RENDERBUFFER,depth);GL33.glDrawBuffer(GL33.GL_COLOR_ATTACHMENT0);if(GL33.glCheckFramebufferStatus(GL33.GL_FRAMEBUFFER)!=GL33.GL_FRAMEBUFFER_COMPLETE)throw new IllegalStateException("Profile framebuffer incomplete");
             GL33.glViewport(0,0,W,H);GL33.glDisable(GL33.GL_SCISSOR_TEST);GL33.glDisable(GL33.GL_STENCIL_TEST);GL33.glDisable(GL33.GL_CULL_FACE);GL33.glEnable(GL33.GL_DEPTH_TEST);GL33.glDepthFunc(GL33.GL_LEQUAL);GL33.glDepthMask(true);GL33.glColorMask(true,true,true,true);GL33.glDisable(GL33.GL_BLEND);
             if(first){GL33.glClearColor(0,0,0,0);GL33.glClearDepth(1);GL33.glClear(GL33.GL_COLOR_BUFFER_BIT|GL33.GL_DEPTH_BUFFER_BIT);}
             GL33.glUseProgram(program);GL33.glBindSampler(0,0);float[] b=e.bounds;float span=Math.max(.1f,Math.max(b[5]-b[2],4*(b[4]-b[1])));GL33.glUniform4f(GL33.glGetUniformLocation(program,"Bounds"),(b[2]+b[5]-span)/2,(b[1]+b[4]-span/4)/2,span,span/4);GL33.glUniform1f(GL33.glGetUniformLocation(program,"Depth"),Math.max(1,Math.max(Math.abs(b[0]),Math.abs(b[3]))+1));GL33.glUniform1i(GL33.glGetUniformLocation(program,"ModelTexture"),0);
             int budget=INDICES_PER_FRAME;while(e.part<e.parts.size()&&budget>0){Part part=e.parts.get(e.part);VertexArray a=part.array;GL33.glBindVertexArray(((VertexArrayIdentity)(Object)a).mtr$vaoId());GL33.glUniform1f(GL33.glGetUniformLocation(program,"OffsetZ"),part.z);GL33.glActiveTexture(GL33.GL_TEXTURE0);int texture=MinecraftClient.getInstance().getTextureManager().getTexture(a.materialProperties.getTexture()).getGlId();GL33.glBindTexture(GL33.GL_TEXTURE_2D,texture);GL33.glUniform1f(GL33.glGetUniformLocation(program,"Glass"),a.materialProperties.translucent?1:0);int count=Math.min(budget,a.indexBuffer.getVertexCount()-e.index);count-=count%3;if(count>0){GL33.glDrawElements(GL33.GL_TRIANGLES,count,a.indexBuffer.indexType,(long)e.index*(a.indexBuffer.indexType==GL33.GL_UNSIGNED_SHORT?2:4));e.index+=count;budget-=count;}if(e.index>=a.indexBuffer.getVertexCount()||count<=0){e.part++;e.index=0;}}
-            if(e.part>=e.parts.size()){e.ready=true;current=null;}
-        }catch(RuntimeException error){if(current!=null)current.failed=true;current=null;broken=true;Init.LOGGER.error("Sillon profile preview stopped after GL failure",error);}finally{saved.restore();GlVertexAttributeCache.invalidate();}
+            if(e.part>=e.parts.size()){e.ready=true;e.parts=null;e.bounds=null;e.part=e.index=0;current=null;}
+        }catch(RuntimeException error){if(current!=null){current.failed=true;current=null;broken=true;Init.LOGGER.error("Sillon profile preview stopped after GL failure",error);}else if(preparing!=null){preparing.failed=true;Init.LOGGER.warn("Sillon could not prepare profile "+preparing.key.resource,error);preparing=null;}}finally{saved.restore();GlVertexAttributeCache.invalidate();}
     }
+    private static void resetPartial(Entry e){dispose(e);e.id=null;e.texture=null;e.parts=null;e.part=e.index=0;e.started=0;}
     private static void dispose(Entry e){if(e.id!=null)MinecraftClient.getInstance().getTextureManager().destroyTexture(e.id);}
-    public static void clear(){for(Entry e:CACHE.values())dispose(e);CACHE.clear();current=null;if(framebuffer!=0)GL33.glDeleteFramebuffers(framebuffer);if(depth!=0)GL33.glDeleteRenderbuffers(depth);if(program!=0)GL33.glDeleteProgram(program);framebuffer=depth=program=0;broken=false;}
+    public static void clear(){for(Entry e:CACHE.values())dispose(e);CACHE.clear();current=preparing=null;frame=0;if(framebuffer!=0)GL33.glDeleteFramebuffers(framebuffer);if(depth!=0)GL33.glDeleteRenderbuffers(depth);if(program!=0)GL33.glDeleteProgram(program);framebuffer=depth=program=0;broken=false;}
     /** Raw GL state guard: preserves the shader pack's actual framebuffer, never assumes framebuffer zero. */
     private static final class State {
         final int read=GL33.glGetInteger(GL33.GL_READ_FRAMEBUFFER_BINDING),draw=GL33.glGetInteger(GL33.GL_DRAW_FRAMEBUFFER_BINDING),shader=GL33.glGetInteger(GL33.GL_CURRENT_PROGRAM),vao=GL33.glGetInteger(GL33.GL_VERTEX_ARRAY_BINDING),array=GL33.glGetInteger(GL33.GL_ARRAY_BUFFER_BINDING),renderbuffer=GL33.glGetInteger(GL33.GL_RENDERBUFFER_BINDING),active=GL33.glGetInteger(GL33.GL_ACTIVE_TEXTURE),bound=GL33.glGetInteger(GL33.GL_TEXTURE_BINDING_2D),depthFunc=GL33.glGetInteger(GL33.GL_DEPTH_FUNC);

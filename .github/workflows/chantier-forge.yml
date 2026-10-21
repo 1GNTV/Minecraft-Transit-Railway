@@ -44,7 +44,7 @@ jobs:
           git config user.email "48333136+1GNTV@users.noreply.github.com"
           git add docs/signage fabric/src/main/resources/assets/mtr/signage
           git diff --cached --quiet || git commit -m "qa(signage): preserve real references and rendered panel review"
-          git push origin HEAD:work/sillon-chantier-forge-1201
+          git push origin HEAD:${{ github.ref_name }}
       - uses: actions/cache@v4
         id: website
         with:
@@ -110,26 +110,30 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
           ALSOFT_DRIVERS: 'null'
-          JAVA_TOOL_OPTIONS: '-Dsillon.qa.chantierOnly=true -Dfml.earlyprogresswindow=false'
+          JAVA_TOOL_OPTIONS: '-Dsillon.qa.previewOnly=true -Dfml.earlyprogresswindow=false'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0
-          timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/chantier-native-qa-success.txt
+          test -f forge/run/preview-native-qa-success.txt
       - name: Capture signs with Oculus and Complementary
         env:
           LIBGL_ALWAYS_SOFTWARE: 'true'
           ALSOFT_DRIVERS: 'null'
-          JAVA_TOOL_OPTIONS: '-Dsillon.qa.chantierOnly=true -Dfml.earlyprogresswindow=false'
+          JAVA_TOOL_OPTIONS: '-Dsillon.qa.previewOnly=true -Dfml.earlyprogresswindow=false'
         run: |
           python tools/qa/install_signage_shader_qa.py
           cp tools/qa/SignageVisualQa.java tools/qa-runtime/src/main/java/org/sillon/qa/SignageVisualQa.java
-          timeout 600s xvfb-run -a -s "-screen 0 1280x800x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
+          timeout 1200s xvfb-run -a -s "-screen 0 1920x1200x24" ./gradlew -p tools/qa-runtime runClient -Dorg.gradle.jvmargs=-Xmx3G
           test -f forge/run/chantier-shader-qa-success.txt
+          test -f forge/run/preview-shader-qa-success.txt
       - name: Preserve native captures
         if: always()
         run: |
           mkdir -p build/signage-qa/native docs/signage/review/native
+          cp forge/run/screenshots/preview*.png build/signage-qa/native/ 2>/dev/null || true
+          cp forge/run/preview-*-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/screenshots/chantier*.png build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/chantier-*-qa-success.txt build/signage-qa/native/ 2>/dev/null || true
           cp forge/run/screenshots/builder*.png build/signage-qa/native/ 2>/dev/null || true
@@ -144,7 +148,7 @@ jobs:
           cp -r build/signage-qa/native/* docs/signage/review/native/ 2>/dev/null || true
           git add docs/signage/review/native
           git diff --cached --quiet || git commit -m "qa(signage): capture the native Minecraft editor and physical signs"
-          git push origin HEAD:work/sillon-chantier-forge-1201
+          git push origin HEAD:${{ github.ref_name }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
