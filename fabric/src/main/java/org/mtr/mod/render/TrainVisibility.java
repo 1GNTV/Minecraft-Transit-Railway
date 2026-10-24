@@ -72,7 +72,7 @@ public final class TrainVisibility {
             // Keep a generous 64-block margin for offscreen shadow casters.
             // Use the current view-distance setting; never cap closer trains.
             double distance = Math.max(192D, MinecraftClientHelper.getRenderDistance() * 16D + 64D);
-            if(SHADOW_TRAIN_DISTANCE>0)distance=Math.min(distance,SHADOW_TRAIN_DISTANCE);
+            distance=ShadowDistanceBudget.trainRadius(distance,SHADOW_TRAIN_DISTANCE);
             double cx = camera.getXMapped(), cz = camera.getZMapped();
             if (x0 > cx + distance || x1 < cx - distance ||
                     z0 > cz + distance || z1 < cz - distance) return false;
