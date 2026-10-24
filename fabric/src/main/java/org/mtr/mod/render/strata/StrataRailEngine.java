@@ -80,15 +80,10 @@ public final class StrataRailEngine {
 		if (LOG_RAIL_METRICS) railCandidateCount++;
 		if (!railWrapper.shouldRender) return false;
 		final Rail rail = railWrapper.getRail();
-		if(shadowPass && SHADOW_RAIL_DISTANCE>0 && cameraValid) {
-			// Distance to the rail's entire AABB, not just its endpoints, so
-			// long tracks crossing the visible area retain their shadows.
-			double nearX=Math.max(rail.railMath.minX,Math.min(cameraX,rail.railMath.maxX));
-			double nearZ=Math.max(rail.railMath.minZ,Math.min(cameraZ,rail.railMath.maxZ));
-			double dx=nearX-cameraX,dz=nearZ-cameraZ;
-			if(Double.isFinite(dx+dz) && dx*dx+dz*dz>
-				(double)SHADOW_RAIL_DISTANCE*SHADOW_RAIL_DISTANCE)return false;
-		}
+		if(shadowPass && cameraValid &&
+			!org.mtr.mod.render.ShadowDistanceBudget.visible(cameraX,cameraZ,
+				rail.railMath.minX,rail.railMath.maxX,
+				rail.railMath.minZ,rail.railMath.maxZ,SHADOW_RAIL_DISTANCE))return false;
 		if (shadowPass && !TrainVisibility.railShadowVisible(
 				rail.railMath.minX, rail.railMath.minY, rail.railMath.minZ,
 				rail.railMath.maxX, rail.railMath.maxY, rail.railMath.maxZ)) return false;
