@@ -174,14 +174,14 @@ public final class GpuDrivenMaterialAtlas {
         return true;
     }
 
-    /** One consecutive material/vertex-layout segment may contain multiple
-     *  different train or rail models. No sorting across material boundaries. */
     /** Skip the entire atlas discovery walk when the feature is disabled or
      * the batch is too small to contain a worthwhile atlas. */
     public static boolean worthScanning(int callCount) {
         return ENABLED && !failed && callCount >= MIN_CALLS;
     }
 
+    /** One consecutive material/vertex-layout segment may contain multiple
+     * different train or rail models. No sorting across material boundaries. */
     public static boolean candidate(Object object) {
         return ENABLED && !failed && object instanceof RenderCallData call && eligible(call);
     }
