@@ -68,7 +68,9 @@ public class RenderVehicles implements IGui {
 		final boolean updateVisibility = !OptimizedRenderer.renderingShadows();
 		final ObjectArrayList<Function<OcclusionCullingInstance, Runnable>> cullingTasks = updateVisibility ? new ObjectArrayList<>() : null;
 		final Vector3d cameraPosition = minecraftClient.getGameRendererMapped().getCamera().getPos();
-		final Vec3d camera = new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped());
+		// Shadow passes never schedule occlusion tests; avoid constructing a
+		// redundant camera vector for every Oculus cascade.
+		final Vec3d camera = updateVisibility ? new Vec3d(cameraPosition.getXMapped(), cameraPosition.getYMapped(), cameraPosition.getZMapped()) : null;
 
 		// When riding a moving vehicle, the client movement is always out of sync with the vehicle rendering. This produces annoying shaking effects.
 		// Offsets are used to render the vehicle with respect to the player position rather than the absolute world position, eliminating shaking.
