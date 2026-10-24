@@ -59,7 +59,11 @@ public final class TrainVisibility {
         return Math.abs(pose.position.x-camera.getXMapped())<=radius && Math.abs(pose.position.y-camera.getYMapped())<=radius && Math.abs(pose.position.z-camera.getZMapped())<=radius;
     }
     public static boolean trainVisible(VehicleExtension vehicle, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> cars, Vector3d camera) {
-        if (!usable() || cars.isEmpty()) return true;
+        if(cars.isEmpty())return true;
+        // The distance budget does not depend on an Oculus frustum capture.
+        // Missing/stale frusta should still fail open for ordinary visibility,
+        // but must not force far-away vehicles through every shadow cascade.
+        if(!usable() && !(SHADOW_DISTANCE_CULL && OptimizedRenderer.renderingShadows()))return true;
         double x0=Double.POSITIVE_INFINITY,y0=x0,z0=x0,x1=Double.NEGATIVE_INFINITY,y1=x1,z1=x1;
         for (int i=0;i<cars.size();i++) {
             PositionAndRotation p=cars.get(i).right().right(); double r=radius(vehicle,i);
@@ -77,6 +81,6 @@ public final class TrainVisibility {
             if (x0 > cx + distance || x1 < cx - distance ||
                     z0 > cz + distance || z1 < cz - distance) return false;
         }
-        return frustum.isVisible(new Box(x0,y0,z0,x1,y1,z1));
+        return !usable() || frustum.isVisible(new Box(x0,y0,z0,x1,y1,z1));
     }
 }
