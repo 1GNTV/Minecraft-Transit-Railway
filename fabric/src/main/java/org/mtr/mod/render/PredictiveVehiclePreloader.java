@@ -12,6 +12,11 @@ import java.util.*;
 public final class PredictiveVehiclePreloader {
     private record Key(VehicleResource resource,int car,int total) {}
     private static final Map<Key,Long> PENDING=new LinkedHashMap<>();
+    // prepareAsync is idempotent, but walking the same model trees at 60 FPS
+    // wastes render-thread time. Retry periodically so delayed resources still load.
+    private static final long PREPARE_RETRY_MS=500;
+    private static final int MAX_RECENT_PREPARES=256;
+    private static final Map<Key,Long> RECENT_PREPARES=new LinkedHashMap<>(128,.75f,true);
     private static final Map<VehicleExtension,Double> DISTANCES=new WeakHashMap<>();
     private static long lastDrain;
     private PredictiveVehiclePreloader() {}
@@ -22,12 +27,20 @@ public final class PredictiveVehiclePreloader {
         Double previous=DISTANCES.put(vehicle,nearest);
         // Include nearby consists on the first observed frame; farther ones only when approaching.
         if (nearest>320*320 || nearest>192*192 && (previous==null || nearest>=previous)) return;
-        for(int i=0;i<cars.size();i++){
+        final int totalCars=cars.size();
+        final long now=System.currentTimeMillis();
+        for(int i=0;i<totalCars;i++){
             final int car=i;
             CustomResourceLoader.getVehicleById(vehicle.getTransportMode(),cars.get(i).left().getVehicleId(),details->{
-                VehicleResource resource=details.left();resource.prepareModels(car,cars.size());
-                Key key=new Key(resource,car,cars.size());
-                if(PENDING.size()<64 || PENDING.containsKey(key))PENDING.put(key,System.currentTimeMillis());
+                VehicleResource resource=details.left();
+                Key key=new Key(resource,car,totalCars);
+                Long previousPrepare=RECENT_PREPARES.get(key);
+                if(previousPrepare!=null && now-previousPrepare>=0 && now-previousPrepare<PREPARE_RETRY_MS)return;
+                resource.prepareModels(car,totalCars);
+                RECENT_PREPARES.put(key,now);
+                if(RECENT_PREPARES.size()>MAX_RECENT_PREPARES)
+                    RECENT_PREPARES.remove(RECENT_PREPARES.keySet().iterator().next());
+                if(PENDING.size()<64 || PENDING.containsKey(key))PENDING.put(key,now);
             });
         }
     }
@@ -38,5 +51,5 @@ public final class PredictiveVehiclePreloader {
         // Never force nested model/upload caches: respect the existing global loading token.
         if(key.resource.getCachedVehicleResource(key.car,key.total,false)==null)PENDING.put(key,entry.getValue());
     }
-    public static void clear(){PENDING.clear();DISTANCES.clear();lastDrain=0;}
+    public static void clear(){PENDING.clear();RECENT_PREPARES.clear();DISTANCES.clear();lastDrain=0;}
 }
