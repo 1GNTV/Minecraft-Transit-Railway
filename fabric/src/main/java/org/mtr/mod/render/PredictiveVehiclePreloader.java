@@ -28,10 +28,10 @@ public final class PredictiveVehiclePreloader {
         // Include nearby consists on the first observed frame; farther ones only when approaching.
         if (nearest>320*320 || nearest>192*192 && (previous==null || nearest>=previous)) return;
         final int totalCars=cars.size();
-        final long now=System.currentTimeMillis();
         for(int i=0;i<totalCars;i++){
             final int car=i;
             CustomResourceLoader.getVehicleById(vehicle.getTransportMode(),cars.get(i).left().getVehicleId(),details->{
+                final long now=System.currentTimeMillis();
                 VehicleResource resource=details.left();
                 Key key=new Key(resource,car,totalCars);
                 Long previousPrepare=RECENT_PREPARES.get(key);
