@@ -1,7 +1,7 @@
-name: Sillon Spark hotpaths - Forge 1.20.1 verification
+name: Sillon SOLIS performance recovery - Forge 1.20.1
 on:
   push:
-    branches: [fix/sillon-spark-hotpaths-20261024]
+    branches: [fix/sillon-spark-hotpaths-20261024, fix/sillon-solis-perf-recovery-20261025]
   workflow_dispatch:
 
 permissions:
@@ -39,6 +39,8 @@ jobs:
         run: |
           python3 tools/test_next_render_safety.py
           python3 tools/test_next_benchmark.py
+          python3 tools/test_sillon_shadow_budget.py
+          python3 tools/test_fusion_engine.py
       - name: Compile Forge 1.20.1
         run: ./gradlew forge:build -PminecraftVersion=1.20.1 --stacktrace
       - name: Restore exact JCM mixin ABI in the compiled Forge JAR
@@ -53,10 +55,10 @@ jobs:
           mkdir -p build/spark-hotpaths
           mapfile -t jars < <(find forge/build/libs -maxdepth 1 -type f -name '*-all.jar')
           test "${#jars[@]}" -eq 1
-          cp "${jars[0]}" build/spark-hotpaths/Sillon-SparkHotpaths-TEST-Forge-1.20.1.jar
+          cp "${jars[0]}" build/spark-hotpaths/Sillon-SOLIS-Recovery-TEST-Forge-1.20.1.jar
           sha256sum build/spark-hotpaths/*.jar > build/spark-hotpaths/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: Sillon-SparkHotpaths-Forge-1.20.1
+          name: Sillon-SOLIS-Recovery-Forge-1.20.1
           path: build/spark-hotpaths/
           if-no-files-found: error
