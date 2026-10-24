@@ -35,11 +35,20 @@ public final class StrataRailEngine {
 	private static int candidateDistance;
 	private static Iterable<MinecraftClientData.RailWrapper> candidateSnapshot;
 	private static long candidateHits, candidateBuilds;
+	// Shadow-map work should be bounded to nearby rail casters. This only
+	// affects the Oculus shadow pass; the main pass still renders every
+	// normally visible rail. Set 0 to restore the previous unlimited range.
+	private static final int SHADOW_RAIL_DISTANCE=Math.max(0,Integer.getInteger("mtr.sillon.shadowRailDistance",128));
+	private static double cameraX,cameraZ;
+	private static boolean cameraValid;
 
 	private StrataRailEngine() {}
 
 	public static Iterable<MinecraftClientData.RailWrapper> candidates(final Vector3d cameraPosition) {
 		currentData = MinecraftClientData.getInstance();
+		cameraX=cameraPosition.getXMapped();
+		cameraZ=cameraPosition.getZMapped();
+		cameraValid=Double.isFinite(cameraX+cameraZ);
 		if (LOG_RAIL_METRICS) {
 			totalRailCount = currentData.railWrapperList.size();
 			scanStartNanos = System.nanoTime();
@@ -71,6 +80,15 @@ public final class StrataRailEngine {
 		if (LOG_RAIL_METRICS) railCandidateCount++;
 		if (!railWrapper.shouldRender) return false;
 		final Rail rail = railWrapper.getRail();
+		if(shadowPass && SHADOW_RAIL_DISTANCE>0 && cameraValid) {
+			// Distance to the rail's entire AABB, not just its endpoints, so
+			// long tracks crossing the visible area retain their shadows.
+			double nearX=Math.max(rail.railMath.minX,Math.min(cameraX,rail.railMath.maxX));
+			double nearZ=Math.max(rail.railMath.minZ,Math.min(cameraZ,rail.railMath.maxZ));
+			double dx=nearX-cameraX,dz=nearZ-cameraZ;
+			if(Double.isFinite(dx+dz) && dx*dx+dz*dz>
+				(double)SHADOW_RAIL_DISTANCE*SHADOW_RAIL_DISTANCE)return false;
+		}
 		if (shadowPass && !TrainVisibility.railShadowVisible(
 				rail.railMath.minX, rail.railMath.minY, rail.railMath.minZ,
 				rail.railMath.maxX, rail.railMath.maxY, rail.railMath.maxZ)) return false;
