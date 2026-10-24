@@ -30,6 +30,10 @@ public final class TrainVisibility {
     // the render-distance range. Can be disabled for shader comparisons.
     private static final boolean SHADOW_DISTANCE_CULL =
             !"false".equalsIgnoreCase(System.getProperty("mtr.next.shadowDistanceCull", "true"));
+    // A near-shadow budget avoids rendering far-away trains repeatedly in
+    // shader cascades. Zero restores the old render-distance-derived range.
+    private static final int SHADOW_TRAIN_DISTANCE =
+            Math.max(0,Integer.getInteger("mtr.sillon.shadowTrainDistance",160));
     public static boolean railShadowVisible(double minX,double minY,double minZ,
                                             double maxX,double maxY,double maxZ) {
         if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;
@@ -68,6 +72,7 @@ public final class TrainVisibility {
             // Keep a generous 64-block margin for offscreen shadow casters.
             // Use the current view-distance setting; never cap closer trains.
             double distance = Math.max(192D, MinecraftClientHelper.getRenderDistance() * 16D + 64D);
+            if(SHADOW_TRAIN_DISTANCE>0)distance=Math.min(distance,SHADOW_TRAIN_DISTANCE);
             double cx = camera.getXMapped(), cz = camera.getZMapped();
             if (x0 > cx + distance || x1 < cx - distance ||
                     z0 > cz + distance || z1 < cz - distance) return false;
