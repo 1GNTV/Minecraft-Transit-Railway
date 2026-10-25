@@ -67,11 +67,21 @@ def rewrite_cp(data, names):
     out += data[offset:]
     return bytes(out)
 
-def main():
-    jars = [Path(os.environ["SILLON_JAR_PATH"])] if os.getenv("SILLON_JAR_PATH") else list(Path("forge/build/libs").glob("*-all.jar"))
+def find_target_jar():
+    """Fabric CI supplies SILLON_JAR_PATH; Forge retains its existing default."""
+    specified = os.environ.get("SILLON_JAR_PATH")
+    if specified:
+        target = Path(specified)
+        if not target.is_file() or target.suffix.lower() != ".jar":
+            raise SystemExit(f"Invalid SILLON_JAR_PATH: {target}")
+        return target
+    jars = list(Path("forge/build/libs").glob("*-all.jar"))
     if len(jars) != 1:
         raise SystemExit(f"Expected exactly one Forge shaded JAR, found {jars}")
-    target = jars[0]
+    return jars[0]
+
+def main():
+    target = find_target_jar()
     fd, temp_name = tempfile.mkstemp(prefix="sillon-jcm-", suffix=".jar", dir=target.parent)
     os.close(fd)
     try:
