@@ -9,6 +9,7 @@ SOURCES = [
     ROOT / "fabric/src/main/java/org/mtr/mod/render/ScenePlanCache.java",
     ROOT / "fabric/src/main/java/org/mtr/mod/render/PersistentRegionCache.java",
     ROOT / "fabric/src/main/java/org/mtr/mod/render/FrameMemoizer.java",
+    ROOT / "fabric/src/main/java/org/mtr/mod/render/SillonMegaEngine.java",
 ]
 JAVA = r"""
 import org.mtr.mod.render.*;

@@ -9,9 +9,8 @@ Set SILLON_JCM_STRICT=true once we establish a working compatibility bridge.
 from pathlib import Path
 import subprocess,sys,re,os,zipfile
 
-jars=[p for p in Path("forge/build/libs").glob("*-all.jar")]
-if len(jars)!=1: raise SystemExit(f"Need exactly one real shaded Forge jar, got {jars}")
-jar=jars[0]
+from patch_sillon_jcm_abi import find_target_jar
+jar=find_target_jar()
 def report(cls):
     run=subprocess.run(["javap","-p","-s","-classpath",str(jar),cls],
                        capture_output=True,text=True,check=True)
