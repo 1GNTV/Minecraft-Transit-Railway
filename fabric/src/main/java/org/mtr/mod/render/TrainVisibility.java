@@ -30,6 +30,10 @@ public final class TrainVisibility {
     // the render-distance range. Can be disabled for shader comparisons.
     private static final boolean SHADOW_DISTANCE_CULL =
             !"false".equalsIgnoreCase(System.getProperty("mtr.next.shadowDistanceCull", "true"));
+    // A near-shadow budget avoids rendering far-away trains repeatedly in
+    // shader cascades. Zero restores the old render-distance-derived range.
+    private static final int SHADOW_TRAIN_DISTANCE =
+            Math.max(0,Integer.getInteger("mtr.sillon.shadowTrainDistance",160));
     public static boolean railShadowVisible(double minX,double minY,double minZ,
                                             double maxX,double maxY,double maxZ) {
         if(!SHADOW_RAIL_CULL || !OptimizedRenderer.renderingShadows() || !usable())return true;
@@ -55,7 +59,11 @@ public final class TrainVisibility {
         return Math.abs(pose.position.x-camera.getXMapped())<=radius && Math.abs(pose.position.y-camera.getYMapped())<=radius && Math.abs(pose.position.z-camera.getZMapped())<=radius;
     }
     public static boolean trainVisible(VehicleExtension vehicle, ObjectArrayList<ObjectObjectImmutablePair<VehicleCar, ObjectObjectImmutablePair<ObjectArrayList<PositionAndRotation>, PositionAndRotation>>> cars, Vector3d camera) {
-        if (!usable() || cars.isEmpty()) return true;
+        if(cars.isEmpty())return true;
+        // The distance budget does not depend on an Oculus frustum capture.
+        // Missing/stale frusta should still fail open for ordinary visibility,
+        // but must not force far-away vehicles through every shadow cascade.
+        if(!usable() && !(SHADOW_DISTANCE_CULL && OptimizedRenderer.renderingShadows()))return true;
         double x0=Double.POSITIVE_INFINITY,y0=x0,z0=x0,x1=Double.NEGATIVE_INFINITY,y1=x1,z1=x1;
         for (int i=0;i<cars.size();i++) {
             PositionAndRotation p=cars.get(i).right().right(); double r=radius(vehicle,i);
@@ -68,10 +76,11 @@ public final class TrainVisibility {
             // Keep a generous 64-block margin for offscreen shadow casters.
             // Use the current view-distance setting; never cap closer trains.
             double distance = Math.max(192D, MinecraftClientHelper.getRenderDistance() * 16D + 64D);
+            distance=ShadowDistanceBudget.trainRadius(distance,SHADOW_TRAIN_DISTANCE);
             double cx = camera.getXMapped(), cz = camera.getZMapped();
             if (x0 > cx + distance || x1 < cx - distance ||
                     z0 > cz + distance || z1 < cz - distance) return false;
         }
-        return frustum.isVisible(new Box(x0,y0,z0,x1,y1,z1));
+        return !usable() || frustum.isVisible(new Box(x0,y0,z0,x1,y1,z1));
     }
 }
