@@ -176,6 +176,11 @@ public final class GpuDrivenMaterialAtlas {
 
     /** One consecutive material/vertex-layout segment may contain multiple
      *  different train or rail models. No sorting across material boundaries. */
+    /** Skip scanning disabled GPU-atlas batches before walking draw calls. */
+    public static boolean worthScanning(int callCount) {
+        return ENABLED && !failed && callCount >= MIN_CALLS;
+    }
+
     public static boolean candidate(Object object) {
         return ENABLED && !failed && object instanceof RenderCallData call && eligible(call);
     }
