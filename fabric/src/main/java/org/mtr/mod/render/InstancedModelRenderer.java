@@ -93,7 +93,7 @@ public final class InstancedModelRenderer {
         // drawn once via GPU multi-draw or via the existing instanced renderer.
         // This does not merge textures or alter transparent draw order.
         boolean atlasPossible=false;
-        if(shaderless && SillonMegaEngine.GPU_DRIVEN
+        if(shaderless && GpuDrivenMaterialAtlas.worthScanning(calls.size())
                 && GL.getCapabilities().OpenGL43) {
             for(int begin=0;begin<calls.size();) {
                 int end=begin+1;
